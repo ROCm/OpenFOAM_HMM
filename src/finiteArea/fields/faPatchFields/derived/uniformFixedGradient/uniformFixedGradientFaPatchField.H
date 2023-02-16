@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2023 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::uniformFixedGradientFvPatchField
+    Foam::uniformFixedGradientFaPatchField
 
 Group
     grpGenericBoundaryConditions
@@ -49,23 +48,22 @@ Usage
     \endverbatim
 
 Note
-    The uniformGradient entry is a PatchFunction1 type,
-    able to describe time and spatial varying functions.
+    The uniformGradient entry is a Function1 type.
     The example above gives the usage for supplying a constant value.
 
 See also
     Foam::Function1Types
-    Foam::fixedGradientFvPatchField
+    Foam::fixedGradientFaPatchField
 
 SourceFiles
-    uniformFixedGradientFvPatchField.C
+    uniformFixedGradientFaPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_uniformFixedGradientFvPatchField_H
-#define Foam_uniformFixedGradientFvPatchField_H
+#ifndef Foam_uniformFixedGradientFaPatchField_H
+#define Foam_uniformFixedGradientFaPatchField_H
 
-#include "fixedGradientFvPatchFields.H"
+#include "fixedGradientFaPatchField.H"
 #include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -74,18 +72,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class uniformFixedGradientFvPatchField Declaration
+              Class uniformFixedGradientFaPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class uniformFixedGradientFvPatchField
+class uniformFixedGradientFaPatchField
 :
-    public fixedGradientFvPatchField<Type>
+    public fixedGradientFaPatchField<Type>
 {
     // Private Data
 
         //- Function providing the gradient
-        autoPtr<PatchFunction1<Type>> refGradFunc_;
+        autoPtr<Function1<Type>> refGradFunc_;
 
 
 public:
@@ -97,68 +95,68 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        uniformFixedGradientFvPatchField
+        uniformFixedGradientFaPatchField
         (
-            const fvPatch&,
-            const DimensionedField<Type, volMesh>&
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&
         );
 
         //- Construct from patch and internal field and patch field
-        uniformFixedGradientFvPatchField
+        uniformFixedGradientFaPatchField
         (
-            const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
             const Field<Type>& fld
         );
 
         //- Construct from patch, internal field and dictionary
-        uniformFixedGradientFvPatchField
+        uniformFixedGradientFaPatchField
         (
-            const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
             const dictionary&
         );
 
         //- Construct by mapping onto a new patch
-        uniformFixedGradientFvPatchField
+        uniformFixedGradientFaPatchField
         (
-            const uniformFixedGradientFvPatchField<Type>&,
-            const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
-            const fvPatchFieldMapper&
+            const uniformFixedGradientFaPatchField<Type>&,
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const faPatchFieldMapper&
         );
 
         //- Construct as copy
-        uniformFixedGradientFvPatchField
+        uniformFixedGradientFaPatchField
         (
-            const uniformFixedGradientFvPatchField<Type>&
+            const uniformFixedGradientFaPatchField<Type>&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type>> clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type>>
+            return tmp<faPatchField<Type>>
             (
-                new uniformFixedGradientFvPatchField<Type>(*this)
+                new uniformFixedGradientFaPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        uniformFixedGradientFvPatchField
+        uniformFixedGradientFaPatchField
         (
-            const uniformFixedGradientFvPatchField<Type>&,
-            const DimensionedField<Type, volMesh>&
+            const uniformFixedGradientFaPatchField<Type>&,
+            const DimensionedField<Type, areaMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type>> clone
+        virtual tmp<faPatchField<Type>> clone
         (
-            const DimensionedField<Type, volMesh>& iF
+            const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type>>
+            return tmp<faPatchField<Type>>
             (
-                new uniformFixedGradientFvPatchField<Type>(*this, iF)
+                new uniformFixedGradientFaPatchField<Type>(*this, iF)
             );
         }
 
@@ -180,7 +178,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "uniformFixedGradientFvPatchField.C"
+    #include "uniformFixedGradientFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

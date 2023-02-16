@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2023 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,47 +24,65 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::uniformFixedGradientFvPatchField
+    Foam::uniformMixedFvPatchField
 
 Group
     grpGenericBoundaryConditions
 
 Description
-    This boundary condition provides a uniform fixed gradient condition.
+    This boundary condition provides 'mixed' type boundary condition
+    that mix a \em uniform fixed value and a \em uniform patch-normal
+    gradient condition. The term "uniform" is a legacy name since the
+    prescribed values were previously spatially uniform across that patch.
+
+    In the meantime, a PatchFunction1 is used, which can have both
+    spatial and temporal dependencies.
 
 Usage
     \table
-        Property     | Description                  | Required | Default
-        uniformGradient | uniform gradient          | yes |
+        Property     | Description                      | Required | Default
+        uniformValue | uniform value                    | partly | 0
+        uniformGradient | uniform gradient              | partly | 0
+        uniformValueFraction | uniform valueFraction    | partly | depends
     \endtable
 
     Example of the boundary condition specification:
     \verbatim
     <patchName>
     {
-        type            uniformFixedGradient;
+        type            uniformMixed;
+        uniformValue    constant 0.2;
         uniformGradient constant 0.2;
+        uniformValueFraction
+        {
+            type  sine;
+            ...
+        }
     }
     \endverbatim
 
 Note
-    The uniformGradient entry is a PatchFunction1 type,
-    able to describe time and spatial varying functions.
-    The example above gives the usage for supplying a constant value.
+    This boundary condition allows \em lazier definitions so that either
+    or both: \c uniformValue and \c uniformGradient must be defined.
+    If only of these entries is defined, the value fraction is automatically
+    treated appropriately (ie, 0 with \c uniformGradient and 1 with
+    uniformValue).
+    If both \c uniformValue and \c uniformGradient are defined,
+    the \c uniformValueFraction must also be defined.
 
 See also
     Foam::Function1Types
-    Foam::fixedGradientFvPatchField
+    Foam::mixedFvPatchField
 
 SourceFiles
-    uniformFixedGradientFvPatchField.C
+    uniformMixedFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_uniformFixedGradientFvPatchField_H
-#define Foam_uniformFixedGradientFvPatchField_H
+#ifndef Foam_uniformMixedFvPatchField_H
+#define Foam_uniformMixedFvPatchField_H
 
-#include "fixedGradientFvPatchFields.H"
+#include "mixedFvPatchField.H"
 #include "PatchFunction1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -74,37 +91,43 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-              Class uniformFixedGradientFvPatchField Declaration
+                  Class uniformMixedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class uniformFixedGradientFvPatchField
+class uniformMixedFvPatchField
 :
-    public fixedGradientFvPatchField<Type>
+    public mixedFvPatchField<Type>
 {
     // Private Data
 
+        //- Function providing the value
+        autoPtr<PatchFunction1<Type>> refValueFunc_;
+
         //- Function providing the gradient
         autoPtr<PatchFunction1<Type>> refGradFunc_;
+
+        //- Function providing the value-fraction
+        autoPtr<PatchFunction1<scalar>> valueFractionFunc_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("uniformFixedGradient");
+    TypeName("uniformMixed");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        uniformFixedGradientFvPatchField
+        uniformMixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch and internal field and patch field
-        uniformFixedGradientFvPatchField
+        uniformMixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
@@ -112,7 +135,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
-        uniformFixedGradientFvPatchField
+        uniformMixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
@@ -120,18 +143,18 @@ public:
         );
 
         //- Construct by mapping onto a new patch
-        uniformFixedGradientFvPatchField
+        uniformMixedFvPatchField
         (
-            const uniformFixedGradientFvPatchField<Type>&,
+            const uniformMixedFvPatchField<Type>&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        uniformFixedGradientFvPatchField
+        uniformMixedFvPatchField
         (
-            const uniformFixedGradientFvPatchField<Type>&
+            const uniformMixedFvPatchField<Type>&
         );
 
         //- Construct and return a clone
@@ -139,14 +162,14 @@ public:
         {
             return tmp<fvPatchField<Type>>
             (
-                new uniformFixedGradientFvPatchField<Type>(*this)
+                new uniformMixedFvPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        uniformFixedGradientFvPatchField
+        uniformMixedFvPatchField
         (
-            const uniformFixedGradientFvPatchField<Type>&,
+            const uniformMixedFvPatchField<Type>&,
             const DimensionedField<Type, volMesh>&
         );
 
@@ -158,12 +181,12 @@ public:
         {
             return tmp<fvPatchField<Type>>
             (
-                new uniformFixedGradientFvPatchField<Type>(*this, iF)
+                new uniformMixedFvPatchField<Type>(*this, iF)
             );
         }
 
 
-    // Member functions
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
@@ -180,7 +203,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "uniformFixedGradientFvPatchField.C"
+    #include "uniformMixedFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

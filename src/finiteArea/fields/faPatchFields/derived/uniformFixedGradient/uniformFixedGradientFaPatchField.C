@@ -25,113 +25,105 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniformFixedValueFaPatchField.H"
+#include "uniformFixedGradientFaPatchField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
+Foam::uniformFixedGradientFaPatchField<Type>::uniformFixedGradientFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
 )
 :
-    fixedValueFaPatchField<Type>(p, iF),
-    refValueFunc_(nullptr)
+    fixedGradientFaPatchField<Type>(p, iF),
+    refGradFunc_(nullptr)
 {}
 
 
 template<class Type>
-Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
+Foam::uniformFixedGradientFaPatchField<Type>::uniformFixedGradientFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const Field<Type>& fld
 )
 :
-    fixedValueFaPatchField<Type>(p, iF, fld),
-    refValueFunc_(nullptr)
+    fixedGradientFaPatchField<Type>(p, iF, fld),
+    refGradFunc_(nullptr)
 {}
 
 
 template<class Type>
-Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
+Foam::uniformFixedGradientFaPatchField<Type>::uniformFixedGradientFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedValueFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
-    refValueFunc_
+    fixedGradientFaPatchField<Type>(p, iF),  // Bypass dictionary constructor
+    refGradFunc_
     (
         Function1<Type>::New
         (
             /* p.patch(), */
-            "uniformValue",
+            "uniformGradient",
             dict
         )
     )
 {
-    if (!this->readValueEntry(dict))
-    {
-        this->evaluate();
-    }
+    this->evaluate();
 }
 
 
 template<class Type>
-Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
+Foam::uniformFixedGradientFaPatchField<Type>::uniformFixedGradientFaPatchField
 (
-    const uniformFixedValueFaPatchField<Type>& ptf,
+    const uniformFixedGradientFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const faPatchFieldMapper& mapper
 )
 :
-    fixedValueFaPatchField<Type>(p, iF),   // Don't map
-    refValueFunc_(ptf.refValueFunc_.clone(/*p.patch()*/))
+    fixedGradientFaPatchField<Type>(ptf, p, iF, mapper),
+    refGradFunc_(ptf.refGradFunc_.clone(/*p.patch()*/))
+{}
+
+
+template<class Type>
+Foam::uniformFixedGradientFaPatchField<Type>::uniformFixedGradientFaPatchField
+(
+    const uniformFixedGradientFaPatchField<Type>& ptf
+)
+:
+    fixedGradientFaPatchField<Type>(ptf),
+    refGradFunc_(ptf.refGradFunc_.clone(/*p.patch()*/))
+{}
+
+
+template<class Type>
+Foam::uniformFixedGradientFaPatchField<Type>::uniformFixedGradientFaPatchField
+(
+    const uniformFixedGradientFaPatchField<Type>& ptf,
+    const DimensionedField<Type, areaMesh>& iF
+)
+:
+    fixedGradientFaPatchField<Type>(ptf, iF),
+    refGradFunc_(ptf.refGradFunc_.clone(/*this->patch().patch()*/))
 {
-    if (mapper.direct() && !mapper.hasUnmapped())
+    // Evaluate the profile if defined
+    if (refGradFunc_)
     {
-        // Use mapping instead of re-evaluation
-        this->map(ptf, mapper);
-    }
-    else
-    {
-        // Evaluate since value not mapped
         this->evaluate();
     }
 }
 
 
-template<class Type>
-Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
-(
-    const uniformFixedValueFaPatchField<Type>& ptf
-)
-:
-    fixedValueFaPatchField<Type>(ptf),
-    refValueFunc_(ptf.refValueFunc_.clone(/*this->patch().patch()*/))
-{}
-
-
-template<class Type>
-Foam::uniformFixedValueFaPatchField<Type>::uniformFixedValueFaPatchField
-(
-    const uniformFixedValueFaPatchField<Type>& ptf,
-    const DimensionedField<Type, areaMesh>& iF
-)
-:
-    fixedValueFaPatchField<Type>(ptf, iF),
-    refValueFunc_(ptf.refValueFunc_.clone(/*this->patch().patch()*/))
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::uniformFixedValueFaPatchField<Type>::updateCoeffs()
+void Foam::uniformFixedGradientFaPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -139,18 +131,28 @@ void Foam::uniformFixedValueFaPatchField<Type>::updateCoeffs()
     }
 
     const scalar t = this->db().time().timeOutputValue();
-    faPatchField<Type>::operator==(refValueFunc_->value(t));
-    fixedValueFaPatchField<Type>::updateCoeffs();
+
+    // Extra safety on the evaluation
+    if (refGradFunc_)
+    {
+        this->gradient() = refGradFunc_->value(t);
+    }
+    else
+    {
+        this->gradient() = Zero;
+    }
+
+    fixedGradientFaPatchField<Type>::updateCoeffs();
 }
 
 
 template<class Type>
-void Foam::uniformFixedValueFaPatchField<Type>::write(Ostream& os) const
+void Foam::uniformFixedGradientFaPatchField<Type>::write(Ostream& os) const
 {
-    faPatchField<Type>::write(os);
-    if (refValueFunc_)
+    fixedGradientFaPatchField<Type>::write(os);
+    if (refGradFunc_)
     {
-        refValueFunc_->writeData(os);
+        refGradFunc_->writeData(os);
     }
     faPatchField<Type>::writeValueEntry(os);
 }

@@ -152,12 +152,16 @@ void Foam::uniformFixedValuePointPatchField<Type>::autoMap
 )
 {
     fixedValuePointPatchField<Type>::autoMap(mapper);
-    refValueFunc_().autoMap(mapper);
 
-    if (refValueFunc_().constant())
+    if (refValueFunc_)
     {
-        // If mapper is not dependent on time we're ok to evaluate
-        this->evaluate();
+        refValueFunc_().autoMap(mapper);
+
+        if (refValueFunc_().constant())
+        {
+            // If mapper is not dependent on time we're ok to evaluate
+            this->evaluate();
+        }
     }
 }
 
@@ -174,7 +178,10 @@ void Foam::uniformFixedValuePointPatchField<Type>::rmap
     const uniformFixedValuePointPatchField& tiptf =
         refCast<const uniformFixedValuePointPatchField>(ptf);
 
-    refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
+    if (refValueFunc_ && tiptf.refValueFunc_)
+    {
+        refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
+    }
 }
 
 
@@ -186,6 +193,7 @@ void Foam::uniformFixedValuePointPatchField<Type>::updateCoeffs()
         return;
     }
     const scalar t = this->db().time().timeOutputValue();
+
     fixedValuePointPatchField<Type>::operator==(refValueFunc_->value(t));
     fixedValuePointPatchField<Type>::updateCoeffs();
 }
@@ -197,7 +205,10 @@ write(Ostream& os) const
 {
     // Note: write value
     fixedValuePointPatchField<Type>::write(os);
-    refValueFunc_->writeData(os);
+    if (refValueFunc_)
+    {
+        refValueFunc_->writeData(os);
+    }
 }
 
 
