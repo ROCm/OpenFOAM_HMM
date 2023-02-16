@@ -26,79 +26,79 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "extrapolatedCalculatedFvPatchField.H"
-#include "fvPatchFieldMapper.H"
+#include "extrapolatedCalculatedFaPatchField.H"
+#include "faPatchFieldMapper.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::extrapolatedCalculatedFvPatchField<Type>::
-extrapolatedCalculatedFvPatchField
+Foam::extrapolatedCalculatedFaPatchField<Type>::
+extrapolatedCalculatedFaPatchField
 (
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF
 )
 :
-    calculatedFvPatchField<Type>(p, iF)
+    calculatedFaPatchField<Type>(p, iF)
 {}
 
 
 template<class Type>
-Foam::extrapolatedCalculatedFvPatchField<Type>::
-extrapolatedCalculatedFvPatchField
+Foam::extrapolatedCalculatedFaPatchField<Type>::
+extrapolatedCalculatedFaPatchField
 (
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict
 )
 :
-    calculatedFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
+    calculatedFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    calculatedFvPatchField<Type>::operator==(this->patchInternalField());
+    calculatedFaPatchField<Type>::operator==(this->patchInternalField());
 }
 
 
 template<class Type>
-Foam::extrapolatedCalculatedFvPatchField<Type>::
-extrapolatedCalculatedFvPatchField
+Foam::extrapolatedCalculatedFaPatchField<Type>::
+extrapolatedCalculatedFaPatchField
 (
-    const extrapolatedCalculatedFvPatchField<Type>& ptf,
-    const fvPatch& p,
-    const DimensionedField<Type, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
+    const extrapolatedCalculatedFaPatchField<Type>& ptf,
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const faPatchFieldMapper& mapper
 )
 :
-    calculatedFvPatchField<Type>(ptf, p, iF, mapper)
+    calculatedFaPatchField<Type>(ptf, p, iF, mapper)
 {}
 
 
 template<class Type>
-Foam::extrapolatedCalculatedFvPatchField<Type>::
-extrapolatedCalculatedFvPatchField
+Foam::extrapolatedCalculatedFaPatchField<Type>::
+extrapolatedCalculatedFaPatchField
 (
-    const extrapolatedCalculatedFvPatchField<Type>& ptf
+    const extrapolatedCalculatedFaPatchField<Type>& ptf
 )
 :
-    calculatedFvPatchField<Type>(ptf)
+    calculatedFaPatchField<Type>(ptf)
 {}
 
 
 template<class Type>
-Foam::extrapolatedCalculatedFvPatchField<Type>::
-extrapolatedCalculatedFvPatchField
+Foam::extrapolatedCalculatedFaPatchField<Type>::
+extrapolatedCalculatedFaPatchField
 (
-    const extrapolatedCalculatedFvPatchField<Type>& ptf,
-    const DimensionedField<Type, volMesh>& iF
+    const extrapolatedCalculatedFaPatchField<Type>& ptf,
+    const DimensionedField<Type, areaMesh>& iF
 )
 :
-    calculatedFvPatchField<Type>(ptf, iF)
+    calculatedFaPatchField<Type>(ptf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::extrapolatedCalculatedFvPatchField<Type>::evaluate
+void Foam::extrapolatedCalculatedFaPatchField<Type>::evaluate
 (
     const Pstream::commsTypes
 )
@@ -108,8 +108,9 @@ void Foam::extrapolatedCalculatedFvPatchField<Type>::evaluate
         this->updateCoeffs();
     }
 
-    calculatedFvPatchField<Type>::operator==(this->patchInternalField());
-    calculatedFvPatchField<Type>::evaluate();
+    // Set to the internal field
+    faPatchField<Type>::patchInternalField(*this);
+    calculatedFaPatchField<Type>::evaluate();
 }
 
 
