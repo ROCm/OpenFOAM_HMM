@@ -580,7 +580,7 @@ void Foam::PstreamDetail::allToAllConsensus
     // This is because we are dealing with a flat list of entries to
     // send and not a sparse Map etc.
 
-    DynamicList<MPI_Request> requests(sendData.size());
+    DynamicList<MPI_Request> sendRequests(sendData.size());
 
     profilingPstream::beginTiming();
 
@@ -614,7 +614,7 @@ void Foam::PstreamDetail::allToAllConsensus
                 proci,
                 tag,
                 PstreamGlobals::MPICommunicators_[comm],
-               &requests.emplace_back()
+               &sendRequests.emplace_back()
             );
         }
     }
@@ -622,7 +622,7 @@ void Foam::PstreamDetail::allToAllConsensus
 
     // Probe and receive
 
-    MPI_Request barrierReq;
+    MPI_Request barrierRequest;
 
     for (bool barrier_active = false, done = false; !done; /*nil*/)
     {
@@ -654,6 +654,7 @@ void Foam::PstreamDetail::allToAllConsensus
                     << exit(FatalError);
             }
 
+            // Regular receive (the data are small)
             MPI_Recv
             (
                &recvData[proci],
@@ -670,7 +671,7 @@ void Foam::PstreamDetail::allToAllConsensus
         {
             // Test barrier for completion
             // - all received, or nothing to receive
-            MPI_Test(&barrierReq, &flag, MPI_STATUS_IGNORE);
+            MPI_Test(&barrierRequest, &flag, MPI_STATUS_IGNORE);
 
             if (flag)
             {
@@ -682,8 +683,9 @@ void Foam::PstreamDetail::allToAllConsensus
             // Check if all sends have arrived
             MPI_Testall
             (
-                requests.size(), requests.data(),
-                &flag, MPI_STATUSES_IGNORE
+                sendRequests.size(),
+                sendRequests.data(),
+               &flag, MPI_STATUSES_IGNORE
             );
 
             if (flag)
@@ -691,7 +693,7 @@ void Foam::PstreamDetail::allToAllConsensus
                 MPI_Ibarrier
                 (
                     PstreamGlobals::MPICommunicators_[comm],
-                   &barrierReq
+                   &barrierRequest
                 );
                 barrier_active = true;
             }
@@ -746,7 +748,7 @@ void Foam::PstreamDetail::allToAllConsensus
     // Algorithm NBX: Nonblocking consensus
     // Implementation like above, but sending map data.
 
-    DynamicList<MPI_Request> requests(sendBufs.size());
+    DynamicList<MPI_Request> sendRequests(sendBufs.size());
 
     profilingPstream::beginTiming();
 
@@ -786,7 +788,7 @@ void Foam::PstreamDetail::allToAllConsensus
                 proci,
                 tag,
                 PstreamGlobals::MPICommunicators_[comm],
-               &requests.emplace_back()
+               &sendRequests.emplace_back()
             );
         }
     }
@@ -794,7 +796,7 @@ void Foam::PstreamDetail::allToAllConsensus
 
     // Probe and receive
 
-    MPI_Request barrierReq;
+    MPI_Request barrierRequest;
 
     for (bool barrier_active = false, done = false; !done; /*nil*/)
     {
@@ -829,9 +831,10 @@ void Foam::PstreamDetail::allToAllConsensus
 
             auto& recvData = recvBufs(proci);
 
+            // Regular receive [the data are small]
             MPI_Recv
             (
-                &recvData,
+               &recvData,
                 count,          // count=1 (see above)
                 datatype,
                 proci,
@@ -845,7 +848,7 @@ void Foam::PstreamDetail::allToAllConsensus
         {
             // Test barrier for completion
             // - all received, or nothing to receive
-            MPI_Test(&barrierReq, &flag, MPI_STATUS_IGNORE);
+            MPI_Test(&barrierRequest, &flag, MPI_STATUS_IGNORE);
 
             if (flag)
             {
@@ -857,8 +860,9 @@ void Foam::PstreamDetail::allToAllConsensus
             // Check if all sends have arrived
             MPI_Testall
             (
-                requests.size(), requests.data(),
-                &flag, MPI_STATUSES_IGNORE
+                sendRequests.size(),
+                sendRequests.data(),
+               &flag, MPI_STATUSES_IGNORE
             );
 
             if (flag)
@@ -866,7 +870,7 @@ void Foam::PstreamDetail::allToAllConsensus
                 MPI_Ibarrier
                 (
                     PstreamGlobals::MPICommunicators_[comm],
-                   &barrierReq
+                   &barrierRequest
                 );
                 barrier_active = true;
             }

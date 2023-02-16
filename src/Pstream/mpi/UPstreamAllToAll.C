@@ -51,6 +51,9 @@ void Foam::UPstream::allToAll                                                 \
 
 Pstream_CommonRoutines(int32_t, MPI_INT32_T);
 Pstream_CommonRoutines(int64_t, MPI_INT64_T);
+// Future?
+// Pstream_CommonRoutines(uint32_t, MPI_UINT32_T);
+// Pstream_CommonRoutines(uint64_t, MPI_UINT64_T);
 
 #undef Pstream_CommonRoutines
 

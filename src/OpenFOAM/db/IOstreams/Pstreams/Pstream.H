@@ -593,7 +593,8 @@ public:
             const UList<Container>& sendBufs,
             List<Container>& recvBufs,
             const int tag,
-            const label comm
+            const label comm,
+            const bool wait = true  //!< Wait for requests to complete
         );
 
         //- Exchange \em contiguous data using non-blocking consensus
@@ -614,7 +615,8 @@ public:
             const Map<Container>& sendBufs,
             Map<Container>& recvBufs,
             const int tag,
-            const label comm
+            const label comm,
+            const bool wait = true  //!< Wait for requests to complete
         );
 };
 
