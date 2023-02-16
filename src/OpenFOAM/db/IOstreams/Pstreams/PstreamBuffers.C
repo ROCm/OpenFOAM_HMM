@@ -112,19 +112,11 @@ void Foam::PstreamBuffers::finalExchangeGatherScatter
     {
         // gather mode (all-to-one)
 
-        if (UPstream::master(comm_))
-        {
-            // Master: has no sends
-            clearSends();
-        }
-        else
-        {
-            // Non-master: only sends to master [0]
+        // Only send to master [0]. Master is also allowed to 'send' to itself
 
-            for (label proci=1; proci < sendBuffers_.size(); ++proci)
-            {
-                sendBuffers_[proci].clear();
-            }
+        for (label proci=1; proci < sendBuffers_.size(); ++proci)
+        {
+            sendBuffers_[proci].clear();
         }
     }
     else
