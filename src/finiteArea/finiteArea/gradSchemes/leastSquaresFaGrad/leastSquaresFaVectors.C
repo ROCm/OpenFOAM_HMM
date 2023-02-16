@@ -64,7 +64,8 @@ Foam::leastSquaresFaVectors::~leastSquaresFaVectors()
 void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 {
     DebugInFunction
-        << "Constructing finite area least square gradient vectors" << nl;
+        << "Constructing finite area (invDist) least square gradient vectors"
+        << nl;
 
     pVectorsPtr_ = new edgeVectorField
     (
@@ -75,7 +76,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedVector(dimless/dimLength, Zero)
@@ -91,7 +92,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedVector(dimless/dimLength, Zero)
@@ -103,63 +104,45 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
     const labelUList& neighbour = mesh().neighbour();
 
     const areaVectorField& C = mesh().areaCentres();
-    const edgeScalarField& w = mesh().weights();
-
 
     // Set up temporary storage for the dd tensor (before inversion)
     symmTensorField dd(mesh().nFaces(), Zero);
 
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        vector d = C[nei] - C[own];
+        const vector d(C[nei] - C[own]);
 
-        // Do not allow any mag(val) < SMALL
-        if (d.magSqr() < ROOTSMALL)
+        // No contribution when mag(val) < SMALL
+        const scalar magSqrDist = d.magSqr();
+        if (magSqrDist > ROOTSMALL)
         {
-            d = vector::uniform(SMALL);
+            const symmTensor wdd(sqr(d)/magSqrDist);
+            dd[own] += wdd;
+            dd[nei] += wdd;
         }
-
-        symmTensor wdd = (1.0/d.magSqr())*sqr(d);
-
-        dd[own] += wdd;
-        dd[nei] += wdd;
     }
 
 
-    forAll(lsP.boundaryField(), patchi)
+    for (const auto& patchLsP : lsP.boundaryField())
     {
-        const faePatchScalarField& pw = w.boundaryField()[patchi];
-
-        const faPatch& p = pw.patch();
+        const faPatch& p = patchLsP.patch();
         const labelUList& edgeFaces = p.edgeFaces();
 
         // Build the d-vectors
-        // HJ, reconsider deltas at the boundary, consistent with FVM
-        // Current implementation is good for fixedValue boundaries, but may
-        // cause problems with fixedGradient.  HJ, 4/Oct/2010
         const vectorField pd(p.delta());
 
-        if (p.coupled())
+        forAll(pd, patchFacei)
         {
-            forAll(pd, patchFacei)
-            {
-                const vector& d = pd[patchFacei];
+            const vector& d = pd[patchFacei];
 
-                dd[edgeFaces[patchFacei]] +=
-                    (1.0/magSqr(d))*sqr(d);
-            }
-        }
-        else
-        {
-            forAll(pd, patchFacei)
+            // No contribution when mag(val) < SMALL
+            const scalar magSqrDist = d.magSqr();
+            if (magSqrDist > ROOTSMALL)
             {
-                const vector& d = pd[patchFacei];
-
-                dd[edgeFaces[patchFacei]] +=
-                    (1.0/magSqr(d))*sqr(d);
+                dd[edgeFaces[patchFacei]] += sqr(d)/magSqrDist;
             }
         }
     }
@@ -172,60 +155,54 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
     // Revisit all faces and calculate the lsP and lsN vectors
     forAll(owner, facei)
     {
-        label own = owner[facei];
-        label nei = neighbour[facei];
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
 
-        vector d = C[nei] - C[own];
+        const vector d(C[nei] - C[own]);
 
-        // Do not allow any mag(val) < SMALL
-        if (d.magSqr() < ROOTSMALL)
+        // No contribution when mag(val) < SMALL
+        const scalar magSqrDist = d.magSqr();
+        if (magSqrDist > ROOTSMALL)
         {
-            d = vector::uniform(SMALL);
+            lsP[facei] = (invDd[own] & d)/magSqrDist;
+            lsN[facei] = -(invDd[nei] & d)/magSqrDist;
         }
-
-        scalar magSfByMagSqrd = 1.0/d.magSqr();
-
-        lsP[facei] = magSfByMagSqrd*(invDd[own] & d);
-        lsN[facei] = -magSfByMagSqrd*(invDd[nei] & d);
+        // ... already zero from initialisation
+        // else
+        // {
+        //     lsP[facei] = Zero;
+        //     lsN[facei] = Zero;
+        // }
     }
 
-    forAll(lsP.boundaryField(), patchi)
+    for (auto& patchLsP : lsP.boundaryFieldRef())
     {
-        faePatchVectorField& patchLsP = lsP.boundaryFieldRef()[patchi];
-
-        const faePatchScalarField& pw = w.boundaryField()[patchi];
-
-        const faPatch& p = pw.patch();
+        const faPatch& p = patchLsP.patch();
         const labelUList& edgeFaces = p.edgeFaces();
 
         // Build the d-vectors
         const vectorField pd(p.delta());
 
-        if (p.coupled())
+        forAll(pd, patchFacei)
         {
-            forAll(pd, patchFacei)
-            {
-                const vector& d = pd[patchFacei];
+            const vector& d = pd[patchFacei];
 
-                patchLsP[patchFacei] =
-                    (1.0/magSqr(d))
-                   *(invDd[edgeFaces[patchFacei]] & d);
-            }
-        }
-        else
-        {
-            forAll(pd, patchFacei)
+            // No contribution when mag(val) < SMALL
+            const scalar magSqrDist = d.magSqr();
+            if (magSqrDist > ROOTSMALL)
             {
-                const vector& d = pd[patchFacei];
-
                 patchLsP[patchFacei] =
-                    (1.0/magSqr(d))
-                   *(invDd[edgeFaces[patchFacei]] & d);
+                    (invDd[edgeFaces[patchFacei]] & d)/magSqrDist;
             }
+            // ... already zero from initialisation
+            // else
+            // {
+            //     patchLsP[patchFacei] = Zero;
+            // }
         }
     }
 
-    DebugInFunction
+    DebugInfo
         << "Done constructing finite area least square gradient vectors" << nl;
 }
 
