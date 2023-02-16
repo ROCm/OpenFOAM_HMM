@@ -9,8 +9,7 @@ divert(-1)dnl
 #     Copyright (C) 2019 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM, licensed under GNU General Public License
-#     <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 #
 # Description
 #     Driver-specific m4/lemon macros for field expressions.
