@@ -102,7 +102,11 @@ protected:
 
 public:
 
-    typedef Field<Type> returnType;
+    // Data Types
+
+        //- The return type is a field of values
+        typedef Field<Type> returnType;
+
 
     //- Runtime type information
     TypeName("PatchFunction1")

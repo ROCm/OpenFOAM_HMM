@@ -41,10 +41,10 @@ flowRateOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    flowRate_(),
-    volumetric_(false),
+    flowRate_(nullptr),
     rhoName_("rho"),
-    rhoOutlet_(0.0)
+    rhoOutlet_(0),
+    volumetric_(false)
 {}
 
 
@@ -57,26 +57,31 @@ flowRateOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict, false),
-    rhoOutlet_(dict.getOrDefault<scalar>("rhoOutlet", -VGREAT))
+    flowRate_(nullptr),
+    rhoName_("rho"),
+    rhoOutlet_(dict.getOrDefault<scalar>("rhoOutlet", -VGREAT)),
+    volumetric_(false)
 {
-    if (dict.found("volumetricFlowRate"))
+    flowRate_ =
+        Function1<scalar>::NewIfPresent("volumetricFlowRate", dict, &db());
+
+    if (flowRate_)
     {
         volumetric_ = true;
-        flowRate_ =
-            Function1<scalar>::New("volumetricFlowRate", dict, &db());
-        rhoName_ = "rho";
-    }
-    else if (dict.found("massFlowRate"))
-    {
-        volumetric_ = false;
-        flowRate_ = Function1<scalar>::New("massFlowRate", dict, &db());
-        rhoName_ = dict.getOrDefault<word>("rho", "rho");
     }
     else
     {
+        dict.readIfPresent("rho", rhoName_);
+        flowRate_ =
+            Function1<scalar>::NewIfPresent("massFlowRate", dict, &db());
+    }
+
+    if (!flowRate_)
+    {
         FatalIOErrorInFunction(dict)
             << "Please supply either 'volumetricFlowRate' or"
-            << " 'massFlowRate' and 'rho'" << exit(FatalIOError);
+            << " 'massFlowRate' (optional: with 'rho')" << nl
+            << exit(FatalIOError);
     }
 
     // Value field require if mass based
@@ -105,9 +110,9 @@ flowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
-    rhoOutlet_(ptf.rhoOutlet_)
+    rhoOutlet_(ptf.rhoOutlet_),
+    volumetric_(ptf.volumetric_)
 {}
 
 
@@ -119,9 +124,9 @@ flowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
-    rhoOutlet_(ptf.rhoOutlet_)
+    rhoOutlet_(ptf.rhoOutlet_),
+    volumetric_(ptf.volumetric_)
 {}
 
 
@@ -134,9 +139,9 @@ flowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, iF),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
-    rhoOutlet_(ptf.rhoOutlet_)
+    rhoOutlet_(ptf.rhoOutlet_),
+    volumetric_(ptf.volumetric_)
 {}
 
 

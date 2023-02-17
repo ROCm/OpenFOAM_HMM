@@ -603,12 +603,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchID_(-1),
     srcMask_(),
     tgtMask_(),
-    srcScalePtr_
-    (
-        dict.found("scale")
-      ? PatchFunction1<scalar>::New(*this, "scale", dict)
-      : nullptr
-    ),
+    srcScalePtr_(PatchFunction1<scalar>::NewIfPresent(*this, "scale", dict)),
     AMITime_
     (
         IOobject

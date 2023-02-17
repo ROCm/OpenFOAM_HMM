@@ -42,9 +42,9 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    flowRate_(),
+    flowRate_(nullptr),
     rhoName_("rho"),
-    rhoInlet_(0.0),
+    rhoInlet_(0),
     volumetric_(false),
     extrapolateProfile_(false)
 {}
@@ -59,6 +59,7 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF, dict, false),
+    flowRate_(nullptr),
     rhoName_("rho"),
     rhoInlet_(dict.getOrDefault<scalar>("rhoInlet", -VGREAT)),
     volumetric_(false),
@@ -67,23 +68,25 @@ flowRateInletVelocityFvPatchVectorField
         dict.getOrDefault<Switch>("extrapolateProfile", false)
     )
 {
-    if (dict.found("volumetricFlowRate"))
+    flowRate_ =
+        Function1<scalar>::NewIfPresent("volumetricFlowRate", dict, &db());
+
+    if (flowRate_)
     {
         volumetric_ = true;
-        flowRate_ =
-            Function1<scalar>::New("volumetricFlowRate", dict, &db());
-    }
-    else if (dict.found("massFlowRate"))
-    {
-        volumetric_ = false;
-        flowRate_ = Function1<scalar>::New("massFlowRate", dict, &db());
-        rhoName_ = dict.getOrDefault<word>("rho", "rho");
     }
     else
     {
+        dict.readIfPresent("rho", rhoName_);
+        flowRate_ =
+            Function1<scalar>::NewIfPresent("massFlowRate", dict, &db());
+    }
+
+    if (!flowRate_)
+    {
         FatalIOErrorInFunction(dict)
             << "Please supply either 'volumetricFlowRate' or"
-            << " 'massFlowRate' and 'rho'" << nl
+            << " 'massFlowRate' (optional: with 'rho')" << nl
             << exit(FatalIOError);
     }
 

@@ -111,13 +111,10 @@ class flowRateOutletVelocityFvPatchVectorField
 :
     public fixedValueFvPatchVectorField
 {
-    // Private data
+    // Private Data
 
         //- Outlet integral flow rate
         autoPtr<Function1<scalar>> flowRate_;
-
-        //- Is volumetric?
-        bool volumetric_;
 
         //- Name of the density field used to normalize the mass flux
         word rhoName_;
@@ -125,8 +122,11 @@ class flowRateOutletVelocityFvPatchVectorField
         //- Rho initialisation value (for start; if value not supplied)
         scalar rhoOutlet_;
 
+        //- Is volumetric?
+        bool volumetric_;
 
-    // Private member functions
+
+    // Private Member Functions
 
         //- Update the patch values given the appropriate density type and value
         template<class RhoType>
