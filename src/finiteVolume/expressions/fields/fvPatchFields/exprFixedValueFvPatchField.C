@@ -107,6 +107,10 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     ),
     driver_(this->patch(), dict_)
 {
+    DeprecatedInFunction(2212)
+        << "Use uniformFixedValue with an expression Function1 instead." << nl
+        << "    This boundary condition will be removed in the future" << endl;
+
     setDebug();
     DebugInFunction << nl;
 

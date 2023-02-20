@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "genericPatchFieldBase.H"
-#include "messageStream.H"
+#include "error.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

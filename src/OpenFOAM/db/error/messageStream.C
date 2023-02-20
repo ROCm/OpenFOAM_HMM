@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ Note
 
 #include "error.H"
 #include "dictionary.H"
+#include "foamVersion.H"
 #include "Pstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -167,7 +168,7 @@ std::ostream& Foam::messageStream::stdStream()
 
 Foam::OSstream& Foam::messageStream::operator()
 (
-    const string& functionName
+    const std::string& functionName
 )
 {
     OSstream& os = this->stream();
@@ -177,6 +178,57 @@ Foam::OSstream& Foam::messageStream::operator()
         os  << nl
             << "    From " << functionName.c_str() << nl;
     }
+
+    return os;
+}
+
+
+Foam::OSstream& Foam::messageStream::deprecated
+(
+    const int afterVersion,
+    const char* functionName,
+    const char* sourceFileName,
+    const int sourceFileLineNumber
+)
+{
+    OSstream& os = this->stream();
+
+    // No warning for 0 (unversioned) or -ve values (silent versioning).
+    // Also no warning for (version >= foamVersion::api), which
+    // can be used to denote future expiry dates of transition features.
+
+    if (afterVersion > 0 && afterVersion < foamVersion::api)
+    {
+        const int months =
+        (
+            // YYMM -> months
+            (12 * (foamVersion::api/100) + (foamVersion::api % 100))
+          - (12 * (afterVersion/100)  + (afterVersion % 100))
+        );
+
+        os  << nl
+            << ">>> DEPRECATED after version " << afterVersion;
+
+        if (afterVersion < 1000)
+        {
+            // Predates YYMM versioning (eg, 240 for version 2.4)
+            os  << ". This is very old! <<<" << nl;
+        }
+        else
+        {
+            os  << ". This is about " << months << " months old. <<<" << nl;
+        }
+    }
+
+    os  << nl;
+
+    if (functionName)  // nullptr check
+    {
+        os  << "    From " << functionName << nl
+            << "    in file " << sourceFileName
+            << " at line " << sourceFileLineNumber << nl;
+    }
+    os  << "    ";
 
     return os;
 }
@@ -194,7 +246,7 @@ Foam::OSstream& Foam::messageStream::operator()
     os  << nl
         << "    From " << functionName << nl
         << "    in file " << sourceFileName
-        << " at line " << sourceFileLineNumber << endl
+        << " at line " << sourceFileLineNumber << nl
         << "    ";
 
     return os;
@@ -203,7 +255,7 @@ Foam::OSstream& Foam::messageStream::operator()
 
 Foam::OSstream& Foam::messageStream::operator()
 (
-    const string& functionName,
+    const std::string& functionName,
     const char* sourceFileName,
     const int sourceFileLineNumber
 )
@@ -222,7 +274,7 @@ Foam::OSstream& Foam::messageStream::operator()
     const char* functionName,
     const char* sourceFileName,
     const int sourceFileLineNumber,
-    const string& ioFileName,
+    const std::string& ioFileName,
     const label ioStartLineNumber,
     const label ioEndLineNumber
 )
@@ -233,7 +285,7 @@ Foam::OSstream& Foam::messageStream::operator()
         << "    From " << functionName << nl
         << "    in file " << sourceFileName
         << " at line " << sourceFileLineNumber << nl
-        << "    Reading " << ioFileName;
+        << "    Reading \"" << ioFileName.c_str() << '"';
 
     if (ioStartLineNumber >= 0)
     {
