@@ -348,6 +348,12 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         // For testing: warn use of non-worldComm
         UPstream::warnComm = UPstream::worldComm;
 
+        // For selfComm : the processor number wrt the new world communicator
+        if (procIDs_[UPstream::selfComm].size())
+        {
+            procIDs_[UPstream::selfComm].front() = UPstream::myProcNo(subComm);
+        }
+
         if (debug)
         {
             // Check
@@ -565,7 +571,7 @@ void Foam::UPstream::allocatePstreamCommunicator
     }
     else if (parentIndex == -2)
     {
-        // Self communicator
+        // Self communicator (selfComm)
 
         PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_SELF;
@@ -588,8 +594,12 @@ void Foam::UPstream::allocatePstreamCommunicator
         }
         #endif
 
+        // For selfComm : the process IDs within the world communicator.
+        // Uses MPI_COMM_WORLD in case called before UPstream::globalComm
+        // was initialized
+
         procIDs_[index].resize_nocopy(1);
-        procIDs_[index] = 0;
+        MPI_Comm_rank(MPI_COMM_WORLD, &procIDs_[index].front());
     }
     else
     {
