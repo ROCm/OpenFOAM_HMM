@@ -1949,7 +1949,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 //        //globalBorderTris.gather
 //        //(
 //        //    UPstream::worldComm,
-//        //    UPstream::procID(Pstream::worldComm),
+//        //    UPstream::allProcs(UPstream::worldComm),
 //        //    globalBorderCentres
 //        //);
 //        pointField globalBorderCentres(allCentres);
@@ -1996,7 +1996,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
 //        //globalBorderTris.scatter
 //        //(
 //        //    UPstream::worldComm,
-//        //    UPstream::procID(Pstream::worldComm),
+//        //    UPstream::allProcs(UPstream::worldComm),
 //        //    isMasterPoint
 //        //);
 //        //boolList isMasterBorder(s.size(), false);
@@ -2094,7 +2094,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
             globalTris().gather
             (
                 UPstream::worldComm,
-                UPstream::procID(Pstream::worldComm),
+                UPstream::allProcs(UPstream::worldComm),
                 allCentres
             );
         }
@@ -2144,7 +2144,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
             globalTris().scatter
             (
                 UPstream::worldComm,
-                UPstream::procID(Pstream::worldComm),
+                UPstream::allProcs(UPstream::worldComm),
                 allDistribution,
                 distribution
             );
