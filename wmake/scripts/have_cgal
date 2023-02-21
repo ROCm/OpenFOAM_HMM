@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2018-2020 OpenCFD Ltd.
+#     Copyright (C) 2018-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -14,10 +14,14 @@
 #     have_cgal
 #
 # Description
-#     Detection/setup of CGAL
+#     Detection/setup of CGAL (with/without mpfr support)
 #
 # Requires
 #     CGAL_ARCH_PATH
+# or  config.sh/CGAL (when CGAL_ARCH_PATH is empty)
+#
+# Optional
+#     MPFR_ARCH_PATH
 # or  config.sh/CGAL (when CGAL_ARCH_PATH is empty)
 #
 # Functions provided
@@ -42,6 +46,7 @@
 no_cgal()
 {
     unset HAVE_CGAL CGAL_FLAVOUR CGAL_INC_DIR CGAL_LIB_DIR
+    unset HAVE_MPFR MPFR_INC_DIR MPFR_LIB_DIR
 }
 
 
@@ -53,6 +58,62 @@ echo_cgal()
     echo "root=\"$CGAL_ARCH_PATH\""
     echo "include=\"$CGAL_INC_DIR\""
     echo "library=\"$CGAL_LIB_DIR\""
+}
+
+
+# Search
+# $1 : prefix (*_ARCH_PATH, system, ...)
+#
+# On success, return 0 and export variables
+# -> HAVE_MPFR, MPFR_INC_DIR, MPFR_LIB_DIR
+search_mpfr()
+{
+    local warn # warn="==> skip mpfr"
+    local incName="mpfr.h"
+    local libName="libmpfr"
+
+    local prefix="${1:-system}"
+    local header library
+
+    # ----------------------------------
+    if isNone "$prefix"
+    then
+        [ -n "$warn" ] && echo "$warn (disabled)"
+        return 1
+    elif hasAbsdir "$prefix"
+    then
+        header=$(findFirstFile "$prefix/include/$incName")
+        library=$(findExtLib "$libName")
+    elif isSystem "$prefix"
+    then
+        header=$(findSystemInclude -name="$incName")
+        prefix=$(sysPrefix "$header")
+    else
+        unset prefix
+    fi
+    # ----------------------------------
+
+    # Header
+    [ -n "$header" ] || {
+        [ -n "$warn" ] && echo "$warn (no header)"
+        return 2
+    }
+
+    # Library may be optional - eg, header-only
+    [ -n "$library" ] \
+    || library=$(findLibrary -prefix="$prefix" -name="$libName") \
+    || {
+        [ -n "$warn" ] && echo "==> $warn (no library)"
+        return 2
+    }
+
+    # ----------------------------------
+
+    # OK
+    export HAVE_MPFR=true
+    export MPFR_ARCH_PATH="$prefix"
+    export MPFR_INC_DIR="${header%/*}"     # Basename
+    export MPFR_LIB_DIR="${library%/*}"    # Basename
 }
 
 
@@ -110,6 +171,10 @@ search_cgal()
     # OK
     export HAVE_CGAL=true
     export CGAL_FLAVOUR="${flavour:-library}"
+    if [ "$HAVE_MPFR" != true ]
+    then
+        CGAL_FLAVOUR="${CGAL_FLAVOUR}-no-mpfr"
+    fi
     export CGAL_ARCH_PATH="$prefix"
     export CGAL_INC_DIR="${header%/*}"     # Basename
     export CGAL_LIB_DIR="${library%/*}"    # Basename
@@ -137,6 +202,9 @@ have_cgal()
 
     # Need boost for cgal
     search_boost "$BOOST_ARCH_PATH"
+
+    # May need mpfr/gmp for cgal
+    search_mpfr "$MPFR_ARCH_PATH"
 
     search_cgal "$CGAL_ARCH_PATH"
 }
