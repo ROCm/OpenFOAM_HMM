@@ -10,7 +10,7 @@ EXE_INC = \
     -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/dynamicFvMesh/lnInclude \
-    -I$(LIB_SRC)/regionFaModels\lnInclude
+    -I$(LIB_SRC)/regionFaModels/lnInclude
 
 EXE_LIBS = \
     -lfiniteVolume \

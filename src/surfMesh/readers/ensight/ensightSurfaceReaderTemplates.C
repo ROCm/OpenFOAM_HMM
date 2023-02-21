@@ -82,7 +82,7 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
         }
 
         // Check that data type is as expected
-        // (assumes OpenFOAM generated the data set)
+        // (assuming OpenFOAM generated the data set)
         string primitiveType;
         is.read(primitiveType);
 
@@ -90,7 +90,8 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
 
         if
         (
-            primitiveType != ensightPTraits<Type>::typeName
+            debug
+         && primitiveType != ensightPTraits<Type>::typeName
          && primitiveType != pTraits<Type>::typeName
         )
         {

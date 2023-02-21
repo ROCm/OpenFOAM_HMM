@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ Foam::fv::limitVelocity::limitVelocity
 :
     fv::cellSetOption(name, modelType, dict, mesh),
     writeFile(mesh, name, typeName, dict, false),
-    UName_(word::null),
+    UName_("U"),
     max_(0)
 {
     read(dict);

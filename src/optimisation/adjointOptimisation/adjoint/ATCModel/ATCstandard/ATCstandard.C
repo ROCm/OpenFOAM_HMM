@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2007-2021 PCOpt/NTUA
-    Copyright (C) 2013-2021 FOSS GP
+    Copyright (C) 2007-2023 PCOpt/NTUA
+    Copyright (C) 2013-2023 FOSS GP
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -90,10 +90,9 @@ void ATCstandard::addATC(fvVectorMatrix& UaEqn)
     if (extraConvection_ > 0)
     {
         // Implicit part added to increase diagonal dominance
-        // Note: Maybe this needs to be multiplied with the ATClimiter ??
-        UaEqn += extraConvection_*fvm::div(-phi, Ua);
+        UaEqn += ATClimiter_*extraConvection_*fvm::div(-phi, Ua);
 
-        // correct rhs due to implicitly augmenting the adjoint convection
+        // Correct rhs due to implicitly augmenting the adjoint convection
         ATC_ += extraConvection_*(fvc::grad(Ua, "gradUaATC")().T() & U);
     }
 

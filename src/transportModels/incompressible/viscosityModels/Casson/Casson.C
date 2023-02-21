@@ -119,8 +119,8 @@ bool Foam::viscosityModels::Casson::read
 
     CassonCoeffs_.readEntry("m", m_);
     CassonCoeffs_.readEntry("tau0", tau0_);
-    CassonCoeffs_.readEntry("nuMin_", nuMin_);
-    CassonCoeffs_.readEntry("nuMax_", nuMax_);
+    CassonCoeffs_.readEntry("nuMin", nuMin_);
+    CassonCoeffs_.readEntry("nuMax", nuMax_);
 
     return true;
 }

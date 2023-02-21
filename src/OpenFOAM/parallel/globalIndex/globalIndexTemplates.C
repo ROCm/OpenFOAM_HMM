@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -248,12 +248,12 @@ void Foam::globalIndex::gather
 }
 
 
-template<class Type, class Addr>
+template<class ProcIDsContainer, class Type, class Addr>
 void Foam::globalIndex::gather
 (
     const labelUList& off,  // needed on master only
     const label comm,
-    const UList<int>& procIDs,
+    const ProcIDsContainer& procIDs,
     const IndirectListBase<Type, Addr>& fld,
     List<Type>& allFld,
     const int tag,
@@ -368,7 +368,7 @@ void Foam::globalIndex::gather
         (
             offsets_,  // needed on master only
             comm,
-            UPstream::procID(comm),
+            UPstream::allProcs(comm),   // All communicator ranks
             sendData,
             allData,
             tag,
@@ -404,7 +404,7 @@ void Foam::globalIndex::gather
         (
             offsets_,  // needed on master only
             comm,
-            UPstream::procID(comm),
+            UPstream::allProcs(comm),   // All communicator ranks
             sendData,
             allData,
             tag,
@@ -622,7 +622,7 @@ void Foam::globalIndex::mpiGather
             (
                 offsets_,  // needed on master only
                 comm,
-                UPstream::procID(comm),
+                UPstream::allProcs(comm),   // All communicator ranks
                 sendData,
                 allData,
                 tag,
@@ -967,7 +967,7 @@ void Foam::globalIndex::scatter
         (
             offsets_,  // needed on master only
             comm,
-            UPstream::procID(comm),
+            UPstream::allProcs(comm),  // All communicator ranks
             allData,
             localData,
             tag,

@@ -35,6 +35,7 @@ LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
     -Wl,--strip-all
 
 LINKEXE     = $(CC) $(c++FLAGS) \
+    -static-libgcc -static-libstdc++ \
     -Wl,--enable-auto-import \
     -Wl,--strip-all \
     -Wl,--force-exe-suffix

@@ -30,8 +30,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CGALTriangulation3DKernel_H
-#define CGALTriangulation3DKernel_H
+#ifndef Foam_CGALTriangulation3DKernel_H
+#define Foam_CGALTriangulation3DKernel_H
 
 // Silence boost bind deprecation warnings (before CGAL-5.2.1)
 #include "CGAL/version.h"
@@ -54,8 +54,18 @@ Description
 //    #include "CGAL/Robust_circumcenter_traits_3.h"
 //    typedef CGAL::Robust_circumcenter_traits_3<baseK>           K;
 
+#if defined(CGAL_VERSION_NR) && (CGAL_VERSION_NR < 1050500000)
+    // Prior to CGAL-5.5
+
     #include "CGAL/Robust_circumcenter_filtered_traits_3.h"
     typedef CGAL::Robust_circumcenter_filtered_traits_3<baseK>  K;
+
+#else
+
+    #include "CGAL/Robust_weighted_circumcenter_filtered_traits_3.h"
+    typedef CGAL::Robust_weighted_circumcenter_filtered_traits_3<baseK> K;
+
+#endif
 
 #else
 

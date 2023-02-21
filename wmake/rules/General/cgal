@@ -1,21 +1,26 @@
 # ----------------------------------------------------------------------------
 # CGAL definitions - several possibilities
 #
-#  0. missing
-#  1. header-only
-#  2. library, no mpfr
-#  3. library, with mpfr (a likely default)
+#  - missing
+#  - header-only
+#  - header-only, no mpfr
+#  - library, no mpfr
+#  - library, with mpfr (default for older CGAL)
 #
 # Dispatch according to the defined 'CGAL_FLAVOUR'
 # - names may change [see wmake/scripts/have_cgal]
-# (no-cgal | cgal-header | cgal-no-mpfr | cgal-mpfr)
+# (no-cgal | cgal-header | cgal-header-no-mpfr | cgal-no-mpfr | cgal-mpfr)
 
 cgal_subrule := cgal-mpfr
-ifneq (,$(findstring header,$(CGAL_FLAVOUR)))
-    cgal_subrule := cgal-header-only
-endif
 ifneq (,$(findstring no-mpfr,$(CGAL_FLAVOUR)))
     cgal_subrule := cgal-no-mpfr
+    ifneq (,$(findstring header,$(CGAL_FLAVOUR)))
+        cgal_subrule := cgal-header-no-mpfr
+    endif
+else
+    ifneq (,$(findstring header,$(CGAL_FLAVOUR)))
+        cgal_subrule := cgal-header-only
+    endif
 endif
 
 # ----------------------------------------------------------------------------
