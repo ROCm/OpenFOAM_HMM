@@ -152,7 +152,7 @@ Description
     For option 6, the following relation is used:
 
     \f[
-        fCoWeight = min(max((Co - Co1)/(Co2 - Co1), 0), 1)
+        fCoWeight = clamp((Co - Co1)/(Co2 - Co1), 0, 1)
     \f]
 
     where

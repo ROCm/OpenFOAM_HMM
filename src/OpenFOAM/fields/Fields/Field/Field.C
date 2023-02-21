@@ -659,27 +659,6 @@ void Foam::Field<Type>::replace
 
 
 template<class Type>
-void Foam::Field<Type>::clamp(const Type& lower, const Type& upper)
-{
-    // Use free functions min(), max() to impose component-wise clamping
-    if (lower < upper)
-    {
-        // std::for_each
-        for (auto& val : *this)
-        {
-            val = min(max(val, lower), upper);
-        }
-    }
-}
-
-template<class Type>
-void Foam::Field<Type>::clamp(const MinMax<Type>& range)
-{
-    clamp(range.min(), range.max());
-}
-
-
-template<class Type>
 void Foam::Field<Type>::clamp_min(const Type& lower)
 {
     // Use free function max() [sic] to impose component-wise clamp_min
@@ -699,6 +678,26 @@ void Foam::Field<Type>::clamp_max(const Type& upper)
     {
         val = min(val, upper);
     }
+}
+
+
+template<class Type>
+void Foam::Field<Type>::clamp_range(const Type& lower, const Type& upper)
+{
+    // Note: no checks for bad/invalid clamping ranges
+
+    // Use free functions min(), max() to impose component-wise clamping
+    // std::for_each
+    for (auto& val : *this)
+    {
+        val = min(max(val, lower), upper);
+    }
+}
+
+template<class Type>
+void Foam::Field<Type>::clamp_range(const MinMax<Type>& range)
+{
+    Field<Type>::clamp_range(range.min(), range.max());
 }
 
 

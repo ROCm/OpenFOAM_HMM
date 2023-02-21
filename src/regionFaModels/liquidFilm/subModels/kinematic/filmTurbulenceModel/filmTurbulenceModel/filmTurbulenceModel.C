@@ -128,7 +128,7 @@ tmp<areaScalarField> filmTurbulenceModel::Cw() const
             const scalar h0 = film_.h0().value();
 
             Cw.primitiveFieldRef() = 3*mu/((h + h0)*rho);
-            Cw.min(5000.0);
+            Cw.clamp_max(5000.0);
 
             break;
         }

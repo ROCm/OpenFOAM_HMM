@@ -122,7 +122,7 @@ public:
             (fVphif - fVphiU)/stabilise(fVphiCD - fVphiU, SMALL);
 
         // Limit the limiter to obey the TVD constraint
-        return max(min(min(twor, cubicLimiter), 2), 0);
+        return clamp(min(twor, cubicLimiter), 0, 2);
     }
 };
 

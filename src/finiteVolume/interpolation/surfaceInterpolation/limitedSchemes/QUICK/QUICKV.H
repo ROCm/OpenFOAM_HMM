@@ -99,7 +99,7 @@ public:
         scalar QLimiter = (phif - phiU)/stabilise(phiCD - phiU, SMALL);
 
         // Limit the limiter between upwind and downwind
-        return max(min(QLimiter, 2), 0);
+        return clamp(QLimiter, 0, 2);
     }
 };
 

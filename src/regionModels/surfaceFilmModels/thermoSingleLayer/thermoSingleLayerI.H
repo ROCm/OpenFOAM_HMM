@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,8 +103,18 @@ inline tmp<volScalarField> thermoSingleLayer::T
         )
     );
 
-    tT.ref().min(Tmax_);
-    tT.ref().max(Tmin_);
+    if (limitType::CLAMP_MIN == withTbounds_)
+    {
+        tT.ref().clamp_min(Tbounds_.min());
+    }
+    else if (limitType::CLAMP_MAX == withTbounds_)
+    {
+        tT.ref().clamp_max(Tbounds_.max());
+    }
+    else if (limitType::CLAMP_RANGE == withTbounds_)
+    {
+        tT.ref().clamp_range(Tbounds_);
+    }
 
     return tT;
 }

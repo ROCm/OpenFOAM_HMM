@@ -340,7 +340,7 @@ void Foam::twoPhaseSystem::solve()
             << endl;
 
         // Ensure the phase-fractions are bounded
-        alpha1.clip(SMALL, 1 - SMALL);
+        alpha1.clamp_range(SMALL, 1 - SMALL);
 
         // Update the phase-fraction of the other phase
         alpha2 = scalar(1) - alpha1;

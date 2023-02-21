@@ -89,11 +89,7 @@ void Foam::functionObjects::BilgerMixtureFraction::calcBilgerMixtureFraction()
            /thermo_.W(i);
     }
     f_Bilger /= o2RequiredFuelOx_;
-    f_Bilger.clip
-    (
-        dimensionedScalar(dimless, 0),
-        dimensionedScalar(dimless, 1)
-    );
+    f_Bilger.clamp_range(zero_one{});
 }
 
 

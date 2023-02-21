@@ -139,8 +139,12 @@ void Foam::coupledFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
     Field<Type>::operator=
     (
-        this->patch().weights()*this->patchInternalField()
-      + (1.0 - this->patch().weights())*this->patchNeighbourField()
+        lerp
+        (
+            this->patchNeighbourField(),
+            this->patchInternalField(),
+            this->patch().weights()
+        )
     );
 
     fvPatchField<Type>::evaluate();

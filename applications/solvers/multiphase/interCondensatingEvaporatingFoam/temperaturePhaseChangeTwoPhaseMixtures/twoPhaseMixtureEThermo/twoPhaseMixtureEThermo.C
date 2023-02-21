@@ -155,7 +155,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::Cp() const
 {
     const volScalarField limitedAlpha1
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_, zero_one{})
     );
 
     return tmp<volScalarField>
@@ -176,12 +176,10 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cp
     const label patchi
 ) const
 {
-    const volScalarField limitedAlpha1
+    const scalarField alpha1p
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_.boundaryField()[patchi], zero_one{})
     );
-
-    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
 
     return
     (
@@ -194,7 +192,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::rho() const
 {
     const volScalarField limitedAlpha1
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_, zero_one{})
     );
 
     return tmp<volScalarField>
@@ -214,12 +212,10 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::rho
     const label patchi
 ) const
 {
-    const volScalarField limitedAlpha1
+    const scalarField alpha1p
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_.boundaryField()[patchi], zero_one{})
     );
-
-    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
 
     return
     (
@@ -232,7 +228,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::Cv() const
 {
     const volScalarField limitedAlpha1
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_, zero_one{})
     );
 
     return tmp<volScalarField>
@@ -253,12 +249,10 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::Cv
     const label patchi
 ) const
 {
-    const volScalarField limitedAlpha1
+    const scalarField alpha1p
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_.boundaryField()[patchi], zero_one{})
     );
-
-    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
 
     return
     (
@@ -339,7 +333,7 @@ Foam::tmp<Foam::volScalarField> Foam::twoPhaseMixtureEThermo::kappa() const
 {
     const volScalarField limitedAlpha1
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_, zero_one{})
     );
 
     return tmp<volScalarField>
@@ -358,12 +352,10 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::kappa
     const label patchi
 ) const
 {
-    const volScalarField limitedAlpha1
+    const scalarField alpha1p
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_.boundaryField()[patchi], zero_one{})
     );
-
-    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
 
     return (alpha1p*kappa1().value() + (1 - alpha1p)*kappa2().value());
 }
@@ -402,12 +394,10 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::kappaEff
     const label patchi
 ) const
 {
-    const volScalarField limitedAlpha1
+    const scalarField alpha1p
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_.boundaryField()[patchi], zero_one{})
     );
-
-    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
 
     return
         (alpha1p*kappa1().value() + (1 - alpha1p)*kappa2().value()) + kappat;
@@ -435,12 +425,10 @@ Foam::tmp<Foam::scalarField> Foam::twoPhaseMixtureEThermo::alphaEff
     const label patchi
 ) const
 {
-    const volScalarField limitedAlpha1
+    const scalarField alpha1p
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_.boundaryField()[patchi], zero_one{})
     );
-
-    const scalarField& alpha1p = limitedAlpha1.boundaryField()[patchi];
 
     const scalarField rho
     (

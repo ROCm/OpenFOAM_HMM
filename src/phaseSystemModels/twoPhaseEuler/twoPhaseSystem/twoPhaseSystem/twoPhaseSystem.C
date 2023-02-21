@@ -530,8 +530,7 @@ void Foam::twoPhaseSystem::solve()
             << endl;
 
         // Ensure the phase-fractions are bounded
-        alpha1.max(0);
-        alpha1.min(1);
+        alpha1.clamp_range(zero_one{});
 
         alpha2 = scalar(1) - alpha1;
     }

@@ -48,7 +48,7 @@ void Foam::incompressibleTwoPhaseMixture::calcNu()
     const volScalarField limitedAlpha1
     (
         "limitedAlpha1",
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_, zero_one{})
     );
 
     // Average kinematic viscosity calculated from dynamic viscosity
@@ -128,7 +128,7 @@ Foam::incompressibleTwoPhaseMixture::mu() const
 {
     const volScalarField limitedAlpha1
     (
-        min(max(alpha1_, scalar(0)), scalar(1))
+        clamp(alpha1_, zero_one{})
     );
 
     return tmp<volScalarField>::New
@@ -153,7 +153,7 @@ Foam::incompressibleTwoPhaseMixture::muf() const
 {
     const surfaceScalarField alpha1f
     (
-        min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1))
+        clamp(fvc::interpolate(alpha1_), zero_one{})
     );
 
     return tmp<surfaceScalarField>::New
@@ -170,7 +170,7 @@ Foam::incompressibleTwoPhaseMixture::nuf() const
 {
     const surfaceScalarField alpha1f
     (
-        min(max(fvc::interpolate(alpha1_), scalar(0)), scalar(1))
+        clamp(fvc::interpolate(alpha1_), zero_one{})
     );
 
     return tmp<surfaceScalarField>::New

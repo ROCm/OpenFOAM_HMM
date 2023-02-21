@@ -157,7 +157,7 @@ void Foam::uniformInletOutletFvPatchField<Type>::updateCoeffs()
             phiName_
         );
 
-    this->valueFraction() = 1.0 - pos0(phip);
+    this->valueFraction() = neg(phip);
 
     mixedFvPatchField<Type>::updateCoeffs();
 }

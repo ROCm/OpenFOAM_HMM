@@ -102,7 +102,7 @@ volScalarField dynamicKEqn<BasicTurbulenceModel>::Ce() const
     (
         0.5*(filter_(magSqr(this->U_)) - magSqr(filter_(this->U_)))
     );
-    KK.max(dimensionedScalar("small", KK.dimensions(), SMALL));
+    KK.clamp_min(SMALL);
 
     return Ce(D, KK);
 }
@@ -245,7 +245,7 @@ void dynamicKEqn<BasicTurbulenceModel>::correct()
     tgradU.clear();
 
     volScalarField KK(0.5*(filter_(magSqr(U)) - magSqr(filter_(U))));
-    KK.max(dimensionedScalar("small", KK.dimensions(), SMALL));
+    KK.clamp_min(SMALL);
 
     tmp<fvScalarMatrix> kEqn
     (

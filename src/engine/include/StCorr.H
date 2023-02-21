@@ -80,7 +80,7 @@
             );
             dimensionedScalar AkEst = gSum(mgb*mesh.V().field());
 
-            StCorr.value() = max(min((Ak/AkEst).value(), 10.0), 1.0);
+            StCorr.value() = clamp((Ak/AkEst).value(), 1, 10);
 
             Info<< "StCorr = " << StCorr.value() << endl;
         }

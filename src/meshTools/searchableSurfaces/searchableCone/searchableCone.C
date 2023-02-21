@@ -113,11 +113,11 @@ void Foam::searchableCone::findNearestAndNormal
     v.normalise();
 
     // Nearest and normal on disk at point1
-    point disk1Point(point1_ + min(max(magV, innerRadius1_), radius1_)*v);
+    point disk1Point(point1_ + clamp(magV, innerRadius1_, radius1_)*v);
     vector disk1Normal(-unitDir_);
 
     // Nearest and normal on disk at point2
-    point disk2Point(point2_ + min(max(magV, innerRadius2_), radius2_)*v);
+    point disk2Point(point2_ + clamp(magV, innerRadius2_, radius2_)*v);
     vector disk2Normal(unitDir_);
 
     // Nearest and normal on cone. Initialise to far-away point so if not

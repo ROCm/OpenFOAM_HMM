@@ -219,7 +219,7 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
         coeffDict().readIfPresent("g", g);
     }
 
-    // const scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);
+    // const scalar ramp = clamp((this->db().time().value() - 5)/10, 0, 1);
     const scalar ramp = 1.0;
 
     if (test_)

@@ -114,7 +114,7 @@ namespace vectorTools
         scalar cosPhi = (a & b)/(mag(a)*mag(b) + tolerance);
 
         // Enforce bounding between -1 and 1
-        return min(max(cosPhi, -1), 1);
+        return clamp(cosPhi, -1, 1);
     }
 
     //- Calculate angle between a and b in radians
@@ -129,7 +129,7 @@ namespace vectorTools
         scalar cosPhi = (a & b)/(mag(a)*mag(b) + tolerance);
 
         // Enforce bounding between -1 and 1
-        return acos( min(max(cosPhi, -1), 1) );
+        return acos(clamp(cosPhi, -1, 1));
     }
 
     //- Calculate angle between a and b in degrees

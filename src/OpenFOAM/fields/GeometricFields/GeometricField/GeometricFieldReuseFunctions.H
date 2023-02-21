@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,6 +76,7 @@ inline bool reusable
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// One-parameter versions
 
 template
 <
@@ -86,24 +87,46 @@ template
 >
 struct reuseTmpGeometricField
 {
+    //- Pass-through to New GeometricField
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
-        const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tgf1,
+        const GeometricField<Type1, PatchField, GeoMesh>& f1,
         const word& name,
         const dimensionSet& dimensions
     )
     {
-        const auto& gf1 = tgf1();
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        (
+            IOobject
+            (
+                name,
+                f1.instance(),
+                f1.db()
+            ),
+            f1.mesh(),
+            dimensions
+        );
+    }
+
+    //- Dissimilar types: return new field
+    static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
+    (
+        const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,
+        const word& name,
+        const dimensionSet& dimensions
+    )
+    {
+        const auto& f1 = tf1();
 
         return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
             IOobject
             (
                 name,
-                gf1.instance(),
-                gf1.db()
+                f1.instance(),
+                f1.db()
             ),
-            gf1.mesh(),
+            f1.mesh(),
             dimensions
         );
     }
@@ -117,41 +140,41 @@ struct reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>
     //- for identical input and output types
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
-        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
+        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tf1,
         const word& name,
         const dimensionSet& dimensions,
         const bool initCopy = false
     )
     {
-        if (Detail::reusable(tgf1))
+        if (Detail::reusable(tf1))
         {
-            auto& gf1 = tgf1.constCast();
+            auto& f1 = tf1.constCast();
 
-            gf1.rename(name);
-            gf1.dimensions().reset(dimensions);
-            return tgf1;
+            f1.rename(name);
+            f1.dimensions().reset(dimensions);
+            return tf1;
         }
 
-        const auto& gf1 = tgf1();
+        const auto& f1 = tf1();
 
-        auto rtgf = tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        auto tresult = tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
             IOobject
             (
                 name,
-                gf1.instance(),
-                gf1.db()
+                f1.instance(),
+                f1.db()
             ),
-            gf1.mesh(),
+            f1.mesh(),
             dimensions
         );
 
         if (initCopy)
         {
-            rtgf.ref() == gf1;
+            tresult.ref() == f1;
         }
 
-        return rtgf;
+        return tresult;
     }
 };
 
@@ -163,7 +186,7 @@ tmp
     GeometricField<TypeR, PatchField, GeoMesh>
 > New
 (
-    const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
+    const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tf1,
     const word& name,
     const dimensionSet& dimensions,
     const bool initCopy = false
@@ -171,7 +194,7 @@ tmp
 {
     return reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>::New
     (
-        tgf1,
+        tf1,
         name,
         dimensions,
         initCopy
@@ -192,23 +215,23 @@ struct reuseTmpTmpGeometricField
 {
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
-        const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tgf1,
-        const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tgf2,
+        const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,
+        const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,
         const word& name,
         const dimensionSet& dimensions
     )
     {
-        const auto& gf1 = tgf1();
+        const auto& f1 = tf1();
 
         return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
             IOobject
             (
                 name,
-                gf1.instance(),
-                gf1.db()
+                f1.instance(),
+                f1.db()
             ),
-            gf1.mesh(),
+            f1.mesh(),
             dimensions
         );
     }
@@ -230,32 +253,32 @@ struct reuseTmpTmpGeometricField
 {
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
-        const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tgf1,
-        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf2,
+        const tmp<GeometricField<Type1, PatchField, GeoMesh>>& tf1,
+        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tf2,
         const word& name,
         const dimensionSet& dimensions
     )
     {
-        if (Detail::reusable(tgf2))
+        if (Detail::reusable(tf2))
         {
-            auto& gf2 = tgf2.constCast();
+            auto& f2 = tf2.constCast();
 
-            gf2.rename(name);
-            gf2.dimensions().reset(dimensions);
-            return tgf2;
+            f2.rename(name);
+            f2.dimensions().reset(dimensions);
+            return tf2;
         }
 
-        const auto& gf1 = tgf1();
+        const auto& f1 = tf1();
 
         return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
             IOobject
             (
                 name,
-                gf1.instance(),
-                gf1.db()
+                f1.instance(),
+                f1.db()
             ),
-            gf1.mesh(),
+            f1.mesh(),
             dimensions
         );
     }
@@ -276,32 +299,32 @@ struct reuseTmpTmpGeometricField
 {
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
-        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
-        const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tgf2,
+        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tf1,
+        const tmp<GeometricField<Type2, PatchField, GeoMesh>>& tf2,
         const word& name,
         const dimensionSet& dimensions
     )
     {
-        if (Detail::reusable(tgf1))
+        if (Detail::reusable(tf1))
         {
-            auto& gf1 = tgf1.constCast();
+            auto& f1 = tf1.constCast();
 
-            gf1.rename(name);
-            gf1.dimensions().reset(dimensions);
-            return tgf1;
+            f1.rename(name);
+            f1.dimensions().reset(dimensions);
+            return tf1;
         }
 
-        const auto& gf1 = tgf1();
+        const auto& f1 = tf1();
 
         return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
             IOobject
             (
                 name,
-                gf1.instance(),
-                gf1.db()
+                f1.instance(),
+                f1.db()
             ),
-            gf1.mesh(),
+            f1.mesh(),
             dimensions
         );
     }
@@ -316,45 +339,44 @@ struct reuseTmpTmpGeometricField
 {
     static tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     (
-        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf1,
-        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tgf2,
+        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tf1,
+        const tmp<GeometricField<TypeR, PatchField, GeoMesh>>& tf2,
         const word& name,
         const dimensionSet& dimensions
     )
     {
-        if (Detail::reusable(tgf1))
+        if (Detail::reusable(tf1))
         {
-            auto& gf1 = tgf1.constCast();
+            auto& f1 = tf1.constCast();
 
-            gf1.rename(name);
-            gf1.dimensions().reset(dimensions);
-            return tgf1;
+            f1.rename(name);
+            f1.dimensions().reset(dimensions);
+            return tf1;
         }
-        if (Detail::reusable(tgf2))
+        if (Detail::reusable(tf2))
         {
-            auto& gf2 = tgf2.constCast();
+            auto& f2 = tf2.constCast();
 
-            gf2.rename(name);
-            gf2.dimensions().reset(dimensions);
-            return tgf2;
+            f2.rename(name);
+            f2.dimensions().reset(dimensions);
+            return tf2;
         }
 
-        const auto& gf1 = tgf1();
+        const auto& f1 = tf1();
 
         return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
         (
             IOobject
             (
                 name,
-                gf1.instance(),
-                gf1.db()
+                f1.instance(),
+                f1.db()
             ),
-            gf1.mesh(),
+            f1.mesh(),
             dimensions
         );
     }
 };
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

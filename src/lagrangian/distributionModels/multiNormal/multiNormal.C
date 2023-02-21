@@ -168,7 +168,7 @@ Foam::scalar Foam::distributionModels::multiNormal::sample
     // Note: numerical approximation of the inverse function yields slight
     //       inaccuracies
 
-    return min(max(x, minValue_), maxValue_);
+    return clamp(x, minValue_, maxValue_);
 }
 
 

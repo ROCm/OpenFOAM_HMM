@@ -113,7 +113,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
     if (fe_)
     {
         tmp<volScalarField> fe1 =
-            2*(pos0(alpha)*pow(expTerm, -11.09) + neg(alpha)*pow(expTerm, -9.));
+            2*lerp(pow(expTerm, -9.), pow(expTerm, -11.09), pos0(alpha));
         tmp<volScalarField> fe2 = 1 - max(ft(magGradU), fl(magGradU));
         tmp<volScalarField> fe = max(fe1 - 1, scalar(0))*psi*fe2;
 
@@ -129,7 +129,7 @@ tmp<volScalarField> SpalartAllmarasIDDES<BasicTurbulenceModel>::dTilda
     // Simplified formulation from Gritskevich et al. paper (2011) where fe = 0
     return max
     (
-        fdTilda*lRAS + (1 - fdTilda)*lLES,
+        lerp(lLES, lRAS, fdTilda),
         dimensionedScalar("SMALL", dimLength, SMALL)
     );
 }

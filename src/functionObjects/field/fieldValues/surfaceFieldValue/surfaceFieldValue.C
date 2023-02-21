@@ -670,7 +670,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
             // Uniformity index
             const scalar ui = 1 - numer/(2*mag(mean*areaTotal) + ROOTVSMALL);
 
-            return min(max(ui, 0), 1);
+            return clamp(ui, 0, 1);
         }
 
         default:
@@ -756,7 +756,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
             // Uniformity index
             const scalar ui = 1 - numer/(2*mag(mean*areaTotal) + ROOTVSMALL);
 
-            return vector(min(max(ui, 0), 1), 0, 0);
+            return vector(clamp(ui, 0, 1), 0, 0);
         }
 
         default:

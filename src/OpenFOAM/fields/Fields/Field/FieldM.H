@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    High performance macro functions for Field\<Type\> algebra.  These expand
-    using either array element access (for vector machines) or pointer
-    dereferencing for scalar machines as appropriate.
+    Declaration macros for Field\<Type\> algebra.
 
 \*---------------------------------------------------------------------------*/
 
@@ -86,6 +84,34 @@ void checkFields
     }
 }
 
+template<class Type1, class Type2, class Type3, class Type4>
+void checkFields
+(
+    const UList<Type1>& f1,
+    const UList<Type2>& f2,
+    const UList<Type3>& f3,
+    const UList<Type4>& f4,
+    const char* op
+)
+{
+    if
+    (
+        f1.size() != f2.size()
+     || f1.size() != f3.size()
+     || f1.size() != f4.size()
+    )
+    {
+        FatalErrorInFunction
+            << " Field<"<<pTraits<Type1>::typeName<<"> f1("<<f1.size()<<')'
+            << ", Field<"<<pTraits<Type2>::typeName<<"> f2("<<f2.size()<<')'
+            << ", Field<"<<pTraits<Type3>::typeName<<"> f3("<<f3.size()<<')'
+            << " and Field<"<<pTraits<Type4>::typeName<<"> f4("<<f4.size()<<')'
+            << endl
+            << "    for operation " << op
+            << abort(FatalError);
+    }
+}
+
 #else
 
 template<class Type1, class Type2>
@@ -107,12 +133,23 @@ void checkFields
 )
 {}
 
+template<class Type1, class Type2, class Type3, class Type4>
+void checkFields
+(
+    const UList<Type1>&,
+    const UList<Type2>&,
+    const UList<Type3>&,
+    const UList<Type4>&,
+    const char*
+)
+{}
+
 #endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Member function : f1 OP Func f2
+// Unary Free Function : f1 OP Func f2
 
 #define TFOR_ALL_F_OP_FUNC_F(typeF1, f1, OP, FUNC, typeF2, f2)                 \
                                                                                \
@@ -133,7 +170,7 @@ void checkFields
     }
 
 
-// Member function : this f1 OP f2.FUNC()
+// Nullary Member Function : f1 OP f2.FUNC()
 
 #define TFOR_ALL_F_OP_F_FUNC(typeF1, f1, OP, typeF2, f2, FUNC)                 \
                                                                                \
@@ -154,7 +191,7 @@ void checkFields
     }
 
 
-// Member function : this field f1 OP FUNC(f2, f3)
+// Binary Free Function : f1 OP FUNC(f2, f3)
 
 #define TFOR_ALL_F_OP_FUNC_F_F(typeF1, f1, OP, FUNC, typeF2, f2, typeF3, f3)   \
                                                                                \
@@ -176,7 +213,7 @@ void checkFields
     }
 
 
-// Member function : s OP FUNC(f1, f2)
+// [reduction] Binary Free Function : s OP FUNC(f1, f2)
 
 #define TFOR_ALL_S_OP_FUNC_F_F(typeS, s, OP, FUNC, typeF1, f1, typeF2, f2)     \
                                                                                \
@@ -197,7 +234,7 @@ void checkFields
     }
 
 
-// Member function : this f1 OP FUNC(f2, s)
+// Binary Free Function : f1 OP FUNC(f2, s)
 
 #define TFOR_ALL_F_OP_FUNC_F_S(typeF1, f1, OP, FUNC, typeF2, f2, typeS, s)     \
                                                                                \
@@ -218,7 +255,7 @@ void checkFields
     }
 
 
-// Member function : s1 OP FUNC(f, s2)
+// [reduction] Binary Free Function : s1 OP FUNC(f, s2)
 
 #define TFOR_ALL_S_OP_FUNC_F_S(typeS1, s1, OP, FUNC, typeF, f, typeS2, s2)     \
                                                                                \
@@ -235,7 +272,7 @@ void checkFields
     }
 
 
-// Member function : this f1 OP FUNC(s, f2)
+// Binary Free Function : f1 OP FUNC(s, f2)
 
 #define TFOR_ALL_F_OP_FUNC_S_F(typeF1, f1, OP, FUNC, typeS, s, typeF2, f2)     \
                                                                                \
@@ -256,7 +293,7 @@ void checkFields
     }
 
 
-// Member function : this f1 OP FUNC(s1, s2)
+// Binary Free Function : f1 OP FUNC(s1, s2)
 
 #define TFOR_ALL_F_OP_FUNC_S_S(typeF1, f1, OP, FUNC, typeS1, s1, typeS2, s2)   \
                                                                                \
@@ -273,7 +310,7 @@ void checkFields
     }
 
 
-// Member function : this f1 OP f2 FUNC(s)
+// Unary Member Function : f1 OP f2 FUNC(s)
 
 #define TFOR_ALL_F_OP_F_FUNC_S(typeF1, f1, OP, typeF2, f2, FUNC, typeS, s)     \
                                                                                \
@@ -293,6 +330,56 @@ void checkFields
         (f1P[i]) OP (f2P[i]) FUNC((s));                                        \
     }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Ternary Free Function : f1 OP FUNC(f2, f3, f4)
+
+#define TFOR_ALL_F_OP_FUNC_F_F_F\
+(typeF1, f1, OP, FUNC, typeF2, f2, typeF3, f3, typeF4, f4)                     \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, f3, f4, "f1 " #OP " " #FUNC "(f2, f3, f4)");           \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    List_CONST_ACCESS(typeF3, f3, f3P);                                        \
+    List_CONST_ACCESS(typeF4, f4, f4P);                                        \
+                                                                               \
+    /* Loop: f1 OP FUNC(f2, f3, f4) */                                         \
+    const label loopLen = (f1).size();                                         \
+                                                                               \
+    /* pragmas... */                                                           \
+    for (label i = 0; i < loopLen; ++i)                                        \
+    {                                                                          \
+        (f1P[i]) OP FUNC((f2P[i]), (f3P[i]), (f4P[i]));                        \
+    }
+
+// Ternary Free Function : f1 OP FUNC(f2, f3, s4)
+
+#define TFOR_ALL_F_OP_FUNC_F_F_S\
+(typeF1, f1, OP, FUNC, typeF2, f2, typeF3, f3, typeF4, s4)                     \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, f3, "f1 " #OP " " #FUNC "(f2, f3, s)");                \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    List_CONST_ACCESS(typeF3, f3, f3P);                                        \
+                                                                               \
+    /* Loop: f1 OP FUNC(f2, f3, s4) */                                         \
+    const label loopLen = (f1).size();                                         \
+                                                                               \
+    /* pragmas... */                                                           \
+    for (label i = 0; i < loopLen; ++i)                                        \
+    {                                                                          \
+        (f1P[i]) OP FUNC((f2P[i]), (f3P[i]), (s4));                            \
+    }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Member operator : this field f1 OP1 f2 OP2 f3
 

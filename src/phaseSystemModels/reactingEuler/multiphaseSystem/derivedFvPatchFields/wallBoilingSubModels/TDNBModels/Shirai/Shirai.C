@@ -75,7 +75,7 @@ Foam::wallBoilingModels::TDNBModels::Shirai::TDNB
 {
     tmp<scalarField> tp = liquid.thermo().p().boundaryField()[patchi];
 
-    const scalarField pRatio(max(min(tp/Pc_, scalar(1)), scalar(0)));
+    const scalarField pRatio(clamp(tp/Pc_, zero_one{}));
 
     return
     (

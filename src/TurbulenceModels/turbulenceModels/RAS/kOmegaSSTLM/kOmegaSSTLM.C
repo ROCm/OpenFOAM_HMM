@@ -70,7 +70,7 @@ tmp<volScalarField::Internal> kOmegaSSTLM<BasicTurbulenceModel>::epsilonByk
 ) const
 {
     return
-        min(max(gammaIntEff_, scalar(0.1)), scalar(1))
+        clamp(gammaIntEff_, scalarMinMax(0.1, 1))
        *kOmegaSST<BasicTurbulenceModel>::epsilonByk(F1, gradU);
 }
 
@@ -310,7 +310,7 @@ tmp<volScalarField::Internal> kOmegaSSTLM<BasicTurbulenceModel>::ReThetat0
             }
 
             lambda = sqr(thetat)/nu[celli]*dUsds[celli];
-            lambda = max(min(lambda, 0.1), -0.1);
+            lambda = clamp(lambda, -0.1, 0.1);
 
             lambdaErr = mag(lambda - lambda0);
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,17 +57,17 @@ Foam::vector Foam::streamLineParticle::interpolateFields
     if
     (
         sampledPositions_.empty()
-     || magSqr(sampledPositions_.last() - position) > Foam::sqr(SMALL)
+     || sampledPositions_.back().distSqr(position) > Foam::sqr(SMALL)
     )
     {
         // Store new location
-        sampledPositions_.append(position);
+        sampledPositions_.push_back(position);
 
         // Scalar fields
         sampledScalars_.resize(td.vsInterp_.size());
         forAll(td.vsInterp_, i)
         {
-            sampledScalars_[i].append
+            sampledScalars_[i].push_back
             (
                 td.vsInterp_[i].interpolate(tetCoords, tetIs, tetIs.face())
             );
@@ -77,7 +77,7 @@ Foam::vector Foam::streamLineParticle::interpolateFields
         sampledVectors_.resize(td.vvInterp_.size());
         forAll(td.vvInterp_, i)
         {
-            sampledVectors_[i].append
+            sampledVectors_[i].push_back
             (
                 td.vvInterp_[i].interpolate(tetCoords, tetIs, tetIs.face())
             );
@@ -85,7 +85,7 @@ Foam::vector Foam::streamLineParticle::interpolateFields
             if (td.vvInterp_.get(i) == &(td.UInterp_))
             {
                 foundU = true;
-                U = sampledVectors_[i].last();
+                U = sampledVectors_[i].back();
             }
         }
     }
@@ -272,19 +272,16 @@ bool Foam::streamLineParticle::move
 
         // Transfer particle data into trackingData.
         {
-            td.allPositions_.append(vectorList());
-            td.allPositions_.last().transfer(sampledPositions_);
+            td.allPositions_.emplace_back().transfer(sampledPositions_);
         }
 
         forAll(sampledScalars_, i)
         {
-            td.allScalars_[i].append(scalarList());
-            td.allScalars_[i].last().transfer(sampledScalars_[i]);
+            td.allScalars_[i].emplace_back().transfer(sampledScalars_[i]);
         }
         forAll(sampledVectors_, i)
         {
-            td.allVectors_[i].append(vectorList());
-            td.allVectors_[i].last().transfer(sampledVectors_[i]);
+            td.allVectors_[i].emplace_back().transfer(sampledVectors_[i]);
         }
     }
 

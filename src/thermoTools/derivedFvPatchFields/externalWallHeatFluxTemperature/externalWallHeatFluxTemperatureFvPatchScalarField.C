@@ -317,11 +317,12 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
-        qr =
+        qr = lerp
+        (
+            qrPrevious_,
+            patch().lookupPatchField<volScalarField>(qrName_),
             qrRelaxation_
-           *patch().lookupPatchField<volScalarField>(qrName_)
-          + (1 - qrRelaxation_)*qrPrevious_;
-
+        );
         qrPrevious_ = qr;
     }
 
@@ -454,9 +455,8 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         }
     }
 
-    valueFraction() =
-        relaxation_*valueFraction() + (1 - relaxation_)*valueFraction0;
-    refValue() = relaxation_*refValue() + (1 - relaxation_)*refValue0;
+    valueFraction() = lerp(valueFraction0, valueFraction(), relaxation_);
+    refValue() = lerp(refValue0, refValue(), relaxation_);
 
     mixedFvPatchScalarField::updateCoeffs();
 

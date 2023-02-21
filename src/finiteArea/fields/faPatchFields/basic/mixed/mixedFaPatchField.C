@@ -198,12 +198,11 @@ void Foam::mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 
     Field<Type>::operator=
     (
-        valueFraction_*refValue_
-      +
-        (1.0 - valueFraction_)*
+        lerp
         (
-            this->patchInternalField()
-          + refGrad_/this->patch().deltaCoeffs()
+            this->patchInternalField() + refGrad_/this->patch().deltaCoeffs(),
+            refValue_,
+            valueFraction_
         )
     );
 
@@ -214,11 +213,12 @@ void Foam::mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::mixedFaPatchField<Type>::snGrad() const
 {
-    return
+    return lerp
+    (
+        refGrad_,
+        (refValue_ - this->patchInternalField())*this->patch().deltaCoeffs(),
         valueFraction_
-       *(refValue_ - this->patchInternalField())
-       *this->patch().deltaCoeffs()
-      + (1.0 - valueFraction_)*refGrad_;
+    );
 }
 
 
@@ -238,9 +238,12 @@ Foam::tmp<Foam::Field<Type>> Foam::mixedFaPatchField<Type>::valueBoundaryCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return
-         valueFraction_*refValue_
-       + (1.0 - valueFraction_)*refGrad_/this->patch().deltaCoeffs();
+    return lerp
+    (
+        refGrad_/this->patch().deltaCoeffs(),
+        refValue_,
+        valueFraction_
+    );
 }
 
 
@@ -256,9 +259,12 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::mixedFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
-    return
-        valueFraction_*this->patch().deltaCoeffs()*refValue_
-      + (1.0 - valueFraction_)*refGrad_;
+    return lerp
+    (
+        refGrad_,
+        this->patch().deltaCoeffs()*refValue_,
+        valueFraction_
+    );
 }
 
 

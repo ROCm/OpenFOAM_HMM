@@ -85,6 +85,7 @@ Description
 #define Foam_MinMax_H
 
 #include "scalar.H"
+#include "zero.H"
 #include "Pair.H"
 #include "Tuple2.H"
 #include "VectorSpace.H"
@@ -97,8 +98,6 @@ namespace Foam
 
 // Forward Declarations
 template<class T> class MinMax;
-class zero;
-class zero_one;
 
 // Common min/max types
 typedef MinMax<label> labelMinMax;      //!< A label min/max range

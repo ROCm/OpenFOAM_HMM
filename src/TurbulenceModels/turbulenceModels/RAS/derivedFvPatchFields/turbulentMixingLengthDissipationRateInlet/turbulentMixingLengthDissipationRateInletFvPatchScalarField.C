@@ -157,7 +157,7 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<surfaceScalarField>(this->phiName_);
 
     this->refValue() = (Cmu75/mixingLength_)*pow(kp, 1.5);
-    this->valueFraction() = 1.0 - pos0(phip);
+    this->valueFraction() = neg(phip);
 
     inletOutletFvPatchScalarField::updateCoeffs();
 }

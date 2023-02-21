@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -264,6 +264,9 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
 
     for (label fi=0; fi<P.size(); fi++)
     {
+        // Same as:
+        // sfi[fi] = Sfi[fi] & lerp(vfi[N[fi]], vfi[P[fi]], lambda[fi]);
+        // but maybe the compiler notices the fused multiply add form
         sfi[fi] = Sfi[fi] & (lambda[fi]*(vfi[P[fi]] - vfi[N[fi]]) + vfi[N[fi]]);
     }
 
@@ -282,9 +285,11 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
         {
             psf =
                 pSf
-              & (
-                    pLambda*vf.boundaryField()[pi].patchInternalField()
-                  + (1.0 - pLambda)*vf.boundaryField()[pi].patchNeighbourField()
+              & lerp
+                (
+                    vf.boundaryField()[pi].patchNeighbourField(),
+                    vf.boundaryField()[pi].patchInternalField(),
+                    pLambda
                 );
         }
         else

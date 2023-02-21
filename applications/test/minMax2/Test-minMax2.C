@@ -152,19 +152,26 @@ int main(int argc, char *argv[])
         Info<< nl
             << "field: " << flatOutput(someField) << nl;
         Info<< "clamp01: "
-            << flatOutput(clamp(someField, scalarMinMax(zero_one{}))()) << nl;
+            << flatOutput(clamp(someField, zero_one{})()) << nl;
 
         Info<< "clamp01: "
-            << clamp(tmp<scalarField>(someField), scalarMinMax(zero_one{}))<< nl;
+            << clamp(tmp<scalarField>(someField), zero_one{})<< nl;
 
         scalarField result(10);
-        clamp(result, someField, scalarMinMax(zero_one{}));
+        clamp(result, someField, zero_one{});
 
         Info<< "result: " << result << nl;
 
-        someField.clamp(zero_one{});
-
+        someField.clamp_range(zero_one{});
         Info<< "inplace: " << someField << nl;
+
+        scalar val(1.414);
+
+        Info<< "clamp " << val
+            // nope << " : " << clamp(val, zero_one{})
+            // nope << " : " << clamp(val, scalarMinMax(zero_one{}))
+            << " : " << clamp(val, 0, 1)
+            << nl;
     }
 
     Info<< nl << "\nDone\n" << endl;

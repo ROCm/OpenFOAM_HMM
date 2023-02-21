@@ -600,11 +600,8 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
 
         if (includeDivU)
         {
-            SuPhase1 +=
-                fvc::div(phi)*min(max(alpha1, scalar(0)), scalar(1));
-
-            SuPhase2 +=
-                fvc::div(phi)*min(max(alpha2, scalar(0)), scalar(1));
+            SuPhase1 += fvc::div(phi)*clamp(alpha1, zero_one{});
+            SuPhase2 += fvc::div(phi)*clamp(alpha2, zero_one{});
         }
 
         // NOTE: dmdtNet is distributed in terms =
@@ -617,7 +614,7 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
             scalar dmdt21 = dmdtNet[celli];
             scalar coeffs12Cell = coeffs12[celli];
 
-            scalar alpha1Limited = max(min(alpha1[celli], 1.0), 0.0);
+            scalar alpha1Limited = clamp(alpha1[celli], 0, 1);
 
             // exp.
             SuPhase1[celli] += coeffs1[celli]*dmdt21;
@@ -660,7 +657,7 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
             scalar dmdt12 = -dmdtNet[celli];
             scalar coeffs21Cell = -coeffs12[celli];
 
-            scalar alpha2Limited = max(min(alpha2[celli], 1.0), 0.0);
+            scalar alpha2Limited = clamp(alpha2[celli], 0, 1);
 
             // exp
             SuPhase2[celli] += coeffs2[celli]*dmdt12;

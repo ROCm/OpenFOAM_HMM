@@ -143,7 +143,7 @@ bool Foam::TAB<CloudType>::update
             scalar phic = y1/a;
 
             // constrain phic within -1 to 1
-            phic = max(min(phic, 1), -1);
+            phic = clamp(phic, -1, 1);
 
             scalar phit = acos(phic);
             scalar phi = phit;

@@ -299,27 +299,18 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
         if (mag(valueDiff) > mag(minThresholdValue_) || baffleActivated_)
         {
             openFraction_ =
-                max
+            (
+                openFraction_
+              + min
                 (
-                    min
-                    (
-                        openFraction_
-                      + min
-                        (
-                          this->db().time().deltaT().value()/openingTime_,
-                          maxOpenFractionDelta_
-                        ),
-                        1 - 1e-6
-                    ),
-                    1e-6
-                );
+                    this->db().time().deltaT().value()/openingTime_,
+                    maxOpenFractionDelta_
+                )
+            );
 
-             baffleActivated_ = true;
+            baffleActivated_ = true;
         }
-        else
-        {
-            openFraction_ = max(min(1 - 1e-6, openFraction_), 1e-6);
-        }
+        openFraction_ = clamp(openFraction_, 1e-6, 1 - 1e-6);
 
         if (Pstream::master())
         {

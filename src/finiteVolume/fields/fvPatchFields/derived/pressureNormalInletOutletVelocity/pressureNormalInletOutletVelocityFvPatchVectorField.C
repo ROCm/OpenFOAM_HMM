@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,7 +146,7 @@ void Foam::pressureNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
             << exit(FatalError);
     }
 
-    valueFraction() = 1.0 - pos0(phip);
+    valueFraction() = neg(phip);
 
     mixedFvPatchVectorField::updateCoeffs();
 }
@@ -171,10 +171,11 @@ void Foam::pressureNormalInletOutletVelocityFvPatchVectorField::operator=
     const fvPatchField<vector>& pvf
 )
 {
+    tmp<vectorField> n = patch().nf();
+
     fvPatchField<vector>::operator=
     (
-        valueFraction()*(patch().nf()*(patch().nf() & pvf))
-      + (1 - valueFraction())*pvf
+        lerp(pvf, n()*(n() & pvf), valueFraction())
     );
 }
 

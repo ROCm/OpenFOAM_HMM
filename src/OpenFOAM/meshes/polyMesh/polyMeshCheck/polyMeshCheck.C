@@ -101,7 +101,7 @@ bool Foam::polyMesh::checkFaceOrthogonality
                         << " between cells " << own[facei]
                         << " and " << nei[facei]
                         << ": Angle = "
-                        << radToDeg(::acos(min(1.0, max(-1.0, ortho[facei]))))
+                        << radToDeg(::acos(clamp(ortho[facei], -1, 1)))
                         << " deg." << endl;
                 }
 
@@ -130,9 +130,9 @@ bool Foam::polyMesh::checkFaceOrthogonality
             if (debug || report)
             {
                 Info<< "    Mesh non-orthogonality Max: "
-                    << radToDeg(::acos(min(1.0, max(-1.0, minDDotS))))
+                    << radToDeg(::acos(clamp(minDDotS, -1, 1)))
                     << " average: "
-                    << radToDeg(::acos(min(1.0, max(-1.0, sumDDotS/nSummed))))
+                    << radToDeg(::acos(clamp(sumDDotS/nSummed, -1, 1)))
                     << endl;
             }
         }

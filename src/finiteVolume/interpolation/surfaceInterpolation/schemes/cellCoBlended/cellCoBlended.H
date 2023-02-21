@@ -253,14 +253,10 @@ public:
                 (
                     vf.name() + "BlendingFactor",
                     scalar(1)
-                  - max
+                  - clamp
                     (
-                        min
-                        (
-                            (fvc::interpolate(Co) - Co1_)/(Co2_ - Co1_),
-                            scalar(1)
-                        ),
-                        scalar(0)
+                        (fvc::interpolate(Co) - Co1_)/(Co2_ - Co1_),
+                        zero_one{}
                     )
                 )
             );

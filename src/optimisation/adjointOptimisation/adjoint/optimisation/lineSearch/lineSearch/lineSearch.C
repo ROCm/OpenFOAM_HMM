@@ -167,7 +167,7 @@ void Foam::lineSearch::reset()
         // step_ = 2*(oldMeritValue_-prevMeritValue_)/directionalDeriv_;
         // Interpolate in order to get same improvement with the previous
         // optimisation cycle
-        step_ = max(min(step_*prevMeritDeriv_/directionalDeriv_, 1.), minStep_);
+        step_ = clamp(step_*prevMeritDeriv_/directionalDeriv_, minStep_, 1);
         Info<< "\n------- Computing initial step-------" << endl;
         Info<< "old dphi(0) "  << prevMeritDeriv_ << endl;
         Info<< "dphi(0) "      << directionalDeriv_ << endl;

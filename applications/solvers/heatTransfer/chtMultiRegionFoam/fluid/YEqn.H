@@ -48,7 +48,7 @@ if (Y.size())
 
             fvOptions.correct(Yi);
 
-            Yi.max(0.0);
+            Yi.clamp_min(0);
             Yt += Yi;
         }
     }
@@ -56,6 +56,6 @@ if (Y.size())
     if (Y.size())
     {
         Y[inertIndex] = scalar(1) - Yt;
-        Y[inertIndex].max(0.0);
+        Y[inertIndex].clamp_min(0);
     }
 }

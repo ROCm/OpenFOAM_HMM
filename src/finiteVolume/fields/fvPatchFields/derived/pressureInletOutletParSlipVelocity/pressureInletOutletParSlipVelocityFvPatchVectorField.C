@@ -150,7 +150,7 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
             << exit(FatalError);
     }
 
-    valueFraction() = 1.0 - pos0(phip);
+    valueFraction() = neg(phip);
 
     mixedFvPatchVectorField::updateCoeffs();
 }

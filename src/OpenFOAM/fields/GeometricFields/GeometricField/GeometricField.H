@@ -629,26 +629,6 @@ public:
             const dimensioned<cmptType>& ds
         );
 
-        //- Clamp field values (in-place) to the specified range.
-        //  A no-op for an invalid range.
-        void clamp(const Type& lower, const Type& upper);
-
-        //- Clamp field values (in-place) to the specified range.
-        //  A no-op for an invalid range.
-        void clamp(const MinMax<Type>& range);
-
-        //- Clamp field values (in-place) to the specified range.
-        //  A no-op for an invalid range. No dimension checking.
-        void clamp
-        (
-            const dimensioned<Type>& lower,
-            const dimensioned<Type>& upper
-        );
-
-        //- Clamp field values (in-place) to the specified range.
-        //  A no-op for an invalid range. No dimension checking.
-        void clamp(const dimensioned<MinMax<Type>>& range);
-
         //- Impose lower (floor) clamp on the field values (in-place)
         void clamp_min(const Type& lower);
 
@@ -662,6 +642,26 @@ public:
         //- Impose upper (ceiling) clamp on the field values (in-place)
         //  No dimension checking
         void clamp_max(const dimensioned<Type>& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not. No dimension checking.
+        void clamp_range(const dimensioned<MinMax<Type>>& range);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const Type& lower, const Type& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const MinMax<Type>& range);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not. No dimension checking.
+        void clamp_range
+        (
+            const dimensioned<Type>& lower,
+            const dimensioned<Type>& upper
+        );
 
 
     // Member Operators
@@ -715,17 +715,17 @@ public:
     // Housekeeping
 
         //- Clamp field values (in-place) to the specified range.
-        //  \deprecated(2023-01) prefer clamp() naming
+        //  \deprecated(2023-01) prefer clamp_range() naming
         void clip(const dimensioned<MinMax<Type>>& range)
         {
-            this->clamp(range);
+            this->clamp_range(range);
         }
 
         //- Clamp field values (in-place) to the specified range.
-        //  \deprecated(2023-01) prefer clamp() naming
+        //  \deprecated(2023-01) prefer clamp_range() naming
         void clip(const dimensioned<Type>& lo, const dimensioned<Type>& hi)
         {
-            this->clamp(lo.value(), hi.value());
+            this->clamp_range(lo.value(), hi.value());
         }
 
         //- Use minimum of the field and specified value. ie, clamp_max().
@@ -738,12 +738,12 @@ public:
         //  \deprecated(2023-01) prefer clamp_min()
         void max(const dimensioned<Type>& lower) { this->clamp_min(lower); }
 
-        //- Deprecated(2019-01) identical to clamp()
-        //  \deprecated(2019-01) identical to clamp()
-        FOAM_DEPRECATED_FOR(2019-01, "clamp() method")
+        //- Deprecated(2019-01) identical to clamp_range()
+        //  \deprecated(2019-01) identical to clamp_range()
+        FOAM_DEPRECATED_FOR(2019-01, "clamp_range() method")
         void maxMin(const dimensioned<Type>& lo, const dimensioned<Type>& hi)
         {
-            return this->clamp(lo.value(), hi.value());
+            return this->clamp_range(lo.value(), hi.value());
         }
 };
 

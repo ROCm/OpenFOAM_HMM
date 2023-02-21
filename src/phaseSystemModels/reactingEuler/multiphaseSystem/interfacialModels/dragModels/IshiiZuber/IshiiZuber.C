@@ -86,7 +86,7 @@ Foam::dragModels::IshiiZuber::CdRe() const
     );
 
     volScalarField F((muc/muMix)*sqrt(1 - pair_.dispersed()));
-    F.max(1e-3);
+    F.clamp_min(1e-3);
 
     const volScalarField Ealpha((1 + 17.67*pow(F, 0.8571428))/(18.67*F));
 

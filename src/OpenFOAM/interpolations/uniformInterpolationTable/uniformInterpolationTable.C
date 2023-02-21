@@ -149,7 +149,7 @@ Type Foam::uniformInterpolationTable<Type>::interpolate(scalar x) const
 {
     if (bound_)
     {
-        x = max(min(xMax() - SMALL*dx_, x), x0_);
+        x = clamp(x, x0_, (xMax() - SMALL*dx_));
     }
     else
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,10 +35,21 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// One-parameter versions
 
 template<template<class> class Field, class TypeR, class Type1>
 struct reuseTmpFieldField
 {
+    //- Pass-through to NewCalculatedType
+    static tmp<FieldField<Field, TypeR>> New
+    (
+        const FieldField<Field, Type1>& f1
+    )
+    {
+        return FieldField<Field, TypeR>::NewCalculatedType(f1);
+    }
+
+    //- Dissimilar types: just use size
     static tmp<FieldField<Field, TypeR>> New
     (
         const tmp<FieldField<Field, Type1>>& tf1
@@ -52,6 +63,8 @@ struct reuseTmpFieldField
 template<template<class> class Field, class TypeR>
 struct reuseTmpFieldField<Field, TypeR, TypeR>
 {
+    //- Identical input and return types:
+    //- allow optional copy assignment of the initial content
     static tmp<FieldField<Field, TypeR>> New
     (
         const tmp<FieldField<Field, TypeR>>& tf1,
@@ -63,19 +76,19 @@ struct reuseTmpFieldField<Field, TypeR, TypeR>
             return tf1;
         }
 
-        auto rtf = FieldField<Field, TypeR>::NewCalculatedType(tf1());
+        auto tresult = FieldField<Field, TypeR>::NewCalculatedType(tf1());
 
         if (initCopy)
         {
-            rtf.ref() = tf1();
+            tresult.ref() = tf1();
         }
 
-        return rtf;
+        return tresult;
     }
 };
 
 
-//- Global function forwards to reuseTmpFieldField::New
+//- This global function forwards to reuseTmpFieldField::New
 template<template<class> class Field, class TypeR>
 tmp<FieldField<Field, TypeR>> New
 (
@@ -87,6 +100,9 @@ tmp<FieldField<Field, TypeR>> New
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Two-parameter versions
+
 template
 <
     template<class> class Field,
@@ -97,6 +113,7 @@ template
 >
 struct reuseTmpTmpFieldField
 {
+    //- Dissimilar types: just use size
     static tmp<FieldField<Field, TypeR>> New
     (
         const tmp<FieldField<Field, Type1>>& tf1,
@@ -111,6 +128,7 @@ struct reuseTmpTmpFieldField
 template<template<class> class Field, class TypeR, class Type1, class Type12>
 struct reuseTmpTmpFieldField<Field, TypeR, Type1, Type12, TypeR>
 {
+    //- Second input has return type
     static tmp<FieldField<Field, TypeR>> New
     (
         const tmp<FieldField<Field, Type1>>& tf1,
@@ -130,6 +148,7 @@ struct reuseTmpTmpFieldField<Field, TypeR, Type1, Type12, TypeR>
 template<template<class> class Field, class TypeR, class Type2>
 struct reuseTmpTmpFieldField<Field, TypeR, TypeR, TypeR, Type2>
 {
+    //- First input has return type
     static tmp<FieldField<Field, TypeR>> New
     (
         const tmp<FieldField<Field, TypeR>>& tf1,
@@ -149,6 +168,7 @@ struct reuseTmpTmpFieldField<Field, TypeR, TypeR, TypeR, Type2>
 template<template<class> class Field, class TypeR>
 struct reuseTmpTmpFieldField<Field, TypeR, TypeR, TypeR, TypeR>
 {
+    //- Both inputs have return type
     static tmp<FieldField<Field, TypeR>> New
     (
         const tmp<FieldField<Field, TypeR>>& tf1,

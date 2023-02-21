@@ -39,20 +39,15 @@ void Foam::ReynoldsStress<BasicTurbulenceModel>::boundNormalStress
     volSymmTensorField& R
 ) const
 {
-    scalar kMin = this->kMin_.value();
+    const scalar kMin = this->kMin_.value();
 
-    R.max
+    R.clamp_min
     (
-        dimensionedSymmTensor
+        symmTensor
         (
-            "zero",
-            R.dimensions(),
-            symmTensor
-            (
-                kMin, -GREAT, -GREAT,
-                kMin, -GREAT,
-                kMin
-            )
+            kMin, -GREAT, -GREAT,
+            kMin, -GREAT,
+            kMin
         )
     );
 }

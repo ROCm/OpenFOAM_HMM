@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -176,7 +176,7 @@ void Foam::pressureDirectedInletOutletVelocityFvPatchVectorField::updateCoeffs()
             << exit(FatalError);
     }
 
-    valueFraction() = 1.0 - pos0(phip);
+    valueFraction() = neg(phip);
 
     mixedFvPatchVectorField::updateCoeffs();
 }
@@ -204,8 +204,7 @@ void Foam::pressureDirectedInletOutletVelocityFvPatchVectorField::operator=
 {
     fvPatchField<vector>::operator=
     (
-        valueFraction()*(inletDir_*(inletDir_ & pvf))
-      + (1 - valueFraction())*pvf
+        lerp(pvf, inletDir_*(inletDir_ & pvf), valueFraction())
     );
 }
 

@@ -133,11 +133,8 @@ void Foam::alphaContactAngleTwoPhaseFvPatchScalarField::evaluate
         gradient() =
         patch().deltaCoeffs()
        *(
-           max(min
-           (
-               *this + gradient()/patch().deltaCoeffs(),
-               scalar(1)), scalar(0)
-           ) - *this
+           clamp(*this + gradient()/patch().deltaCoeffs(), zero_one{})
+         - *this
        );
     }
     else if (limit_ == lcZeroGradient)
@@ -149,7 +146,7 @@ void Foam::alphaContactAngleTwoPhaseFvPatchScalarField::evaluate
 
     if (limit_ == lcAlpha)
     {
-        scalarField::operator=(max(min(*this, scalar(1)), scalar(0)));
+        scalarField::operator=(clamp(*this, zero_one{}));
     }
 }
 

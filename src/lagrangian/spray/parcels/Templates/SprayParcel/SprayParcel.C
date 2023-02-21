@@ -361,9 +361,7 @@ Foam::scalar Foam::SprayParcel<ParcelType>::chi
         }
     }
 
-    chi = min(1.0, max(chi, 0.0));
-
-    return chi;
+    return clamp(chi, 0, 1);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -272,33 +272,29 @@ void Foam::functionObjects::streamLineBase::storePoint
     DynamicList<vectorList>& newVectors
 ) const
 {
-    const label sz = newTrack.size();
-
     const List<point>& track = allTracks_[tracki];
 
-    newTrack.append((1.0-w)*track[lefti] + w*track[righti]);
+    newTrack.push_back(lerp(track[lefti], track[righti], w));
 
     // Scalars
     {
-        newScalars.append(scalarList(allScalars_.size()));
-        scalarList& newVals = newScalars[sz];
+        scalarList& newVals = newScalars.emplace_back(allScalars_.size());
 
-        forAll(allScalars_, scalari)
+        forAll(allScalars_, i)
         {
-            const scalarList& trackVals = allScalars_[scalari][tracki];
-            newVals[scalari] = (1.0-w)*trackVals[lefti] + w*trackVals[righti];
+            const scalarList& trackVals = allScalars_[i][tracki];
+            newVals[i] = lerp(trackVals[lefti], trackVals[righti], w);
         }
     }
 
     // Vectors
     {
-        newVectors.append(vectorList(allVectors_.size()));
-        vectorList& newVals = newVectors[sz];
+        vectorList& newVals = newVectors.emplace_back(allVectors_.size());
 
-        forAll(allVectors_, vectori)
+        forAll(allVectors_, i)
         {
-            const vectorList& trackVals = allVectors_[vectori][tracki];
-            newVals[vectori] = (1.0-w)*trackVals[lefti] + w*trackVals[righti];
+            const vectorList& trackVals = allVectors_[i][tracki];
+            newVals[i] = lerp(trackVals[lefti], trackVals[righti], w);
         }
     }
 }
@@ -343,9 +339,9 @@ void Foam::functionObjects::streamLineBase::trimToBox
                         segmenti-1,
                         segmenti,
 
-                        newTracks.last(),
-                        newScalars.last(),
-                        newVectors.last()
+                        newTracks.back(),
+                        newScalars.back(),
+                        newVectors.back()
                     );
 
                     if (!bb.contains(endPt))
@@ -363,14 +359,14 @@ void Foam::functionObjects::streamLineBase::trimToBox
                                 segmenti-1,
                                 segmenti,
 
-                                newTracks.last(),
-                                newScalars.last(),
-                                newVectors.last()
+                                newTracks.back(),
+                                newScalars.back(),
+                                newVectors.back()
                             );
 
-                            newTracks.last().shrink();
-                            newScalars.last().shrink();
-                            newVectors.last().shrink();
+                            newTracks.back().shrink();
+                            newScalars.back().shrink();
+                            newVectors.back().shrink();
                         }
                     }
                 }
@@ -382,18 +378,7 @@ void Foam::functionObjects::streamLineBase::trimToBox
                     if (bb.intersects(startPt, endPt, clipPt))
                     {
                         // New track
-                        newTracks.append
-                        (
-                            new DynamicList<point>(track.size()/10)
-                        );
-                        newScalars.append
-                        (
-                            new DynamicList<scalarList>(track.size()/10)
-                        );
-                        newVectors.append
-                        (
-                            new DynamicList<vectorList>(track.size()/10)
-                        );
+                        const label defltCapacity(track.size()/10);
 
                         // Store point and interpolated values
                         storePoint
@@ -404,9 +389,9 @@ void Foam::functionObjects::streamLineBase::trimToBox
                             segmenti-1,
                             segmenti,
 
-                            newTracks.last(),
-                            newScalars.last(),
-                            newVectors.last()
+                            newTracks.emplace_back(defltCapacity),
+                            newScalars.emplace_back(defltCapacity),
+                            newVectors.emplace_back(defltCapacity)
                         );
 
                         if (!bb.contains(endPt))
@@ -427,14 +412,14 @@ void Foam::functionObjects::streamLineBase::trimToBox
                                 segmenti-1,
                                 segmenti,
 
-                                newTracks.last(),
-                                newScalars.last(),
-                                newVectors.last()
+                                newTracks.back(),
+                                newScalars.back(),
+                                newVectors.back()
                             );
 
-                            newTracks.last().shrink();
-                            newScalars.last().shrink();
-                            newVectors.last().shrink();
+                            newTracks.back().shrink();
+                            newScalars.back().shrink();
+                            newVectors.back().shrink();
                         }
                     }
                 }
@@ -442,7 +427,7 @@ void Foam::functionObjects::streamLineBase::trimToBox
         }
 
         // Last point
-        if (bb.contains(track.last()))
+        if (bb.contains(track.back()))
         {
             storePoint
             (
@@ -452,9 +437,9 @@ void Foam::functionObjects::streamLineBase::trimToBox
                 track.size()-2,
                 track.size()-1,
 
-                newTracks.last(),
-                newScalars.last(),
-                newVectors.last()
+                newTracks.back(),
+                newScalars.back(),
+                newVectors.back()
             );
         }
     }
@@ -476,9 +461,9 @@ void Foam::functionObjects::streamLineBase::trimToBox(const treeBoundBox& bb)
         if (track.size())
         {
             // New track. Assume it consists of the whole track
-            newTracks.append(new DynamicList<point>(track.size()));
-            newScalars.append(new DynamicList<scalarList>(track.size()));
-            newVectors.append(new DynamicList<vectorList>(track.size()));
+            newTracks.emplace_back(track.size());
+            newScalars.emplace_back(track.size());
+            newVectors.emplace_back(track.size());
 
             // Trim, split and append to newTracks
             trimToBox(bb, tracki, newTracks, newScalars, newVectors);

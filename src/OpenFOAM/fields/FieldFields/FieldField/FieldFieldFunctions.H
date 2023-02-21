@@ -287,10 +287,16 @@ BINARY_TYPE_FUNCTION(Type, Type, Type, min)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptMultiply)
 BINARY_TYPE_FUNCTION(Type, Type, Type, cmptDivide)
 
+// Note: works with zero_one through implicit conversion to MinMax
 BINARY_TYPE_FUNCTION_FS(Type, Type, MinMax<Type>, clamp)
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-/* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
+TERNARY_FUNCTION(Type, Type, Type, scalar, lerp)
+TERNARY_TYPE_FUNCTION_FFS(Type, Type, Type, scalar, lerp)
+
+
+/* * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * */
 
 UNARY_OPERATOR(Type, Type, -, negate)
 
