@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -231,32 +231,31 @@ static inline std::string entryToString
 
     if (eptr)
     {
-        OStringStream buf;
-        // Force floating point numbers to be printed with at least
-        // some decimal digits.
-        buf << fixed;
-        buf.precision(IOstream::defaultPrecision());
+        // Note, for OpenFOAM-v2212 and earlier: used 'fixed' notation
+        // to force floating point numbers to be printed with at least
+        // some decimal digits. However, in the meantime we are more
+        // flexible with handling float/int input so remove this constraint.
 
-        if (allowSubDict && eptr->isDict())
+        if (eptr->isDict())
         {
-            eptr->dict().write(buf, false);
-            str = buf.str();
-        }
-        else
-        {
-            // Fail for non-primitiveEntry
-            const auto& pe = dynamicCast<const primitiveEntry>(*eptr);
-
-            if (pe.size() == 1 && pe[0].isStringType())
+            if (allowSubDict)
             {
-                // Already a string-type (WORD, STRING, ...). Just copy.
-                str = pe[0].stringToken();
+                OStringStream buf;
+                buf.precision(16);  // Some reasonably high precision
+
+                eptr->dict().write(buf, false);
+                str = buf.str();
             }
             else
             {
-                pe.write(buf, true);
-                str = buf.str();
+                // Ignore silently...
             }
+        }
+        else
+        {
+            // Serialized with spaces (primitiveEntry)
+            ITstream& its = eptr->stream();
+            return its.toString();
         }
     }
 

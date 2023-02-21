@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014-2018 Bernhard Gschaider
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -238,18 +238,9 @@ void Foam::exprTools::expressionEntry::inplaceExpand
 
             if (castTo.empty())
             {
-                // Serialized with spaces
+                // Serialized with spaces - fails for non-primitiveEntry
                 ITstream& its = eptr->stream();
-
-                if (its.size() == 1 && its[0].isStringType())
-                {
-                    // Already a string-type (WORD, STRING, ...). Just copy.
-                    varValue = its[0].stringToken();
-                }
-                else
-                {
-                    varValue = its.toString();
-                }
+                varValue = its.toString();
             }
             else
             {
