@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,13 +67,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Agglomerate all levels starting from the given face weights
-        void agglomerate
-        (
-            const lduMesh& mesh,
-            const scalarField& faceWeights
-        );
-
         //- No copy construct
         pairGAMGAgglomeration(const pairGAMGAgglomeration&) = delete;
 
@@ -101,6 +95,17 @@ public:
             label& nCoarseCells,
             const lduAddressing& fineMatrixAddressing,
             const scalarField& faceWeights
+        );
+
+        //- Agglomerate from a starting level. Starting level is usually 0
+        //- (initial mesh) but sometimes >0 (restarting after processor
+        //- agglomeration)
+        virtual void agglomerate
+        (
+            const label nCellsInCoarsestLevel,
+            const label startLevel,
+            const scalarField& startFaceWeights,
+            const bool doProcessorAgglomerate = true
         );
 };
 

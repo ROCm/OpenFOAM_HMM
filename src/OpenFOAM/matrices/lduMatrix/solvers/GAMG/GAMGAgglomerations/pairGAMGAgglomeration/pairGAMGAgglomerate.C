@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,43 +33,79 @@ License
 
 void Foam::pairGAMGAgglomeration::agglomerate
 (
-    const lduMesh& mesh,
-    const scalarField& faceWeights
+    const label nCellsInCoarsestLevel,
+    const label startLevel,
+    const scalarField& startFaceWeights,
+    const bool doProcessorAgglomerate
 )
 {
-    const label nFaces = mesh.lduAddr().lowerAddr().size();
-    if (faceWeights.size() != nFaces)
+    if (nCells_.size() < maxLevels_)
     {
-        FatalErrorInFunction
-            << "Supplied number of face weights " << faceWeights.size()
-            << " does not correspond to the number of faces " << nFaces << endl
-            << "This may be because of using a geometry-based"
-            << " agglomeration method instead of a matrix-based one"
-            << exit(FatalError);
+        // See compactLevels. Make space if not enough
+        nCells_.resize(maxLevels_);
+        restrictAddressing_.resize(maxLevels_);
+        nFaces_.resize(maxLevels_);
+        faceRestrictAddressing_.resize(maxLevels_);
+        faceFlipMap_.resize(maxLevels_);
+        nPatchFaces_.resize(maxLevels_);
+        patchFaceRestrictAddressing_.resize(maxLevels_);
+        meshLevels_.resize(maxLevels_);
+        // Have procCommunicator_ always, even if not procAgglomerating.
+        // Use value -1 to indicate nothing is proc-agglomerated
+        procCommunicator_.resize(maxLevels_ + 1, -1);
+        if (processorAgglomerate())
+        {
+            procAgglomMap_.resize(maxLevels_);
+            agglomProcIDs_.resize(maxLevels_);
+            procCommunicator_.resize(maxLevels_);
+            procCellOffsets_.resize(maxLevels_);
+            procFaceMap_.resize(maxLevels_);
+            procBoundaryMap_.resize(maxLevels_);
+            procBoundaryFaceMap_.resize(maxLevels_);
+        }
     }
 
 
     // Start geometric agglomeration from the given faceWeights
-    scalarField* faceWeightsPtr = const_cast<scalarField*>(&faceWeights);
+    scalarField faceWeights = startFaceWeights;
 
     // Agglomerate until the required number of cells in the coarsest level
     // is reached
 
     label nPairLevels = 0;
-    label nCreatedLevels = 0;
+    label nCreatedLevels = startLevel;
 
     while (nCreatedLevels < maxLevels_ - 1)
     {
+        if (!hasMeshLevel(nCreatedLevels))
+        {
+            FatalErrorInFunction<< "No mesh at nCreatedLevels:"
+                << nCreatedLevels
+                << exit(FatalError);
+        }
+
+        const auto& fineMesh = meshLevel(nCreatedLevels);
+
+
         label nCoarseCells = -1;
 
         tmp<labelField> finalAgglomPtr = agglomerate
         (
             nCoarseCells,
-            meshLevel(nCreatedLevels).lduAddr(),
-            *faceWeightsPtr
+            fineMesh.lduAddr(),
+            faceWeights
         );
 
-        if (continueAgglomerating(finalAgglomPtr().size(), nCoarseCells))
+        if
+        (
+            continueAgglomerating
+            (
+                nCellsInCoarsestLevel,
+                finalAgglomPtr().size(),
+                nCoarseCells,
+                fineMesh.comm()
+            )
+        )
         {
             nCells_[nCreatedLevels] = nCoarseCells;
             restrictAddressing_.set(nCreatedLevels, finalAgglomPtr);
@@ -78,32 +115,25 @@ void Foam::pairGAMGAgglomeration::agglomerate
             break;
         }
 
+        // Create coarse mesh
         agglomerateLduAddressing(nCreatedLevels);
 
         // Agglomerate the faceWeights field for the next level
         {
-            scalarField* aggFaceWeightsPtr
+            scalarField aggFaceWeights
             (
-                new scalarField
-                (
-                    meshLevels_[nCreatedLevels].upperAddr().size(),
-                    0.0
-                )
+                meshLevels_[nCreatedLevels].upperAddr().size(),
+                0.0
             );
 
             restrictFaceField
             (
-                *aggFaceWeightsPtr,
-                *faceWeightsPtr,
+                aggFaceWeights,
+                faceWeights,
                 nCreatedLevels
             );
 
-            if (nCreatedLevels)
-            {
-                delete faceWeightsPtr;
-            }
-
-            faceWeightsPtr = aggFaceWeightsPtr;
+            faceWeights = std::move(aggFaceWeights);
         }
 
         if (nPairLevels % mergeLevels_)
@@ -119,13 +149,7 @@ void Foam::pairGAMGAgglomeration::agglomerate
     }
 
     // Shrink the storage of the levels to those created
-    compactLevels(nCreatedLevels);
-
-    // Delete temporary geometry storage
-    if (nCreatedLevels)
-    {
-        delete faceWeightsPtr;
-    }
+    compactLevels(nCreatedLevels, doProcessorAgglomerate);
 }
 
 

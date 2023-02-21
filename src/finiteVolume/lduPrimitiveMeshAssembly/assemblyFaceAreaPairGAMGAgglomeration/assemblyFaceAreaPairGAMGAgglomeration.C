@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -181,7 +181,8 @@ assemblyFaceAreaPairGAMGAgglomeration
 
         agglomerate
         (
-            mesh,
+            nCellsInCoarsestLevel_,
+            0,      //mesh,
             mag
             (
                 cmptMultiply
@@ -189,7 +190,8 @@ assemblyFaceAreaPairGAMGAgglomeration
                     faceAreas/sqrt(mag(faceAreas)),
                     vector(1, 1.01, 1.02)
                 )
-            )
+            ),
+            true
         );
     }
     else
@@ -199,7 +201,8 @@ assemblyFaceAreaPairGAMGAgglomeration
 
         agglomerate
         (
-            matrix.mesh(),
+            nCellsInCoarsestLevel_,
+            0,      //matrix.mesh(),
             mag
             (
                 cmptMultiply
@@ -209,7 +212,8 @@ assemblyFaceAreaPairGAMGAgglomeration
                     vector(1, 1.01, 1.02)
                     //vector::one
                 )
-            )
+            ),
+            true
         );
     }
 }
@@ -228,7 +232,8 @@ assemblyFaceAreaPairGAMGAgglomeration
 {
     agglomerate
     (
-        matrix.mesh(),
+        nCellsInCoarsestLevel_,
+        0,      //matrix.mesh(),
         mag
         (
             cmptMultiply
@@ -236,7 +241,8 @@ assemblyFaceAreaPairGAMGAgglomeration
                 faceAreas/sqrt(mag(faceAreas)),
                 vector(1, 1.01, 1.02)
             )
-        )
+        ),
+        true
     );
 }
 

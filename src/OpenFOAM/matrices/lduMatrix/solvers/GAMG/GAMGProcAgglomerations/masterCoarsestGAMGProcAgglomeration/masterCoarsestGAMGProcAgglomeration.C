@@ -62,6 +62,10 @@ Foam::masterCoarsestGAMGProcAgglomeration::masterCoarsestGAMGProcAgglomeration
             0,
             keyType::LITERAL
         )
+    ),
+    nMasterCoarsestCells_
+    (
+        controlDict.getOrDefault<label>("nCellsInMasterLevel", -1)
     )
 {
     const auto* ePtr = controlDict.findEntry("nMasters", keyType::LITERAL);
@@ -208,9 +212,36 @@ bool Foam::masterCoarsestGAMGProcAgglomeration::agglomerate()
                         agglomProcIDs,
                         comms_.back()
                     );
+
+                    if (nMasterCoarsestCells_ > 0)
+                    {
+                        const label levelI = agglom_.size();
+                        if (agglom_.hasMeshLevel(levelI))
+                        {
+                            const lduMesh& fineMesh = agglom_.meshLevel(levelI);
+                            const auto& addr = fineMesh.lduAddr();
+                            const scalarField weights
+                            (
+                                addr.lowerAddr().size(),
+                                1.0
+                            );
+                            agglom_.agglomerate
+                            (
+                                nMasterCoarsestCells_,
+                                levelI,
+                                weights,
+                                false
+                            );
+                        }
+                    }
                 }
             }
         }
+
+
+        // Note that at this point for nMasterCoarsestCells_ the non-master
+        // processors will have less levels. This does/should not matter since
+        // they are not involved in those levels
     }
 
     // Print a bit

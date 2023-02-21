@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -290,7 +290,16 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
             );
         }
 
-        if (continueAgglomerating(finalAgglomPtr().size(), nCoarseCells))
+        if
+        (
+            continueAgglomerating
+            (
+                nCellsInCoarsestLevel_,
+                finalAgglomPtr().size(),
+                nCoarseCells,
+                meshLevel(nCreatedLevels).comm()
+            )
+        )
         {
             nCells_[nCreatedLevels] = nCoarseCells;
             restrictAddressing_.set(nCreatedLevels, finalAgglomPtr);
@@ -359,7 +368,7 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
     }
 
     // Shrink the storage of the levels to those created
-    compactLevels(nCreatedLevels);
+    compactLevels(nCreatedLevels, true);
 
     // Delete temporary geometry storage
     if (nCreatedLevels)
