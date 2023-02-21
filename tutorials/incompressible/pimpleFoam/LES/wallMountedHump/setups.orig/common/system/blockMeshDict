@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -53,7 +53,7 @@ dxFocus     0.005;
 dxOutlet    0.05;
 
 // cell-to-cell growth ratio from focus region to outlet (x-Zone 3)
-rxOutlet     1.2;
+rxOutlet    1.2;
 
 // y-spacing of 1st near-wall cell at bottom wall
 dyWall      1.5e-05;
@@ -65,7 +65,7 @@ ryBL        1.15;
 LyBL        0.05;
 
 // y-spacing in focus region (y-Zone 2)
-dyFocus     0.005;        
+dyFocus     0.005;
 
 // vertical length of y-Zone 2
 LyFocus     0.11;
@@ -91,21 +91,19 @@ dz          0.01;
 // * * * * meshing / x-direction
 
 // x-Zone 1 with grading
-NxCorrZ1    #codeStream
+NxZ1    #codeStream
 {
     code
     #{
-        scalar tol        = 1.0e-10;
-        scalar residual   = 1.0e+10;
+        const scalar tol  = 1.0e-10;
+        const int maxIter = 100;
         scalar expRcorr   = $rxInlet;
         scalar totExpR    = $dxInlet/$dxFocus;
         scalar Nx         = Foam::log(totExpR)/Foam::log(expRcorr);
         scalar deltaStart = $dxFocus;
         scalar lEdge      = $x1Bottom - $xInlet;
-        int iter          = 0;
-        int iterMax       = 100;
 
-        while ((residual > tol) && (iter < iterMax))
+        for (int iter=0; iter < maxIter; ++iter)
         {
             scalar coeff  = pow(totExpR, 1./(Nx-1.));
             scalar coeffN = pow(totExpR, Nx/(Nx-1.));
@@ -114,35 +112,33 @@ NxCorrZ1    #codeStream
             scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Nx-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
             Nx            = Nx - (f/fPrime);
 
-            residual      = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
-            iter++;
+            scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+            if (residual <= tol) break;
         }
-        os  << Nx << endl;
+        os  << floor(Nx);
     #};
 };
-totExpZ1x    #calc "$dxFocus/$dxInlet";
-NxZ1         #calc "static_cast<int>( $NxCorrZ1 )";
-totExpZ1xTop #calc "($x2Top - $x1Top)/($NxZ1*$dxInlet)";
+
+totExpZ1x    #eval{ $dxFocus/$dxInlet };
+totExpZ1xTop #eval{ ($x2Top - $x1Top)/($NxZ1*$dxInlet) };
 
 // x-Zone 2 with uniform spacing
-NxFocus     #calc "static_cast<int>( ($x2Bottom-$x1Bottom)/$dxFocus )";
+NxFocus      #eval{ floor( ($x2Bottom-$x1Bottom)/$dxFocus ) };
 
 // x-Zone 3 with grading
-NxCorrZ3    #codeStream
+NxZ3    #codeStream
 {
     code
     #{
-        scalar tol        = 1.0e-10;
-        scalar residual   = 1.0e+10;
+        const scalar tol  = 1.0e-10;
+        const int maxIter = 100;
         scalar expRcorr   = $rxOutlet;
         scalar totExpR    = $dxOutlet/(1.05377349658562*$dxFocus);
         scalar Nx         = Foam::log(totExpR)/Foam::log(expRcorr);
         scalar deltaStart = $dxFocus;
         scalar lEdge      = $xOutlet - $x2Bottom;
-        int iter          = 0;
-        int iterMax       = 100;
 
-        while ((residual > tol) && (iter < iterMax))
+        for (int iter=0; iter < maxIter; ++iter)
         {
             scalar coeff  = pow(totExpR, 1./(Nx-1.));
             scalar coeffN = pow(totExpR, Nx/(Nx-1.));
@@ -151,63 +147,58 @@ NxCorrZ3    #codeStream
             scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Nx-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
             Nx            = Nx - (f/fPrime);
 
-            residual      = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
-            iter++;
+            scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+            if (residual <= tol) break;
         }
-        os  << Nx << endl;
+        os  << floor(Nx);
     #};
 };
-totExpZ3x    #calc "$dxOutlet/$dxFocus";
-NxZ3         #calc "static_cast<int>( $NxCorrZ3 )";
+totExpZ3x    #eval{ $dxOutlet/$dxFocus };
 
 rxOutletcorr #codeStream
 {
     code
     #{
-        scalar tol        = 1.0e-10;
-        scalar residual   = 1.0e+10;
+        const scalar tol  = 1.0e-10;
+        const int maxIter = 100;
         scalar expRcorr   = $rxOutlet;
         scalar deltaStart = 1.00141417674807*($x2Top - $x1Top)/$NxFocus;
         scalar lEdge      = $xOutlet - $x2Top;
         int Nx            = $NxZ3;
-        int iter          = 0;
-        int iterMax       = 100;
 
-        while ((residual > tol) && (iter < iterMax))
+        for (int iter=0; iter < maxIter; ++iter)
         {
             scalar f      = (deltaStart*((pow(expRcorr, Nx))-1)/(expRcorr-1)) - lEdge;
             scalar fPrime = deltaStart*((expRcorr-1)*Nx*(pow(expRcorr, (Nx-1)))-((pow(expRcorr, Nx))-1))/(sqr(expRcorr-1));
             expRcorr      = expRcorr - (f/fPrime);
 
-            residual      = mag((deltaStart*(pow(expRcorr, Nx)-1)/(expRcorr-1)) - lEdge);
-            iter++;
+            scalar residual = mag((deltaStart*(pow(expRcorr, Nx)-1)/(expRcorr-1)) - lEdge);
+            if (residual <= tol) break;
         }
-        os  << expRcorr << endl;
+        os  << expRcorr;
     #};
 };
-totExpZ3xTop #calc "pow($rxOutletcorr, $NxZ3-1.0)";
+totExpZ3xTop #eval{ pow($rxOutletcorr, $NxZ3-1.0) };
 
 // total number of cells in the x-direction
-Nx           #calc "static_cast<int>( $NxZ1 + $NxFocus + $NxZ3 )";
+Nx           #eval{ floor( $NxZ1 + $NxFocus + $NxZ3 ) };
 
 // * * * * meshing / y-direction
 
 // y-Zone 1 with grading
-NyCorrZ1    #codeStream
+NyZ1    #codeStream
 {
     code
     #{
-        scalar tol        = 1.0e-10;
-        scalar residual   = 1.0e+10;
+        const scalar tol  = 1.0e-10;
+        const int maxIter = 100;
         scalar expRcorr   = $ryBL;
         scalar totExpR    = $dyFocus/$dyWall;
         scalar Nx         = Foam::log(totExpR)/Foam::log(expRcorr);
         scalar deltaStart = $dyWall;
         scalar lEdge      = $LyBL;
-        int iter          = 0;
-        int iterMax       = 100;
 
-        while ((residual > tol) && (iter < iterMax))
+        for (int iter=0; iter < maxIter; ++iter)
         {
             scalar coeff  = pow(totExpR, 1./(Nx-1.));
             scalar coeffN = pow(totExpR, Nx/(Nx-1.));
@@ -216,34 +207,31 @@ NyCorrZ1    #codeStream
             scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Nx-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
             Nx            = Nx - (f/fPrime);
 
-            residual      = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
-            iter++;
+            scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+            if (residual <= tol) break;
         }
-        os  << Nx << endl;
+        os  << floor(Nx);
     #};
 };
-totExpZ1y   #calc "$dyFocus/$dyWall";
-NyZ1        #calc "static_cast<int>( $NyCorrZ1 )";
+totExpZ1y   #eval{ $dyFocus/$dyWall };
 
 // y-Zone 2 with uniform spacing
-NyZ2        #calc "static_cast<int>( $LyFocus/$dyFocus )";
+NyZ2        #eval{ floor( $LyFocus/$dyFocus )};
 
 // y-Zone 3 with grading
-NyCorrZ3    #codeStream
+NyZ3    #codeStream
 {
     code
     #{
-        scalar tol        = 1.0e-10;
-        scalar residual   = 1.0e+10;
+        const scalar tol  = 1.0e-10;
+        const int maxIter = 100;
         scalar expRcorr   = $ryMid;
         scalar totExpR    = $dyMid/$dyFocus;
         scalar Nx         = Foam::log(totExpR)/Foam::log(expRcorr);
         scalar deltaStart = $dyFocus;
         scalar lEdge      = $LyMid;
-        int iter          = 0;
-        int iterMax       = 100;
 
-        while ((residual > tol) && (iter < iterMax))
+        for (int iter=0; iter < maxIter; ++iter)
         {
             scalar coeff  = pow(totExpR, 1./(Nx-1.));
             scalar coeffN = pow(totExpR, Nx/(Nx-1.));
@@ -252,31 +240,29 @@ NyCorrZ3    #codeStream
             scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Nx-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
             Nx            = Nx - (f/fPrime);
 
-            residual      = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
-            iter++;
+            scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+            if (residual <= tol) break;
         }
-        os  << Nx << endl;
+        os  << floor(Nx);
     #};
 };
-totExpZ3y   #calc "$dyMid/$dyFocus";
-NyZ3        #calc "static_cast<int>( $NyCorrZ3 )";
+totExpZ3y   #eval{ $dyMid/$dyFocus };
+
 
 // y-Zone 4 with grading
-NyCorrZ4    #codeStream
+NyZ4    #codeStream
 {
     code
     #{
-        scalar tol        = 1.0e-10;
-        scalar residual   = 1.0e+10;
+        const scalar tol  = 1.0e-10;
+        const int maxIter = 100;
         scalar expRcorr   = $ryTop;
         scalar totExpR    = $dyMid/$dyTop;
         scalar Nx         = Foam::log(totExpR)/Foam::log(expRcorr);
         scalar deltaStart = $dyTop;
         scalar lEdge      = $yMax - $yMin - $LyMid - $LyFocus - $LyBL;
-        int iter          = 0;
-        int iterMax       = 100;
 
-        while ((residual > tol) && (iter < iterMax))
+        for (int iter=0; iter < maxIter; ++iter)
         {
             scalar coeff  = pow(totExpR, 1./(Nx-1.));
             scalar coeffN = pow(totExpR, Nx/(Nx-1.));
@@ -285,79 +271,79 @@ NyCorrZ4    #codeStream
             scalar fPrime = deltaStart * Foam::log(totExpR) * (1./sqr(Nx-1.)) * ((1.-coeff)*coeffN - (1.-coeffN)*coeff)/ sqr(1.-coeff);
             Nx            = Nx - (f/fPrime);
 
-            residual      = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
-            iter++;
+            scalar residual = mag((deltaStart*((1.-coeffN) / ((1.-coeff)))) - lEdge);
+            if (residual <= tol) break;
         }
-        os  << Nx << endl;
+        os  << floor(Nx);
     #};
 };
-totExpZ4y   #calc "$dyTop/$dyMid";
-NyZ4        #calc "static_cast<int>( $NyCorrZ4 )";
+totExpZ4y   #eval{ $dyTop/$dyMid };
 
 // total number of cells in the y-direction
-Ny          #calc "static_cast<int>( $NyZ1 + $NyZ2 + $NyZ3 + $NyZ4 )";
+Ny          #eval{ floor($NyZ1 + $NyZ2 + $NyZ3 + $NyZ4) };
 
 // * * * * meshing / z-direction
 
 // total number of cells in the z-direction
-Nz          #calc "static_cast<int>( ($zMax-$zMin)/$dz )";
+Nz          #eval{ floor(($zMax-$zMin)/$dz) };
 
 // * * * * report additional grid statistics
 #codeStream
 {
     code
     #{
-        Info  << endl;
-        Info  << "Computed grid parameters:" << endl;
-        Info  << "    > x-direction: " << endl;
-        Info  << "      - Zone 1 (x): " << endl;
-        Info  << "        - first spacing:                        dxInlet      = " << $dxInlet << " x c" << endl;
-        Info  << "        - last spacing:                         dxFocus      = " << $dxFocus << " x c" << endl;
-        Info  << "        - number of cells:                      NxZ1         = " << $NxZ1 << endl;
-        Info  << "        - cell-to-cell ratio (prescribed):      rxInlet      = " << $rxInlet << endl;
-        Info  << "        - first-to-last ratio (bottom):         totExpZ1x    = " << $totExpZ1x << endl;
-        Info  << "        - first-to-last ratio (top):            totExpZ1xTop = " << $totExpZ1xTop << endl;
-        Info  << "      - Zone 2 (x): " << endl;
-        Info  << "        - first / last spacing:                 dxFocus      = " << $dxFocus << " x c" << endl;
-        Info  << "        - number of cells:                      NxFocus      = " << $NxFocus << endl;
-        Info  << "        - cell-to-cell ratio:                   rxFocus      = 1" << endl;
-        Info  << "      - Zone 3 (x): " << endl;
-        Info  << "        - first spacing:                        dxFocus      = " << $dxFocus << " x c" << endl;
-        Info  << "        - last spacing:                         dxOutlet     = " << $dxOutlet << " x c" << endl;
-        Info  << "        - number of cells:                      NxZ3         = " << $NxZ3 << endl;
-        Info  << "        - cell-to-cell ratio (prescribed):      rxOutlet     = " << $rxOutlet << endl;
-        Info  << "        - cell-to-cell ratio (corrected,top):   rxOutletcorr = " << $rxOutletcorr << endl;
-        Info  << "        - first-to-last ratio (bottom):         totExpZ3x    = " << $totExpZ3x << endl;
-        Info  << "        - first-to-last ratio (top):            totExpZ3xTop = " << $totExpZ3xTop << endl;
-        Info  << "    - Total number of cells (x):              Nx           = " << $Nx << endl;
-        Info  << endl;
-        Info  << "    > y-directions: " << endl;
-        Info  << "      - Zone 1 (y): " << endl;
-        Info  << "        - length of edge:                       LyBL         = " << $LyBL << " x c" << endl;
-        Info  << "        - first spacing:                        dyWall       = " << $dyWall << " x c" << endl;
-        Info  << "        - last spacing:                         dyFocus      = " << $dyFocus << " x c" << endl;
-        Info  << "        - number of cells:                      NyZ1         = " << $NyZ1 << endl;
-        Info  << "        - cell-to-cell ratio (prescribed):      ryBL         = " << $ryBL << endl;
-        Info  << "        - first-to-last ratio:                  totExpZ1y    = " << $totExpZ1y << endl;
-        Info  << "      - Zone 2 (y): " << endl;
-        Info  << "        - length of edge:                       LyFocus      = " << $LyFocus << " x c" << endl;
-        Info  << "        - first / last spacing:                 dyFocus      = " << $dyFocus << " x c" << endl;
-        Info  << "        - number of cells:                      NyZ2         = " << $NyZ2 << endl;
-        Info  << "        - cell-to-cell ratio:                   ryFocus      = 1" << endl;
-        Info  << "      - Zone 3 (y): " << endl;
-        Info  << "        - length of edge:                       LyMid        = " << $LyMid << " x c" << endl;
-        Info  << "        - first spacing:                        dyFocus      = " << $dyFocus << " x c" << endl;
-        Info  << "        - last spacing:                         dyMid        = " << $dyMid << " x c" << endl;
-        Info  << "        - number of cells:                      NyZ3         = " << $NyZ3 << endl;
-        Info  << "        - cell-to-cell ratio (prescribed):      ryMid        = " << $ryMid << endl;
-        Info  << "        - first-to-last ratio:                  totExpZ3y    = " << $totExpZ3y << endl;
-        Info  << "      - Zone 4 (y): " << endl;
-        Info  << "        - first spacing:                        dyMid        = " << $dyMid << " x c" << endl;
-        Info  << "        - last spacing:                         dyTop        = " << $dyTop << " x c" << endl;
-        Info  << "        - number of cells:                      NyZ4         = " << $NyZ4 << endl;
-        Info  << "        - cell-to-cell ratio (prescribed):      ryTop        = " << $ryTop << endl;
-        Info  << "        - first-to-last ratio:                  totExpZ4y    = " << $totExpZ4y << endl;
-        Info  << "    - Total number of cells (y):              Ny           = " << $Ny << endl << endl;
+        Info<< nl
+            << "Computed grid parameters:" << nl
+            << "    > x-direction: " << nl
+            << "      - Zone 1 (x): " << nl
+            << "        - first spacing:                        dxInlet      = " << $dxInlet << " x c" << nl
+            << "        - last spacing:                         dxFocus      = " << $dxFocus << " x c" << nl
+            << "        - number of cells:                      NxZ1         = " << $NxZ1 << nl
+            << "        - cell-to-cell ratio (prescribed):      rxInlet      = " << $rxInlet << nl
+            << "        - first-to-last ratio (bottom):         totExpZ1x    = " << $totExpZ1x << nl
+            << "        - first-to-last ratio (top):            totExpZ1xTop = " << $totExpZ1xTop << nl
+            << "      - Zone 2 (x): " << nl
+            << "        - first / last spacing:                 dxFocus      = " << $dxFocus << " x c" << nl
+            << "        - number of cells:                      NxFocus      = " << $NxFocus << nl
+            << "        - cell-to-cell ratio:                   rxFocus      = 1" << nl
+            << "      - Zone 3 (x): " << nl
+            << "        - first spacing:                        dxFocus      = " << $dxFocus << " x c" << nl
+            << "        - last spacing:                         dxOutlet     = " << $dxOutlet << " x c" << nl
+            << "        - number of cells:                      NxZ3         = " << $NxZ3 << nl
+            << "        - cell-to-cell ratio (prescribed):      rxOutlet     = " << $rxOutlet << nl
+            << "        - cell-to-cell ratio (corrected,top):   rxOutletcorr = " << $rxOutletcorr << nl
+            << "        - first-to-last ratio (bottom):         totExpZ3x    = " << $totExpZ3x << nl
+            << "        - first-to-last ratio (top):            totExpZ3xTop = " << $totExpZ3xTop << nl
+            << "    - Total number of cells (x):                Nx           = " << $Nx << nl
+            << endl;
+        Info<< "    > y-direction: " << nl
+            << "      - Zone 1 (y): " << nl
+            << "        - length of edge:                       LyBL         = " << $LyBL << " x c" << nl
+            << "        - first spacing:                        dyWall       = " << $dyWall << " x c" << nl
+            << "        - last spacing:                         dyFocus      = " << $dyFocus << " x c" << nl
+            << "        - number of cells:                      NyZ1         = " << $NyZ1 << nl
+            << "        - cell-to-cell ratio (prescribed):      ryBL         = " << $ryBL << nl
+            << "        - first-to-last ratio:                  totExpZ1y    = " << $totExpZ1y << nl
+            << "      - Zone 2 (y): " << nl
+            << "        - length of edge:                       LyFocus      = " << $LyFocus << " x c" << nl
+            << "        - first / last spacing:                 dyFocus      = " << $dyFocus << " x c" << nl
+            << "        - number of cells:                      NyZ2         = " << $NyZ2 << nl
+            << "        - cell-to-cell ratio:                   ryFocus      = 1" << nl
+            << "      - Zone 3 (y): " << nl
+            << "        - length of edge:                       LyMid        = " << $LyMid << " x c" << nl
+            << "        - first spacing:                        dyFocus      = " << $dyFocus << " x c" << nl
+            << "        - last spacing:                         dyMid        = " << $dyMid << " x c" << nl
+            << "        - number of cells:                      NyZ3         = " << $NyZ3 << nl
+            << "        - cell-to-cell ratio (prescribed):      ryMid        = " << $ryMid << nl
+            << "        - first-to-last ratio:                  totExpZ3y    = " << $totExpZ3y << nl
+            << "      - Zone 4 (y): " << nl
+            << "        - first spacing:                        dyMid        = " << $dyMid << " x c" << nl
+            << "        - last spacing:                         dyTop        = " << $dyTop << " x c" << nl
+            << "        - number of cells:                      NyZ4         = " << $NyZ4 << nl
+            << "        - cell-to-cell ratio (prescribed):      ryTop        = " << $ryTop << nl
+            << "        - first-to-last ratio:                  totExpZ4y    = " << $totExpZ4y << nl
+            << "    - Total number of cells (y):                Ny           = " << $Ny << nl
+            << endl;
     #};
 };
 
