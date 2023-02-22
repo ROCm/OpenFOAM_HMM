@@ -29,6 +29,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "lduMatrix.H"
+#include "macros.H"
+#include "AtomicAccumulator.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,10 +58,11 @@ Foam::tmp<Foam::Field<Type>> Foam::lduMatrix::H(const Field<Type>& psi) const
 
         const label nFaces = upper().size();
 
+        OMP(parallel for if(nFaces >= (1<<21)))
         for (label face=0; face<nFaces; face++)
         {
-            HpsiPtr[uPtr[face]] -= lowerPtr[face]*psiPtr[lPtr[face]];
-            HpsiPtr[lPtr[face]] -= upperPtr[face]*psiPtr[uPtr[face]];
+            atomicAccumulator(HpsiPtr[uPtr[face]]) -= lowerPtr[face]*psiPtr[lPtr[face]];
+            atomicAccumulator(HpsiPtr[lPtr[face]]) -= upperPtr[face]*psiPtr[uPtr[face]];
         }
     }
 
@@ -91,6 +94,7 @@ Foam::lduMatrix::faceH(const Field<Type>& psi) const
         tmp<Field<Type>> tfaceHpsi(new Field<Type> (Lower.size()));
         Field<Type> & faceHpsi = tfaceHpsi.ref();
 
+        OMP(parallel for if(l.size() >= (1<<21)))
         for (label face=0; face<l.size(); face++)
         {
             faceHpsi[face] =

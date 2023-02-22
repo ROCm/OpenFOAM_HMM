@@ -28,6 +28,8 @@ License
 #include "fvcSurfaceIntegrate.H"
 #include "fvMesh.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
+#include "AtomicAccumulator.H"
+#include "macros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,12 +57,14 @@ void surfaceIntegrate
 
     const Field<Type>& issf = ssf;
 
+    OMP(parallel for if(owner.size() >= (1<<21)))
     forAll(owner, facei)
     {
-        ivf[owner[facei]] += issf[facei];
-        ivf[neighbour[facei]] -= issf[facei];
+        atomicAccumulator(ivf[owner[facei]]) += issf[facei];
+        atomicAccumulator(ivf[neighbour[facei]]) -= issf[facei];
     }
 
+    OMP(parallel for if(mesh.boundary().size() >= (1<<21)))
     forAll(mesh.boundary(), patchi)
     {
         const labelUList& pFaceCells =
@@ -70,7 +74,7 @@ void surfaceIntegrate
 
         forAll(mesh.boundary()[patchi], facei)
         {
-            ivf[pFaceCells[facei]] += pssf[facei];
+            atomicAccumulator(ivf[pFaceCells[facei]]) += pssf[facei];
         }
     }
 

@@ -30,6 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "lduMatrix.H"
+#include "AtomicAccumulator.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,10 +43,11 @@ void Foam::lduMatrix::sumDiag()
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
+    OMP(parallel for if(l.size() >= (1<<21)))
     for (label face=0; face<l.size(); face++)
     {
-        Diag[l[face]] += Lower[face];
-        Diag[u[face]] += Upper[face];
+        atomicAccumulator(Diag[l[face]]) += Lower[face];
+        atomicAccumulator(Diag[u[face]]) += Upper[face];
     }
 }
 
@@ -59,10 +61,11 @@ void Foam::lduMatrix::negSumDiag()
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
+    OMP(parallel for if(l.size() >= (1<<21)))
     for (label face=0; face<l.size(); face++)
     {
-        Diag[l[face]] -= Lower[face];
-        Diag[u[face]] -= Upper[face];
+        atomicAccumulator(Diag[l[face]]) -= Lower[face];
+        atomicAccumulator(Diag[u[face]]) -= Upper[face];
     }
 }
 
@@ -78,10 +81,11 @@ void Foam::lduMatrix::sumMagOffDiag
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
+    OMP(parallel for if(l.size() >= (1<<21)))
     for (label face = 0; face < l.size(); face++)
     {
-        sumOff[u[face]] += mag(Lower[face]);
-        sumOff[l[face]] += mag(Upper[face]);
+        atomicAccumulator(sumOff[u[face]]) += mag(Lower[face]);
+        atomicAccumulator(sumOff[l[face]]) += mag(Upper[face]);
     }
 }
 
@@ -316,14 +320,19 @@ void Foam::lduMatrix::operator*=(const scalarField& sf)
         const labelUList& l = lduAddr().lowerAddr();
         const labelUList& u = lduAddr().upperAddr();
 
-        for (label face=0; face<upper.size(); face++)
+        OMP(parallel if(upper.size() + lower.size() >= (1<<21)))
         {
-            upper[face] *= sf[l[face]];
-        }
+            OMP(for nowait)
+            for (label face=0; face<upper.size(); face++)
+            {
+                upper[face] *= sf[l[face]];
+            }
 
-        for (label face=0; face<lower.size(); face++)
-        {
-            lower[face] *= sf[u[face]];
+            OMP(for nowait)
+            for (label face=0; face<lower.size(); face++)
+            {
+                lower[face] *= sf[u[face]];
+            }
         }
     }
 }
