@@ -29,7 +29,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "string.H"
+#include "word.H"
 #include "IOstreams.H"
 
 using namespace Foam;

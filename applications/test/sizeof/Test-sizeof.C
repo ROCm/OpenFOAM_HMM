@@ -31,7 +31,6 @@ Description
 
 #include "bool.H"
 #include "Switch.H"
-#include "string.H"
 #include "dictionary.H"
 #include "zero.H"
 #include "IOstreams.H"

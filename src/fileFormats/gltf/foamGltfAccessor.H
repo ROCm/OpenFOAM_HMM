@@ -44,7 +44,7 @@ SourceFiles
 #include "foamGltfBase.H"
 #include "Field.H"
 #include "label.H"
-#include "string.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

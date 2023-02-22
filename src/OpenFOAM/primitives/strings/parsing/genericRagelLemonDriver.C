@@ -26,8 +26,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "genericRagelLemonDriver.H"
-#include "string.H"
 #include "error.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

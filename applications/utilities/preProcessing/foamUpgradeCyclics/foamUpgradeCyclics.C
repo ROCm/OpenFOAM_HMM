@@ -58,7 +58,6 @@ Usage
 #include "volFields.H"
 #include "pointFields.H"
 #include "surfaceFields.H"
-#include "string.H"
 
 using namespace Foam;
 

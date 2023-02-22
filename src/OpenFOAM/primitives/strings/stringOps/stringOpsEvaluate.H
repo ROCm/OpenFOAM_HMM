@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef stringOpsEvaluate_H
-#define stringOpsEvaluate_H
+#ifndef Foam_stringOpsEvaluate_H
+#define Foam_stringOpsEvaluate_H
 
 #include "labelFwd.H"
 #include "string.H"

@@ -40,10 +40,10 @@ SourceFiles
 #ifndef Foam_UPstream_H
 #define Foam_UPstream_H
 
+#include "wordList.H"
 #include "labelList.H"
 #include "DynamicList.H"
 #include "HashTable.H"
-#include "string.H"
 #include "Enum.H"
 #include "ListOps.H"
 

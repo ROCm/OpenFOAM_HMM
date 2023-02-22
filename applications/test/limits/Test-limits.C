@@ -32,8 +32,8 @@ Description
 #include <limits>
 #include "int.H"
 #include "uint.H"
-#include "string.H"
 #include "scalar.H"
+#include "word.H"
 #include "IOstreams.H"
 
 using namespace Foam;

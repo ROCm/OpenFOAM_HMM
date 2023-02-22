@@ -38,9 +38,9 @@ SourceFiles
 #ifndef Foam_profilingInformation_H
 #define Foam_profilingInformation_H
 
-#include "label.H"
-#include "scalar.H"
-#include "string.H"
+#include "labelFwd.H"
+#include "scalarFwd.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,45 +130,21 @@ public:
 
     // Access
 
-        label id() const
-        {
-            return id_;
-        }
+        label id() const noexcept { return id_; }
 
-        const string& description() const
-        {
-            return description_;
-        }
+        const string& description() const noexcept { return description_; }
 
-        profilingInformation& parent() const
-        {
-            return *parent_;
-        }
+        profilingInformation& parent() const noexcept { return *parent_; }
 
-        label calls() const
-        {
-            return calls_;
-        }
+        label calls() const noexcept { return calls_; }
 
-        scalar totalTime() const
-        {
-            return totalTime_;
-        }
+        scalar totalTime() const noexcept { return totalTime_; }
 
-        scalar childTime() const
-        {
-            return childTime_;
-        }
+        scalar childTime() const noexcept { return childTime_; }
 
-        int maxMem() const
-        {
-            return maxMem_;
-        }
+        int maxMem() const noexcept { return maxMem_; }
 
-        bool active() const
-        {
-            return active_;
-        }
+        bool active() const noexcept { return active_; }
 
 
     // Edit

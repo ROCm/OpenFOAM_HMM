@@ -38,8 +38,6 @@ SourceFiles
 #ifndef Foam_graph_H
 #define Foam_graph_H
 
-#include "string.H"
-#include "point.H"
 #include "curve.H"
 #include "HashPtrTable.H"
 

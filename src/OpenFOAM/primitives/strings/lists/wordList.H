@@ -43,8 +43,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordList_H
-#define wordList_H
+#ifndef Foam_wordList_H
+#define Foam_wordList_H
 
 #include "word.H"
 #include "List.H"

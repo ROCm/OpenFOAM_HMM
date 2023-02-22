@@ -43,10 +43,10 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef stringList_H
-#define stringList_H
+#ifndef Foam_stringList_H
+#define Foam_stringList_H
 
-#include "string.H"
+#include "word.H"
 #include "List.H"
 #include "SubList.H"
 
