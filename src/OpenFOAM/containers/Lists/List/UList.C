@@ -30,6 +30,7 @@ License
 #include "ListLoopM.H"
 #include "contiguous.H"
 #include "labelRange.H"
+#include "macros.H"
 
 #include <algorithm>
 #include <random>
@@ -58,6 +59,7 @@ void Foam::UList<T>::moveFirst(const label i)
 {
     checkIndex(i);
 
+    OMP(parallel for if(i >= (1<<21)))
     for (label lower = 0; lower < i; ++lower)
     {
         Foam::Swap(this->operator[](lower), this->operator[](i));
@@ -70,6 +72,7 @@ void Foam::UList<T>::moveLast(const label i)
 {
     checkIndex(i);
 
+    OMP(parallel for if(i >= (1<<21)))
     for (label upper = size()-1; upper > i; --upper)
     {
         Foam::Swap(this->operator[](i), this->operator[](upper));
@@ -130,6 +133,7 @@ void Foam::UList<T>::deepCopy(const UList<T>& list)
         {
             List_ACCESS(T, (*this), lhs);
             List_CONST_ACCESS(T, list, rhs);
+            OMP(parallel for if(len >= (1<<21)))
             for (label i = 0; i < len; ++i)
             {
                 lhs[i] = rhs[i];
@@ -155,6 +159,7 @@ void Foam::UList<T>::deepCopy(const IndirectListBase<T, Addr>& list)
     else if (len)
     {
         List_ACCESS(T, (*this), lhs);
+        OMP(parallel for if(len >= (1<<21)))
         for (label i = 0; i < len; ++i)
         {
             lhs[i] = list[i];
@@ -172,6 +177,7 @@ void Foam::UList<T>::operator=(const T& val)
 
     List_ACCESS(T, (*this), vp);
 
+    OMP(parallel for if(len >= (1<<21)))
     for (label i=0; i < len; ++i)
     {
         vp[i] = val;
@@ -186,6 +192,7 @@ void Foam::UList<T>::operator=(const Foam::zero)
 
     List_ACCESS(T, (*this), vp);
 
+    OMP(parallel for if(len >= (1<<21)))
     for (label i=0; i < len; ++i)
     {
         vp[i] = Zero;

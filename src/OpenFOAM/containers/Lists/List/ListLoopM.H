@@ -32,6 +32,8 @@ Description
 #ifndef ListLoopM_H
 #define ListLoopM_H
 
+#include "macros.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Element access looping
 
@@ -45,6 +47,7 @@ Description
 
 #define List_FOR_ALL(f, i)                      \
         const label _n##i = (f).size();         \
+        OMP(parallel for if(_n##i >= (1<<21)))  \
         for (label i=0; i<_n##i; ++i)
 
 // Current element (non-const access)
