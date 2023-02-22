@@ -64,7 +64,7 @@ void surfaceIntegrate
         atomicAccumulator(ivf[neighbour[facei]]) -= issf[facei];
     }
 
-    OMP(parallel for if(mesh.boundary().size() >= (1<<21)))
+    OMP(parallel for if(mesh.boundary().size() >= (1<<18)))
     forAll(mesh.boundary(), patchi)
     {
         const labelUList& pFaceCells =
@@ -164,12 +164,14 @@ surfaceSum
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
 
+    OMP(parallel for if(owner.size() >= (1<<21)))
     forAll(owner, facei)
     {
-        vf[owner[facei]] += ssf[facei];
-        vf[neighbour[facei]] += ssf[facei];
+        atomicAccumulator(vf[owner[facei]]) += ssf[facei];
+        atomicAccumulator(vf[neighbour[facei]]) += ssf[facei];
     }
 
+    OMP(parallel for if(mesh.boundary().size() >= (1<<18)))
     forAll(mesh.boundary(), patchi)
     {
         const labelUList& pFaceCells =
@@ -179,7 +181,7 @@ surfaceSum
 
         forAll(mesh.boundary()[patchi], facei)
         {
-            vf[pFaceCells[facei]] += pssf[facei];
+            atomicAccumulator(vf[pFaceCells[facei]]) += pssf[facei];
         }
     }
 

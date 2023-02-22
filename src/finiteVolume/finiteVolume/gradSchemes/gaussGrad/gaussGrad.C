@@ -89,7 +89,7 @@ Foam::fv::gaussGrad<Type>::gradf
         atomicAccumulator(igGrad[neighbour[facei]]) -= Sfssf;
     }
 
-    OMP(parallel for if(mesh.boundary().size() >= (1<<21)))
+    OMP(parallel for if(mesh.boundary().size() >= (1<<18)))
     forAll(mesh.boundary(), patchi)
     {
         const labelUList& pFaceCells =

@@ -31,6 +31,8 @@ License
 #include "syncTools.H"
 #include "pyramidPointFaceRef.H"
 #include "PrecisionAdaptor.H"
+#include "macros.H"
+#include "AtomicAccumulator.H"
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -308,68 +310,77 @@ void Foam::primitiveMeshTools::makeCellCentresAndVols
     Field<solveVector> cEst(mesh.nCells(), Zero);
     labelField nCellFaces(mesh.nCells(), Zero);
 
-    forAll(own, facei)
+    OMP(parallel if(own.size() + nei.size() >= (1<<21)))
     {
-        cEst[own[facei]] += solveVector(fCtrs[facei]);
-        ++nCellFaces[own[facei]];
-    }
-
-    forAll(nei, facei)
-    {
-        cEst[nei[facei]] += solveVector(fCtrs[facei]);
-        ++nCellFaces[nei[facei]];
-    }
-
-    forAll(cEst, celli)
-    {
-        cEst[celli] /= nCellFaces[celli];
-    }
-
-    forAll(own, facei)
-    {
-        const solveVector fc(fCtrs[facei]);
-        const solveVector fA(fAreas[facei]);
-
-        // Calculate 3*face-pyramid volume
-        solveScalar pyr3Vol = fA & (fc - cEst[own[facei]]);
-
-        // Calculate face-pyramid centre
-        solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[own[facei]];
-
-        // Accumulate volume-weighted face-pyramid centre
-        cellCtrs[own[facei]] += pyr3Vol*pc;
-
-        // Accumulate face-pyramid volume
-        cellVols[own[facei]] += pyr3Vol;
-    }
-
-    forAll(nei, facei)
-    {
-        const solveVector fc(fCtrs[facei]);
-        const solveVector fA(fAreas[facei]);
-
-        // Calculate 3*face-pyramid volume
-        solveScalar pyr3Vol = fA & (cEst[nei[facei]] - fc);
-
-        // Calculate face-pyramid centre
-        solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[nei[facei]];
-
-        // Accumulate volume-weighted face-pyramid centre
-        cellCtrs[nei[facei]] += pyr3Vol*pc;
-
-        // Accumulate face-pyramid volume
-        cellVols[nei[facei]] += pyr3Vol;
-    }
-
-    forAll(cellCtrs, celli)
-    {
-        if (mag(cellVols[celli]) > VSMALL)
+        OMP(for nowait)
+        forAll(own, facei)
         {
-            cellCtrs[celli] /= cellVols[celli];
+            atomicAccumulator(cEst[own[facei]]) += solveVector(fCtrs[facei]);
+            atomicAccumulator(nCellFaces[own[facei]]) += 1;
         }
-        else
+
+        OMP(for)
+        forAll(nei, facei)
         {
-            cellCtrs[celli] = cEst[celli];
+            atomicAccumulator(cEst[nei[facei]]) += solveVector(fCtrs[facei]);
+            atomicAccumulator(nCellFaces[nei[facei]]) += 1;
+        }
+
+        OMP(for)
+        forAll(cEst, celli)
+        {
+            cEst[celli] /= nCellFaces[celli];
+        }
+
+        OMP(for nowait)
+        forAll(own, facei)
+        {
+            const solveVector fc(fCtrs[facei]);
+            const solveVector fA(fAreas[facei]);
+
+        // Calculate 3*face-pyramid volume
+            solveScalar pyr3Vol = fA & (fc - cEst[own[facei]]);
+
+            // Calculate face-pyramid centre
+            solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[own[facei]];
+
+            // Accumulate volume-weighted face-pyramid centre
+            atomicAccumulator(cellCtrs[own[facei]]) += pyr3Vol*pc;
+
+            // Accumulate face-pyramid volume
+            atomicAccumulator(cellVols[own[facei]]) += pyr3Vol;
+        }
+
+        OMP(for)
+        forAll(nei, facei)
+        {
+            const solveVector fc(fCtrs[facei]);
+            const solveVector fA(fAreas[facei]);
+
+        // Calculate 3*face-pyramid volume
+            solveScalar pyr3Vol = fA & (cEst[nei[facei]] - fc);
+
+            // Calculate face-pyramid centre
+            solveVector pc = (3.0/4.0)*fc + (1.0/4.0)*cEst[nei[facei]];
+
+            // Accumulate volume-weighted face-pyramid centre
+            atomicAccumulator(cellCtrs[nei[facei]]) += pyr3Vol*pc;
+
+            // Accumulate face-pyramid volume
+            atomicAccumulator(cellVols[nei[facei]]) += pyr3Vol;
+        }
+
+        OMP(for)
+        forAll(cellCtrs, celli)
+        {
+            if (mag(cellVols[celli]) > VSMALL)
+            {
+                cellCtrs[celli] /= cellVols[celli];
+            }
+            else
+            {
+                cellCtrs[celli] = cEst[celli];
+            }
         }
     }
 
