@@ -49,7 +49,6 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "primitiveFieldsFwd.H"
 #include "geometricOneField.H"
-#include "zero.H"
 #include "zeroField.H"
 #include "UPtrList.H"
 #include "HashSet.H"

@@ -44,7 +44,6 @@ SourceFiles
 #include "zero.H"
 #include "contiguous.H"
 #include <complex>
-#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -224,10 +223,10 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                      Class pTraits<complex> Declaration
+                        Specialization pTraits<complex>
 \*---------------------------------------------------------------------------*/
 
-// Template specialisation for pTraits<complex>
+//- Template specialisation for pTraits<complex>
 template<>
 class pTraits<complex>
 {
@@ -288,16 +287,10 @@ public:
     // Member Functions
 
         //- Return the value
-        operator complex() const noexcept
-        {
-            return p_;
-        }
+        operator complex() const noexcept { return p_; }
 
         //- Access the value
-        operator complex&() noexcept
-        {
-            return p_;
-        }
+        operator complex&() noexcept { return p_; }
 };
 
 

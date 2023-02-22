@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MatrixTools_H
-#define MatrixTools_H
+#ifndef Foam_MatrixTools_H
+#define Foam_MatrixTools_H
 
 #include "Matrix.H"
 
@@ -43,9 +43,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declarations
-class Ostream;
 
 /*---------------------------------------------------------------------------*\
                        Namespace MatrixTools Declaration

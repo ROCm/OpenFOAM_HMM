@@ -64,8 +64,6 @@ namespace Foam
 
 // Forward Declarations
 class Time;
-class Istream;
-class Ostream;
 
 template<class Face> class MeshedSurface;
 template<class Face> class MeshedSurfaceProxy;

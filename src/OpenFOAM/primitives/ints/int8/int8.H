@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,58 +24,77 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Primitive
-    bool
+    int8_t
 
 Description
-    System bool
+    8bit signed integer
 
 SourceFiles
-    bool.C
+    int8.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_primitives_bool_H
-#define Foam_primitives_bool_H
+#ifndef Foam_primitives_int8_H
+#define Foam_primitives_int8_H
 
-#include "pTraits.H"
+#include <cstdint>
+#include <climits>
+#include <cstdlib>
+
 #include "direction.H"
+#include "pTraits.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// IOstream Operators
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Read bool from stream using Foam::Switch(Istream&)
-Istream& operator>>(Istream& is, bool& b);
+//- A word representation of uint8 value
+inline word name(const int8_t val)
+{
+    return word(std::to_string(int(val)), false); // Needs no stripping
+}
 
-//- Write bool to a stream as an label (integer) value
-Ostream& operator<<(Ostream& os, const bool b);
 
-//- Read bool from stream using Foam::Switch(Istream&)
-bool readBool(Istream& is);
+//- A word representation of uint8 value
+template<>
+struct nameOp<int8_t>
+{
+    word operator()(const int8_t val) const
+    {
+        return word(std::to_string(int(val)), false); // Needs no stripping
+    }
+};
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+//- Read from stream (as label)
+Istream& operator>>(Istream& is, int8_t& val);
+
+//- Write to stream (as label)
+Ostream& operator<<(Ostream& os, const int8_t val);
 
 
 /*---------------------------------------------------------------------------*\
-                         Specialization pTraits<bool>
+                        Specialization pTraits<int8_t>
 \*---------------------------------------------------------------------------*/
 
-//- Template specialisation for pTraits\<bool\>
+//- Template specialization for pTraits<int8_t>
 template<>
-class pTraits<bool>
+class pTraits<int8_t>
 {
-    bool p_;
+    int8_t p_;
 
 public:
 
     // Typedefs
 
         //- Component type
-        typedef bool cmptType;
-
-        //- Magnitude type
-        typedef bool magType;
+        typedef int8_t cmptType;
 
 
     // Member Constants
@@ -84,10 +102,10 @@ public:
         //- Dimensionality of space
         static constexpr direction dim = 3;
 
-        //- Rank of bool is 0
+        //- Rank of int8_t is 0
         static constexpr direction rank = 0;
 
-        //- Number of components in bool is 1
+        //- Number of components in int8_t is 1
         static constexpr direction nComponents = 1;
 
 
@@ -95,14 +113,18 @@ public:
 
         static const char* const typeName;
         static const char* const componentNames[];
-        static const bool zero;
-        static const bool one;
+        static const int8_t zero;
+        static const int8_t one;
+        static const int8_t min;
+        static const int8_t max;
+        static const int8_t rootMax;
+        static const int8_t rootMin;
 
 
     // Constructors
 
         //- Copy construct from primitive
-        explicit pTraits(bool val) noexcept
+        explicit pTraits(int8_t val) noexcept
         :
             p_(val)
         {}
@@ -114,10 +136,10 @@ public:
     // Member Functions
 
         //- Return the value
-        operator bool() const noexcept { return p_; }
+        operator int8_t() const noexcept { return p_; }
 
         //- Access the value
-        operator bool&() noexcept { return p_; }
+        operator int8_t&() noexcept { return p_; }
 };
 
 

@@ -100,7 +100,7 @@ protected:
         //- that forms the basis of many more complex ramp functions
         inline scalar linearRamp(const scalar t) const
         {
-            return clamp((t - start_)/duration_, 0, 1);
+            return clamp((t - start_)/duration_, zero_one{});
         }
 
 

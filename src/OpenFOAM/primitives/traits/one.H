@@ -51,7 +51,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class one;
 class Istream;
 class Ostream;
 
@@ -63,11 +62,11 @@ class one
 {
 public:
 
+    //- The value type
     typedef one value_type;
 
     // Forward Declarations
     class minus;
-    class null;
 
     //- Default construct
     constexpr one() noexcept {}
@@ -113,6 +112,7 @@ class one::minus
 {
 public:
 
+    //- The value type
     typedef minus value_type;
 
     //- Default construct
@@ -148,27 +148,6 @@ public:
 };
 
 
-/*---------------------------------------------------------------------------*\
-                          Class one::null Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A Foam::one class with a null output adapter.
-class one::null
-:
-    public one
-{
-public:
-
-    typedef null value_type;
-
-    //- Default construct
-    constexpr null() noexcept {}
-
-    //- Construct from Istream consumes no content.
-    explicit constexpr null(Istream&) noexcept {}
-};
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Global one (1)
@@ -186,12 +165,6 @@ inline constexpr Istream& operator>>(Istream& is, one&) noexcept
 inline constexpr Istream& operator>>(Istream& is, one::minus&) noexcept
 {
     return is;
-}
-
-//- Write to Ostream emits no content.
-inline constexpr Ostream& operator<<(Ostream& os, const one::null&) noexcept
-{
-    return os;
 }
 
 

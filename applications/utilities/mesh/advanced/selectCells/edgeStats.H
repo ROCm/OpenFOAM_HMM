@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeStats_H
-#define edgeStats_H
+#ifndef Foam_edgeStats_H
+#define Foam_edgeStats_H
 
 #include "direction.H"
 #include "scalar.H"
@@ -45,9 +45,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward Declarations
 class polyMesh;
-class Ostream;
 class twoDPointCorrector;
 
 /*---------------------------------------------------------------------------*\

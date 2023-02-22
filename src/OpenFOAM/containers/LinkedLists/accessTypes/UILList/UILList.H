@@ -49,8 +49,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Ostream;
-
 template<class LListBase, class T> class UILList;
 
 template<class LListBase, class T>

@@ -53,7 +53,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
 template<class Type> class indexedOctree;
 template<class Type> Ostream& operator<<(Ostream&, const indexedOctree<Type>&);
 

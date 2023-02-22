@@ -56,8 +56,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isoSurfaceParams_H
-#define isoSurfaceParams_H
+#ifndef Foam_isoSurfaceParams_H
+#define Foam_isoSurfaceParams_H
 
 #include "boundBox.H"
 #include "Enum.H"
@@ -69,7 +69,6 @@ namespace Foam
 
 // Forward Declarations
 class dictionary;
-class Ostream;
 
 /*---------------------------------------------------------------------------*\
                      Class isoSurfaceSelector Declaration

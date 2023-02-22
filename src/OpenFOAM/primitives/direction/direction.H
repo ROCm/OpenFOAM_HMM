@@ -36,20 +36,18 @@ Note
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef primitives_direction_H
-#define primitives_direction_H
+#ifndef Foam_primitives_direction_H
+#define Foam_primitives_direction_H
 
 #include <cstdint>
 #include <iostream>
+
+#include "pTraits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class Istream;
-class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

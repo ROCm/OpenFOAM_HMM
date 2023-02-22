@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeMeshTools_H
-#define edgeMeshTools_H
+#ifndef Foam_edgeMeshTools_H
+#define Foam_edgeMeshTools_H
 
 #include "tmp.H"
 #include "scalarField.H"
@@ -46,12 +46,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class edgeMesh;
 class extendedEdgeMesh;
 class extendedFeatureEdgeMesh;
 class triSurface;
 class Time;
-class Ostream;
 
 /*---------------------------------------------------------------------------*\
                       Namespace edgeMeshTools Declaration

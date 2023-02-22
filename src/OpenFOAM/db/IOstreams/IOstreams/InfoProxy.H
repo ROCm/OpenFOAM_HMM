@@ -31,22 +31,24 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef InfoProxy_H
-#define InfoProxy_H
+#ifndef Foam_InfoProxy_H
+#define Foam_InfoProxy_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class Ostream;
+
+template<class T> class InfoProxy;
+template<class T> Ostream& operator<<(Ostream&, const InfoProxy<T>&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class InfoProxy Declaration
 \*---------------------------------------------------------------------------*/
-
-template<class T> class InfoProxy;
-template<class T> Ostream& operator<<(Ostream&, const InfoProxy<T>&);
 
 template<class T>
 class InfoProxy

@@ -92,15 +92,13 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class Istream;
-class Ostream;
+// Forward Declarations
 class objectRegistry;
 
 namespace functionObjects
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class fieldAverageItem;
 Istream& operator>>(Istream&, fieldAverageItem&);
 Ostream& operator<<(Ostream&, const fieldAverageItem&);

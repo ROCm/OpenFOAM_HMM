@@ -31,7 +31,6 @@ Description
 
 SourceFiles
     uint8.C
-    uint8IO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,10 +49,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward Declarations
-class Istream;
-class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,7 +78,9 @@ uint8_t readUint8(Istream& is);
 // IO operators are identical to direction, which is uint8_t
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                        Specialization pTraits<uint8_t>
+\*---------------------------------------------------------------------------*/
 
 //- Template specialization for pTraits<uint8_t>
 template<>

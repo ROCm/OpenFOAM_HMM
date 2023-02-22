@@ -41,11 +41,10 @@ SourceFiles
 #ifndef Foam_pointEdgePoint_H
 #define Foam_pointEdgePoint_H
 
-#include "point.H"
 #include "label.H"
 #include "scalar.H"
+#include "point.H"
 #include "tensor.H"
-#include "pTraits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

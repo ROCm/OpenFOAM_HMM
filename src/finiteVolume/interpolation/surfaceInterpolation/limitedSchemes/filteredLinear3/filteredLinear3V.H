@@ -110,7 +110,7 @@ public:
         scalar limiter = 1 - k_*(dN - df)*(dP - df)/max(sqr(dN + dP), SMALL);
 
         // Limit the limiter between linear and upwind
-        return clamp(limiter, 0, 1);
+        return clamp(limiter, zero_one{});
     }
 };
 

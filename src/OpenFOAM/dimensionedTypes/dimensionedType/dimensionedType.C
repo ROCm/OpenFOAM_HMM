@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dimensionedType.H"
-#include "pTraits.H"
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

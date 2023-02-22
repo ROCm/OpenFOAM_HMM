@@ -49,7 +49,6 @@ SourceFiles
 #include "tmp.H"
 #include "autoPtr.H"
 #include "dimensionedTypes.H"
-#include "zero.H"
 #include "className.H"
 #include "lduPrimitiveMeshAssembly.H"
 #include "lduMesh.H"

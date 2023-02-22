@@ -614,7 +614,7 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
             scalar dmdt21 = dmdtNet[celli];
             scalar coeffs12Cell = coeffs12[celli];
 
-            scalar alpha1Limited = clamp(alpha1[celli], 0, 1);
+            scalar alpha1Limited = clamp(alpha1[celli], zero_one{});
 
             // exp.
             SuPhase1[celli] += coeffs1[celli]*dmdt21;
@@ -657,7 +657,7 @@ void Foam::MassTransferPhaseSystem<BasePhaseSystem>::alphaTransfer
             scalar dmdt12 = -dmdtNet[celli];
             scalar coeffs21Cell = -coeffs12[celli];
 
-            scalar alpha2Limited = clamp(alpha2[celli], 0, 1);
+            scalar alpha2Limited = clamp(alpha2[celli], zero_one{});
 
             // exp
             SuPhase2[celli] += coeffs2[celli]*dmdt12;

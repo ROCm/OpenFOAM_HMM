@@ -50,9 +50,9 @@ namespace Foam
 {
 
 // Forward Declarations
-class SHA1;
 class Istream;
 class Ostream;
+class SHA1;
 
 /*---------------------------------------------------------------------------*\
                          Class SHA1Digest Declaration

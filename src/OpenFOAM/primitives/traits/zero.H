@@ -52,8 +52,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class zero;
-class zero_one;
 class Istream;
 class Ostream;
 
@@ -65,6 +63,7 @@ class zero
 {
 public:
 
+    //- The value type
     typedef zero value_type;
 
     // Forward Declarations
@@ -130,24 +129,6 @@ public:
 
     //- Construct from Istream consumes no content.
     explicit constexpr null(Istream&) noexcept {}
-};
-
-
-/*---------------------------------------------------------------------------*\
-                          Class zero_one Declaration
-\*---------------------------------------------------------------------------*/
-
-//- Represents 0/1 concept, eg for tagged dispatch
-class zero_one
-{
-public:
-    typedef zero_one value_type;
-
-    //- Default construct
-    constexpr zero_one() noexcept {}
-
-    //- Construct from Istream consumes no content.
-    explicit constexpr zero_one(Istream&) noexcept {}
 };
 
 

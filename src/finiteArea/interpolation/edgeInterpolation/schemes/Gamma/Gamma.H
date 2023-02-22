@@ -110,7 +110,7 @@ public:
         gradcf = stabilise(gradcf, SMALL);
 
         scalar phict = 1 - 0.5*gradf/gradcf;
-        scalar limiter = clamp(phict/k_, 0, 1);
+        scalar limiter = clamp(phict/k_, zero_one{});
 
         return lerp(udWeight, cdWeight, limiter);
     }

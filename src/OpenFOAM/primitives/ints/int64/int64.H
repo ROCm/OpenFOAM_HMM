@@ -52,10 +52,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class Istream;
-class Ostream;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- A word representation of int64 value
@@ -74,6 +70,12 @@ struct nameOp<int64_t>
         return word(std::to_string(val), false); // Needs no stripping
     }
 };
+
+
+inline int64_t mag(const int64_t val)
+{
+    return ::labs(val);
+}
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
@@ -129,6 +131,10 @@ Ostream& operator<<(Ostream& os, const int64_t val);
     Ostream& operator<<(Ostream& os, const long val);
 #endif
 
+
+/*---------------------------------------------------------------------------*\
+                        Specialization pTraits<int64_t>
+\*---------------------------------------------------------------------------*/
 
 //- Template specialization for pTraits<int64_t>
 template<>
@@ -186,23 +192,11 @@ public:
     // Member Functions
 
         //- Return the value
-        operator int64_t() const noexcept
-        {
-            return p_;
-        }
+        operator int64_t() const noexcept { return p_; }
 
         //- Access the value
-        operator int64_t&() noexcept
-        {
-            return p_;
-        }
+        operator int64_t&() noexcept { return p_; }
 };
-
-
-inline int64_t mag(const int64_t val)
-{
-    return ::labs(val);
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

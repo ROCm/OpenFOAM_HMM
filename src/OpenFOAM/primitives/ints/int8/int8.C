@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,43 +25,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "direction.H"
+#include "int8.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::direction Foam::readDirection(Istream& is)
+const char* const Foam::pTraits<int8_t>::typeName = "int8";
+const char* const Foam::pTraits<int8_t>::componentNames[] = { "" };
+
+const int8_t Foam::pTraits<int8_t>::zero = 0;
+const int8_t Foam::pTraits<int8_t>::one = 1;
+const int8_t Foam::pTraits<int8_t>::min = INT8_MIN;
+const int8_t Foam::pTraits<int8_t>::max = INT8_MAX;
+const int8_t Foam::pTraits<int8_t>::rootMin = INT8_MIN;
+const int8_t Foam::pTraits<int8_t>::rootMax = INT8_MAX;
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::pTraits<int8_t>::pTraits(Istream& is)
 {
-    direction val(0);
-    is >> val;
-
-    return val;
+    is >> p_;
 }
 
 
-Foam::Istream& Foam::operator>>(Istream& is, direction& val)
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+// int8_t Foam::readInt8(Istream& is)
+// {
+//     int8_t val(0);
+//     is >> val;
+//
+//     return val;
+// }
+
+
+Foam::Istream& Foam::operator>>(Istream& is, int8_t& val)
 {
     token t(is);
 
     if (!t.good())
     {
         FatalIOErrorInFunction(is)
-            << "Bad token - could not get uint8/direction"
+            << "Bad token - could not get int8"
             << exit(FatalIOError);
         is.setBad();
         return is;
     }
 
+    // Accept separated '-' (or '+') while expecting a number.
+    // This can arise during dictionary expansions (Eg, -$value)
+
     if (t.isLabel())
     {
-        val = direction(t.labelToken());
+        val = int8_t(t.labelToken());
     }
     else
     {
         FatalIOErrorInFunction(is)
-            << "Wrong token type - expected label (uint8/direction), found "
-            << t.info()
-            << exit(FatalIOError);
+            << "Wrong token type - expected label (int8), found "
+            << t.info() << exit(FatalIOError);
         is.setBad();
         return is;
     }
@@ -72,17 +94,10 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& val)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const direction val)
+Foam::Ostream& Foam::operator<<(Ostream& os, const int8_t val)
 {
     os.write(label(val));
     os.check(FUNCTION_NAME);
-    return os;
-}
-
-
-std::ostream& Foam::operator<<(std::ostream& os, const direction val)
-{
-    os << int(val);
     return os;
 }
 

@@ -81,7 +81,7 @@ public:
             faceFlux, phiP, phiN, gradcP, gradcN, d
         );
 
-        return clamp(r, 0, 1);
+        return clamp(r, zero_one{});
     }
 };
 

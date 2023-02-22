@@ -146,7 +146,7 @@ int main(int argc, char *argv[])
         Random rnd(4567);
         for (scalar& val : someField)
         {
-            val = rnd.position(-0.2, 1.2);
+            val = rnd.position(scalar(-0.2), scalar(1.2));
         }
 
         Info<< nl
@@ -171,6 +171,7 @@ int main(int argc, char *argv[])
             // nope << " : " << clamp(val, zero_one{})
             // nope << " : " << clamp(val, scalarMinMax(zero_one{}))
             << " : " << clamp(val, 0, 1)
+            << " : " << clamp(val, zero_one{})
             << nl;
     }
 

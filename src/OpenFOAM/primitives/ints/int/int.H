@@ -37,6 +37,7 @@ SourceFiles
 #ifndef Foam_primitives_int_H
 #define Foam_primitives_int_H
 
+#include "int8.H"
 #include "int16.H"
 #include "int32.H"
 #include "int64.H"

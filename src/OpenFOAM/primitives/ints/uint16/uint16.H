@@ -27,7 +27,7 @@ Primitive
     uint16_t
 
 Description
-    16bit unsigned integer. I/O is done via an int32.
+    16bit unsigned integer. I/O is done as an int32.
 
 SourceFiles
     uint16.C
@@ -38,16 +38,15 @@ SourceFiles
 #define Foam_primitives_uint16_H
 
 #include <cstdint>
+
+#include "direction.H"
+#include "pTraits.H"
 #include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class Istream;
-class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

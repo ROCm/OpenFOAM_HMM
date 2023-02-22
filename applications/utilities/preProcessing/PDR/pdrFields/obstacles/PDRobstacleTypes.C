@@ -62,7 +62,7 @@ namespace Foam
 // Volume porosity -> blockage
 inline scalar getPorosity(const dictionary& dict)
 {
-    return 1 - clamp(dict.getOrDefault<scalar>("porosity", 0), 0, 1);
+    return 1 - clamp(dict.getOrDefault<scalar>("porosity", 0), zero_one{});
 }
 
 // Direction porosities -> blockage
@@ -74,7 +74,7 @@ inline vector getPorosities(const dictionary& dict)
     {
         for (scalar& val : blockage)
         {
-            val = 1 - clamp(val, 0, 1);
+            val = 1 - clamp(val, zero_one{});
         }
     }
 

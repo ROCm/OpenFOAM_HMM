@@ -294,6 +294,13 @@ inline bool notEqual(const Scalar a, const Scalar b)
 }
 
 
+//- Clamp scalar value to a 0-1 range
+inline Scalar clamp(const Scalar val, const Foam::zero_one)
+{
+    return (val < 0) ? 0 : (1 < val) ? 1 : val;
+}
+
+
 // Fast implementation, and with scalar promotion of upper/lower limits
 inline Scalar clamp(const Scalar& val, const Scalar& lower, const Scalar& upper)
 {

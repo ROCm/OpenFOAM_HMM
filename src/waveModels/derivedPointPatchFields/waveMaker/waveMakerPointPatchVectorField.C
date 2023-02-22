@@ -89,7 +89,7 @@ Foam::scalar Foam::waveMakerPointPatchVectorField::timeCoeff
     const scalar t
 ) const
 {
-    return clamp(t/rampTime_, 0, 1);
+    return clamp(t/rampTime_, zero_one{});
 }
 
 

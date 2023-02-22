@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sliceRange_H
-#define sliceRange_H
+#ifndef Foam_sliceRange_H
+#define Foam_sliceRange_H
 
 #include "label.H"
 #include <iterator>
@@ -47,8 +47,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 template<class T> class List;
 template<class T, unsigned N> class FixedList;
 

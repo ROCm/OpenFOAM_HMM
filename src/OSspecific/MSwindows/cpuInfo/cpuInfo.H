@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Ostream;
 
 /*---------------------------------------------------------------------------*\

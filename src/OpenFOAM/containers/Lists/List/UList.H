@@ -57,7 +57,6 @@ SourceFiles
 #include "ListPolicy.H"
 
 #include <iterator>
-#include <type_traits>
 #include <vector>  // i.e, std::vector
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -66,8 +65,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 class labelRange;
 
 template<class T> class List;

@@ -81,7 +81,7 @@ namespace ListPolicy
 {
 
 // Override on a per-type basis
-template<> struct short_length<short> : std::integral_constant<short,20> {};
+template<> struct short_length<short> : std::integral_constant<int,20> {};
 
 } // End namespace ListPolicy
 } // End namespace Detail

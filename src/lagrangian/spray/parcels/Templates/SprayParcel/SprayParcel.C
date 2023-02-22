@@ -361,7 +361,7 @@ Foam::scalar Foam::SprayParcel<ParcelType>::chi
         }
     }
 
-    return clamp(chi, 0, 1);
+    return clamp(chi, zero_one{});
 }
 
 

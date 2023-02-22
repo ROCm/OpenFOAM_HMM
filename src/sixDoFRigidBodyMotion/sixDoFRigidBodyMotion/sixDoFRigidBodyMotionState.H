@@ -54,8 +54,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 class sixDoFRigidBodyMotionState;
 Istream& operator>>(Istream&, sixDoFRigidBodyMotionState&);
 Ostream& operator<<(Ostream&, const sixDoFRigidBodyMotionState&);

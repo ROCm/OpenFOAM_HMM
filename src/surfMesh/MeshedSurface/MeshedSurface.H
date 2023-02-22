@@ -76,8 +76,6 @@ namespace Foam
 class Time;
 class surfMesh;
 class polyBoundaryMesh;
-class Istream;
-class Ostream;
 
 template<class Face> class MeshedSurface;
 template<class Face> class MeshedSurfaceProxy;

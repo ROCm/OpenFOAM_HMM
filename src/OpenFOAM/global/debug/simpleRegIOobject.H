@@ -42,7 +42,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class Istream;
 class Ostream;
 

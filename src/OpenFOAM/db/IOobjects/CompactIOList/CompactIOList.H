@@ -51,8 +51,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 template<class T, class BaseType> class CompactIOList;
 
 template<class T, class BaseType> Istream& operator>>

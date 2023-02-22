@@ -5,7 +5,6 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2018-2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -62,8 +61,8 @@ Description
 #ifndef Foam_contiguous_H
 #define Foam_contiguous_H
 
-#include "scalarFwd.H"
 #include "labelFwd.H"
+#include "scalarFwd.H"
 #include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,26 +74,17 @@ namespace Foam
 
 // Base definition for (integral | floating-point) as contiguous
 template<class T>
-struct is_contiguous
-:
-    std::is_arithmetic<T>
-{};
+struct is_contiguous : std::is_arithmetic<T> {};
 
 
 // Base definition for 'label'
 template<class T>
-struct is_contiguous_label
-:
-    std::is_same<T, label>
-{};
+struct is_contiguous_label : std::is_same<T, label> {};
 
 
 // Base definition for 'scalar'
 template<class T>
-struct is_contiguous_scalar
-:
-    std::is_same<T, scalar>
-{};
+struct is_contiguous_scalar : std::is_same<T, scalar> {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

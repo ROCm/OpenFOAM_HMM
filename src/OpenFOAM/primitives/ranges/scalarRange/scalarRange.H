@@ -56,7 +56,6 @@ namespace Foam
 
 // Forward Declarations
 class scalarRange;
-class Ostream;
 template<class T> class MinMax;
 
 Ostream& operator<<(Ostream& os, const scalarRange& range);

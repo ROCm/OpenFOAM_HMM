@@ -38,14 +38,12 @@ SourceFiles
 #ifndef Foam_primitives_char_H
 #define Foam_primitives_char_H
 
+#include "pTraits.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class Istream;
-class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,16 +74,9 @@ inline bool isspace(char c) noexcept
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "pTraits.H"
-
-namespace Foam
-{
+/*---------------------------------------------------------------------------*\
+                         Specialization pTraits<char>
+\*---------------------------------------------------------------------------*/
 
 //- Template specialisation for pTraits\<char\>
 template<>
@@ -115,16 +106,10 @@ public:
     // Member Functions
 
         //- Return the value
-        operator char() const noexcept
-        {
-            return p_;
-        }
+        operator char() const noexcept { return p_; }
 
         //- Access the value
-        operator char&() noexcept
-        {
-            return p_;
-        }
+        operator char&() noexcept { return p_; }
 };
 
 

@@ -107,7 +107,7 @@ public:
             ((faceFlux - phiU)/stabilise(phiCD - phiU, SMALL) + k_);
 
         // Limit the limiter between upwind and central
-        return clamp(PLimiter, 0, 1);
+        return clamp(PLimiter, zero_one{});
     }
 };
 

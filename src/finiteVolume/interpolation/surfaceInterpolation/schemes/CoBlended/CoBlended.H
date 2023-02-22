@@ -36,7 +36,7 @@ Description
     face-based Courant number and the lower and upper Courant number limits
     supplied:
     \f[
-        weight = 1 - clamp((Co - Co1)/(Co2 - Co1), 0, 1)
+        weight = 1 - clamp((Co - Co1)/(Co2 - Co1), zero_one{})
     \f]
     where
     \vartable

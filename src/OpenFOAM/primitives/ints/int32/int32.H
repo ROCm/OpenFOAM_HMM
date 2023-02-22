@@ -52,10 +52,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class Istream;
-class Ostream;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- A word representation of int32 value
@@ -74,6 +70,12 @@ struct nameOp<int32_t>
         return word(std::to_string(val), false); // Needs no stripping
     }
 };
+
+
+inline int32_t mag(const int32_t val)
+{
+    return ::abs(val);
+}
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
@@ -131,6 +133,10 @@ Ostream& operator<<(Ostream& os, const int32_t val);
 #endif
 
 
+/*---------------------------------------------------------------------------*\
+                        Specialization pTraits<int32_t>
+\*---------------------------------------------------------------------------*/
+
 //- Template specialization for pTraits<int32_t>
 template<>
 class pTraits<int32_t>
@@ -187,23 +193,11 @@ public:
     // Member Functions
 
         //- Return the value
-        operator int32_t() const noexcept
-        {
-            return p_;
-        }
+        operator int32_t() const noexcept { return p_; }
 
         //- Access the value
-        operator int32_t&() noexcept
-        {
-            return p_;
-        }
+        operator int32_t&() noexcept { return p_; }
 };
-
-
-inline int32_t mag(const int32_t val)
-{
-    return ::abs(val);
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
