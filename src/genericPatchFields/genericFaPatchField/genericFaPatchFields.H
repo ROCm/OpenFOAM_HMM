@@ -25,8 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef genericFaPatchFields_H
-#define genericFaPatchFields_H
+#ifndef Foam_genericFaPatchFields_H
+#define Foam_genericFaPatchFields_H
 
 #include "genericFaPatchField.H"
 #include "fieldTypes.H"

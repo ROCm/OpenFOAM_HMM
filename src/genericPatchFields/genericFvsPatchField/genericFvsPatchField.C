@@ -40,7 +40,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
     parent_bctype(p, iF)
 {
     FatalErrorInFunction
-        << "Trying to construct an genericFvsPatchField on patch "
+        << "Trying to construct generic patchField on patch "
         << this->patch().name()
         << " of field " << this->internalField().name()
         << abort(FatalError);
@@ -62,7 +62,7 @@ Foam::genericFvsPatchField<Type>::genericFvsPatchField
     const word& patchName = this->patch().name();
     const IOobject& io = this->internalField();
 
-    if (!dict.found("value"))
+    if (!dict.findEntry("value", keyType::LITERAL))
     {
         reportMissingEntry("value", patchName, io);
     }
@@ -148,7 +148,7 @@ Foam::genericFvsPatchField<Type>::valueInternalCoeffs
 ) const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFvsPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (
@@ -169,7 +169,7 @@ Foam::genericFvsPatchField<Type>::valueBoundaryCoeffs
 ) const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFvsPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (
@@ -187,7 +187,7 @@ Foam::tmp<Foam::Field<Type>>
 Foam::genericFvsPatchField<Type>::gradientInternalCoeffs() const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFvsPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (
@@ -204,7 +204,7 @@ Foam::tmp<Foam::Field<Type>>
 Foam::genericFvsPatchField<Type>::gradientBoundaryCoeffs() const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFvsPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (

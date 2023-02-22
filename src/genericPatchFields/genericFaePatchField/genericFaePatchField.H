@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,21 +24,25 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::genericPointPatchField
+    Foam::genericFaePatchField
 
 Description
-    A generic version of calculatedPointPatchField, useful as a fallback for
-    handling unknown patch types.
+    This boundary condition provides a generic version of the \c calculated
+    condition, useful as a fallback for handling unknown patch types.  Not
+    generally applicable as a user-specified condition.
+
+See also
+    Foam::calculatedFaePatchField
 
 SourceFiles
-    genericPointPatchField.C
+    genericFaePatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_genericPointPatchField_H
-#define Foam_genericPointPatchField_H
+#ifndef genericFaePatchField_H
+#define genericFaePatchField_H
 
-#include "calculatedPointPatchField.H"
+#include "calculatedFaePatchField.H"
 #include "genericPatchFieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -48,17 +51,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class genericPointPatchField Declaration
+                    Class genericFaePatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class genericPointPatchField
+class genericFaePatchField
 :
-    public calculatedPointPatchField<Type>,
+    public calculatedFaePatchField<Type>,
     public genericPatchFieldBase
 {
     //- The parent boundary condition type
-    typedef calculatedPointPatchField<Type> parent_bctype;
+    typedef calculatedFaePatchField<Type> parent_bctype;
 
 
 public:
@@ -70,64 +73,57 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        genericPointPatchField
+        genericFaePatchField
         (
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        genericPointPatchField
+        genericFaePatchField
         (
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&,
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&,
             const dictionary&
         );
 
         //- Construct by mapping given patch field onto a new patch
-        genericPointPatchField
+        genericFaePatchField
         (
-            const genericPointPatchField<Type>&,
-            const pointPatch&,
-            const DimensionedField<Type, pointMesh>&,
-            const pointPatchFieldMapper&
+            const genericFaePatchField<Type>&,
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&,
+            const faPatchFieldMapper&
         );
 
+        //- Default copy construct
+        genericFaePatchField(const genericFaePatchField<Type>&) = default;
+
         //- Construct and return a clone
-        virtual autoPtr<pointPatchField<Type>> clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return autoPtr<pointPatchField<Type>>
+            return tmp<faePatchField<Type>>
             (
-                new genericPointPatchField<Type>
-                (
-                    *this
-                )
+                new genericFaePatchField<Type>(*this)
             );
         }
 
-        //- Default copy construct
-        genericPointPatchField(const genericPointPatchField<Type>&) = default;
-
         //- Construct as copy setting internal field reference
-        genericPointPatchField
+        genericFaePatchField
         (
-            const genericPointPatchField<Type>&,
-            const DimensionedField<Type, pointMesh>&
+            const genericFaePatchField<Type>&,
+            const DimensionedField<Type, edgeMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual autoPtr<pointPatchField<Type>> clone
+        virtual tmp<faePatchField<Type>> clone
         (
-            const DimensionedField<Type, pointMesh>& iF
+            const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return autoPtr<pointPatchField<Type>>
+            return tmp<faePatchField<Type>>
             (
-                new genericPointPatchField<Type>
-                (
-                    *this,
-                    iF
-                )
+                new genericFaePatchField<Type>(*this, iF)
             );
         }
 
@@ -141,12 +137,12 @@ public:
     // Mapping Functions
 
         //- Map (and resize as needed) from self given a mapping object
-        virtual void autoMap(const pointPatchFieldMapper&);
+        virtual void autoMap(const faPatchFieldMapper&);
 
-        //- Reverse map the given pointPatchField onto this pointPatchField
+        //- Reverse map the given faPatchField onto this faPatchField
         virtual void rmap
         (
-            const pointPatchField<Type>&,
+            const faePatchField<Type>&,
             const labelList&
         );
 };
@@ -159,7 +155,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "genericPointPatchField.C"
+    #include "genericFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,7 +88,7 @@ void Foam::genericPatchFieldBase::genericFatalSolveError
 ) const
 {
     FatalError
-        << " (actual type " << actualTypeName_ << ')'
+        << " (Actual type " << actualTypeName_ << ')'
         << "\n    on patch " << patchName
         << " of field " << io.name() << " in file " << io.objectPath() << nl
         << nl
@@ -161,10 +161,6 @@ bool Foam::genericPatchFieldBase::processEntry
         return false;
     }
 
-    #undef FIELDSIZE_CHECK
-    #define FIELDSIZE_CHECK(fieldLen)  \
-        checkFieldSize(fieldLen, patchSize, patchName, key, io)
-
 
     // First token
     token tok(is);
@@ -179,6 +175,7 @@ bool Foam::genericPatchFieldBase::processEntry
             // without a compound type.
             // Just treat as scalar and hope for the best.
             scalarFields_.insert(key, autoPtr<scalarField>::New());
+            return true;
         }
         else if (!tok.isCompound())
         {
@@ -190,130 +187,50 @@ bool Foam::genericPatchFieldBase::processEntry
                 << exit(FatalIOError);
             return false;
         }
-        else if
-        (
-            tok.compoundToken().type()
-         == token::Compound<List<scalar>>::typeName
-        )
-        {
-            auto fPtr = autoPtr<scalarField>::New();
 
-            fPtr->transfer
-            (
-                dynamicCast<token::Compound<List<scalar>>>
-                (
-                    tok.transferCompoundToken(is)
-                )
-            );
-
-            if (!FIELDSIZE_CHECK(fPtr->size()))
-            {
-                return false;
-            }
-
-            scalarFields_.insert(key, fPtr);
+        #undef  doLocalCode
+        #define doLocalCode(ValueType, Member)                                \
+        if                                                                    \
+        (                                                                     \
+            tok.compoundToken().type()                                        \
+         == token::Compound<List<ValueType>>::typeName                        \
+        )                                                                     \
+        {                                                                     \
+            auto fPtr = autoPtr<Field<ValueType>>::New();                     \
+                                                                              \
+            fPtr->transfer                                                    \
+            (                                                                 \
+                dynamicCast<token::Compound<List<ValueType>>>                 \
+                (                                                             \
+                    tok.transferCompoundToken(is)                             \
+                )                                                             \
+            );                                                                \
+                                                                              \
+            if (!checkFieldSize(fPtr->size(), patchSize, patchName, key, io)) \
+            {                                                                 \
+                return false;                                                 \
+            }                                                                 \
+                                                                              \
+            this->Member.insert(key, fPtr);                                   \
+            return true;                                                      \
         }
-        else if
-        (
-            tok.compoundToken().type()
-         == token::Compound<List<vector>>::typeName
-        )
-        {
-            auto fPtr = autoPtr<vectorField>::New();
 
-            fPtr->transfer
-            (
-                dynamicCast<token::Compound<List<vector>>>
-                (
-                    tok.transferCompoundToken(is)
-                )
-            );
+        //doLocalCode(label, labelFields_);
+        doLocalCode(scalar, scalarFields_);
+        doLocalCode(vector, vectorFields_);
+        doLocalCode(sphericalTensor, sphTensorFields_);
+        doLocalCode(symmTensor, symmTensorFields_);
+        doLocalCode(tensor, tensorFields_);
+        #undef doLocalCode
 
-            if (!FIELDSIZE_CHECK(fPtr->size()))
-            {
-                return false;
-            }
-            vectorFields_.insert(key, fPtr);
-        }
-        else if
-        (
-            tok.compoundToken().type()
-         == token::Compound<List<sphericalTensor>>::typeName
-        )
-        {
-            auto fPtr = autoPtr<sphericalTensorField>::New();
-
-            fPtr->transfer
-            (
-                dynamicCast<token::Compound<List<sphericalTensor>>>
-                (
-                    tok.transferCompoundToken(is)
-                )
-            );
-
-            if (!FIELDSIZE_CHECK(fPtr->size()))
-            {
-                return false;
-            }
-
-            sphTensorFields_.insert(key, fPtr);
-        }
-        else if
-        (
-            tok.compoundToken().type()
-         == token::Compound<List<symmTensor>>::typeName
-        )
-        {
-            auto fPtr = autoPtr<symmTensorField>::New();
-
-            fPtr->transfer
-            (
-                dynamicCast<token::Compound<List<symmTensor>>>
-                (
-                    tok.transferCompoundToken(is)
-                )
-            );
-
-            if (!FIELDSIZE_CHECK(fPtr->size()))
-            {
-                return false;
-            }
-
-            symmTensorFields_.insert(key, fPtr);
-        }
-        else if
-        (
-            tok.compoundToken().type()
-         == token::Compound<List<tensor>>::typeName
-        )
-        {
-            auto fPtr = autoPtr<tensorField>::New();
-
-            fPtr->transfer
-            (
-                dynamicCast<token::Compound<List<tensor>>>
-                (
-                    tok.transferCompoundToken(is)
-                )
-            );
-
-            if (!FIELDSIZE_CHECK(fPtr->size()))
-            {
-                return false;
-            }
-
-            tensorFields_.insert(key, fPtr);
-        }
-        else
-        {
-            FatalIOErrorInFunction(dict_)
-                << "\n    unsupported compound " << tok.compoundToken()
-                << "\n    on patch " << patchName << " of field "
-                << io.name() << " in file "
-                << io.objectPath() << nl
-                << exit(FatalIOError);
-            return false;
-        }
+        // Fall-through
+        FatalIOErrorInFunction(dict_)
+            << "\n    unsupported compound " << tok.compoundToken() << nl
+            << "\n    on patch " << patchName << " of field "
+            << io.name() << " in file "
+            << io.objectPath() << nl
+            << exit(FatalIOError);
+        return false;
     }
     else if (tok.isWord("uniform"))
     {
@@ -321,6 +238,9 @@ bool Foam::genericPatchFieldBase::processEntry
 
         if (!tok.isPunctuation())
         {
+            // Unfortunately cannot distinguish between
+            // labelField and scalarField...
+
             scalarFields_.insert
             (
                 key,
@@ -413,8 +333,6 @@ bool Foam::genericPatchFieldBase::processEntry
         }
     }
 
-    #undef FIELDSIZE_CHECK
-
     return true;
 }
 
@@ -430,30 +348,27 @@ void Foam::genericPatchFieldBase::putEntry
     if
     (
         e.isStream()
-     && e.stream().size()
-     && e.stream()[0].isWord("nonuniform")
+     && e.stream().peek().isWord("nonuniform")
     )
     {
-        if (scalarFields_.found(key))
-        {
-            scalarFields_.cfind(key)()->writeEntry(key, os);
+        #undef  doLocalCode
+        #define doLocalCode(ValueType, Member)                                \
+        {                                                                     \
+            const auto iter = this->Member.cfind(key);                        \
+            if (iter.good())                                                  \
+            {                                                                 \
+                iter.val()->writeEntry(key, os);                              \
+                return;                                                       \
+            }                                                                 \
         }
-        else if (vectorFields_.found(key))
-        {
-            vectorFields_.cfind(key)()->writeEntry(key, os);
-        }
-        else if (sphTensorFields_.found(key))
-        {
-            sphTensorFields_.cfind(key)()->writeEntry(key, os);
-        }
-        else if (symmTensorFields_.found(key))
-        {
-            symmTensorFields_.cfind(key)()->writeEntry(key, os);
-        }
-        else if (tensorFields_.found(key))
-        {
-            tensorFields_.cfind(key)()->writeEntry(key, os);
-        }
+
+        //doLocalCode(label, labelFields_);
+        doLocalCode(scalar, scalarFields_);
+        doLocalCode(vector, vectorFields_);
+        doLocalCode(sphericalTensor, sphTensorFields_);
+        doLocalCode(symmTensor, symmTensorFields_);
+        doLocalCode(tensor, tensorFields_);
+        #undef doLocalCode
     }
     else
     {
@@ -492,55 +407,25 @@ void Foam::genericPatchFieldBase::rmapGeneric
     const labelList& addr
 )
 {
-    forAllIters(scalarFields_, iter)
-    {
-        const auto iter2 = rhs.scalarFields_.cfind(iter.key());
-
-        if (iter2.good())
-        {
-            (*iter)->rmap(*iter2(), addr);
-        }
+    #undef  doLocalCode
+    #define doLocalCode(ValueType, Member)                                    \
+    forAllIters(this->Member, iter)                                           \
+    {                                                                         \
+        const auto iter2 = rhs.Member.cfind(iter.key());                      \
+                                                                              \
+        if (iter2.good())                                                     \
+        {                                                                     \
+            iter.val()->rmap(*iter2.val(), addr);                             \
+        }                                                                     \
     }
 
-    forAllIters(vectorFields_, iter)
-    {
-        const auto iter2 = rhs.vectorFields_.cfind(iter.key());
-
-        if (iter2.good())
-        {
-            (*iter)->rmap(*iter2(), addr);
-        }
-    }
-
-    forAllIters(sphTensorFields_, iter)
-    {
-        const auto iter2 = rhs.sphTensorFields_.cfind(iter.key());
-
-        if (iter2.good())
-        {
-            (*iter)->rmap(*iter2(), addr);
-        }
-    }
-
-    forAllIters(symmTensorFields_, iter)
-    {
-        const auto iter2 = rhs.symmTensorFields_.cfind(iter.key());
-
-        if (iter2.good())
-        {
-            (*iter)->rmap(*iter2(), addr);
-        }
-    }
-
-    forAllIters(tensorFields_, iter)
-    {
-        const auto iter2 = rhs.tensorFields_.find(iter.key());
-
-        if (iter2.good())
-        {
-            (*iter)->rmap(*iter2(), addr);
-        }
-    }
+    //doLocalCode(label, labelFields_);
+    doLocalCode(scalar, scalarFields_);
+    doLocalCode(vector, vectorFields_);
+    doLocalCode(sphericalTensor, sphTensorFields_);
+    doLocalCode(symmTensor, symmTensorFields_);
+    doLocalCode(tensor, tensorFields_);
+    #undef doLocalCode
 }
 
 

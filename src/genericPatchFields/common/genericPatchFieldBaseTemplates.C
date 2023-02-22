@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,50 +36,24 @@ void Foam::genericPatchFieldBase::mapGeneric
     const MapperType& mapper
 )
 {
-    forAllConstIters(rhs.scalarFields_, iter)
-    {
-        scalarFields_.insert
-        (
-            iter.key(),
-            autoPtr<scalarField>::New(*iter(), mapper)
-        );
+    #undef  doLocalCode
+    #define doLocalCode(ValueType, Member)                                    \
+    forAllIters(rhs.Member, iter)                                             \
+    {                                                                         \
+        this->Member.insert                                                   \
+        (                                                                     \
+            iter.key(),                                                       \
+            autoPtr<Field<ValueType>>::New(*iter.val(), mapper)               \
+        );                                                                    \
     }
 
-    forAllConstIters(rhs.vectorFields_, iter)
-    {
-        vectorFields_.insert
-        (
-            iter.key(),
-            autoPtr<vectorField>::New(*iter(), mapper)
-        );
-    }
-
-    forAllConstIters(rhs.sphTensorFields_, iter)
-    {
-        sphTensorFields_.insert
-        (
-            iter.key(),
-            autoPtr<sphericalTensorField>::New(*iter(), mapper)
-        );
-    }
-
-    forAllConstIters(rhs.symmTensorFields_, iter)
-    {
-        symmTensorFields_.insert
-        (
-            iter.key(),
-            autoPtr<symmTensorField>::New(*iter(), mapper)
-        );
-    }
-
-    forAllConstIters(rhs.tensorFields_, iter)
-    {
-        tensorFields_.insert
-        (
-            iter.key(),
-            autoPtr<tensorField>::New(*iter(), mapper)
-        );
-    }
+    //doLocalCode(label, labelFields_);
+    doLocalCode(scalar, scalarFields_);
+    doLocalCode(vector, vectorFields_);
+    doLocalCode(sphericalTensor, sphTensorFields_);
+    doLocalCode(symmTensor, symmTensorFields_);
+    doLocalCode(tensor, tensorFields_);
+    #undef doLocalCode
 }
 
 
@@ -89,30 +63,20 @@ void Foam::genericPatchFieldBase::autoMapGeneric
     const MapperType& mapper
 )
 {
-    forAllIters(scalarFields_, iter)
-    {
-        (*iter)->autoMap(mapper);
+    #undef  doLocalCode
+    #define doLocalCode(ValueType, Member)                                    \
+    forAllIters(this->Member, iter)                                           \
+    {                                                                         \
+        iter.val()->autoMap(mapper);                                          \
     }
 
-    forAllIters(vectorFields_, iter)
-    {
-        (*iter)->autoMap(mapper);
-    }
-
-    forAllIters(sphTensorFields_, iter)
-    {
-        (*iter)->autoMap(mapper);
-    }
-
-    forAllIters(symmTensorFields_, iter)
-    {
-        (*iter)->autoMap(mapper);
-    }
-
-    forAllIters(tensorFields_, iter)
-    {
-        (*iter)->autoMap(mapper);
-    }
+    //doLocalCode(label, labelFields_);
+    doLocalCode(scalar, scalarFields_);
+    doLocalCode(vector, vectorFields_);
+    doLocalCode(sphericalTensor, sphTensorFields_);
+    doLocalCode(symmTensor, symmTensorFields_);
+    doLocalCode(tensor, tensorFields_);
+    #undef doLocalCode
 }
 
 

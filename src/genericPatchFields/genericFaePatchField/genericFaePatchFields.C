@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2023 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,16 +25,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "genericFvsPatchFields.H"
+#include "genericFaePatchFields.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvsPatchFields.H"
-#include "volFields.H"
+#include "edgeFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeFvsPatchFields(generic);
+    makeFaePatchFields(generic);
 }
 
 // ************************************************************************* //

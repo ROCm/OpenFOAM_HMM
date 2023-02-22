@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef genericPatchFieldBase_H
-#define genericPatchFieldBase_H
+#ifndef Foam_genericPatchFieldBase_H
+#define Foam_genericPatchFieldBase_H
 
 #include "dictionary.H"
 #include "primitiveFields.H"
@@ -54,6 +54,26 @@ namespace Foam
 
 class genericPatchFieldBase
 {
+    // Private Data
+
+        //- The non-generic patch name
+        word actualTypeName_;
+
+        //- Copy of the input dictionary (used for transcribing)
+        dictionary dict_;
+
+
+    // The data fields read.
+    // Do not need to handle generic for 'label' since these
+    // will be limited to known field types.
+
+        HashPtrTable<scalarField> scalarFields_;
+        HashPtrTable<vectorField> vectorFields_;
+        HashPtrTable<sphericalTensorField> sphTensorFields_;
+        HashPtrTable<symmTensorField> symmTensorFields_;
+        HashPtrTable<tensorField> tensorFields_;
+
+
     // Private Member Functions
 
         bool checkFieldSize
@@ -67,20 +87,6 @@ class genericPatchFieldBase
 
 
 protected:
-
-    // Protected Data
-
-        //- The non-generic patch name
-        word actualTypeName_;
-
-        dictionary dict_;
-
-        HashPtrTable<scalarField> scalarFields_;
-        HashPtrTable<vectorField> vectorFields_;
-        HashPtrTable<sphericalTensorField> sphTensorFields_;
-        HashPtrTable<symmTensorField> symmTensorFields_;
-        HashPtrTable<tensorField> tensorFields_;
-
 
     // Protected Member Functions
 

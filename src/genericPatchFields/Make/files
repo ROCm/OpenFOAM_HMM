@@ -1,6 +1,7 @@
-genericPatchFieldBase/genericPatchFieldBase.C
+common/genericPatchFieldBase.C
 
 genericFaPatchField/genericFaPatchFields.C
+/* not yet needed:  genericFaePatchField/genericFaePatchFields.C */
 genericFvPatchField/genericFvPatchFields.C
 genericFvsPatchField/genericFvsPatchFields.C
 genericPointPatchField/genericPointPatchFields.C
