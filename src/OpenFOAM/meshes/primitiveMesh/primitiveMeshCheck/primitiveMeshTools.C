@@ -45,6 +45,7 @@ void Foam::primitiveMeshTools::updateFaceCentresAndAreas
 {
     const faceList& fs = mesh.faces();
 
+    OMP(parallel for if(faceIDs.size() >= (1<<21)))
     for (const label facei : faceIDs)
     {
         const labelList& f = fs[facei];

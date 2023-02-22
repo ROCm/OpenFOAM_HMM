@@ -262,6 +262,7 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
 
     const typename SFType::Internal& Sfi = Sf();
 
+    OMP(parallel for if(P.size() >= (1<<21)))
     for (label fi=0; fi<P.size(); fi++)
     {
         sfi[fi] = Sfi[fi] & (lambda[fi]*(vfi[P[fi]] - vfi[N[fi]]) + vfi[N[fi]]);
@@ -272,6 +273,7 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     typename GeometricField<RetType, fvsPatchField, surfaceMesh>::
         Boundary& sfbf = sf.boundaryFieldRef();
 
+    OMP(parallel for if(lambdas.boundaryField().size() >= (1<<21)))
     forAll(lambdas.boundaryField(), pi)
     {
         const fvsPatchScalarField& pLambda = lambdas.boundaryField()[pi];
