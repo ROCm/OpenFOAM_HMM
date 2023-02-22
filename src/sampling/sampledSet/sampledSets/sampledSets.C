@@ -292,7 +292,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
         writers_.clear();
     }
 
-    const entry* eptr = dict.findEntry("sets");
+    const entry* eptr = dict.findEntry("sets", keyType::LITERAL);
 
     if (eptr && eptr->isDict())
     {
@@ -529,7 +529,7 @@ bool Foam::sampledSets::read(const dictionary& dict)
     samplePointScheme_ =
         dict.getOrDefault<word>("interpolationScheme", "cellPoint");
 
-    const entry* eptr = dict.findEntry("sets");
+    const entry* eptr = dict.findEntry("sets", keyType::LITERAL);
 
     if (eptr)
     {

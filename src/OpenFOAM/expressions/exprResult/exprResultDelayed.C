@@ -99,9 +99,9 @@ Foam::expressions::exprResultDelayed::exprResultDelayed
     storeInterval_(dict.get<scalar>("storeInterval")),
     delay_(dict.get<scalar>("delay"))
 {
-    const entry *eptr = dict.findEntry("storedValues");
+    const entry *eptr = dict.findEntry("storedValues", keyType::LITERAL);
 
-    if (eptr)
+    if (eptr && eptr->isStream())
     {
         storedValues_ = DLList<ValueAtTime>(eptr->stream());
     }

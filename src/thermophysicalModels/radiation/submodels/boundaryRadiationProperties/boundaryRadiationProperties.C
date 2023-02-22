@@ -89,14 +89,16 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
             {
                 const label patchi = pp.index();
 
-                const auto* ePtr = radiationDict.findEntry(pp.name());
+                // Allow wildcard matches
+                const auto* eptr =
+                    radiationDict.findEntry(pp.name(), keyType::REGEX);
 
-                if (ePtr && ePtr->isDict())
+                if (eptr && eptr->isDict())
                 {
                     radBoundaryPropertiesPtrList_.set
                     (
                         patchi,
-                        boundaryRadiationPropertiesPatch::New(ePtr->dict(), pp)
+                        boundaryRadiationPropertiesPatch::New(eptr->dict(), pp)
                     );
 
                     matchedEntries.insert(pp.name());
@@ -132,32 +134,25 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
             {
                 const label zonei = fz.index();
 
-                if (!matchedEntries.found(fz.name()))
+                if (!matchedEntries.contains(fz.name()))
                 {
                     // Note: avoid wildcard matches. Assume user explicitly
                     // provided information for faceZones.
-                    const auto* ePtr = radiationDict.findEntry
+
+                    const auto* eptr = radiationDict.findEntry
                     (
                         fz.name(),
                         keyType::LITERAL
                     );
 
-                    // Skip face zones that are not used in boundary radiation
-                    if (!ePtr)
+                    if (eptr && eptr->isDict())
                     {
-                        continue;
-                    }
-
-                    if (ePtr->isDict())
-                    {
-                        const dictionary& dict = ePtr->dict();
-
                         radZonePropertiesPtrList_.set
                         (
                             zonei,
                             boundaryRadiationPropertiesPatch::New
                             (
-                                dict,
+                                eptr->dict(),
                                 dummyRef
                             )
                         );

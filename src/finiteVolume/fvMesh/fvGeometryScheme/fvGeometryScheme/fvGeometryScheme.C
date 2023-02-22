@@ -106,11 +106,11 @@ Foam::tmp<Foam::fvGeometryScheme> Foam::fvGeometryScheme::New
     const word& defaultScheme
 )
 {
-    const entry* ePtr = dict.findEntry("method");
+    const entry* eptr = dict.findEntry("method", keyType::LITERAL);
     const word schemeName
     (
-        ePtr
-      ? word(ePtr->stream())
+        eptr
+      ? word(eptr->stream())
       : dict.getOrDefault<word>("type", defaultScheme)
     );
 

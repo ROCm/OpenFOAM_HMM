@@ -128,7 +128,7 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
             << exit(FatalError);
     }
 
-    //const auto* eptr = dict.findEntry("thicknessLayers");
+    //const auto* eptr = dict.findEntry("thicknessLayers", keyType::LITERAL);
     //if (eptr)
     //{
     //    // Detect either a list (parsed as a scalarList) or

@@ -297,7 +297,7 @@ bool Foam::sampledSurfaces::read(const dictionary& dict)
     sampleNodeScheme_ =
         dict.getOrDefault<word>("interpolationScheme", "cellPoint");
 
-    const entry* eptr = dict.findEntry("surfaces");
+    const entry* eptr = dict.findEntry("surfaces", keyType::LITERAL);
 
     // Surface writer type and format options
     const word writerType =
