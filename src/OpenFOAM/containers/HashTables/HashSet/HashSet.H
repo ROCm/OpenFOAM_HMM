@@ -93,7 +93,7 @@ typedef HashSet<label, Hash<label>> labelHashSet;
 template<class Key, class Hash=Foam::Hash<Key>>
 class HashSet
 :
-    public HashTable<zero::null, Key, Hash>
+    public HashTable<Foam::zero, Key, Hash>
 {
     // Private Member Functions
 
@@ -113,7 +113,7 @@ public:
     typedef HashSet<Key, Hash> this_type;
 
     //- The template instance used for the parent HashTable
-    typedef HashTable<zero::null, Key, Hash> parent_type;
+    typedef HashTable<Foam::zero, Key, Hash> parent_type;
 
     //- An iterator, returning reference to the key
     using iterator = typename parent_type::key_iterator;

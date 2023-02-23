@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -217,7 +217,7 @@ struct HashTableSingle
         typedef K key_type;
 
         //- Type of content (no content: placeholder)
-        typedef Foam::zero::null mapped_type;
+        typedef Foam::zero mapped_type;
 
         //- Content storage type to the entry
         typedef key_type value_type;
@@ -271,22 +271,22 @@ struct HashTableSingle
             return key_;
         }
 
-        //- Const access to the (dummy) mapped value
+        //- Const access to the (dummy) mapped value (for API only)
         const mapped_type& cval() const noexcept
         {
-            return Foam::zero::null::dummy;
+            return Foam::zero::dummy;
         }
 
-        //- Const access to the (dummy) mapped value
+        //- Const access to the (dummy) mapped value (for API only)
         const mapped_type& val() const noexcept
         {
-            return Foam::zero::null::dummy;
+            return Foam::zero::dummy;
         }
 
-        //- Non-const access to the (dummy) mapped value
+        //- Non-const access to the (dummy) mapped value (for API only)
         mapped_type& val() noexcept
         {
-            return Foam::zero::null::dummy;
+            return Foam::zero::dummy;
         }
 
 

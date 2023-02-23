@@ -141,7 +141,7 @@ public:
 
         //- Swallow assignment (cf, std::ignore)
         template<class T>
-        const NullObject& operator=(const T&) const
+        const NullObject& operator=(const T&) const noexcept
         {
             return *this;
         }

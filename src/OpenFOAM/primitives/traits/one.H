@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,9 +65,6 @@ public:
     //- The value type
     typedef one value_type;
 
-    // Forward Declarations
-    class minus;
-
     //- Default construct
     constexpr one() noexcept {}
 
@@ -101,53 +98,6 @@ public:
 };
 
 
-/*---------------------------------------------------------------------------*\
-                         Class one::minus Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A class representing the concept of -1.
-//  \note this class must never be derived from Foam::one, since this could
-//  potentially mask its behaviour.
-class one::minus
-{
-public:
-
-    //- The value type
-    typedef minus value_type;
-
-    //- Default construct
-    constexpr minus() noexcept {}
-
-    //- Construct from Istream consumes no content.
-    explicit constexpr minus(Istream&) noexcept {}
-
-
-    //- Return -1 for label
-    constexpr operator label() const noexcept
-    {
-        return -1;
-    }
-
-    //- Return -1 for float
-    constexpr operator float() const noexcept
-    {
-        return -1;
-    }
-
-    //- Return -1 for double
-    constexpr operator double() const noexcept
-    {
-        return -1;
-    }
-
-    //- Component-wise or element-wise access returns minus one
-    one::minus operator[](const label) const noexcept
-    {
-        return one::minus{};
-    }
-};
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Global one (1)
@@ -157,12 +107,6 @@ static constexpr const one One;
 
 //- Read from Istream consumes no content.
 inline constexpr Istream& operator>>(Istream& is, one&) noexcept
-{
-    return is;
-}
-
-//- Read from Istream consumes no content.
-inline constexpr Istream& operator>>(Istream& is, one::minus&) noexcept
 {
     return is;
 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -400,7 +400,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh()
 {}
 
 
-Foam::extendedEdgeMesh::extendedEdgeMesh(class one::minus)
+Foam::extendedEdgeMesh::extendedEdgeMesh(std::nullptr_t)
 :
     edgeMesh(),
     concaveStart_(-1),
@@ -486,7 +486,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const boolList& surfBaffleRegions
 )
 :
-    extendedEdgeMesh(one::minus{})
+    extendedEdgeMesh(nullptr)
 {
     // Extract and reorder the data from surfaceFeatures
     const triSurface& surf = sFeat.surface();
@@ -549,7 +549,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const labelUList& featurePoints
 )
 :
-    extendedEdgeMesh(one::minus{})
+    extendedEdgeMesh(nullptr)
 {
     sortPointsAndEdges
     (

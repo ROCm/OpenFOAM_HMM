@@ -132,7 +132,7 @@ public:
         //- with an additional linked-list entry for hash collisions
         typedef typename std::conditional
         <
-            std::is_same<zero::null, typename std::remove_cv<T>::type>::value,
+            std::is_same<Foam::zero, typename std::remove_cv<T>::type>::value,
             Detail::HashTableSingle<Key>,
             Detail::HashTablePair<Key, T>
         >::type node_type;

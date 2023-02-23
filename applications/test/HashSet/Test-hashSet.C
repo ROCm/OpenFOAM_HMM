@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +25,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
+    Some simple HashSet tests
 
 \*---------------------------------------------------------------------------*/
 
 #include "hashedWordList.H"
-#include "nil.H"
 #include "HashOps.H"
 #include "HashSet.H"
 #include "Map.H"
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         { "value3", 3 }
     });
 
-    HashTable<nil> tableB;
+    HashTable<Foam::zero> tableB;
     tableB.emplace("value4");
     tableB.emplace("value5");
     tableB.emplace("value6");
@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
     Info<< wordHashSet(setA) << endl;
     Info<< "create from HashTable<T>: ";
     Info<< wordHashSet(tableA) << endl;
-    Info<< "create from HashTable<nil>: ";
+    Info<< "create from HashTable<zero>: ";
     Info<< wordHashSet(tableB) << endl;
 
     Info<< "create from Map<label>: ";

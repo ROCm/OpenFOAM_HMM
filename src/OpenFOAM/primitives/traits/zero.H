@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,8 +66,8 @@ public:
     //- The value type
     typedef zero value_type;
 
-    // Forward Declarations
-    class null;
+    //- A static instance, when modifiable reference is required by an API
+    static zero dummy;
 
     //- Default construct
     constexpr zero() noexcept {}
@@ -105,30 +105,10 @@ public:
     {
         return zero{};
     }
-};
 
-
-/*---------------------------------------------------------------------------*\
-                         Class zero::null Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A zero class with a null output adapter.
-class zero::null
-:
-    public zero
-{
-public:
-
-    typedef null value_type;
-
-    //- A static zero::null for dereferencing as a dummy element
-    static null dummy;
-
-    //- Default construct
-    constexpr null() noexcept {}
-
-    //- Construct from Istream consumes no content.
-    explicit constexpr null(Istream&) noexcept {}
+    // FUTURE?: Swallow assignment (as per std::ignore)
+    // template<class T>
+    // constexpr const zero& operator=(const T&) const { return *this; }
 };
 
 
@@ -143,12 +123,6 @@ static constexpr const zero Zero;
 inline constexpr Istream& operator>>(Istream& is, zero&) noexcept
 {
     return is;
-}
-
-//- Write to Ostream emits no content
-inline constexpr Ostream& operator<<(Ostream& os, const zero::null&) noexcept
-{
-    return os;
 }
 
 

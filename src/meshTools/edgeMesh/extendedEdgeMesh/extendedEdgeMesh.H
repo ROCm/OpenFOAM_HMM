@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -205,7 +205,7 @@ protected:
     // Protected Constructors
 
         //- Construct null, initializing start indices with -1
-        explicit extendedEdgeMesh(class one::minus);
+        explicit extendedEdgeMesh(std::nullptr_t);
 
 
     // Protected Member Functions
