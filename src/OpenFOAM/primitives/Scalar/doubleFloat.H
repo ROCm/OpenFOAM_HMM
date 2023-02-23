@@ -41,12 +41,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define MAXMINPOW(retType, type1, type2)                \
+#define MAXMINPOW(RetType, Type1, Type2)                \
                                                         \
-MAXMIN(retType, type1, type2)                           \
+MAXMIN(RetType, Type1, Type2)                           \
                                                         \
 /*! \brief Raise base to the power expon */             \
-inline double pow(const type1 base, const type2 expon)  \
+inline double pow(const Type1 base, const Type2 expon)  \
 {                                                       \
     return ::pow(double(base), double(expon));          \
 }

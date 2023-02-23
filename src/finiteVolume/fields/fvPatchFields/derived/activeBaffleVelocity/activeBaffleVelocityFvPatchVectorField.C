@@ -259,7 +259,7 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
                 *(orientation_*sign(forceDiff))
             );
 
-        openFraction_ = clamp(openFraction_, 1e-6, 1 - 1e-6);
+        openFraction_ = clamp(openFraction_, scalar(1e-6), scalar(1 - 1e-6));
 
         Info<< "openFraction = " << openFraction_ << endl;
 

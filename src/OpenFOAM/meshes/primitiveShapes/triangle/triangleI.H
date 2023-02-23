@@ -334,7 +334,7 @@ inline Foam::scalar Foam::triangle<Point, PointRef>::circumRadius() const
     }
 
     const scalar a = (d1 + d2)*(d2 + d3)*(d3 + d1) / denom;
-    return 0.5*Foam::sqrt(clamp(a, 0, GREAT));
+    return 0.5*Foam::sqrt(clamp(a, scalar(0), scalar(GREAT)));
 }
 
 

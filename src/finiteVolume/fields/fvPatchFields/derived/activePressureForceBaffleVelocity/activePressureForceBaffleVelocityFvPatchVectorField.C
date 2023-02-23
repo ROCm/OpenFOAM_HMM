@@ -310,7 +310,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
 
             baffleActivated_ = true;
         }
-        openFraction_ = clamp(openFraction_, 1e-6, 1 - 1e-6);
+        openFraction_ = clamp(openFraction_, scalar(1e-6), scalar(1 - 1e-6));
 
         if (Pstream::master())
         {

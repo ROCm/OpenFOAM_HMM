@@ -82,7 +82,7 @@ public:
             faceFlux, phiP, phiN, gradcP, gradcN, d
         );
 
-        scalar limitPhict = clamp(phict, 0, 0.5);
+        scalar limitPhict = clamp(phict, scalar(0), scalar(0.5));
         return limitPhict/(1 - limitPhict);
     }
 };

@@ -310,7 +310,7 @@ tmp<volScalarField::Internal> kOmegaSSTLM<BasicTurbulenceModel>::ReThetat0
             }
 
             lambda = sqr(thetat)/nu[celli]*dUsds[celli];
-            lambda = clamp(lambda, -0.1, 0.1);
+            lambda = clamp(lambda, scalar(-0.1), scalar(0.1));
 
             lambdaErr = mag(lambda - lambda0);
 

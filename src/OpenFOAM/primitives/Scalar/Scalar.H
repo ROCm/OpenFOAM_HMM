@@ -302,7 +302,7 @@ inline Scalar clamp(const Scalar val, const Foam::zero_one)
 
 
 // Fast implementation, and with scalar promotion of upper/lower limits
-inline Scalar clamp(const Scalar& val, const Scalar& lower, const Scalar& upper)
+inline Scalar clamp(const Scalar val, const Scalar lower, const Scalar upper)
 {
     return (val < lower) ? lower : (upper < val) ? upper : val;
 }

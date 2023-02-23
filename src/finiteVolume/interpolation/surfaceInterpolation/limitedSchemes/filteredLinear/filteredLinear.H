@@ -93,7 +93,7 @@ public:
            /(max(mag(dcP), mag(dcN)) + SMALL);
 
         // Limit the limiter between linear and 20% upwind
-        return clamp(limiter, 0.8, 1);
+        return clamp(limiter, scalar(0.8), scalar(1));
     }
 };
 

@@ -108,14 +108,17 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
             {
                 const scalar nu = mu[i]/(rho[i] + SMALL);
 
-                const scalar Da =
-                    clamp(sqrt(nu/(epsilon[i] + SMALL))/tc[i], 1e-10, 10);
+                const scalar Da = clamp
+                (
+                    sqrt(nu/(epsilon[i] + SMALL))/tc[i],
+                    scalar(1e-10), scalar(10)
+                );
 
                 const scalar ReT = sqr(k[i])/(nu*epsilon[i] + SMALL);
                 const scalar CtauI = min(C1_/(Da*sqrt(ReT + 1)), 2.1377);
 
                 const scalar CgammaI =
-                    clamp(C2_*sqrt(Da*(ReT + 1)), 0.4082, 5);
+                    clamp(C2_*sqrt(Da*(ReT + 1)), scalar(0.4082), scalar(5));
 
                 const scalar gammaL =
                     CgammaI*pow025(nu*epsilon[i]/(sqr(k[i]) + SMALL));

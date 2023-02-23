@@ -47,16 +47,16 @@ SourceFiles
 namespace Foam
 {
 
-#define MAXMIN(retType, type1, type2)                                          \
+#define MAXMIN(RetType, Type1, Type2)                                          \
                                                                                \
 /*! \brief Floating/integral min. Use stdFoam::min() to preserve references */ \
-inline retType min(const type1 s1, const type2 s2)                             \
+inline RetType min(const Type1 s1, const Type2 s2)                             \
 {                                                                              \
     return (s1 < s2) ? s1 : s2;                                                \
 }                                                                              \
                                                                                \
 /*! \brief Floating integral max. Use stdFoam::max() to preserve references */ \
-inline retType max(const type1 s1, const type2 s2)                             \
+inline RetType max(const Type1 s1, const Type2 s2)                             \
 {                                                                              \
     return (s2 < s1) ? s1 : s2;                                                \
 }

@@ -28,7 +28,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "argList.H"
 #include "Time.H"
 #include "BitOps.H"
 #include "HashOps.H"
