@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::symmTensorIOField
-
-Description
-    symmTensorField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmTensorIOField_H
-#define symmTensorIOField_H
+#ifndef Foam_symmTensorIOField_H
+#define Foam_symmTensorIOField_H
 
 #include "symmTensorField.H"
 #include "IOField.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of symmTensor
     typedef IOField<symmTensor> symmTensorIOField;
 }
 

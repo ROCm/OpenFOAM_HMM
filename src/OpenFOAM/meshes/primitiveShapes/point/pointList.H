@@ -23,34 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::pointList
-
-Description
-    A List of points.
-
-Typedef
-    Foam::pointUList
-
-Description
-    A UList of points.
-
-Typedef
-    Foam::pointSubList
-
-Description
-    A SubList of points.
-
-Typedef
-    Foam::pointListList
-
-Description
-    A List of pointList.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef pointList_H
-#define pointList_H
+#ifndef Foam_pointList_H
+#define Foam_pointList_H
 
 #include "point.H"
 #include "List.H"
@@ -60,10 +36,10 @@ Description
 
 namespace Foam
 {
-    typedef UList<point> pointUList;
-    typedef List<point> pointList;
-    typedef SubList<point> pointSubList;
-    typedef List<pointList> pointListList;
+    typedef List<point> pointList;          //!< List of point
+    typedef SubList<point> pointSubList;    //!< SubList of point
+    typedef UList<point> pointUList;        //!< UList of point
+    typedef List<pointList> pointListList;  //!< List of pointList
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

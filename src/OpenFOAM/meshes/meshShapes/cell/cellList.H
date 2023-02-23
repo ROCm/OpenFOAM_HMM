@@ -23,38 +23,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::cellList
-
-Description
-    A List of cells.
-
-Typedef
-    Foam::cellUList
-
-Description
-    A UList of cells.
-
-Typedef
-    Foam::cellSubList
-
-Description
-    A SubList of cells.
-
-Typedef
-    Foam::cellListList
-
-Description
-    A List of cellList.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellList_H
-#define cellList_H
+#ifndef Foam_cellList_H
+#define Foam_cellList_H
 
 #include "cell.H"
-#include "List.H"
-#include "SubList.H"
 #include "cellListFwd.H"
 
 #endif

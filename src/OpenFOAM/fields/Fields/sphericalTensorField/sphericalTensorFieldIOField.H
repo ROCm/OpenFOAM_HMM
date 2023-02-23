@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::sphericalTensorFieldIOField
-
-Description
-    sphericalTensorFieldField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef sphericalTensorFieldIOField_H
-#define sphericalTensorFieldIOField_H
+#ifndef Foam_sphericalTensorFieldIOField_H
+#define Foam_sphericalTensorFieldIOField_H
 
 #include "sphericalTensorField.H"
 #include "CompactIOField.H"
@@ -41,8 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of sphericalTensorField
     typedef IOField<sphericalTensorField> sphericalTensorFieldIOField;
 
+    //! Compact IO for a Field of sphericalTensorField
     typedef CompactIOField<sphericalTensorField, sphericalTensor>
     sphericalTensorFieldCompactIOField;
 }

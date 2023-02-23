@@ -23,24 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::wordUList
-
-Description
-    A UList of words.
-
-Typedef
-    Foam::wordList
-
-Description
-    A List of words.
-
-Typedef
-    Foam::wordSubList
-
-Description
-    A SubList of words.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_wordList_H
@@ -54,9 +36,9 @@ Description
 
 namespace Foam
 {
-    typedef UList<word> wordUList;
-    typedef List<word> wordList;
-    typedef SubList<word> wordSubList;
+    typedef List<word> wordList;            //!< List of word
+    typedef SubList<word> wordSubList;      //!< SubList of word
+    typedef UList<word> wordUList;          //!< UList of word
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

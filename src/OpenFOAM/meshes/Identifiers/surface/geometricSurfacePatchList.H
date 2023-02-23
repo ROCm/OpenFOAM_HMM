@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::geometricSurfacePatchList
-
-Description
-    A List of geometricSurfacePatch.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef geometricSurfacePatchList_H
-#define geometricSurfacePatchList_H
+#ifndef Foam_geometricSurfacePatchList_H
+#define Foam_geometricSurfacePatchList_H
 
 #include "geometricSurfacePatch.H"
 #include "List.H"
@@ -41,14 +35,9 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef List<geometricSurfacePatch> geometricSurfacePatchList;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    //! List of geometricSurfacePatch
+    typedef List<geometricSurfacePatch> geometricSurfacePatchList;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

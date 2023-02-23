@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelIOField
-
-Description
-    labelField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelIOField_H
-#define labelIOField_H
+#ifndef Foam_labelIOField_H
+#define Foam_labelIOField_H
 
 #include "primitiveFields.H"
 #include "IOField.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of label
     typedef IOField<label> labelIOField;
 }
 

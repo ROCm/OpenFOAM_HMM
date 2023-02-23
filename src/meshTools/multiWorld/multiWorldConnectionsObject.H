@@ -41,7 +41,7 @@ SourceFiles
 #define meshObjects_multiWorldConnections_H
 
 #include "MeshObject.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

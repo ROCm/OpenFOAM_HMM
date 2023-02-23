@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::edgeIOList
-
-Description
-    An IOList of edges
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeIOList_H
-#define edgeIOList_H
+#ifndef Foam_edgeIOList_H
+#define Foam_edgeIOList_H
 
 #include "edge.H"
 #include "CompactIOList.H"
@@ -41,7 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of edge
     typedef IOList<edge> edgeIOList;
+
+    //! Compact IO for a List of edge
     typedef CompactIOList<edge, label> edgeCompactIOList;
 }
 

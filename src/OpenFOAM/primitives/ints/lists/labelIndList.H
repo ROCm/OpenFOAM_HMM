@@ -23,18 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelIndList
-
-Description
-    A IndirectList of labels.
-
-Typedef
-    Foam::labelUIndList
-
-Description
-    An UIndirectList of labels.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_labelIndList_H
@@ -48,8 +36,10 @@ Description
 
 namespace Foam
 {
+    //! IndirectList of label
     typedef IndirectList<label>  labelIndList;
-    // labelUIndList is defined in UIndirectList itself
+
+    // labelUIndList = defined in IndirectList.H
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

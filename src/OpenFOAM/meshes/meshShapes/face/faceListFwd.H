@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceListFwd_H
-#define faceListFwd_H
+#ifndef Foam_faceListFwd_H
+#define Foam_faceListFwd_H
 
 #include "List.H"
 #include "SubList.H"
@@ -41,12 +41,13 @@ Description
 
 namespace Foam
 {
+    // Forward Declaration
     class face;
 
-    typedef UList<face> faceUList;
-    typedef List<face> faceList;
-    typedef SubList<face> faceSubList;
-    typedef List<faceList> faceListList;
+    typedef List<face> faceList;            //!< List of faces
+    typedef SubList<face> faceSubList;      //!< SubList of faces
+    typedef UList<face> faceUList;          //!< UList of faces
+    typedef List<faceList> faceListList;    //!< List of faceList
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

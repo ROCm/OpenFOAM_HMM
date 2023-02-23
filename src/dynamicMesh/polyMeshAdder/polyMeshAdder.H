@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polyMeshAdder_H
-#define polyMeshAdder_H
+#ifndef Foam_polyMeshAdder_H
+#define Foam_polyMeshAdder_H
 
 #include "autoPtr.H"
 #include "polyMesh.H"
@@ -120,7 +120,7 @@ class polyMeshAdder
         // edge the points introduced inbetween the endpoints.
         static void insertVertices
         (
-            const edgeLookup& cutEdgeToPoints,
+            const EdgeMap<labelList>& cutEdgeToPoints,
             const Map<label>& meshToMaster,
             const labelList& masterToCutPoints,
             const face& masterFace,

@@ -23,12 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelIOList
-
-Description
-    Label container classes
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_labelIOList_H
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of label
     typedef IOList<label> labelIOList;
 }
 

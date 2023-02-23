@@ -23,47 +23,22 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::wordPairPair
-
-Description
-    A pair of wordPairs.
-
-Typedef
-    Foam::wordPairList
-
-Description
-    List of wordPairs.
-
-Typedef
-    Foam::wordPairUList
-
-Description
-    UList of wordPairs.
-
-Typedef
-    Foam::wordPairSubList
-
-Description
-    A SubList of wordPairs.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordPair_H
-#define wordPair_H
+#ifndef Foam_wordPair_H
+#define Foam_wordPair_H
 
+#include "Pair.H"
 #include "List.H"
 #include "SubList.H"
-#include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef Pair<wordPair> wordPairPair;
-    typedef List<wordPair> wordPairList;
-    typedef UList<wordPair> wordPairUList;
-    typedef SubList<wordPair> wordPairSubList;
+    typedef Pair<wordPair> wordPairPair;        //!< Pair of wordPair
+    typedef List<wordPair> wordPairList;        //!< List of wordPair
+    typedef UList<wordPair> wordPairUList;      //!< UList of wordPair
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

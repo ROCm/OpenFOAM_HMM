@@ -23,15 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::surfZoneList
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfZoneList_H
-#define surfZoneList_H
+#ifndef Foam_surfZoneList_H
+#define Foam_surfZoneList_H
 
 #include "surfZone.H"
 #include "List.H"
@@ -41,14 +36,8 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef List<surfZone>  surfZoneList;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef List<surfZone> surfZoneList;    //!< List of surfZone
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::charListList
-
-Description
-    A List of charList.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef charList_H
-#define charList_H
+#ifndef Foam_charList_H
+#define Foam_charList_H
 
 #include "char.H"
 #include "List.H"
@@ -42,10 +36,11 @@ Description
 
 namespace Foam
 {
-    // charUList   = defined in UList.H
     // charList    = defined in List.H
     // charSubList = defined in SubList.H
+    // charUList   = defined in UList.H
 
+    //! List of charList
     typedef List<charList> charListList;
 }
 

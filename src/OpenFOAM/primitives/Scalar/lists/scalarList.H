@@ -23,34 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::scalarUList
-
-Description
-    A UList of scalars.
-
-Typedef
-    Foam::scalarList
-
-Description
-    A List of scalars.
-
-Typedef
-    Foam::scalarSubList
-
-Description
-    A SubList of scalars.
-
-Typedef
-    Foam::scalarListList
-
-Description
-    A List of scalarList.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarList_H
-#define scalarList_H
+#ifndef Foam_scalarList_H
+#define Foam_scalarList_H
 
 #include "scalar.H"
 #include "List.H"
@@ -60,10 +36,10 @@ Description
 
 namespace Foam
 {
-    typedef UList<scalar> scalarUList;
-    typedef List<scalar> scalarList;
-    typedef SubList<scalar> scalarSubList;
-    typedef List<scalarList> scalarListList;
+    typedef List<scalar> scalarList;            //!< List of scalar
+    typedef SubList<scalar> scalarSubList;      //!< SubList of scalar
+    typedef UList<scalar> scalarUList;          //!< UList of scalar
+    typedef List<scalarList> scalarListList;    //!< List of scalarList
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

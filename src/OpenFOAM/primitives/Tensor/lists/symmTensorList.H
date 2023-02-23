@@ -23,22 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::symmTensorUList
-
-Description
-    A UList of symmTensors.
-
-Typedef
-    Foam::symmTensorList
-
-Description
-    A List of symmTensors.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmTensorList_H
-#define symmTensorList_H
+#ifndef Foam_symmTensorList_H
+#define Foam_symmTensorList_H
 
 #include "symmTensor.H"
 #include "List.H"
@@ -47,9 +35,8 @@ Description
 
 namespace Foam
 {
-    typedef UList<symmTensor> symmTensorUList;
-
-    typedef List<symmTensor> symmTensorList;
+    typedef List<symmTensor> symmTensorList;    //!< List of symmTensor
+    typedef UList<symmTensor> symmTensorUList;  //!< UList of symmTensor
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::tensorFieldIOField
-
-Description
-    tensorFieldField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensorFieldIOField_H
-#define tensorFieldIOField_H
+#ifndef Foam_tensorFieldIOField_H
+#define Foam_tensorFieldIOField_H
 
 #include "tensorField.H"
 #include "CompactIOField.H"
@@ -41,7 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of tensorField
     typedef IOField<tensorField> tensorFieldIOField;
+
+    //! Compact IO for a Field of tensorField
     typedef CompactIOField<tensorField, tensor> tensorFieldCompactIOField;
 }
 

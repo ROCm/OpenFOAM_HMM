@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::scalarIOList
-
-Description
-    Scalar container classes
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarIOList_H
-#define scalarIOList_H
+#ifndef Foam_scalarIOList_H
+#define Foam_scalarIOList_H
 
 #include "scalar.H"
 #include "IOList.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of scalar
     typedef IOList<scalar> scalarIOList;
 }
 

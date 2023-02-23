@@ -23,38 +23,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::faceList
-
-Description
-    A List of faces.
-
-Typedef
-    Foam::faceUList
-
-Description
-    A UList of faces.
-
-Typedef
-    Foam::faceSubList
-
-Description
-    A SubList of faces.
-
-Typedef
-    Foam::faceListList
-
-Description
-    A List of faceList.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceList_H
-#define faceList_H
+#ifndef Foam_faceList_H
+#define Foam_faceList_H
 
 #include "face.H"
-#include "List.H"
-#include "SubList.H"
 #include "faceListFwd.H"
 
 #endif

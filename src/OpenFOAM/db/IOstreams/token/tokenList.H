@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::tokenList
-
-Description
-    List of tokens, used for a IOdictionary entry.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef tokenList_H
-#define tokenList_H
+#ifndef Foam_tokenList_H
+#define Foam_tokenList_H
 
 #include "token.H"
 #include "List.H"
@@ -41,8 +35,8 @@ Description
 
 namespace Foam
 {
+    //! List of token, used for dictionary primitive entry (for example)
     typedef List<token> tokenList;
-    typedef List<token::tokenType> tokenTypeList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

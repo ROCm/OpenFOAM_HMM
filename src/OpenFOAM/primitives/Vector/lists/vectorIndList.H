@@ -23,18 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::vectorIndList
-
-Description
-    An IndirectList of vectors.
-
-Typedef
-    Foam::vectorUIndList
-
-Description
-    A UIndirectList of vectors.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_vectorIndList_H
@@ -48,7 +36,10 @@ Description
 
 namespace Foam
 {
+    //! IndirectList of vector
     typedef IndirectList<vector>  vectorIndList;
+
+    //! UIndirectList of vector
     typedef UIndirectList<vector> vectorUIndList;
 }
 

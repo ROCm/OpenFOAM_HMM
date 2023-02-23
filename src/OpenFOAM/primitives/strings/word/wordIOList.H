@@ -24,16 +24,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::wordIOList
-
-Description
-    IO of a list of words
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef wordIOList_H
-#define wordIOList_H
+#ifndef Foam_wordIOList_H
+#define Foam_wordIOList_H
 
 #include "wordList.H"
 #include "IOList.H"
@@ -42,7 +36,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of word
     typedef IOList<word> wordIOList;
+
+    //! IO for a List of wordList
     typedef IOList<wordList> wordListIOList;
 
     //- Print a List of wordList as a table

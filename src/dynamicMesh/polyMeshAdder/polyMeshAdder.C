@@ -400,7 +400,7 @@ Foam::labelList Foam::polyMeshAdder::getFaceOrder
 // edge the points introduced inbetween the endpoints.
 void Foam::polyMeshAdder::insertVertices
 (
-    const edgeLookup& cutEdgeToPoints,
+    const EdgeMap<labelList>& cutEdgeToPoints,
     const Map<label>& meshToMaster,
     const labelList& masterToCutPoints,
     const face& masterF,
@@ -764,7 +764,8 @@ void Foam::polyMeshAdder::mergePrimitives
     {
         // From two cut-points to labels of cut-points inbetween.
         // (in order: from e[0] to e[1]
-        const edgeLookup& cutEdgeToPoints = coupleInfo.cutEdgeToPoints();
+        const EdgeMap<labelList>& cutEdgeToPoints
+            = coupleInfo.cutEdgeToPoints();
 
         // Get map of master face (in mesh labels) that are in cut. These faces
         // do not need to be renumbered.
