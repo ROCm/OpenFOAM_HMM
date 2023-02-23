@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2021,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -347,8 +347,17 @@ void Foam::GAMGSolver::Vcycle
 
             if (interpolateCorrection_) //&& leveli < coarsestLevel - 2)
             {
-                if (coarseCorrFields.set(leveli+1))
+                if
+                (
+                    coarseCorrFields.set(leveli+1)
+                 && (
+                        matrixLevels_[leveli].mesh().comm()
+                     == matrixLevels_[leveli+1].mesh().comm()
+                    )
+                )
                 {
+                    // Normal operation : have both coarse level and fine
+                    // level. No processor agglomeration
                     interpolate
                     (
                         coarseCorrFields[leveli],
