@@ -56,7 +56,7 @@ void Foam::dynamicIndexedOctree<Type>::divide
         {
             if (shapes_.overlaps(index, subBbs))
             {
-                contains.append(index);
+                contains.push_back(index);
             }
         }
     }
@@ -117,7 +117,7 @@ Foam::dynamicIndexedOctree<Type>::divide
             {
                 // Append to contents
                 contentIndex = contents_.size();
-                contents_.append(std::move(subIndices));
+                contents_.push_back(std::move(subIndices));
             }
 
             nod.subNodes_[octant] = contentPlusOctant(contentIndex, octant);
@@ -136,7 +136,7 @@ Foam::dynamicIndexedOctree<Type>::divide
 
         const label newNodeId = nodes_.size();
 
-        nodes_.append(nod);
+        nodes_.push_back(nod);
 
         nodes_[parentNodeIndex].subNodes_[octantToBeDivided]
             = nodePlusOctant(newNodeId, octantToBeDivided);
@@ -2463,13 +2463,12 @@ bool Foam::dynamicIndexedOctree<Type>::insert(label startIndex, label endIndex)
 
     if (nodes_.empty())
     {
-        contents_.append(DynamicList<label>(1));
-        contents_[0].append(0);
+        contents_.emplace_back(1).push_back(0);
 
         // Create topnode.
         node topNode = divide(bb_, 0, -1, 0);
 
-        nodes_.append(topNode);
+        nodes_.push_back(topNode);
 
         startIndex++;
     }
@@ -2528,7 +2527,7 @@ bool Foam::dynamicIndexedOctree<Type>::insertIndex
             {
                 const label contentI = getContent(subNodeLabel);
 
-                contents_[contentI].append(index);
+                contents_[contentI].push_back(index);
 
                 recursiveSubDivision
                 (
@@ -2548,11 +2547,9 @@ bool Foam::dynamicIndexedOctree<Type>::insertIndex
 
             if (shapes().overlaps(index, subBb))
             {
-                label sz = contents_.size();
+                const label sz = contents_.size();
 
-                contents_.append(DynamicList<label>(1));
-
-                contents_[sz].append(index);
+                contents_.emplace_back(1).push_back(index);
 
                 nodes_[nodIndex].subNodes_[octant]
                     = contentPlusOctant(sz, octant);
@@ -2635,7 +2632,7 @@ Foam::label Foam::dynamicIndexedOctree<Type>::removeIndex
 
                     if (oldIndex != index)
                     {
-                        newContent.append(oldIndex);
+                        newContent.push_back(oldIndex);
                     }
                 }
 
