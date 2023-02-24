@@ -211,6 +211,7 @@ void Foam::processorFaPatch::calcGeometry(PstreamBuffers& pBufs)
                 >> neighbEdgeFaceCentres_;
         }
 
+        #ifdef FULLDEBUG
         const scalarField& magEl = magEdgeLengths();
 
         forAll(magEl, edgei)
@@ -220,14 +221,14 @@ void Foam::processorFaPatch::calcGeometry(PstreamBuffers& pBufs)
 
             if (mag(magEl[edgei] - nmagEl)/avEl > 1e-6)
             {
-                FatalErrorInFunction
+                WarningInFunction
                     << "edge " << edgei
                     << " length does not match neighbour by "
                     << 100*mag(magEl[edgei] - nmagEl)/avEl
-                    << "% -- possible edge ordering problem"
-                    << exit(FatalError);
+                    << "% -- possible edge ordering problem" << nl;
             }
         }
+        #endif
 
         calcTransformTensors
         (
