@@ -109,23 +109,13 @@ public:
 
     // Member Functions
 
-    // Access
-
-        //- The value before the start of the range
-        label before() const noexcept { return rend_value(); }
-
-        //- The value after the last element in the range
-        //  This is identical to the value of cend()
-        label after() const noexcept { return end_value(); }
+    // Edit
 
         //- Adjust the start to avoid negative indices.
         //  The size is decreased accordingly, but will never become negative.
         //  Eg, adjusting (-10, 15) becomes (0,5).
         //  adjusting (-20, 15) becomes (0,0)
         void adjust() noexcept;
-
-
-    // Edit
 
         //- Reset start and length, no checks
         using IntRange<label>::reset;

@@ -282,31 +282,31 @@ public:
         //  \return position in list or -1 if not found.
         label rfind(const scalar value, label pos = -1) const;
 
-        //- True if the value matches in the list.
+        //- Matches \em any condition in the list after the offset position.
         //  Linear search from start pos until the end of the list.
         //  Any occurrences before the start pos are ignored.
-        //  \return true if found.
+        //
+        //  \return True if the value matches any condition in the (sub)list.
         inline bool contains(const scalar value, label pos = 0) const;
 
-        //- Match \em any condition in the list.
+        //- Matches \em any condition in the list.
         //
         //  \return True if the value matches any condition in the list.
         inline bool match(const scalar value) const;
 
-        //- Match \em any condition in the list.
+        //- Matches \em any condition in the list.
         //
         //  \return True if the value matches any condition in the list.
         inline bool matchAny(const scalar value) const;
 
-        //- Match \em all conditions in the list.
+        //- Matches \em all conditions in the list.
         //
         //  \return True if the value matches all conditions in the list.
         inline bool matchAll(const scalar value) const;
 
         //- Extract list indices for all matches.
         //
-        //  \return The locations (indices) in the input list where match()
-        //      is true
+        //  \return The locations (indices) of the predicates that match
         inline labelList matching(const scalar value) const;
 
         //- Extract list indices for all matches.
@@ -325,7 +325,7 @@ public:
     // Member Operators
 
         //- Identical to contains(), match(), for use as a predicate.
-        inline bool operator()(const scalar value) const;
+        bool operator()(const scalar value) const { return matchAny(value); }
 
 
     // Housekeeping

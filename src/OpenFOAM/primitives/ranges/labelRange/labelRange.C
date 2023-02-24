@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,13 +103,13 @@ bool Foam::labelRange::overlaps(const labelRange& range, bool touches) const
      &&
         (
             (
-                range.first() >= this->first()
-             && range.first() <= this->last() + extra
+                range.min() >= this->min()
+             && range.min() <= this->max() + extra
             )
          ||
             (
-                this->first() >= range.first()
-             && this->first() <= range.last() + extra
+                this->min() >= range.min()
+             && this->min() <= range.max() + extra
             )
         )
     );
@@ -128,8 +128,8 @@ Foam::labelRange Foam::labelRange::join(const labelRange& range) const
         return range;
     }
 
-    const label lower = Foam::min(this->first(), range.first());
-    const label upper = Foam::max(this->last(),  range.last());
+    const label lower = Foam::min(this->min(), range.min());
+    const label upper = Foam::max(this->max(), range.max());
     const label total = upper+1 - lower;
     // last = start+size-1
     // size = last+1-start
@@ -143,8 +143,8 @@ Foam::labelRange Foam::labelRange::join(const labelRange& range) const
 
 Foam::labelRange Foam::labelRange::subset(const labelRange& range) const
 {
-    const label lower = Foam::max(this->first(), range.first());
-    const label upper = Foam::min(this->last(),  range.last());
+    const label lower = Foam::max(this->min(), range.min());
+    const label upper = Foam::min(this->max(), range.max());
     const label total = upper+1 - lower;
     // last = start+size-1
     // size = last+1-start
@@ -164,8 +164,8 @@ Foam::labelRange Foam::labelRange::subset
     const label size
 ) const
 {
-    const label lower = Foam::max(this->start(), start);
-    const label upper = Foam::min(this->last(),  start+Foam::max(0,size-1));
+    const label lower = Foam::max(this->min(), start);
+    const label upper = Foam::min(this->max(), start+Foam::max(0,size-1));
     const label total = upper+1 - lower;
     // last = start+size-1
     // size = last+1-start
@@ -181,8 +181,8 @@ Foam::labelRange Foam::labelRange::subset
 
 Foam::labelRange Foam::labelRange::subset0(const label size) const
 {
-    const label lower = Foam::max(this->start(), 0);
-    const label upper = Foam::min(this->last(),  Foam::max(0,size-1));
+    const label lower = Foam::max(this->min(), 0);
+    const label upper = Foam::min(this->max(), Foam::max(0,size-1));
     const label total = upper+1 - lower;
     // last = start+size-1
     // size = last+1-start

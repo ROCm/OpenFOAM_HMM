@@ -36,42 +36,41 @@ License
 namespace Foam
 {
 
-    template<class T>
-    inline static List<label> makeIdentity(const IntRange<T>& range)
+template<class T>
+inline static List<label> makeIdentity(const IntRange<T>& range)
+{
+    if (range.size() < 1)
     {
-        if (range.size() < 0)
-        {
-            // Skip this check?
-            return List<label>();
-        }
-
-        List<label> result(range.size());
-        std::iota(result.begin(), result.end(), range.start());
-
-        return result;
+        return List<label>();
     }
 
-    template<class T>
-    inline static Istream& input(Istream& is, IntRange<T>& range)
-    {
-        is.readBegin("IntRange");
-        is >> range.start() >> range.size();
-        is.readEnd("IntRange");
+    List<label> result(range.size());
+    std::iota(result.begin(), result.end(), range.start());
 
-        is.check(FUNCTION_NAME);
-        return is;
-    }
+    return result;
+}
 
-    template<class T>
-    inline static Ostream& output(Ostream& os, const IntRange<T>& range)
-    {
-        os  << token::BEGIN_LIST
-            << range.start() << token::SPACE << range.size()
-            << token::END_LIST;
+template<class T>
+inline static Istream& input(Istream& is, IntRange<T>& range)
+{
+    is.readBegin("IntRange");
+    is >> range.start() >> range.size();
+    is.readEnd("IntRange");
 
-        os.check(FUNCTION_NAME);
-        return os;
-    }
+    is.check(FUNCTION_NAME);
+    return is;
+}
+
+template<class T>
+inline static Ostream& output(Ostream& os, const IntRange<T>& range)
+{
+    os  << token::BEGIN_LIST
+        << range.start() << token::SPACE << range.size()
+        << token::END_LIST;
+
+    os.check(FUNCTION_NAME);
+    return os;
+}
 
 } // End namespace Foam
 

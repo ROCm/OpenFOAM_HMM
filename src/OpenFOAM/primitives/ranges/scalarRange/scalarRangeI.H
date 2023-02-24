@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ inline Foam::scalarRange::scalarRange
 :
     scalarRange(scalarRange::GE_LE, minVal, maxVal)
 {
-    if (minVal > maxVal)
+    if (maxVal < minVal)
     {
         clear();  // Inverted - explicitly mark as such
     }
@@ -147,18 +147,6 @@ inline bool Foam::scalarRange::single() const noexcept
 }
 
 
-inline Foam::scalar Foam::scalarRange::min() const noexcept
-{
-    return min_;
-}
-
-
-inline Foam::scalar Foam::scalarRange::max() const noexcept
-{
-    return max_;
-}
-
-
 inline Foam::scalar Foam::scalarRange::value() const
 {
     switch (type_)
@@ -184,12 +172,6 @@ inline Foam::scalar Foam::scalarRange::value() const
 
 inline bool Foam::scalarRange::contains(const scalar val) const
 {
-    return match(val);
-}
-
-
-inline bool Foam::scalarRange::match(const scalar val) const
-{
     switch (type_)
     {
         case scalarRange::EQ:    return equal(val, min_);
@@ -207,20 +189,14 @@ inline bool Foam::scalarRange::match(const scalar val) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline constexpr bool
-Foam::scalarRange::operator==
-(
-    const scalarRange& rhs
-) const noexcept
+Foam::scalarRange::operator==(const scalarRange& rhs) const noexcept
 {
     return (type_ == rhs.type_ && min_ == rhs.min_ && max_ == rhs.max_);
 }
 
 
 inline constexpr bool
-Foam::scalarRange::operator!=
-(
-    const scalarRange& rhs
-) const noexcept
+Foam::scalarRange::operator!=(const scalarRange& rhs) const noexcept
 {
     return !(*this == rhs);
 }

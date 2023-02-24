@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,7 @@ namespace Foam
     {
         for (const auto& entry : entries)
         {
-            if (!Foam::predicates::scalars::opNames.found(get0(entry)))
+            if (!Foam::predicates::scalars::opNames.contains(get0(entry)))
             {
                 return true;
             }
@@ -135,7 +135,7 @@ namespace Foam
 
         for (const auto& entry : entries)
         {
-            if (!Foam::predicates::scalars::opNames.found(get0(entry)))
+            if (!Foam::predicates::scalars::opNames.contains(get0(entry)))
             {
                 badIndices.insert(idx);
             }
@@ -150,7 +150,7 @@ namespace Foam
         idx = 0;
         for (const auto& entry : entries)
         {
-            const bool bad = badIndices.found(idx);
+            const bool bad = badIndices.contains(idx);
             ++idx;
 
             if (bad)

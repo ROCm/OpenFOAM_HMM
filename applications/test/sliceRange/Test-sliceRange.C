@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,10 +47,10 @@ void printInfo(const sliceCoeffs& coeffs)
 
     Info<< nl
         << "coeffs: " << coeffs << nl
-        << "range: " << range << nl
-        << "first: " << range.first() << nl
+        << "range:  " << range << nl
+        << "min:    " << range.min() << nl
         << "*begin  " << *range.begin() << nl
-        << "last:  " << range.last() << nl
+        << "max:    " << range.max() << nl
         << "*end    " << *range.end() << nl
         << "values: " << flatOutput(range.labels()) << nl;
 

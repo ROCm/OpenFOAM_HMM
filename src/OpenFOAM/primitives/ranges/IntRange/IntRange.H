@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -172,19 +172,13 @@ public:
         //- Non-const access to start of the range
         IntType& start() noexcept { return start_; }
 
-        //- The (inclusive) lower value of the range. Same as start()
-        IntType first() const noexcept { return start_; }
-
-        //- The (inclusive) upper value of the range
-        IntType last() const noexcept { return (start_ + (size_ - 1)); }
-
         //- The (inclusive) lower value of the range,
-        //- same as first(), start(), begin_value()
-        IntType min() const noexcept { return start(); }
+        //- same as start(), begin_value()
+        IntType min() const noexcept { return start_; }
 
         //- The (inclusive) upper value of the range,
-        //- same as last(), rbegin_value()
-        IntType max() const noexcept { return last(); }
+        //- same as rbegin_value(). Ill-defined for an empty range
+        IntType max() const noexcept { return (start_ + (size_ - 1)); }
 
 
     // Edit
@@ -252,13 +246,13 @@ public:
 
     // Iterator ranges
 
-        //- The value at the beginning of the range - same as first(), start()
+        //- The value at the beginning of the range - same as min(), start()
         inline IntType begin_value() const noexcept;
 
         //- The value 1 beyond the end of the range.
         inline IntType end_value() const noexcept;
 
-        //- The last value of the range.
+        //- The max value of the range.
         inline IntType rbegin_value() const noexcept;
 
         //- The value 1 before the begin of range
@@ -563,7 +557,7 @@ inline constexpr bool operator==
     const IntRange<IntType>& b
 ) noexcept
 {
-    return (a.first() == b.first() && a.size() == b.size());
+    return (a.start() == b.start() && a.size() == b.size());
 }
 
 
@@ -578,10 +572,10 @@ inline constexpr bool operator<
 {
     return
     (
-        a.first() < b.first()
+        a.start() < b.start()
      ||
         (
-            !(b.first() < a.first())
+            !(b.start() < a.start())
          && a.size() < b.size()
         )
     );
