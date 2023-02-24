@@ -29,7 +29,7 @@ License
 
 #include "sensitivitySurfaceIncompressible.H"
 #include "incompressibleAdjointSolver.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
 #include "faMatrices.H"

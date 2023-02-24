@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,19 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PrimitivePatchInterpolation.H"
-#include "faceList.H"
-#include "demandDrivenData.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Patch>
-const scalarListList&
-PrimitivePatchInterpolation<Patch>::faceToPointWeights() const
+const Foam::scalarListList&
+Foam::PrimitivePatchInterpolation<Patch>::faceToPointWeights() const
 {
     if (!faceToPointWeightsPtr_)
     {
@@ -51,7 +44,7 @@ PrimitivePatchInterpolation<Patch>::faceToPointWeights() const
 
 
 template<class Patch>
-void PrimitivePatchInterpolation<Patch>::makeFaceToPointWeights() const
+void Foam::PrimitivePatchInterpolation<Patch>::makeFaceToPointWeights() const
 {
     if (faceToPointWeightsPtr_)
     {
@@ -60,10 +53,10 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToPointWeights() const
             << abort(FatalError);
     }
 
-    const pointField& points = patch_.localPoints();
-    const List<typename Patch::face_type>& faces = patch_.localFaces();
+    const auto& points = patch_.localPoints();
+    const auto& faces = patch_.localFaces();
 
-    faceToPointWeightsPtr_ = new scalarListList(points.size());
+    faceToPointWeightsPtr_.reset(new scalarListList(points.size()));
     auto& weights = *faceToPointWeightsPtr_;
 
     // get reference to addressing
@@ -94,8 +87,8 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToPointWeights() const
 
 
 template<class Patch>
-const scalarList&
-PrimitivePatchInterpolation<Patch>::faceToEdgeWeights() const
+const Foam::scalarList&
+Foam::PrimitivePatchInterpolation<Patch>::faceToEdgeWeights() const
 {
     if (!faceToEdgeWeightsPtr_)
     {
@@ -107,7 +100,7 @@ PrimitivePatchInterpolation<Patch>::faceToEdgeWeights() const
 
 
 template<class Patch>
-void PrimitivePatchInterpolation<Patch>::makeFaceToEdgeWeights() const
+void Foam::PrimitivePatchInterpolation<Patch>::makeFaceToEdgeWeights() const
 {
     if (faceToEdgeWeightsPtr_)
     {
@@ -116,12 +109,12 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToEdgeWeights() const
             << abort(FatalError);
     }
 
-    const pointField& points = patch_.localPoints();
-    const List<typename Patch::face_type>& faces = patch_.localFaces();
+    const auto& points = patch_.localPoints();
+    const auto& faces = patch_.localFaces();
     const edgeList& edges = patch_.edges();
     const labelListList& edgeFaces = patch_.edgeFaces();
 
-    faceToEdgeWeightsPtr_ = new scalarList(patch_.nInternalEdges());
+    faceToEdgeWeightsPtr_.reset(new scalarList(patch_.nInternalEdges()));
     auto& weights = *faceToEdgeWeightsPtr_;
 
     forAll(weights, edgei)
@@ -142,17 +135,20 @@ void PrimitivePatchInterpolation<Patch>::makeFaceToEdgeWeights() const
 
 
 template<class Patch>
-void PrimitivePatchInterpolation<Patch>::clearWeights()
+void Foam::PrimitivePatchInterpolation<Patch>::clearWeights()
 {
-    deleteDemandDrivenData(faceToPointWeightsPtr_);
-    deleteDemandDrivenData(faceToEdgeWeightsPtr_);
+    faceToPointWeightsPtr_.reset(nullptr);
+    faceToEdgeWeightsPtr_.reset(nullptr);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Patch>
-PrimitivePatchInterpolation<Patch>::PrimitivePatchInterpolation(const Patch& p)
+Foam::PrimitivePatchInterpolation<Patch>::PrimitivePatchInterpolation
+(
+    const Patch& p
+)
 :
     patch_(p),
     faceToPointWeightsPtr_(nullptr),
@@ -160,20 +156,12 @@ PrimitivePatchInterpolation<Patch>::PrimitivePatchInterpolation(const Patch& p)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class Patch>
-PrimitivePatchInterpolation<Patch>::~PrimitivePatchInterpolation()
-{
-    clearWeights();
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Patch>
 template<class Type>
-tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToPointInterpolate
+Foam::tmp<Foam::Field<Type>>
+Foam::PrimitivePatchInterpolation<Patch>::faceToPointInterpolate
 (
     const Field<Type>& ff
 ) const
@@ -187,15 +175,8 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToPointInterpolate
             << abort(FatalError);
     }
 
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>
-        (
-            patch_.nPoints(), Zero
-        )
-    );
-
-    Field<Type>& result = tresult.ref();
+    auto tresult = tmp<Field<Type>>::New(patch_.nPoints(), Zero);
+    auto& result = tresult.ref();
 
     const labelListList& pointFaces = patch_.pointFaces();
     const scalarListList& weights = faceToPointWeights();
@@ -217,7 +198,8 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToPointInterpolate
 
 template<class Patch>
 template<class Type>
-tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToPointInterpolate
+Foam::tmp<Foam::Field<Type>>
+Foam::PrimitivePatchInterpolation<Patch>::faceToPointInterpolate
 (
     const tmp<Field<Type>>& tff
 ) const
@@ -230,7 +212,8 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToPointInterpolate
 
 template<class Patch>
 template<class Type>
-tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
+Foam::tmp<Foam::Field<Type>>
+Foam::PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
 (
     const Field<Type>& pf
 ) const
@@ -243,18 +226,10 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
             << abort(FatalError);
     }
 
-    tmp<Field<Type>> tresult
-    (
-        new Field<Type>
-        (
-            patch_.size(),
-            Zero
-        )
-    );
+    auto tresult = tmp<Field<Type>>::New(patch_.size(), Zero);
+    auto& result = tresult.ref();
 
-    Field<Type>& result = tresult.ref();
-
-    const List<typename Patch::face_type>& localFaces = patch_.localFaces();
+    const auto& localFaces = patch_.localFaces();
 
     forAll(result, facei)
     {
@@ -274,7 +249,8 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
 
 template<class Patch>
 template<class Type>
-tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
+Foam::tmp<Foam::Field<Type>>
+Foam::PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
 (
     const tmp<Field<Type>>& tpf
 ) const
@@ -287,7 +263,8 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::pointToFaceInterpolate
 
 template<class Patch>
 template<class Type>
-tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
+Foam::tmp<Foam::Field<Type>>
+Foam::PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
 (
     const Field<Type>& pf
 ) const
@@ -327,7 +304,8 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
 
 template<class Patch>
 template<class Type>
-tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
+Foam::tmp<Foam::Field<Type>>
+Foam::PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
 (
     const tmp<Field<Type>>& tpf
 ) const
@@ -339,16 +317,12 @@ tmp<Field<Type>> PrimitivePatchInterpolation<Patch>::faceToEdgeInterpolate
 
 
 template<class Patch>
-bool PrimitivePatchInterpolation<Patch>::movePoints()
+bool Foam::PrimitivePatchInterpolation<Patch>::movePoints()
 {
     clearWeights();
 
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

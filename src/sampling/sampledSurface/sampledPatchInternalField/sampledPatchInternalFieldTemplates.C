@@ -28,7 +28,7 @@ License
 
 #include "sampledPatchInternalField.H"
 #include "interpolationCellPoint.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

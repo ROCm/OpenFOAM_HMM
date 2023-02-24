@@ -34,14 +34,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshTools_H
-#define meshTools_H
+#ifndef Foam_meshTools_H
+#define Foam_meshTools_H
 
 #include "label.H"
 #include "vector.H"
 #include "triad.H"
 #include "labelList.H"
-#include "pointField.H"
 #include "faceList.H"
 #include "cellList.H"
 #include "primitivePatch.H"
@@ -51,6 +50,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class polyMesh;
 class primitiveMesh;
 class treeBoundBox;

@@ -39,7 +39,6 @@ SourceFiles
 #define hexRef8_H
 
 #include "labelIOList.H"
-#include "face.H"
 #include "HashSet.H"
 #include "DynamicList.H"
 #include "primitivePatch.H"

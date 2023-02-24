@@ -43,7 +43,7 @@ public:
 
             if (!excludeIndices_.found(index))
             {
-                const typename PatchType::FaceType& f = patch[index];
+                const auto& f = patch[index];
 
                 pointHit nearHit = f.nearestPoint(sample, points);
                 scalar distSqr = sqr(nearHit.distance());

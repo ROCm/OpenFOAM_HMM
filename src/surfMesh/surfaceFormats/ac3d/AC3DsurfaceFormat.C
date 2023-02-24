@@ -28,7 +28,7 @@ License
 
 #include "AC3DsurfaceFormat.H"
 #include "StringStream.H"
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 #include "faceTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

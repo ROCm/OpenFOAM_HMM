@@ -137,7 +137,6 @@ SourceFiles
 #define Foam_faceCoupleInfo_H
 
 #include "edgeHashes.H"
-#include "pointField.H"
 #include "indirectPrimitivePatch.H"
 #include "primitivePatch.H"
 
@@ -147,7 +146,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class face;
 class primitiveMesh;
 class polyPatch;
 class polyMesh;

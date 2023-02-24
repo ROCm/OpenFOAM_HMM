@@ -56,14 +56,14 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef extendedEdgeMesh_H
-#define extendedEdgeMesh_H
+#ifndef Foam_extendedEdgeMesh_H
+#define Foam_extendedEdgeMesh_H
 
 #include "edgeMesh.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
 #include "treeDataPoint.H"
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

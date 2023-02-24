@@ -33,13 +33,10 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bMesh_H
-#define bMesh_H
+#ifndef Foam_bMesh_H
+#define Foam_bMesh_H
 
-#include "PrimitivePatch.H"
-#include "face.H"
-#include "List.H"
-#include "pointField.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

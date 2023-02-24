@@ -57,9 +57,11 @@ SourceFiles
 #include "boolList.H"
 #include "labelList.H"
 #include "edgeList.H"
-#include "point.H"
+#include "face.H"
+#include "pointField.H"
 #include "intersection.H"
 #include "HashSet.H"
+#include "SubList.H"
 #include "objectHit.H"
 #include "PrimitivePatchBase.H"
 
@@ -69,8 +71,9 @@ namespace Foam
 {
 
 // Forward Declarations
-class face;
 template<class T> class Map;
+template<class FaceList, class PointField> class PrimitivePatch;
+
 
 /*---------------------------------------------------------------------------*\
                            Class PrimitivePatch Declaration

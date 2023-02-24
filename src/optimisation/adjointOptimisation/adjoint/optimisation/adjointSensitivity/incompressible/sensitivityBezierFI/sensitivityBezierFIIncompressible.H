@@ -46,7 +46,7 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "volPointInterpolation.H"
 #include "FIBaseIncompressible.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 #include "deltaBoundary.H"
 #include "Bezier.H"
 

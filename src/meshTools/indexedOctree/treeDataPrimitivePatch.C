@@ -199,9 +199,9 @@ Foam::volumeType Foam::treeDataPrimitivePatch<PatchType>::getVolumeType
             << " nearest face:" << facei;
     }
 
-    const typename PatchType::face_type& localF = patch_.localFaces()[facei];
-    const typename PatchType::face_type& f = patch_[facei];
-    const pointField& points = patch_.points();
+    const auto& localF = patch_.localFaces()[facei];
+    const auto& f = patch_[facei];
+    const auto& points = patch_.points();
 
     // Retest to classify where on face info is. Note: could be improved. We
     // already have point.
@@ -412,8 +412,8 @@ bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
 
     // 2. Check if one or more face points inside
 
-    const pointField& points = patch_.points();
-    const typename PatchType::face_type& f = patch_[index];
+    const auto& points = patch_.points();
+    const auto& f = patch_[index];
 
     if (f.size() == 3)
     {
@@ -469,8 +469,8 @@ bool Foam::treeDataPrimitivePatch<PatchType>::overlaps
         return false;
     }
 
-    const pointField& points = patch_.points();
-    const face& f = patch_[index];
+    const auto& points = patch_.points();
+    const auto& f = patch_[index];
 
     pointHit nearHit = f.nearestPoint(centre, points);
 
@@ -498,11 +498,11 @@ void Foam::treeDataPrimitivePatch<PatchType>::findNearest
     point& nearestPoint
 ) const
 {
-    const pointField& points = patch_.points();
+    const auto& points = patch_.points();
 
     for (const label index : indices)
     {
-        const typename PatchType::face_type& f = patch_[index];
+        const auto& f = patch_[index];
 
         const pointHit nearHit = f.nearestPoint(sample, points);
         const scalar distSqr = sqr(nearHit.distance());
@@ -606,7 +606,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findSelfIntersectOp::operator()
     const treeDataPrimitivePatch<PatchType>& shape = tree_.shapes();
     const PatchType& patch = shape.patch();
 
-    const typename PatchType::face_type& f = patch.localFaces()[index];
+    const auto& f = patch.localFaces()[index];
     const edge& e = patch.edges()[edgeID_];
 
     if (!f.found(e[0]) && !f.found(e[1]))
@@ -631,8 +631,8 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findIntersection
     const treeDataPrimitivePatch<PatchType>& shape = tree.shapes();
     const PatchType& patch = shape.patch();
 
-    const pointField& points = patch.points();
-    const typename PatchType::face_type& f = patch[index];
+    const auto& points = patch.points();
+    const auto& f = patch[index];
 
     // Do quick rejection test
     if (shape.cacheBb_)

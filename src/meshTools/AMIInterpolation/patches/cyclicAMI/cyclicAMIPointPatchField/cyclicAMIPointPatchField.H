@@ -40,7 +40,7 @@ SourceFiles
 
 #include "coupledPointPatchField.H"
 #include "cyclicAMIPointPatch.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

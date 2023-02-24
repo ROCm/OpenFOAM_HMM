@@ -43,7 +43,7 @@ SourceFiles
 #include "boundaryPatch.H"
 #include "className.H"
 #include "polyPatch.H"
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 #include "PtrList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
