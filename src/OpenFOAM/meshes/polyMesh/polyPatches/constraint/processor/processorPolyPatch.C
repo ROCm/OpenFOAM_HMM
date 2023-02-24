@@ -199,7 +199,7 @@ void Foam::processorPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
     if (Pstream::parRun())
     {
-        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        if (neighbProcNo() >= pBufs.nProcs())
         {
             FatalErrorInFunction
                 << "On patch " << name()
@@ -362,7 +362,7 @@ void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
     if (Pstream::parRun())
     {
-        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        if (neighbProcNo() >= pBufs.nProcs())
         {
             FatalErrorInFunction
                 << "On patch " << name()
