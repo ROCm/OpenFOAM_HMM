@@ -145,6 +145,8 @@ int main(int argc, char *argv[])
 
         complexField cmplx(4);
 
+        zip(cmplx, reals, zero{});
+        zip(cmplx, 1, imags);
         zip(cmplx, reals, imags);
         Info<< nl
             << "zip " << reals << nl
@@ -359,6 +361,24 @@ int main(int argc, char *argv[])
 
     // MinMax fails since there is no less comparison operator
     // Info<< "min/max = " << MinMax<complex>(fld1) << nl;
+
+
+    // Cross-product
+    {
+        const vector vec(1, 2, 3);
+        const vector realValue(4, 5, 6);
+        const vector imagValue(7, 8, 9);
+
+        complexVector cmplxVec(zip(realValue, imagValue));
+
+        Info<< "complexVector: " << cmplxVec << nl;
+        Info<< "cross: " << (vec ^ cmplxVec) << nl;
+
+        Info<< "cross real: " << (vec ^ realValue) << nl
+            << "cross imag: " << (vec ^ imagValue) << nl
+            << "cross     : "
+            << zip((vec ^ realValue), (vec ^ imagValue)) << nl;
+    }
 
     Info<< "\nEnd\n" << endl;
 

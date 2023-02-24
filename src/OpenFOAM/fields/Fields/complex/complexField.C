@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,27 +46,80 @@ namespace Foam
 void Foam::zip
 (
     complexField& result,
-    const UList<scalar>& re,
-    const UList<scalar>& im
+    const UList<scalar>& realValues,
+    const UList<scalar>& imagValues
 )
 {
     const label len = result.size();
 
     #ifdef FULLDEBUG
-    if (len != re.size() || len != im.size())
+    if (len != realValues.size() || len != imagValues.size())
     {
         FatalErrorInFunction
             << "Components sizes do not match: " << len << " ("
-            << re.size() << ' ' << im.size() << ')'
-            << nl
+            << realValues.size() << ' ' << imagValues.size() << ')' << nl
             << abort(FatalError);
     }
     #endif
 
     for (label i=0; i < len; ++i)
     {
-        result[i].Re() = re[i];
-        result[i].Im() = im[i];
+        result[i].real(realValues[i]);
+        result[i].imag(imagValues[i]);
+    }
+}
+
+
+void Foam::zip
+(
+    complexField& result,
+    const UList<scalar>& realValues,
+    const scalar imagValue
+)
+{
+    const label len = result.size();
+
+    #ifdef FULLDEBUG
+    if (len != realValues.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len
+            << " != " << realValues.size() << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        result[i].real(realValues[i]);
+        result[i].imag(imagValue);
+    }
+}
+
+
+void Foam::zip
+(
+    complexField& result,
+    const scalar realValue,
+    const UList<scalar>& imagValues
+)
+{
+    const label len = result.size();
+
+    #ifdef FULLDEBUG
+    if (len != imagValues.size())
+    {
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len
+            << " != " << imagValues.size() << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    for (label i=0; i < len; ++i)
+    {
+        result[i].real(realValue);
+        result[i].imag(imagValues[i]);
     }
 }
 
@@ -74,27 +127,26 @@ void Foam::zip
 void Foam::unzip
 (
     const UList<complex>& input,
-    scalarField& re,
-    scalarField& im
+    scalarField& realValues,
+    scalarField& imagValues
 )
 {
     const label len = input.size();
 
     #ifdef FULLDEBUG
-    if (len != re.size() || len != im.size())
+    if (len != realValues.size() || len != imagValues.size())
     {
         FatalErrorInFunction
             << "Components sizes do not match: " << len << " ("
-            << re.size() << ' ' << im.size() << ')'
-            << nl
+            << realValues.size() << ' ' << imagValues.size() << ')' << nl
             << abort(FatalError);
     }
     #endif
 
     for (label i=0; i < len; ++i)
     {
-        re[i] = input[i].Re();
-        im[i] = input[i].Im();
+        realValues[i] = input[i].real();
+        imagValues[i] = input[i].imag();
     }
 }
 
@@ -103,82 +155,91 @@ void Foam::unzip
 
 Foam::complexField Foam::ComplexField
 (
-    const UList<scalar>& re,
-    const UList<scalar>& im
+    const UList<scalar>& realValues,
+    const UList<scalar>& imagValues
 )
 {
-    complexField result(re.size());
+    complexField result(realValues.size());
 
-    Foam::zip(result, re, im);
+    Foam::zip(result, realValues, imagValues);
 
     return result;
 }
 
 
-Foam::complexField Foam::ReComplexField(const UList<scalar>& re)
+Foam::complexField Foam::ComplexField
+(
+    const UList<scalar>& realValues,
+    const scalar imagValue
+)
 {
-    complexField cf(re.size());
+    complexField result(realValues.size());
 
-    forAll(cf, i)
-    {
-        cf[i].Re() = re[i];
-        cf[i].Im() = Zero;
-    }
+    Foam::zip(result, realValues, imagValue);
 
-    return cf;
+    return result;
 }
 
 
-Foam::complexField Foam::ImComplexField(const UList<scalar>& im)
+Foam::complexField Foam::ComplexField
+(
+    const scalar realValue,
+    const UList<scalar>& imagValues
+)
 {
-    complexField cf(im.size());
+    complexField result(imagValues.size());
 
-    forAll(cf, i)
-    {
-        cf[i].Re() = Zero;
-        cf[i].Im() = im[i];
-    }
+    Foam::zip(result, realValue, imagValues);
 
-    return cf;
+    return result;
 }
 
 
-Foam::scalarField Foam::ReImSum(const UList<complex>& cf)
+Foam::scalarField Foam::ReImSum(const UList<complex>& cmplx)
 {
-    scalarField sf(cf.size());
+    scalarField result(cmplx.size());
 
-    forAll(sf, i)
-    {
-        sf[i] = cf[i].Re() + cf[i].Im();
-    }
+    std::transform
+    (
+        cmplx.cbegin(),
+        cmplx.cend(),
+        result.begin(),
+        [](const complex& c) { return c.cmptSum(); }
+    );
 
-    return sf;
+    return result;
 }
 
 
-Foam::scalarField Foam::Re(const UList<complex>& cf)
+Foam::scalarField Foam::Re(const UList<complex>& cmplx)
 {
-    scalarField sf(cf.size());
+    scalarField result(cmplx.size());
 
-    forAll(sf, i)
-    {
-        sf[i] = cf[i].Re();
-    }
+    std::transform
+    (
+        cmplx.cbegin(),
+        cmplx.cend(),
+        result.begin(),
+        [](const complex& c) { return c.real(); }
+    );
 
-    return sf;
+    return result;
 }
 
 
-Foam::scalarField Foam::Im(const UList<complex>& cf)
+Foam::scalarField Foam::Im(const UList<complex>& cmplx)
 {
-    scalarField sf(cf.size());
+    scalarField result(cmplx.size());
 
-    forAll(sf, i)
-    {
-        sf[i] = cf[i].Im();
-    }
+    std::transform
+    (
+        cmplx.cbegin(),
+        cmplx.cend(),
+        result.begin(),
+        [](const complex& c) { return c.imag(); }
+    );
 
-    return sf;
+    return result;
 }
 
 

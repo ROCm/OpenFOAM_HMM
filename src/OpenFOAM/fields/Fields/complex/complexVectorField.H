@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef complexVectorField_H
-#define complexVectorField_H
+#ifndef Foam_complexVectorField_H
+#define Foam_complexVectorField_H
 
 #include "complex.H"
 #include "complexVector.H"
@@ -51,33 +51,92 @@ namespace Foam
 
 typedef Field<complexVector> complexVectorField;
 
-//- Zip up two lists of values into a list of complex
-complexVectorField ComplexField
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Zip together complex vector field from real/imag components
+void zip
 (
-    const UList<vector>& re,
-    const UList<vector>& im
+    complexVectorField& result,
+    const UList<vector>& realValues,
+    const UList<vector>& imagValues
 );
 
 
-//- Create complex field from a list of real (using imag == 0)
-complexVectorField ReComplexField(const UList<vector>& re);
+//- Zip together complex vector field from real components
+//- and constant imag component
+void zip
+(
+    complexVectorField& result,
+    const UList<vector>& realValues,
+    const vector& imagValue
+);
 
-//- Create complex field from a list of imag (using real == 0)
-complexVectorField ImComplexField(const UList<vector>& im);
+
+//- Zip together complex vector field from constant real component
+//- and imag components
+void zip
+(
+    complexVectorField& result,
+    const vector& realValue,
+    const UList<vector>& imagValues
+);
+
+
+//- Create complexVector field by zipping two lists of real/imag values
+complexVectorField ComplexField
+(
+    const UList<vector>& realValues,
+    const UList<vector>& imagValues
+);
+
+//- Create complexVector field by zipping a list of real components
+//- and a constant imag component
+complexVectorField ComplexField
+(
+    const UList<vector>& realValues,
+    const vector& imagValue
+);
+
+//- Create complexVector field by zipping a constant real component
+//- and a list of imag components
+complexVectorField ComplexField
+(
+    const vector& realValue,
+    const UList<vector>& imagValues
+);
+
 
 //- Extract real component
-vectorField Re(const UList<complexVector>& cvf);
+vectorField Re(const UList<complexVector>& cmplx);
 
 //- Extract imag component
-vectorField Im(const UList<complexVector>& cvf);
+vectorField Im(const UList<complexVector>& cmplx);
 
 //- Sum real and imag components
-vectorField ReImSum(const UList<complexVector>& cvf);
+vectorField ReImSum(const UList<complexVector>& cmplx);
 
+
+//- Create complexVector field from a list of real (using imag == 0)
+inline complexVectorField ReComplexField(const UList<vector>& realValues)
+{
+    return ComplexField(realValues, vector::zero);
+}
+
+//- Create complexVector field from a list of imag (using real == 0)
+inline complexVectorField ImComplexField(const UList<vector>& imagValues)
+{
+    return ComplexField(vector::zero, imagValues);
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Cross-product
 complexVectorField operator^
 (
-    const UList<vector>& vf,
-    const UList<complexVector>& cvf
+    const UList<vector>& vec,
+    const UList<complexVector>& cmplx
 );
 
 

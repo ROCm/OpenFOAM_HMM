@@ -138,24 +138,6 @@ public:
         void imag(scalar val) noexcept { im = val; }
 
 
-    // Access
-
-        //- Real part of complex number
-        scalar Re() const noexcept { return re; }
-
-        //- Imaginary part of complex number
-        scalar Im() const noexcept { return im; }
-
-
-    // Edit
-
-        //- Real part of complex number
-        scalar& Re() noexcept { return re; }
-
-        //- Imaginary part of complex number
-        scalar& Im() noexcept { return im; }
-
-
     // Methods
 
         //- Complex conjugate
@@ -167,6 +149,9 @@ public:
 
         //- The L2-norm squared of complex
         inline scalar magSqr() const;
+
+        //- The sum of real/imag components
+        inline scalar cmptSum() const noexcept;
 
 
     // Member Operators
@@ -219,6 +204,21 @@ public:
         friend complex operator/(const complex& c1, const complex& c2);
         friend complex operator/(const complex& c, const scalar s);
         friend complex operator/(const scalar s, const complex& c);
+
+
+    // Housekeeping
+
+        //- Get real part of complex number. Same as real()
+        scalar Re() const noexcept { return re; }
+
+        //- Get imaginary part of complex number. Same as imag()
+        scalar Im() const noexcept { return im; }
+
+        //- Non-const access to real part. Prefer real() setter method
+        scalar& Re() noexcept { return re; }
+
+        //- Non-const access to imaginary part. Prefer imag() setter method
+        scalar& Im() noexcept { return im; }
 };
 
 

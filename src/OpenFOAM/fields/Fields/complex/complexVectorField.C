@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,117 +40,209 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-Foam::complexVectorField Foam::ComplexField
+void Foam::zip
 (
-    const UList<vector>& re,
-    const UList<vector>& im
+    complexVectorField& result,
+    const UList<vector>& realValues,
+    const UList<vector>& imagValues
 )
 {
-    complexVectorField cvf(re.size());
+    const label len = result.size();
 
-    for (direction cmpt=0; cmpt<vector::nComponents; ++cmpt)
+    #ifdef FULLDEBUG
+    if (len != realValues.size() || len != imagValues.size())
     {
-        forAll(cvf, i)
-        {
-            cvf[i].component(cmpt).Re() = re[i].component(cmpt);
-            cvf[i].component(cmpt).Im() = im[i].component(cmpt);
-        }
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " ("
+            << realValues.size() << ' ' << imagValues.size() << ')' << nl
+            << abort(FatalError);
     }
+    #endif
 
-    return cvf;
+    for (label i=0; i < len; ++i)
+    {
+        result[i] = Foam::zip(realValues[i], imagValues[i]);
+    }
 }
 
 
-Foam::complexVectorField Foam::ReComplexField(const UList<vector>& re)
+void Foam::zip
+(
+    complexVectorField& result,
+    const UList<vector>& realValues,
+    const vector& imagValue
+)
 {
-    complexVectorField cvf(re.size());
+    const label len = result.size();
 
-    for (direction cmpt=0; cmpt<vector::nComponents; ++cmpt)
+    #ifdef FULLDEBUG
+    if (len != realValues.size())
     {
-        forAll(cvf, i)
-        {
-            cvf[i].component(cmpt).Re() = re[i].component(cmpt);
-            cvf[i].component(cmpt).Im() = 0.0;
-        }
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " != "
+            << realValues.size() << nl
+            << abort(FatalError);
     }
+    #endif
 
-    return cvf;
+    for (label i=0; i < len; ++i)
+    {
+        result[i] = Foam::zip(realValues[i], imagValue);
+    }
 }
 
 
-Foam::complexVectorField Foam::ImComplexField(const UList<vector>& im)
+void Foam::zip
+(
+    complexVectorField& result,
+    const vector& realValue,
+    const UList<vector>& imagValues
+)
 {
-    complexVectorField cvf(im.size());
+    const label len = result.size();
 
-    for (direction cmpt=0; cmpt<vector::nComponents; ++cmpt)
+    #ifdef FULLDEBUG
+    if (len != imagValues.size())
     {
-        forAll(cvf, i)
-        {
-            cvf[i].component(cmpt).Re() = 0.0;
-            cvf[i].component(cmpt).Im() = im[i].component(cmpt);
-        }
+        FatalErrorInFunction
+            << "Components sizes do not match: " << len << " != "
+            << imagValues.size() << nl
+            << abort(FatalError);
     }
+    #endif
 
-    return cvf;
+    for (label i=0; i < len; ++i)
+    {
+        result[i] = Foam::zip(realValue, imagValues[i]);
+    }
 }
 
 
-Foam::vectorField Foam::ReImSum(const UList<complexVector>& cvf)
+Foam::complexVectorField Foam::ComplexField
+(
+    const UList<vector>& realValues,
+    const UList<vector>& imagValues
+)
 {
-    vectorField vf(cvf.size());
+    complexVectorField result(realValues.size());
 
-    for (direction cmpt=0; cmpt<vector::nComponents; ++cmpt)
-    {
-        forAll(cvf, i)
-        {
-            vf[i].component(cmpt) =
-                cvf[i].component(cmpt).Re() + cvf[i].component(cmpt).Im();
-        }
-    }
+    Foam::zip(result, realValues, imagValues);
 
-    return vf;
+    return result;
 }
 
 
-Foam::vectorField Foam::Re(const UList<complexVector>& cvf)
+Foam::complexVectorField Foam::ComplexField
+(
+    const UList<vector>& realValues,
+    const vector& imagValue
+)
 {
-    vectorField vf(cvf.size());
+    complexVectorField result(realValues.size());
 
-    for (direction cmpt=0; cmpt<vector::nComponents; ++cmpt)
-    {
-        forAll(cvf, i)
-        {
-            vf[i].component(cmpt) = cvf[i].component(cmpt).Re();
-        }
-    }
+    Foam::zip(result, realValues, imagValue);
 
-    return vf;
+    return result;
 }
 
 
-Foam::vectorField Foam::Im(const UList<complexVector>& cvf)
+Foam::complexVectorField Foam::ComplexField
+(
+    const vector& realValue,
+    const UList<vector>& imagValues
+)
 {
-    vectorField vf(cvf.size());
+    complexVectorField result(imagValues.size());
 
-    for (direction cmpt=0; cmpt<vector::nComponents; ++cmpt)
-    {
-        forAll(cvf, i)
+    Foam::zip(result, realValue, imagValues);
+
+    return result;
+}
+
+
+Foam::vectorField Foam::ReImSum(const UList<complexVector>& cmplx)
+{
+    vectorField result(cmplx.size());
+
+    std::transform
+    (
+        cmplx.cbegin(),
+        cmplx.cend(),
+        result.begin(),
+        [](const complexVector& c)
         {
-            vf[i].component(cmpt) = cvf[i].component(cmpt).Im();
+            return vector(c.x().cmptSum(), c.y().cmptSum(), c.z().cmptSum());
         }
-    }
+    );
 
-    return vf;
+    return result;
+}
+
+
+Foam::vectorField Foam::Re(const UList<complexVector>& cmplx)
+{
+    vectorField result(cmplx.size());
+
+    std::transform
+    (
+        cmplx.cbegin(),
+        cmplx.cend(),
+        result.begin(),
+        [](const complexVector& c)
+        {
+            return vector(c.x().real(), c.y().real(), c.z().real());
+        }
+    );
+
+    return result;
+}
+
+
+Foam::vectorField Foam::Im(const UList<complexVector>& cmplx)
+{
+    vectorField result(cmplx.size());
+
+    std::transform
+    (
+        cmplx.cbegin(),
+        cmplx.cend(),
+        result.begin(),
+        [](const complexVector& c)
+        {
+            return vector(c.x().imag(), c.y().imag(), c.z().imag());
+        }
+    );
+
+    return result;
 }
 
 
 Foam::complexVectorField Foam::operator^
 (
-    const UList<vector>& vf,
-    const UList<complexVector>& cvf
+    const UList<vector>& vec,
+    const UList<complexVector>& cmplx
 )
 {
-    return ComplexField(vf^Re(cvf), vf^Im(cvf));
+    const label len = cmplx.size();
+
+    #ifdef FULLDEBUG
+    if (len != vec.size())
+    {
+        FatalErrorInFunction
+            << "Parameter sizes do not match: " << vec.size()
+            << " != " << len << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    complexVectorField result(len);
+
+    for (label i=0; i < len; ++i)
+    {
+        result[i] = (vec[i] ^ cmplx[i]);
+    }
+
+    return result;
 }
 
 

@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef complexFields_H
-#define complexFields_H
+#ifndef Foam_complexFields_H
+#define Foam_complexFields_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -90,6 +90,12 @@ inline Foam::scalar Foam::complex::magSqr() const
 }
 
 
+inline Foam::scalar Foam::complex::cmptSum() const noexcept
+{
+    return (re + im);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::complex::operator=(const Foam::zero)

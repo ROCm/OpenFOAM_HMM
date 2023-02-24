@@ -73,7 +73,7 @@ void Foam::functionObjects::energySpectrum::calcAndWriteSpectrum
     (
         fft::forwardTransform
         (
-            ReComplexField(U),
+            ComplexField(U, vector::zero),
             List<int>({N.x(), N.y(), N.z()})
         )
        /scalar(cmptProduct(N))
