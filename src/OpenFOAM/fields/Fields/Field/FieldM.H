@@ -123,7 +123,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP FUNC(f2) */                                                 \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                                        \
     {                                                                          \
         (f1P[i]) OP FUNC(f2P[i]);                                              \
     }
@@ -139,7 +139,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP f2.FUNC() */                                                \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                                        \
     {                                                                          \
         (f1P[i]) OP (f2P[i]).FUNC();                                           \
     }
@@ -158,7 +158,7 @@ void checkFields
     List_CONST_ACCESS(typeF3, f3, f3P);                                        \
                                                                                \
     /* Loop: f1 OP FUNC(f2, f3) */                                             \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP FUNC((f2P[i]), (f3P[i]));                                  \
     }
@@ -194,7 +194,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP FUNC(f2, s) */                                              \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP FUNC((f2P[i]), (s));                                       \
     }
@@ -226,7 +226,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP1 f2 OP2 f3 */                                               \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP FUNC((s), (f2P[i]));                                       \
     }
@@ -240,7 +240,7 @@ void checkFields
     List_ACCESS(typeF1, f1, f1P);                                              \
                                                                                \
     /* Loop: f1 OP FUNC(s1, s2) */                                             \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP FUNC((s1), (s2));                                          \
     }
@@ -258,7 +258,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP f2 FUNC(s) */                                               \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP (f2P[i]) FUNC((s));                                        \
     }
@@ -277,7 +277,7 @@ void checkFields
     List_CONST_ACCESS(typeF3, f3, f3P);                                        \
                                                                                \
     /* Loop: f1 OP1 f2 OP2 f3 */                                               \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP1 (f2P[i]) OP2 (f3P[i]);                                    \
     }
@@ -295,7 +295,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP1 s OP2 f2 */                                                \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP1 (s) OP2 (f2P[i]);                                         \
     }
@@ -313,7 +313,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop f1 OP1 s OP2 f2 */                                                 \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP1 (f2P[i]) OP2 (s);                                         \
     }
@@ -331,7 +331,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP f2 */                                                       \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP (f2P[i]);                                                  \
     }
@@ -348,7 +348,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
     /* Loop: f1 OP1 OP2 f2 */                                                  \
-    List_FOR_ALL(f1, i)                                                        \
+    List_FOR_ALL_PARALLEL(f1, i)                                               \
     {                                                                          \
         (f1P[i]) OP1 OP2 (f2P[i]);                                             \
     }
@@ -362,7 +362,7 @@ void checkFields
     List_ACCESS(typeF, f, fP);                                                 \
                                                                                \
     /* Loop: f OP s */                                                         \
-    List_FOR_ALL(f, i)                                                         \
+    List_FOR_ALL_PARALLEL(f, i)                                                \
     {                                                                          \
         (fP[i]) OP (s);                                                        \
     }

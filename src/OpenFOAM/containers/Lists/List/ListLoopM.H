@@ -45,9 +45,13 @@ Description
 #define List_CONST_ACCESS(type, f, fp)          \
     const type* const __restrict__ fp = (f).begin()
 
-#define List_FOR_ALL(f, i)                      \
+#define List_FOR_ALL_PARALLEL(f, i)             \
         const label _n##i = (f).size();         \
         OMP(parallel for if(_n##i >= (1<<21)))  \
+        for (label i=0; i<_n##i; ++i)
+
+#define List_FOR_ALL(f, i)                      \
+        const label _n##i = (f).size();         \
         for (label i=0; i<_n##i; ++i)
 
 // Current element (non-const access)
