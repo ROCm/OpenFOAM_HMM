@@ -136,26 +136,26 @@ public:
         //- Default construct
         constexpr face() noexcept = default;
 
-        //- Construct given size, with invalid point labels (-1)
+        //- Construct given size, with invalid vertex labels (-1)
         inline explicit face(const label sz);
 
-        //- Copy construct from list of point labels
+        //- Copy construct from list of vertex labels
         inline explicit face(const labelUList& list);
 
-        //- Move construct from list of point labels
+        //- Move construct from list of vertex labels
         inline explicit face(labelList&& list);
 
-        //- Copy construct from an initializer list of point labels
+        //- Copy construct from an initializer list of vertex labels
         inline explicit face(std::initializer_list<label> list);
 
-        //- Copy construct from list of point labels
+        //- Copy construct from list of vertex labels
         template<unsigned N>
         inline explicit face(const FixedList<label, N>& list);
 
-        //- Copy construct from subset of point labels
+        //- Copy construct from subset of vertex labels
         inline face(const labelUList& list, const labelUList& indices);
 
-        //- Copy construct from subset of point labels
+        //- Copy construct from subset of vertex labels
         template<unsigned N>
         inline face(const labelUList& list, const FixedList<label, N>& indices);
 
@@ -168,12 +168,12 @@ public:
 
     // Member Functions
 
-        //- Collapse face by removing duplicate point labels
+        //- Collapse face by removing duplicate vertex labels
         //  \return the collapsed size
         label collapse();
 
         //- Flip the face in-place.
-        //  The starting points of the original and flipped face are identical.
+        //  The starting vertex of the original and flipped face are identical.
         void flip();
 
         //- Return the points corresponding to this face
@@ -211,15 +211,15 @@ public:
         inline Pair<point> box(const UList<point>& pts) const;
 
         //- Return face with reverse direction
-        //  The starting points of the original and reverse face are identical.
+        //  The starting vertex of the original and reverse face are identical.
         face reverseFace() const;
 
 
         // Navigation through face vertices
 
-        //- Find local index on face for the point label, same as find()
+        //- Find local vertex on face for the vertex label, same as find()
         //  \return position in face (0,1,2,...) or -1 if not found.
-        inline label which(const label pointLabel) const;
+        inline label which(const label vertex) const;
 
         //- The vertex on face - identical to operator[], but with naming
         //- similar to nextLabel(), prevLabel()

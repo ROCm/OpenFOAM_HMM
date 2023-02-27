@@ -175,9 +175,9 @@ inline Foam::vector Foam::face::rcEdge
 }
 
 
-inline Foam::label Foam::face::which(const label pointLabel) const
+inline Foam::label Foam::face::which(const label vertex) const
 {
-    return labelList::find(pointLabel);
+    return labelList::find(vertex);
 }
 
 

@@ -28,13 +28,13 @@ Class
     Foam::edge
 
 Description
-    An edge is a list of two point labels. The functionality it provides
-    supports the discretisation on a 2-D flat mesh.
+    An edge is a list of two vertex labels.
+    This can correspond to a directed graph edge or an edge on a mesh.
 
     The edge is implemented as a Pair/FixedList of labels.
     As well as geometrically relevant methods, it also provides methods
     similar to HashSet for additional convenience.
-    Valid point labels are always non-negative (since they correspond to
+    Valid vertex labels are always non-negative (eg, since they correspond to
     addressing within the mesh). The value '-1' is used to tag invalid
     point labels that correspond conceptually to open 'slots', which
     can be filled with a HashSet-like functionality.
@@ -69,30 +69,31 @@ public:
 
     // Static Data Members
 
+        //- The typeName ("edge")
         static const char* const typeName;
 
 
     // Constructors
 
-        //- Default construct, with invalid point labels (-1)
+        //- Default construct, with invalid vertex labels (-1)
         inline edge();
 
-        //- Construct from two point labels
+        //- Construct from two vertex labels
         inline edge(const label from, const label to);
 
-        //- Construct from pair of point labels
+        //- Construct from pair of vertex labels
         inline edge(const labelPair& pair);
 
-        //- Construct from list of point labels
+        //- Construct from list of vertex labels
         inline edge(const FixedList<label, 2>& list);
 
-        //- Construct from two point labels, sorted with first less-than second
+        //- Construct from two vertex labels, sorted with first less-than second
         inline edge(const label from, const label to, const bool doSort);
 
         //- Construct from list, sorted with first less-than second
         inline edge(const FixedList<label, 2>& list, const bool doSort);
 
-        //- Copy construct from a subset of point labels
+        //- Copy construct from a subset of vertex labels
         inline edge
         (
             const UList<label>& list,
@@ -133,53 +134,50 @@ public:
 
 
         //- Return reverse edge as copy.
-        //  No special handling of negative point labels.
+        //  No special handling of negative vertex labels.
         inline edge reverseEdge() const;
 
 
     // Queries
 
-        //- Return the smallest point label used by the edge
-        //  No special handling of negative point labels.
-        inline label minVertex() const;
+        //- Return the smallest vertex label used by the edge
+        //  No special handling of negative vertex labels.
+        inline label minVertex() const noexcept;
 
-        //- Return the largest point label used by the edge
-        //  No special handling of negative point labels.
-        inline label maxVertex() const;
+        //- Return the largest vertex label used by the edge
+        //  No special handling of negative vertex labels.
+        inline label maxVertex() const noexcept;
 
         //- True if the vertices are unique and non-negative.
         inline bool good() const noexcept;
 
-        //- True if the vertices are unique and non-negative.
-        bool valid() const noexcept { return good(); }
+        //- Return true if the vertex label is contained in the edge.
+        //  Always false for a negative vertex label.
+        inline bool contains(const label vertex) const noexcept;
 
-        //- Return true if the point label is contained in the edge.
-        //  Always false for a negative label.
-        inline bool contains(const label pointLabel) const;
-
-        //- Return local index (0,1) of point label in edge -1 on failure
-        //  Always return -1 for a negative label.
-        inline label which(const label pointLabel) const;
+        //- Return local index (0,1) of vertex label in edge -1 on failure
+        //  Always return -1 for a negative vertex label.
+        inline label which(const label vertex) const;
 
         //- True if the edge has at least one vertex in common with other
         inline bool connected(const edge& other) const;
 
         //- Return vertex common with other edge or -1 on failure
-        //  Negative point labels are never considered common between edges.
+        //  Negative vertex labels are never considered common between edges.
         inline label commonVertex(const edge& other) const;
 
-        //- Given the point label for one vertex, return the other one.
-        //  No special treatment for negative point labels.
-        inline label otherVertex(const label pointLabel) const;
+        //- Given one vertex label, return the other one.
+        //  No special treatment for negative vertex labels.
+        inline label otherVertex(const label vertex) const;
 
         //- Do the edges share a common vertex index?
-        //  Negative point labels never connect.
+        //  Negative vertex labels never connect.
         bool connects(const edge& other) const { return connected(other); }
 
 
     // Editing
 
-        //- 'Collapse' edge by marking duplicate point labels as '-1',
+        //- 'Collapse' edge by marking duplicate vertex labels as '-1',
         //- the lower vertex is retained.
         //  Return the effective size after collapsing.
         inline label collapse();
@@ -187,21 +185,22 @@ public:
 
     // Hash-like Functions
 
-        //- Return the number of unique, valid (non -1) point labels.
+        //- Return the number of unique, valid (non -1) vertex labels.
         //  Similar to a HashTable::size().
         inline label count() const;
 
-        //- Return true if edge has no valid point labels.
-        inline bool empty() const;
+        //- Return true if edge has no valid vertex labels.
+        inline bool empty() const noexcept;
 
-        //- 'Clears' edge by setting both ends to invalid point labels.
+        //- 'Clears' edge by setting both ends to invalid vertex labels.
         inline void clear();
 
 
-        //- Fill any open slot with the index if it did not previously exist.
-        //  Returns true on success. A negative label never inserts.
+        //- Fill any open slot with the vertex label
+        //- (if not previously contained in the edge).
+        //  Returns true on success. A negative vertex label never inserts.
         //  Similar to a HashTable::insert().
-        inline bool insert(const label index);
+        inline bool insert(const label vertex);
 
         //- Insert values, using begin/end iterators.
         template<class InputIterator>
@@ -227,10 +226,11 @@ public:
         inline label insert(const labelUList& list);
 
 
-        //- Remove an existing index from the edge and set its location to '-1'.
-        //  Returns the number of changes. A negative label never removes.
+        //- Remove an existing vertex from the edge and set its location
+        //- to '-1'. A negative vertex label never removes.
+        //  Returns the number of changes.
         //  Similar to a HashTable::erase().
-        inline label erase(const label index);
+        inline label erase(const label vertex);
 
         //- Remove values, using begin/end iterators.
         template<class InputIterator>
@@ -253,26 +253,30 @@ public:
     // Geometric Functions
 
         //- Return centre point (centroid) of the edge.
-        //  No special handling of negative point labels.
+        //  No special handling of negative vertex labels.
         inline point centre(const UList<point>& pts) const;
 
-        //- Return the vector (end - start)
-        //  No special handling of negative point labels.
+        //- Return the vector (from first to second).
+        //  No special handling of negative vertex labels.
         inline vector vec(const UList<point>& pts) const;
 
-        //- Return the unit vector (end - start)
-        //  No special handling of negative point labels.
+        //- Return the unit vector (from first to second).
+        //  No special handling of negative vertex labels.
         inline vector unitVec(const UList<point>& pts) const;
 
-        //- Return scalar magnitude of the edge.
-        //  No special handling of negative point labels.
+        //- The length (L2-norm) of the edge vector.
+        //  No special handling of negative vertex labels.
         inline scalar mag(const UList<point>& pts) const;
+
+        //- The length (L2-norm) squared of the edge vector.
+        //  No special handling of negative vertex labels.
+        inline scalar magSqr(const UList<point>& pts) const;
 
         //- The enclosing (bounding) box for the edge
         inline Pair<point> box(const UList<point>& pts) const;
 
         //- Return edge line
-        //  No special handling of negative point labels.
+        //  No special handling of negative vertex labels.
         inline linePointRef line(const UList<point>& pts) const;
 
 
@@ -326,6 +330,9 @@ public:
 
         //- Same as contains()
         bool found(label vertex) const { return contains(vertex); }
+
+        //- Same as good()
+        bool valid() const noexcept { return good(); }
 
         //- Deprecated(2021-04) hashing functor. Use hasher()
         // \deprecated(2021-04) - use hasher() functor

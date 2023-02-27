@@ -776,8 +776,8 @@ Foam::edgeList Foam::face::edges() const
     edgeList theEdges(nVerts);
 
     // Last edge closes the polygon
-    theEdges.last().first() = verts.last();
-    theEdges.last().second() = verts[0];
+    theEdges.back().first() = verts.back();
+    theEdges.back().second() = verts.front();
 
     for (label verti = 0; verti < nVerts - 1; ++verti)
     {
@@ -797,8 +797,8 @@ Foam::edgeList Foam::face::rcEdges() const
     edgeList theEdges(nVerts);
 
     // First edge closes the polygon
-    theEdges.first().first() = verts[0];
-    theEdges.first().second() = verts.last();
+    theEdges.front().first() = verts.front();
+    theEdges.front().second() = verts.back();
 
     for (label verti = 1; verti < nVerts; ++verti)
     {
@@ -878,12 +878,12 @@ Foam::label Foam::face::longestEdge(const UList<point>& pts) const
 
     // Last edge closes the polygon. Use it to initialize loop
     label longest = nVerts - 1;
-    scalar longestLen = Foam::edge(verts.first(), verts.last()).mag(pts);
+    scalar longestLen = pts[verts.front()].distSqr(pts[verts.back()]);
 
     // Examine other edges
     for (label edgei = 0; edgei < nVerts - 1; ++edgei)
     {
-        scalar edgeLen = Foam::edge(verts[edgei], verts[edgei + 1]).mag(pts);
+        scalar edgeLen = pts[verts[edgei]].distSqr(pts[verts[edgei+1]]);
 
         if (longestLen < edgeLen)
         {

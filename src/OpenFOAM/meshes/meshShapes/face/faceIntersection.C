@@ -107,12 +107,7 @@ Foam::pointHit Foam::face::ray
 
                 // Miss distance is the distance between the plane intersection
                 // point and the nearest point of the triangle
-                scalar missDist =
-                    Foam::mag
-                    (
-                        p + curHit.distance()*n
-                      - curHit.point()
-                    );
+                scalar missDist = curHit.point().dist(p + curHit.distance()*n);
 
                 if (missDist < nearestMissDist)
                 {
