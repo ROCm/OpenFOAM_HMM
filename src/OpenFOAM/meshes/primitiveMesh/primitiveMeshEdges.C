@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,9 +32,13 @@ License
 #include "SortableList.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::label Foam::primitiveMesh::getEdge
+namespace Foam
+{
+
+// Helper: return (after optional creation) edge between two points
+static label getEdge
 (
     List<DynamicList<label>>& pe,
     DynamicList<edge>& es,
@@ -44,40 +48,40 @@ Foam::label Foam::primitiveMesh::getEdge
 )
 {
     // Find connection between pointi and nextPointi
-    forAll(pe[pointi], ppI)
+    for (const label edgei : pe[pointi])
     {
-        label eI = pe[pointi][ppI];
-
-        const edge& e = es[eI];
-
-        if (e.start() == nextPointi || e.end() == nextPointi)
+        if (edgei < es.size() && es[edgei].contains(nextPointi))
         {
-            return eI;
+            return edgei;
         }
     }
 
     // Make new edge.
-    label edgeI = es.size();
-    pe[pointi].append(edgeI);
+    const label edgei = es.size();
+    pe[pointi].push_back(edgei);
 
     if (nextPointi != pointi)
     {
         // Very occasionally (e.g. blockMesh) a face can have duplicate
         // vertices. Make sure we register pointEdges only once.
-        pe[nextPointi].append(edgeI);
+        pe[nextPointi].push_back(edgei);
     }
 
     if (pointi < nextPointi)
     {
-        es.append(edge(pointi, nextPointi));
+        es.emplace_back(pointi, nextPointi);
     }
     else
     {
-        es.append(edge(nextPointi, pointi));
+        es.emplace_back(nextPointi, pointi);
     }
-    return edgeI;
+    return edgei;
 }
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::primitiveMesh::calcEdges(const bool doFaceEdges) const
 {
@@ -463,16 +467,22 @@ void Foam::primitiveMesh::calcEdges(const bool doFaceEdges) const
 }
 
 
-Foam::label Foam::primitiveMesh::findFirstCommonElementFromSortedLists
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Helper: for on-the-fly addressing calculation
+static label findFirstCommonElementFromSortedLists
 (
-    const labelList& list1,
-    const labelList& list2
+    const labelUList& list1,
+    const labelUList& list2
 )
 {
     label result = -1;
 
-    labelList::const_iterator iter1 = list1.begin();
-    labelList::const_iterator iter2 = list2.begin();
+    auto iter1 = list1.begin();
+    auto iter2 = list2.begin();
 
     while (iter1 != list1.end() && iter2 != list2.end())
     {
@@ -498,6 +508,8 @@ Foam::label Foam::primitiveMesh::findFirstCommonElementFromSortedLists
     }
     return result;
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -601,14 +613,14 @@ const Foam::labelList& Foam::primitiveMesh::faceEdges
     const face& f = faces()[facei];
 
     storage.clear();
-    if (f.size() > storage.capacity())
+    if (storage.capacity() < f.size())
     {
         storage.setCapacity(f.size());
     }
 
     forAll(f, fp)
     {
-        storage.append
+        storage.push_back
         (
             findFirstCommonElementFromSortedLists
             (
@@ -650,14 +662,14 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges
     }
 
     storage.clear();
-    if (set.size() > storage.capacity())
+    if (storage.capacity() < set.size())
     {
         storage.setCapacity(set.size());
     }
 
     for (const label edgei : set)
     {
-        storage.append(edgei);
+        storage.push_back(edgei);
     }
 
     return storage;

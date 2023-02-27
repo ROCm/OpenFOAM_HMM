@@ -81,7 +81,10 @@ void Foam::primitiveMesh::calcCellEdges() const
             for (const label edgei : curEdges)
             {
                 // Add the edge
-                curCellEdges.appendUniq(edgei);
+                if (!curCellEdges.contains(edgei))
+                {
+                    curCellEdges.push_back(edgei);
+                }
             }
         }
 
@@ -94,7 +97,10 @@ void Foam::primitiveMesh::calcCellEdges() const
             for (const label edgei : curEdges)
             {
                 // Add the edge
-                curCellEdges.appendUniq(edgei);
+                if (!curCellEdges.contains(edgei))
+                {
+                    curCellEdges.push_back(edgei);
+                }
             }
         }
 

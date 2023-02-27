@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -128,19 +128,17 @@ const Foam::labelList& Foam::primitiveMesh::cellCells
 
         storage.clear();
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            label facei = cFaces[i];
-
             if (facei < nInternalFaces())
             {
                 if (own[facei] == celli)
                 {
-                    storage.append(nei[facei]);
+                    storage.push_back(nei[facei]);
                 }
                 else
                 {
-                    storage.append(own[facei]);
+                    storage.push_back(own[facei]);
                 }
             }
         }

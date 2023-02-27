@@ -27,7 +27,44 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
+#include "cell.H"
+#include "bitSet.H"
 #include "ListOps.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::primitiveMesh::calcCellPoints() const
+{
+    if (debug)
+    {
+        Pout<< "primitiveMesh::cellCellPoints() : "
+            << "calculating cellPoints" << endl;
+
+        if (debug == -1)
+        {
+            // For checking calls:abort so we can quickly hunt down
+            // origin of call
+            FatalErrorInFunction
+                << abort(FatalError);
+        }
+    }
+
+    // It is an error to attempt to recalculate cellPoints
+    // if the pointer is already set
+    if (cpPtr_)
+    {
+        FatalErrorInFunction
+            << "cellPoints already calculated"
+            << abort(FatalError);
+    }
+    else
+    {
+        // Invert pointCells
+        cpPtr_ = new labelListList(nCells());
+        invertManyToMany(nCells(), pointCells(), *cpPtr_);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -35,23 +72,7 @@ const Foam::labelListList& Foam::primitiveMesh::cellPoints() const
 {
     if (!cpPtr_)
     {
-        if (debug)
-        {
-            Pout<< "primitiveMesh::cellPoints() : "
-                << "calculating cellPoints" << endl;
-
-            if (debug == -1)
-            {
-                // For checking calls:abort so we can quickly hunt down
-                // origin of call
-                FatalErrorInFunction
-                    << abort(FatalError);
-            }
-        }
-
-        // Invert pointCells
-        cpPtr_ = new labelListList(nCells());
-        invertManyToMany(nCells(), pointCells(), *cpPtr_);
+        calcCellPoints();
     }
 
     return *cpPtr_;
@@ -81,14 +102,14 @@ const Foam::labelList& Foam::primitiveMesh::cellPoints
     }
 
     storage.clear();
-    if (set.size() > storage.capacity())
+    if (storage.capacity() < set.size())
     {
         storage.setCapacity(set.size());
     }
 
     for (const label pointi : set)
     {
-        storage.append(pointi);
+        storage.push_back(pointi);
     }
 
     return storage;

@@ -27,6 +27,8 @@ License
 
 #include "primitiveMesh.H"
 #include "cell.H"
+#include "bitSet.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -136,36 +138,28 @@ const Foam::labelList& Foam::primitiveMesh::pointCells
 
         storage.clear();
 
-        forAll(pFaces, i)
+        for (const label facei : pFaces)
         {
-            const label facei = pFaces[i];
+            // Owner cell
+            storage.push_back(own[facei]);
 
-            // Append owner
-            storage.append(own[facei]);
-
-            // Append neighbour
+            // Neighbour cell
             if (facei < nInternalFaces())
             {
-                storage.append(nei[facei]);
+                storage.push_back(nei[facei]);
             }
         }
 
         // Filter duplicates
         if (storage.size() > 1)
         {
-            sort(storage);
+            std::sort(storage.begin(), storage.end());
 
-            label n = 1;
-            for (label i = 1; i < storage.size(); i++)
-            {
-                if (storage[i-1] != storage[i])
-                {
-                    storage[n++] = storage[i];
-                }
-            }
+            auto last = std::unique(storage.begin(), storage.end());
 
-            // truncate addressed list
-            storage.setSize(n);
+            const label newLen = label(last - storage.begin());
+
+            storage.resize(newLen);
         }
 
         return storage;
@@ -178,7 +172,5 @@ const Foam::labelList& Foam::primitiveMesh::pointCells(const label pointi) const
     return pointCells(pointi, labels_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -28,7 +28,6 @@ License
 #include "primitiveMesh.H"
 #include "ListOps.H"
 
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::labelListList& Foam::primitiveMesh::pointFaces() const

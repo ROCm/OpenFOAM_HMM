@@ -59,20 +59,20 @@ const Foam::labelListList& Foam::primitiveMesh::edgeFaces() const
 
 const Foam::labelList& Foam::primitiveMesh::edgeFaces
 (
-    const label edgeI,
+    const label edgei,
     DynamicList<label>& storage
 ) const
 {
     if (hasEdgeFaces())
     {
-        return edgeFaces()[edgeI];
+        return edgeFaces()[edgei];
     }
     else
     {
         // Use the fact that pointFaces are sorted in incrementing edge order
         // (since they get constructed by inverting the faces which walks
         //  in increasing face order)
-        const edge& e = edges()[edgeI];
+        const edge& e = edges()[edgei];
         const labelList& pFaces0 = pointFaces()[e[0]];
         const labelList& pFaces1 = pointFaces()[e[1]];
 
@@ -123,9 +123,9 @@ const Foam::labelList& Foam::primitiveMesh::edgeFaces
 }
 
 
-const Foam::labelList& Foam::primitiveMesh::edgeFaces(const label edgeI) const
+const Foam::labelList& Foam::primitiveMesh::edgeFaces(const label edgei) const
 {
-    return edgeFaces(edgeI, labels_);
+    return edgeFaces(edgei, labels_);
 }
 
 
