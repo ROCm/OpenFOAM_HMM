@@ -41,7 +41,7 @@ void printInfo(const tmp<T>& item, const bool verbose = false)
         << " movable:" << Switch(item.movable());
     if (item)
     {
-        Info<< " refCount:" << item->count();
+        Info<< " refCount:" << item->use_count();
     }
 
     Info<< " move-constructible:"

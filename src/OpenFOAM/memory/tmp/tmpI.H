@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,9 +34,9 @@ License
 template<class T>
 inline void Foam::tmp<T>::incrCount()
 {
-    ptr_->operator++();
+    ptr_->refCount::operator++();
 
-    if (ptr_->count() > 1)
+    if (ptr_->refCount::use_count() > 1)
     {
         FatalErrorInFunction
             << "Attempt to create more than 2 tmp's referring to the same"
@@ -79,7 +79,7 @@ inline Foam::tmp<T>::tmp(T* p)
     ptr_(p),
     type_(PTR)
 {
-    if (ptr_ && !ptr_->unique())
+    if (ptr_ && !ptr_->refCount::unique())
     {
         FatalErrorInFunction
             << "Attempted construction of a "
@@ -195,7 +195,7 @@ inline Foam::tmp<T>::~tmp() noexcept
 template<class T>
 inline bool Foam::tmp<T>::movable() const noexcept
 {
-    return (is_pointer() && ptr_ && ptr_->unique());
+    return (is_pointer() && ptr_ && ptr_->refCount::unique());
 }
 
 
@@ -246,7 +246,7 @@ inline T* Foam::tmp<T>::ptr() const
 
     if (is_pointer())
     {
-        if (!ptr_->unique())
+        if (!ptr_->refCount::unique())
         {
             FatalErrorInFunction
                 << "Attempt to acquire pointer to object referred to"
@@ -271,13 +271,13 @@ inline void Foam::tmp<T>::clear() const noexcept
 {
     if (is_pointer() && ptr_)
     {
-        if (ptr_->unique())
+        if (ptr_->refCount::unique())
         {
             delete ptr_;
         }
         else
         {
-            ptr_->operator--();
+            ptr_->refCount::operator--();
         }
         ptr_ = nullptr;
     }
@@ -479,7 +479,7 @@ inline void Foam::tmp<T>::operator=(T* p)
             << this->typeName()
             << abort(FatalError);
     }
-    else if (!p->unique())
+    else if (!p->refCount::unique())
     {
         FatalErrorInFunction
             << "Attempted assignment of a "
