@@ -28,6 +28,8 @@ License
 #include "fvcSurfaceIntegrate.H"
 #include "fvMesh.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
+#include "AtomicAccumulator.H"
+#include "macros.H"
 
 #ifdef USE_ROCTX
 #include <roctx.h>
@@ -63,12 +65,14 @@ void surfaceIntegrate
 
     const Field<Type>& issf = ssf;
 
+    OMP(parallel for if(owner.size() >= (1<<21)))
     forAll(owner, facei)
     {
-        ivf[owner[facei]] += issf[facei];
-        ivf[neighbour[facei]] -= issf[facei];
+        atomicAccumulator(ivf[owner[facei]]) += issf[facei];
+        atomicAccumulator(ivf[neighbour[facei]]) -= issf[facei];
     }
 
+    OMP(parallel for if(mesh.boundary().size() >= (1<<18)))
     forAll(mesh.boundary(), patchi)
     {
         const labelUList& pFaceCells =
@@ -78,7 +82,7 @@ void surfaceIntegrate
 
         forAll(mesh.boundary()[patchi], facei)
         {
-            ivf[pFaceCells[facei]] += pssf[facei];
+            atomicAccumulator(ivf[pFaceCells[facei]]) += pssf[facei];
         }
     }
 
@@ -184,12 +188,14 @@ surfaceSum
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
 
+    OMP(parallel for if(owner.size() >= (1<<21)))
     forAll(owner, facei)
     {
-        vf[owner[facei]] += ssf[facei];
-        vf[neighbour[facei]] += ssf[facei];
+        atomicAccumulator(vf[owner[facei]]) += ssf[facei];
+        atomicAccumulator(vf[neighbour[facei]]) += ssf[facei];
     }
 
+    OMP(parallel for if(mesh.boundary().size() >= (1<<18)))
     forAll(mesh.boundary(), patchi)
     {
         const labelUList& pFaceCells =
@@ -199,7 +205,7 @@ surfaceSum
 
         forAll(mesh.boundary()[patchi], facei)
         {
-            vf[pFaceCells[facei]] += pssf[facei];
+            atomicAccumulator(vf[pFaceCells[facei]]) += pssf[facei];
         }
     }
 

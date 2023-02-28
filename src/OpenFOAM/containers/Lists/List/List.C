@@ -32,6 +32,7 @@ License
 #include "PtrList.H"
 #include "SLList.H"
 #include "contiguous.H"
+#include "macros.H"
 #include <utility>
 
 #include <stdlib.h>  //LG1 AMD
@@ -146,6 +147,7 @@ Foam::List<T>::List(const label len, const T& val)
         doAlloc();
 
         List_ACCESS(T, (*this), vp);
+        OMP(parallel for if(len >= (1<<21)))
         for (label i=0; i < len; ++i)
         {
             vp[i] = val;
@@ -171,6 +173,7 @@ Foam::List<T>::List(const label len, const Foam::zero)
         doAlloc();
 
         List_ACCESS(T, (*this), vp);
+        OMP(parallel for if(len >= (1<<21)))
         for (label i=0; i < len; ++i)
         {
             vp[i] = Zero;
@@ -230,6 +233,7 @@ Foam::List<T>::List(const UList<T>& a)
         {
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
+            OMP(parallel for if(len >= (1<<21)))
             for (label i = 0; i < len; ++i)
             {
                 vp[i] = ap[i];
@@ -263,6 +267,7 @@ Foam::List<T>::List(const List<T>& a)
         {
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
+            OMP(parallel for if(len >= (1<<21)))
             for (label i = 0; i < len; ++i)
             {
                 vp[i] = ap[i];
@@ -305,6 +310,7 @@ Foam::List<T>::List(List<T>& a, bool reuse)
         {
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
+            OMP(parallel for if(len >= (1<<21)))
             for (label i = 0; i < len; ++i)
             {
                 vp[i] = ap[i];
@@ -327,6 +333,7 @@ Foam::List<T>::List(const UList<T>& list, const labelUList& indices)
 
         List_ACCESS(T, (*this), vp);
 
+        OMP(parallel for if(len >= (1<<21)))
         for (label i=0; i < len; ++i)
         {
             vp[i] = list[indices[i]];
@@ -351,6 +358,7 @@ Foam::List<T>::List
 
     List_ACCESS(T, (*this), vp);
 
+    OMP(parallel for if(len >= (1<<21)))
     for (label i=0; i < len; ++i)
     {
         vp[i] = list[indices[i]];
@@ -522,6 +530,7 @@ void Foam::List<T>::operator=(const UList<T>& a)
         {
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
+            OMP(parallel for if(len >= (1<<21)))
             for (label i = 0; i < len; ++i)
             {
                 vp[i] = ap[i];

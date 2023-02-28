@@ -447,6 +447,7 @@ void Foam::GeometricBoundaryField<Type, PatchField, GeoMesh>::evaluate()
     {
         const label startOfRequests = UPstream::nRequests();
 
+        OMP(parallel for if(this->size() >= (1<<21)))
         for (auto& pfld : *this)
         {
             pfld.initEvaluate(commsType);
@@ -462,6 +463,7 @@ void Foam::GeometricBoundaryField<Type, PatchField, GeoMesh>::evaluate()
             UPstream::waitRequests(startOfRequests);
         }
 
+        OMP(parallel for if(this->size() >= (1<<21)))
         for (auto& pfld : *this)
         {
             pfld.evaluate(commsType);

@@ -28,6 +28,8 @@ License
 
 #include "gaussGrad.H"
 #include "extrapolatedCalculatedFvPatchField.H"
+#include "AtomicAccumulator.H"
+#include "macros.H"
 
 
 #ifdef USE_ROCTX
@@ -89,14 +91,16 @@ Foam::fv::gaussGrad<Type>::gradf
     Field<GradType>& igGrad = gGrad;
     const Field<Type>& issf = ssf;
 
+    OMP(parallel for if(owner.size() >= (1<<21)))
     forAll(owner, facei)
     {
         const GradType Sfssf = Sf[facei]*issf[facei];
 
-        igGrad[owner[facei]] += Sfssf;
-        igGrad[neighbour[facei]] -= Sfssf;
+        atomicAccumulator(igGrad[owner[facei]]) += Sfssf;
+        atomicAccumulator(igGrad[neighbour[facei]]) -= Sfssf;
     }
 
+    OMP(parallel for if(mesh.boundary().size() >= (1<<18)))
     forAll(mesh.boundary(), patchi)
     {
         const labelUList& pFaceCells =
@@ -108,7 +112,7 @@ Foam::fv::gaussGrad<Type>::gradf
 
         forAll(mesh.boundary()[patchi], facei)
         {
-            igGrad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
+            atomicAccumulator(igGrad[pFaceCells[facei]]) += pSf[facei]*pssf[facei];
         }
     }
 

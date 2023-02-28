@@ -37,6 +37,8 @@ Description
 #ifndef Foam_ops_H
 #define Foam_ops_H
 
+#include "macros.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -123,6 +125,38 @@ EqOp(nopEq, (void)x)
 
 #undef EqOp
 
+#define AtomicEqOp(opName, op, atomicClause)                                   \
+                                                                               \
+    template<class T1, class T2>                                               \
+    struct atomic##opName##Op2                                                 \
+    {                                                                          \
+        void operator()(T1& x, const T2& y) const                              \
+        {                                                                      \
+            OMP(atomic atomicClause)                                           \
+            op;                                                                \
+        }                                                                      \
+    };                                                                         \
+                                                                               \
+    template<class T>                                                          \
+    struct atomic##opName##Op                                                  \
+    {                                                                          \
+        void operator()(T& x, const T& y) const                                \
+        {                                                                      \
+            OMP(atomic atomicClause)                                           \
+            op;                                                                \
+        }                                                                      \
+    };
+
+AtomicEqOp(Eq,         x = y,  write)
+AtomicEqOp(PlusEq,     x += y, update)
+AtomicEqOp(MinusEq,    x -= y, update)
+AtomicEqOp(MultiplyEq, x *= y, update)
+AtomicEqOp(DivideEq,   x /= y, update)
+AtomicEqOp(BitAndEq,   x &= y, update)
+AtomicEqOp(BitOrEq,    x |= y, update)
+AtomicEqOp(BitXorEq,   x ^= y, update)
+
+#undef AtomicEqOp
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
