@@ -88,7 +88,7 @@ Foam::boundaryDataSurfaceReader::readField
 {
     refPtr<Time> timePtr(Time::New(argList::envGlobalPath()));
 
-    return readField<Type>(baseDir, timeDir, fieldName, avg);
+    return readField<Type>(*timePtr, baseDir, timeDir, fieldName, avg);
 }
 
 
