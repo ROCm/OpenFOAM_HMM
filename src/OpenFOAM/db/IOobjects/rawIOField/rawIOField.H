@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,6 +97,12 @@ public:
 
         //- Construct from IOobject and specified request for reading average
         rawIOField(const IOobject& io, const bool readAverage);
+
+
+    // Factory Methods
+
+        //- Read and return contents. The IOobject will not be registered
+        static Field<Type> readContents(const IOobject& io);
 
 
     //- Destructor

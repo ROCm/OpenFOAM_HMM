@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,6 +90,12 @@ public:
 
         //- Construct by transferring the content
         IOList(const IOobject& io, List<T>&& content);
+
+
+    // Factory Methods
+
+        //- Read and return contents. The IOobject is never registered
+        static List<T> readContents(const IOobject& io);
 
 
     //- Destructor

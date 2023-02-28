@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef baseIOdictionary_H
-#define baseIOdictionary_H
+#ifndef Foam_baseIOdictionary_H
+#define Foam_baseIOdictionary_H
 
 #include "dictionary.H"
 #include "regIOobject.H"

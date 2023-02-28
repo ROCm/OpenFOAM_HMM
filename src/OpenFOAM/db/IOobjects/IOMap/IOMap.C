@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,6 +91,23 @@ Foam::IOMap<T>::IOMap(const IOobject& io, Map<T>&& content)
     Map<T>::transfer(content);
 
     readContents();
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class T>
+Foam::Map<T> Foam::IOMap<T>::readContents(const IOobject& io)
+{
+    IOobject rio(io, IOobjectOption::NO_REGISTER);
+    if (rio.readOpt() == IOobjectOption::MUST_READ_IF_MODIFIED)
+    {
+        rio.readOpt(IOobjectOption::MUST_READ);
+    }
+
+    IOMap<T> reader(rio);
+
+    return Map<T>(std::move(static_cast<Map<T>&>(reader)));
 }
 
 

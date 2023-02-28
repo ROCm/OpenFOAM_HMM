@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef unwatchedIOdictionary_H
-#define unwatchedIOdictionary_H
+#ifndef Foam_unwatchedIOdictionary_H
+#define Foam_unwatchedIOdictionary_H
 
 #include "baseIOdictionary.H"
 

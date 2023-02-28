@@ -434,6 +434,13 @@ public:
             IOobjectOption::writeOption wOpt
         );
 
+        //- Copy construct, resetting register option
+        inline IOobject
+        (
+            const IOobject& io,
+            IOobjectOption::registerOption regOpt
+        );
+
 
         //- Clone
         autoPtr<IOobject> clone() const

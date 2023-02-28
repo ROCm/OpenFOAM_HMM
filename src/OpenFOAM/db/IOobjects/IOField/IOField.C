@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -178,6 +178,23 @@ Foam::IOFieldRef<Type>::IOFieldRef
     regIOobject(io),
     contentRef_(content)  // cref
 {}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class Type>
+Foam::Field<Type> Foam::IOField<Type>::readContents(const IOobject& io)
+{
+    IOobject rio(io, IOobjectOption::NO_REGISTER);
+    if (rio.readOpt() == IOobjectOption::MUST_READ_IF_MODIFIED)
+    {
+        rio.readOpt(IOobjectOption::MUST_READ);
+    }
+
+    IOField<Type> reader(rio);
+
+    return Field<Type>(std::move(static_cast<Field<Type>&>(reader)));
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

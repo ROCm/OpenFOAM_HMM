@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,23 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, PtrList<T>&& content)
         PtrList<T>::readIstream(readStream(typeName), INew<T>());
         close();
     }
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class T>
+Foam::PtrList<T> Foam::IOPtrList<T>::readContents(const IOobject& io)
+{
+    IOobject rio(io, IOobjectOption::NO_REGISTER);
+    if (rio.readOpt() == IOobjectOption::MUST_READ_IF_MODIFIED)
+    {
+        rio.readOpt(IOobjectOption::MUST_READ);
+    }
+
+    IOPtrList<T> reader(rio);
+
+    return PtrList<T>(std::move(static_cast<PtrList<T>&>(reader)));
 }
 
 

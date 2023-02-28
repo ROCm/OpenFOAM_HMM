@@ -109,7 +109,11 @@ int main(int argc, char *argv[])
     {
         #include "setConstantRunTimeDictionaryIO.H"
 
-        IOdictionary propsDict(dictIO);
+        #if (OPENFOAM > 2212)
+        dictionary propsDict(IOdictionary::readContents(dictIO));
+        #else
+        dictionary propsDict(static_cast<dictionary&&>(IOdictionary(dictIO)));
+        #endif
 
         const scalarField xvals(propsDict.lookup("x"));
 
