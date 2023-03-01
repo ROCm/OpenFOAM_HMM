@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,8 +155,8 @@ public:
         void piece(const pointField& points, const edgeList& edges);
 
 
-        //- Write processor ids for each line as CellData
-        //- (no-op in serial)
+        //- Write processor ids for each line as CellData or for each point
+        //- as PointData, depending on isPointData() state. No-op in serial.
         bool writeProcIDs();
 
         //- Write a uniform field of Cell (Line) or Point values

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -585,6 +585,10 @@ void Foam::vtk::patchMeshWriter::writePatchIDs()
 
 bool Foam::vtk::patchMeshWriter::writeProcIDs()
 {
+    if (this->isPointData())
+    {
+        return vtk::fileWriter::writeProcIDs(nLocalPoints_);
+    }
     return vtk::fileWriter::writeProcIDs(nLocalPolys_);
 }
 

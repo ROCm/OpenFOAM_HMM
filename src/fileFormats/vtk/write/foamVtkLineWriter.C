@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,6 +131,10 @@ void Foam::vtk::lineWriter::piece
 
 bool Foam::vtk::lineWriter::writeProcIDs()
 {
+    if (this->isPointData())
+    {
+        return vtk::fileWriter::writeProcIDs(nLocalPoints_);
+    }
     return vtk::fileWriter::writeProcIDs(nLocalLines_);
 }
 

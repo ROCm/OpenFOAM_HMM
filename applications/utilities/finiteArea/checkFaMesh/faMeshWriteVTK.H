@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -76,9 +76,9 @@ Description
     writer.beginCellData(4);
     writer.writeProcIDs();
     {
-        // Use primitive patch order
         Field<scalar> fld
         (
+            // Use primitive patch order
             faMeshTools::flattenEdgeField(aMesh.magLe(), true)
         );
         writer.write("magLe", fld);
@@ -93,11 +93,17 @@ Description
 }
 
 {
+    const Field<vector> edgeCentres
+    (
+        // Use primitive patch order
+        faMeshTools::flattenEdgeField(aMesh.edgeCentres(), true)
+    );
+
     // finiteArea - edgeCentres
     // (no other convenient way to display vectors on the edges)
     vtk::lineWriter writer
     (
-        aMesh.edgeCentres(),
+        edgeCentres,
         edgeList::null(),
         // vtk::formatType::INLINE_ASCII,
         fileName
@@ -109,19 +115,20 @@ Description
     writer.writeGeometry();
 
     // PointData
-    writer.beginPointData(4);
+    writer.beginPointData(3);
+    writer.writeProcIDs();  // Unfortunately cannot threshold on points
     {
-        // Use primitive patch order
         Field<vector> fld
         (
+            // Use primitive patch order
             faMeshTools::flattenEdgeField(aMesh.Le(), true)
         );
         writer.write("Le", fld);
     }
     {
-        // Use primitive patch order
         Field<vector> fld
         (
+            // Use primitive patch order
             faMeshTools::flattenEdgeField(aMesh.edgeAreaNormals(), true)
         );
         writer.write("normal", fld);

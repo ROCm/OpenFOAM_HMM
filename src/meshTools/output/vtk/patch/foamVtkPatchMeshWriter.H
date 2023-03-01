@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -209,8 +209,8 @@ public:
         //  Must be called within the CELL_DATA state.
         void writePatchIDs();
 
-        //- Write processor ids as CellData. This is no-op in serial.
-        //  Must be called within the CELL_DATA state.
+        //- Write processor ids for each line as CellData or for each point
+        //- as PointData, depending on isPointData() state. No-op in serial.
         bool writeProcIDs();
 
         //- Write processor neighbour ids as CellData. This is no-op in serial.

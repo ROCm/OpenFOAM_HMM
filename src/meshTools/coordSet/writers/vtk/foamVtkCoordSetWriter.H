@@ -201,8 +201,9 @@ public:
         void piece(const UPtrList<const pointField>& points);
 
 
-        //- Write processor ids for each line as CellData
-        //- (no-op in serial)
+        //- Write processor ids for each line as CellData or for each point
+        //- as PointData, depending on isPointData() state. No-op in serial.
+        //  Not implemented.
         bool writeProcIDs();
 
 
