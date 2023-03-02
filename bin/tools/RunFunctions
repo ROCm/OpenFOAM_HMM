@@ -6,7 +6,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2015-2022 OpenCFD Ltd.
+#     Copyright (C) 2015-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -180,6 +180,16 @@ getNumberOfProcessors()
 {
     local dict="${1:-system/decomposeParDict}"
 
+    case "$dict" in
+    (system/*)  # Already qualified
+        ;;
+    (*)
+        # If it does not exist, assume it refers to location in system/
+        [ -f "$dict" ] || dict="system/$dict"
+        ;;
+    esac
+
+
     # Re-use positional parameters for automatic whitespace elimination
     set -- $(foamDictionary -entry numberOfSubdomains -value "$dict" 2>/dev/null)
 
@@ -223,7 +233,7 @@ getApplication()
 #
 runApplication()
 {
-    local appName appRun logFile logMode
+    local appName appRun optValue logFile logMode
 
     # Any additional parsed arguments (eg, decomposeParDict)
     local appArgs
@@ -232,25 +242,39 @@ runApplication()
     while [ "$#" -gt 0 ] && [ -z "$appRun" ]
     do
         case "$1" in
-            -a | -append)
-                logMode=append
-                ;;
-            -o | -overwrite)
-                logMode=overwrite
-                ;;
-            -s | -suffix)
-                logFile=".$2"
-                shift
-                ;;
-            -decomposeParDict)
-                appArgs="$appArgs $1 $2"
-                shift
-                ;;
-            '')
-                ;;
-            *)
-                appRun="$1"
-                ;;
+        ('') ;;  # Ignore junk
+
+        (-a | -append)
+            logMode=append
+            ;;
+        (-o | -overwrite)
+            logMode=overwrite
+            ;;
+        (-s | -suffix)
+            logFile=".$2"
+            shift
+            ;;
+
+        (-decompose-dict=*)
+            optValue="${1#*=}"
+            case "$optValue" in
+            ('' | none | false) ;;  ## Ignore
+            (*) appArgs="$appArgs -decomposeParDict $optValue" ;;
+            esac
+            ;;
+
+        (-decomposeParDict)
+            optValue="$2"
+            shift
+            case "$optValue" in
+            ('' | none | false) ;; ## Ignore
+            (*) appArgs="$appArgs -decomposeParDict $optValue" ;;
+            esac
+            ;;
+
+        (*)
+            appRun="$1"
+            ;;
         esac
         shift
     done
@@ -280,7 +304,7 @@ runApplication()
 #
 runParallel()
 {
-    local appName appRun logFile logMode nProcs
+    local appName appRun optValue logFile logMode nProcs
 
     # Any additional parsed arguments (eg, decomposeParDict)
     local appArgs="-parallel"
@@ -295,30 +319,46 @@ runParallel()
     while [ "$#" -gt 0 ] && [ -z "$appRun" ]
     do
         case "$1" in
-            -a | -append)
-                logMode=append
+        ('') ;;  # Ignore junk
+
+        (-a | -append)
+            logMode=append
+            ;;
+        (-o | -overwrite)
+            logMode=overwrite
+            ;;
+        (-s | -suffix)
+            logFile=".$2"
+            shift
+            ;;
+        (-n | -np)
+            nProcs="$2"
+            shift
+            ;;
+        (-decompose-dict=*)
+            optValue="${1#*=}"
+            case "$optValue" in
+            ('' | none | false) ;;  ## Ignore
+            (*)
+                appArgs="$appArgs -decomposeParDict $optValue"
+                nProcs="$(getNumberOfProcessors "$optValue")"
                 ;;
-            -o | -overwrite)
-                logMode=overwrite
+            esac
+            ;;
+        (-decomposeParDict)
+            optValue="$2"
+            shift
+            case "$optValue" in
+            ('' | none | false) ;;  ## Ignore
+            (*)
+                appArgs="$appArgs -decomposeParDict $optValue"
+                nProcs="$(getNumberOfProcessors "$optValue")"
                 ;;
-            -s | -suffix)
-                logFile=".$2"
-                shift
-                ;;
-            -n | -np)
-                nProcs="$2"
-                shift
-                ;;
-            -decomposeParDict)
-                appArgs="$appArgs $1 $2"
-                nProcs=$(getNumberOfProcessors "$2")
-                shift
-                ;;
-            '')
-                ;;
-            *)
-                appRun="$1"
-                ;;
+            esac
+            ;;
+         (*)
+            appRun="$1"
+            ;;
         esac
         shift
     done

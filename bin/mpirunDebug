@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2015 OpenFOAM Foundation
-#     Copyright (C) 2017-2021 OpenCFD Ltd.
+#     Copyright (C) 2017-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -45,6 +45,7 @@ options:
   -local        Same as -spawn=1
   -remote       Same as -spawn=2
   -clean        Remove old processor*.{log,sh} files, mpirun.schema etc
+  -decompose-dict=<file>   Specific decomposeParDict name
   -help         Print the usage
 
 Invoke mpirun with separate per-processor log files or running in
@@ -111,7 +112,7 @@ Linux)
 esac
 
 unset appName appArgs nProcs
-unset method spawn optClean
+unset method spawn optClean optValue
 optConfirm=true
 
 decompDict="system/decomposeParDict"
@@ -126,7 +127,7 @@ do
     then
         knownOption=true  # Assume success
         case "$1" in
-        '') ;;  # ignore junk
+        ('') ;;  # Ignore junk
 
         -clean)     optClean=true ;;
         -yes)       unset optConfirm ;;
@@ -173,14 +174,25 @@ do
             shift
             ;;
 
+        (-decompose-dict=*)
+            optValue="${1#*=}"
+            case "$optValue" in
+            ('' | none | false) ;;  ## Ignore
+            (*)
+                decompDict="$optValue"
+                appArgs="${appArgs}${appArgs:+ }-decomposeParDict '$decompDict'"
+                ;;
+            esac
+            ;;
+
         -decomposeParDict)
             # Grab values and add to args immediately
             decompDict="$2"
-            appArgs="${appArgs}${appArgs:+ }$1 '$2'"
             shift
+            appArgs="${appArgs}${appArgs:+ }-decomposeParDict '$decompDict'"
             ;;
 
-        *)
+        (*)
             knownOption=false  # Fallthrough to regular processing
             ;;
         esac
@@ -192,23 +204,24 @@ do
         fi
     fi
 
+    # Processing application arguments
     case "$1" in
-    -help* | --help*) usage ;;
-    '') ;;  # ignore junk
+    (-help* | --help*) usage ;;
+    ('') ;;  ## Ignore junk
 
-    -np)
+    (-np)
         nProcs="$2"
         shift
         ;;
 
-    -decomposeParDict)
+    (-decomposeParDict)
         # Grab values and add to args immediately
         decompDict="$2"
-        appArgs="${appArgs}${appArgs:+ }$1 '$2'"
+        appArgs="${appArgs}${appArgs:+ }-decomposeParDict '$decompDict'"
         shift
         ;;
 
-    *)
+    (*)
         if [ -z "$appName" ]
         then
             appName="$1"
