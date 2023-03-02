@@ -470,13 +470,23 @@ public:
 
     // Exchange
 
-        //- Helper: exchange sizes of sendBufs for specified
-        //- set of send/receive processes.
+        //- Helper: exchange sizes of sendBufs for specified send/recv ranks
         template<class Container>
         static void exchangeSizes
         (
             const labelUList& sendProcs,
             const labelUList& recvProcs,
+            const Container& sendBufs,
+            labelList& sizes,
+            const label tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- Helper: exchange sizes of sendBufs for specified neighbour ranks
+        template<class Container>
+        static void exchangeSizes
+        (
+            const labelUList& neighProcs,
             const Container& sendBufs,
             labelList& sizes,
             const label tag = UPstream::msgType(),

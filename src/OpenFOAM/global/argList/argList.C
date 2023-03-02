@@ -1720,6 +1720,8 @@ void Foam::argList::parse
                 << "    nProcsSimpleSum    : " << Pstream::nProcsSimpleSum << nl
                 << "    nonBlockingExchange: "
                 << Pstream::nProcsNonblockingExchange << nl
+                << "    exchange algorithm : "
+                << PstreamBuffers::algorithm << nl
                 << "    commsType          : "
                 << Pstream::commsTypeNames[Pstream::defaultCommsType] << nl
                 << "    polling iterations : " << Pstream::nPollProcInterfaces

@@ -746,55 +746,86 @@ void Foam::Pstream::exchangeSizes
     const label comm
 )
 {
-    //const label myProci = UPstream::myProcNo(comm);
+    const label myProci = UPstream::myProcNo(comm);
+    const label numProcs = UPstream::nProcs(comm);
 
-    if (sendBufs.size() != UPstream::nProcs(comm))
+    if (sendBufs.size() != numProcs)
     {
         FatalErrorInFunction
             << "Size of container " << sendBufs.size()
-            << " does not equal the number of processors "
-            << UPstream::nProcs(comm)
+            << " does not equal the number of processors " << numProcs
             << Foam::abort(FatalError);
     }
 
-    labelList sendSizes(sendProcs.size());
-    forAll(sendProcs, i)
+    labelList sendSizes(numProcs);
+    for (label proci = 0; proci < numProcs; ++proci)
     {
-        sendSizes[i] = sendBufs[sendProcs[i]].size();
+        sendSizes[proci] = sendBufs[proci].size();
     }
 
-    recvSizes.resize_nocopy(sendBufs.size());
+    recvSizes.resize_nocopy(numProcs);
     recvSizes = 0;  // Ensure non-received entries are properly zeroed
+
+    // Preserve self-send, even if not described by neighbourhood
+    recvSizes[myProci] = sendSizes[myProci];
 
     const label startOfRequests = UPstream::nRequests();
 
     for (const label proci : recvProcs)
     {
-        UIPstream::read
-        (
-            UPstream::commsTypes::nonBlocking,
-            proci,
-            reinterpret_cast<char*>(&recvSizes[proci]),
-            sizeof(label),
-            tag,
-            comm
-        );
+        if (proci != myProci)
+        {
+            UIPstream::read
+            (
+                UPstream::commsTypes::nonBlocking,
+                proci,
+                reinterpret_cast<char*>(&recvSizes[proci]),
+                sizeof(label),
+                tag,
+                comm
+            );
+        }
     }
 
-    forAll(sendProcs, i)
+    for (const label proci : sendProcs)
     {
-        UOPstream::write
-        (
-            UPstream::commsTypes::nonBlocking,
-            sendProcs[i],
-            reinterpret_cast<char*>(&sendSizes[i]),
-            sizeof(label),
-            tag,
-            comm
-        );
+        if (proci != myProci)
+        {
+            UOPstream::write
+            (
+                UPstream::commsTypes::nonBlocking,
+                proci,
+                reinterpret_cast<char*>(&sendSizes[proci]),
+                sizeof(label),
+                tag,
+                comm
+            );
+        }
     }
 
     UPstream::waitRequests(startOfRequests);
+}
+
+
+template<class Container>
+void Foam::Pstream::exchangeSizes
+(
+    const labelUList& neighProcs,
+    const Container& sendBufs,
+    labelList& recvSizes,
+    const label tag,
+    const label comm
+)
+{
+    Pstream::exchangeSizes<Container>
+    (
+        neighProcs,  // send
+        neighProcs,  // recv
+        sendBufs,
+        recvSizes,
+        tag,
+        comm
+    );
 }
 
 

@@ -164,7 +164,7 @@ class PstreamBuffers
         );
 
         //- Mark sends as done.
-        //  Only exchange sizes using the sendProcs/recvProcs subset
+        //  Only exchange sizes using the neighbour ranks
         //  (nonBlocking comms).
         void finalExchange
         (
@@ -175,11 +175,10 @@ class PstreamBuffers
         );
 
         //- For all-to-one or one-to-all
-        void finalExchangeGatherScatter
+        void finalGatherScatter
         (
             const bool isGather,
             const bool wait,
-            const bool needSizes,   // If recvSizes needed or scratch
             labelList& recvSizes
         );
 
@@ -201,6 +200,12 @@ class PstreamBuffers
 
 
 public:
+
+    // Static Data
+
+        //- Preferred exchange algorithm (may change or be removed in future)
+        static int algorithm;
+
 
     // Constructors
 
@@ -340,7 +345,7 @@ public:
 
         //- Maximum receive size, excluding the specified processor rank
         //- Must call finishedSends() or other finished.. method first!
-        label maxNonLocalRecvCount(const label proci) const;
+        label maxNonLocalRecvCount(const label excludeProci) const;
 
         //- Number of unconsumed receive bytes for the specified processor.
         //- Must call finishedSends() or other finished.. method first!
@@ -398,60 +403,6 @@ public:
     // Functions with restricted neighbours
 
         //- Mark sends as done using subset of send/recv ranks
-        //- to exchange data on.
-        //
-        //  Non-blocking mode: populates receive buffers.
-        //  \param sendProcs ranks used for sends
-        //  \param recvProcs ranks used for recvs
-        //  \param wait wait for requests to complete (in nonBlocking mode)
-        //
-        //  \warning currently only valid for nonBlocking comms.
-        void finishedSends
-        (
-            const labelUList& sendProcs,
-            const labelUList& recvProcs,
-            const bool wait = true
-        );
-
-        //- Mark sends as done using subset of send/recv ranks
-        //- to exchange data on. Recovers the sizes (bytes) received.
-        //
-        //  Non-blocking mode: populates receive buffers.
-        //
-        //  \param sendProcs ranks used for sends
-        //  \param recvProcs ranks used for recvs
-        //  \param[out] recvSizes the sizes (bytes) received
-        //  \param wait wait for requests to complete (in nonBlocking mode)
-        //
-        //  \warning currently only valid for nonBlocking comms.
-        void finishedSends
-        (
-            const labelUList& sendProcs,
-            const labelUList& recvProcs,
-            labelList& recvSizes,
-            const bool wait = true
-        );
-
-        //- A caching version that uses a limited send/recv connectivity.
-        //
-        //  Non-blocking mode: populates receive buffers.
-        //  \param sendConnections on/off for sending ranks
-        //  \param sendProcs ranks used for sends
-        //  \param recvProcs ranks used for recvs
-        //  \param wait wait for requests to complete (in nonBlocking mode)
-        //
-        //  \return True if the send/recv connectivity changed
-        //
-        //  \warning currently only valid for nonBlocking comms.
-        bool finishedSends
-        (
-            bitSet& sendConnections,
-            DynamicList<label>& sendProcs,
-            DynamicList<label>& recvProcs,
-            const bool wait = true
-        );
-
-        //- Mark sends as done using subset of send/recv ranks
         //- and recover the sizes (bytes) received.
         //
         //  Non-blocking mode: populates receive buffers.
@@ -481,6 +432,25 @@ public:
         (
             const labelUList& neighProcs,
             labelList& recvSizes,
+            const bool wait = true
+        );
+
+        //- A caching version that uses a limited send/recv connectivity.
+        //
+        //  Non-blocking mode: populates receive buffers.
+        //  \param sendConnections on/off for sending ranks
+        //  \param sendProcs ranks used for sends
+        //  \param recvProcs ranks used for recvs
+        //  \param wait wait for requests to complete (in nonBlocking mode)
+        //
+        //  \return True if the send/recv connectivity changed
+        //
+        //  \warning currently only valid for nonBlocking comms.
+        bool finishedSends
+        (
+            bitSet& sendConnections,
+            DynamicList<label>& sendProcs,
+            DynamicList<label>& recvProcs,
             const bool wait = true
         );
 
