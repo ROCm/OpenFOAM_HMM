@@ -114,13 +114,15 @@ void Foam::zoneDistribute::setUpCommforZone
 
         pBufs_.clear();
 
-        for (const int proci : UPstream::allProcs())
+        for (const int proci : pBufs_.allProcs())
         {
-            if (proci != UPstream::myProcNo() && !needed[proci].empty())
+            const auto& indices = needed[proci];
+
+            if (proci != UPstream::myProcNo() && !indices.empty())
             {
                 // Serialize as List
                 UOPstream toProc(proci, pBufs_);
-                toProc << needed[proci].sortedToc();
+                toProc << indices.sortedToc();
             }
         }
 

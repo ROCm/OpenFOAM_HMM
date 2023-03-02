@@ -214,7 +214,7 @@ void Foam::globalIndex::reset
             // Non-parallel branch: use localSize on-proc, zero elsewhere
 
             localLens.resize(len, Zero);
-            localLens[Pstream::myProcNo(comm)] = localSize;
+            localLens[UPstream::myProcNo(comm)] = localSize;
         }
 
         reset(localLens, true);  // checkOverflow = true

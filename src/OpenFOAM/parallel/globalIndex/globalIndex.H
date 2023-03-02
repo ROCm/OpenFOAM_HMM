@@ -519,7 +519,9 @@ public:
         {
             List<Type> allData;
             gather(offsets, comm, procIDs, fld, allData, tag, ct);
-            if (Pstream::myProcNo(comm) == procIDs[0])
+
+            const int masterProci = procIDs.size() ? procIDs[0] : 0;
+            if (UPstream::myProcNo(comm) == masterProci)
             {
                 fld.transfer(allData);
             }

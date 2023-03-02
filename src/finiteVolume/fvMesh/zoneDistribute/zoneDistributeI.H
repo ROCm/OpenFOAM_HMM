@@ -175,14 +175,16 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
 
         pBufs_.clear();
 
-        for (const int proci : UPstream::allProcs())
+        for (const int proci : pBufs_.allProcs())
         {
-            if (proci != UPstream::myProcNo() && !send_[proci].empty())
+            const auto& indices = send_[proci];
+
+            if (proci != UPstream::myProcNo() && !indices.empty())
             {
                 // Serialize as Map
-                Map<Type> sendValues(2*send_[proci].size());
+                Map<Type> sendValues(2*indices.size());
 
-                for (const label sendIdx : send_[proci])
+                for (const label sendIdx : indices)
                 {
                     sendValues.insert
                     (
