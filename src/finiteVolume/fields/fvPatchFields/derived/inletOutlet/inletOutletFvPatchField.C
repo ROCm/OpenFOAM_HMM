@@ -73,16 +73,9 @@ Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
 {
     fvPatchFieldBase::readDict(dict);
 
-    this->refValue() = Field<Type>("inletValue", dict, p.size());
+    this->refValue().assign("inletValue", dict, p.size());
 
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<Type>::operator=(this->refValue());
     }

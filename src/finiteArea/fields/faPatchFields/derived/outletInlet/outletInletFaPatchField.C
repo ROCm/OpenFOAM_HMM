@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,12 +25,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "inletOutletFaPatchField.H"
+#include "outletInletFaPatchField.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::outletInletFaPatchField<Type>::outletInletFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -40,16 +39,16 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
     mixedFaPatchField<Type>(p, iF),
     phiName_("phi")
 {
-    this->refValue() = Zero;
+    this->refValue() = *this;
     this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
 
 template<class Type>
-Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::outletInletFaPatchField<Type>::outletInletFaPatchField
 (
-    const inletOutletFaPatchField<Type>& ptf,
+    const outletInletFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const faPatchFieldMapper& mapper
@@ -61,7 +60,7 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
 
 template<class Type>
-Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::outletInletFaPatchField<Type>::outletInletFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -73,7 +72,7 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 {
     faPatchFieldBase::readDict(dict);
 
-    this->refValue().assign("inletValue", dict, p.size());
+    this->refValue().assign("outletValue", dict, p.size());
 
     if (!this->readValueEntry(dict))
     {
@@ -86,9 +85,9 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
 
 template<class Type>
-Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::outletInletFaPatchField<Type>::outletInletFaPatchField
 (
-    const inletOutletFaPatchField<Type>& ptf
+    const outletInletFaPatchField<Type>& ptf
 )
 :
     mixedFaPatchField<Type>(ptf),
@@ -97,9 +96,9 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
 
 template<class Type>
-Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::outletInletFaPatchField<Type>::outletInletFaPatchField
 (
-    const inletOutletFaPatchField<Type>& ptf,
+    const outletInletFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
 )
 :
@@ -111,7 +110,7 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::inletOutletFaPatchField<Type>::updateCoeffs()
+void Foam::outletInletFaPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -121,18 +120,18 @@ void Foam::inletOutletFaPatchField<Type>::updateCoeffs()
     const Field<scalar>& phip =
         this->patch().template lookupPatchField<edgeScalarField>(phiName_);
 
-    this->valueFraction() = neg(phip);
+    this->valueFraction() = pos0(phip);
 
     mixedFaPatchField<Type>::updateCoeffs();
 }
 
 
 template<class Type>
-void Foam::inletOutletFaPatchField<Type>::write(Ostream& os) const
+void Foam::outletInletFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
-    this->refValue().writeEntry("inletValue", os);
+    this->refValue().writeEntry("outletValue", os);
     faPatchField<Type>::writeValueEntry(os);
 }
 

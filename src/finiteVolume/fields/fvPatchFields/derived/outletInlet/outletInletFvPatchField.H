@@ -57,7 +57,7 @@ Usage
 Note
     Sign conventions:
     - Positive flux (out of domain): apply the "outletValue" fixed-value
-    - Negative flux (into of domain): apply zero-gradient condition
+    - Negative flux (into domain): apply zero-gradient condition
 
 See also
     Foam::mixedFvPatchField
@@ -69,8 +69,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef outletInletFvPatchField_H
-#define outletInletFvPatchField_H
+#ifndef Foam_outletInletFvPatchField_H
+#define Foam_outletInletFvPatchField_H
 
 #include "mixedFvPatchField.H"
 

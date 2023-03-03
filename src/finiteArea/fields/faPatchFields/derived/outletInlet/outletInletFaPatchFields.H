@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,16 +25,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "areaFields.H"
-#include "edgeFields.H"
-#include "inletOutletFaPatchFields.H"
-#include "addToRunTimeSelectionTable.H"
+#ifndef Foam_outletInletFaPatchFields_H
+#define Foam_outletInletFaPatchFields_H
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "outletInletFaPatchField.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeFaPatchFields(inletOutlet);
-}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makeFaPatchTypeFieldTypedefs(outletInlet);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -27,19 +27,52 @@ License
 Class
     Foam::inletOutletFaPatchField
 
-Description
+Group
+    grpOutletBoundaryConditions
 
-Author
-    Zeljko Tukovic, FMENA
-    Hrvoje Jasak, Wikki Ltd.
+Description
+    This boundary condition provides a generic outflow condition, with
+    specified inflow for the case of return flow.
+
+Usage
+    \table
+        Property     | Description             | Required    | Default value
+        phi          | Flux field name         | no          | phi
+        inletValue   | Inlet value for reverse flow | yes    |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        type            inletOutlet;
+        phi             phi;
+        inletValue      uniform 0;
+        value           uniform 0;
+    }
+    \endverbatim
+
+    The mode of operation is determined by the sign of the flux across the
+    patch edges.
+
+
+Note
+    Sign conventions:
+    - Positive flux (out of domain): apply zero-gradient condition
+    - Negative flux (into domain): apply the "inletValue" fixed-value
+
+See also
+    Foam::mixedFaPatchField
+    Foam::zeroGradientFaPatchField
+    Foam::outletInletFaPatchField
 
 SourceFiles
     inletOutletFaPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef inletOutletFaPatchField_H
-#define inletOutletFaPatchField_H
+#ifndef Foam_inletOutletFaPatchField_H
+#define Foam_inletOutletFaPatchField_H
 
 #include "mixedFaPatchField.H"
 
@@ -57,11 +90,11 @@ class inletOutletFaPatchField
 :
     public mixedFaPatchField<Type>
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
+        //- Name of flux field
         word phiName_;
 
 
@@ -136,22 +169,7 @@ public:
     virtual ~inletOutletFaPatchField() = default;
 
 
-    // Member functions
-
-        // Access
-
-            //- Return the name of phi
-            const word& phiName() const
-            {
-                return phiName_;
-            }
-
-            //- Return reference to the name of phi to allow adjustment
-            word& phiName()
-            {
-                return phiName_;
-            }
-
+    // Member Functions
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();

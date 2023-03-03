@@ -62,6 +62,7 @@ $(constraintFaPatchFields)/symmetry/symmetryFaPatchFields.C
 derivedFaPatchFields = $(faPatchFields)/derived
 $(derivedFaPatchFields)/fixedValueOutflow/fixedValueOutflowFaPatchFields.C
 $(derivedFaPatchFields)/inletOutlet/inletOutletFaPatchFields.C
+$(derivedFaPatchFields)/outletInlet/outletInletFaPatchFields.C
 $(derivedFaPatchFields)/slip/slipFaPatchFields.C
 $(derivedFaPatchFields)/edgeNormalFixedValue/edgeNormalFixedValueFaPatchVectorField.C
 $(derivedFaPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFaPatchFields.C
