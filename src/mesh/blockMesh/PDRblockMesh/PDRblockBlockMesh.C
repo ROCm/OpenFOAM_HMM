@@ -252,7 +252,7 @@ Foam::Ostream& Foam::PDRblock::blockMeshDict
                 *dummyTimePtr,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false  // no register
+                IOobject::NO_REGISTER
             )
         );
 
@@ -375,7 +375,7 @@ Foam::Ostream& Foam::PDRblock::blockMeshDict
                 *dummyTimePtr,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false  // do not register
+                IOobject::NO_REGISTER
             );
 
             searchableSphere sphere(io, radialCentre, radialSizes);
@@ -796,7 +796,7 @@ void Foam::PDRblock::writeBlockMeshDict(const IOobject& io) const
             io.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // no register
+            IOobject::NO_REGISTER
         )
     );
 
@@ -831,7 +831,7 @@ Foam::PDRblock::createBlockMesh(const IOobject& io) const
             io.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // no register
+            IOobject::NO_REGISTER
         ),
         blockMeshDict()
     );

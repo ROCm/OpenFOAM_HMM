@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,8 +65,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PDRblock_H
-#define PDRblock_H
+#ifndef Foam_PDRblock_H
+#define Foam_PDRblock_H
 
 #include "ijkMesh.H"
 #include "boundBox.H"
@@ -121,6 +121,9 @@ public:
             public scalarList
         {
         public:
+
+            //- Reset with min/max range and number of divisions
+            void reset(const scalar low, const scalar upp, const label nCells);
 
             //- The location list is valid if it contains 2 or more points
             inline bool valid() const;
@@ -338,6 +341,9 @@ private:
             const UList<scalar>& pts
         );
 
+        //- Add zero-sized patches with default naming/types
+        void addDefaultPatches();
+
         //- Adjust sizing for updated grid points
         void adjustSizes();
 
@@ -440,6 +446,9 @@ public:
             const UList<scalar>& zgrid
         );
 
+        //- Construct from cube with specified griding
+        PDRblock(const boundBox& box, const labelVector& nCells);
+
         //- Construct from dictionary
         explicit PDRblock(const dictionary& dict, bool verboseOutput=false);
 
@@ -457,11 +466,14 @@ public:
             const UList<scalar>& zgrid
         );
 
+        //- Reset cube and mesh i-j-k sizing
+        void reset(const boundBox& box, const labelVector& nCells);
+
 
     // Access
 
         //- The grid point locations in the i,j,k (x,y,z) directions.
-        inline const Vector<location>& grid() const;
+        const Vector<location>& grid() const noexcept { return grid_; }
 
         //- Equivalent edge grading descriptors in (x,y,z) directions.
         Vector<gradingDescriptors> grading() const;
@@ -476,10 +488,10 @@ public:
         using ijkMesh::sizes;
 
         //- The mesh bounding box
-        inline const boundBox& bounds() const;
+        const boundBox& bounds() const noexcept { return bounds_; }
 
         //- The min/max edge length
-        inline const scalarMinMax& edgeLimits() const;
+        const scalarMinMax& edgeLimits() const noexcept { return edgeLimits_; }
 
         //- Cell size in x-direction at i position.
         inline scalar dx(const label i) const;

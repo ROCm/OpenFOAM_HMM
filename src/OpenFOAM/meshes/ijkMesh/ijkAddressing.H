@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ijkAddressing_H
-#define ijkAddressing_H
+#ifndef Foam_ijkAddressing_H
+#define Foam_ijkAddressing_H
 
 #include "labelVector.H"
 #include "vector.H"

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,6 +163,9 @@ public:
         //- Construct a bounding box containing a single initial point
         inline explicit boundBox(const point& p);
 
+        //- Construct a 0/1 unit bounding box
+        inline explicit boundBox(const Foam::zero_one);
+
         //- Construct from bound box min/max points
         inline boundBox(const point& min, const point& max);
 
@@ -290,6 +293,9 @@ public:
 
             //- Reset to an inverted box
             inline void reset();
+
+            //- Reset to a 0/1 unit bounding box
+            inline void reset(const Foam::zero_one);
 
             //- Reset min/max to be identical to the specified point
             inline void reset(const point& pt);

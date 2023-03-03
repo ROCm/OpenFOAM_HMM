@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,6 +200,9 @@ public:
 
 
     // Constructors
+
+        //- Construct a 0/1 unit bounding box
+        inline explicit treeBoundBox(const Foam::zero_one);
 
         //- Construct a bounding box containing a single initial point
         inline explicit treeBoundBox(const point& p);

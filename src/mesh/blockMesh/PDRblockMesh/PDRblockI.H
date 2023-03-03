@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,31 +48,31 @@ inline Foam::label Foam::PDRblock::location::nPoints() const
 
 inline bool Foam::PDRblock::location::contains(const scalar p) const
 {
-    return (scalarList::size() > 1 && first() <= p && p <= last());
+    return (scalarList::size() > 1 && front() <= p && p <= back());
 }
 
 
 inline const Foam::scalar& Foam::PDRblock::location::min() const
 {
-    return scalarList::empty() ? pTraits<scalar>::rootMax : first();
+    return scalarList::empty() ? pTraits<scalar>::rootMax : front();
 }
 
 
 inline const Foam::scalar& Foam::PDRblock::location::max() const
 {
-    return scalarList::empty() ? pTraits<scalar>::rootMin : last();
+    return scalarList::empty() ? pTraits<scalar>::rootMin : back();
 }
 
 
 inline Foam::scalar Foam::PDRblock::location::centre() const
 {
-    return scalarList::empty() ? 0 : (0.5*first() + 0.5*last());
+    return scalarList::empty() ? 0 : (0.5*front() + 0.5*back());
 }
 
 
 inline Foam::scalar Foam::PDRblock::location::length() const
 {
-    return scalarList::empty() ? 0 : mag(last() - first());
+    return scalarList::empty() ? 0 : mag(back() - front());
 }
 
 
@@ -107,12 +107,12 @@ inline Foam::scalar Foam::PDRblock::location::C(const label i) const
         #endif
 
         // "Halo" centre [-1] == x0 - 1/2 (x1 - x0)
-        return first() - 0.5*(operator[](1) - first());
+        return front() - 0.5*(operator[](1) - front());
     }
     else if (i > 1 && i == scalarList::size()-1)
     {
         // "Halo" centre [nCells] == xN + 1/2 (xN - xN1)
-        return last() + 0.5*(last() - operator[](scalarList::size()-2));
+        return back() + 0.5*(back() - operator[](scalarList::size()-2));
     }
 
     #ifdef FULLDEBUG
@@ -128,13 +128,13 @@ Foam::PDRblock::location::clip(const scalar& val) const
 {
     if (scalarList::size())
     {
-        if (val < first())
+        if (val < front())
         {
-            return first();
+            return front();
         }
-        else if (last() < val)
+        else if (back() < val)
         {
-            return last();
+            return back();
         }
     }
 
@@ -143,25 +143,6 @@ Foam::PDRblock::location::clip(const scalar& val) const
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::Vector<Foam::PDRblock::location>&
-Foam::PDRblock::grid() const
-{
-    return grid_;
-}
-
-
-inline const Foam::scalarMinMax& Foam::PDRblock::edgeLimits() const
-{
-    return edgeLimits_;
-}
-
-
-inline const Foam::boundBox& Foam::PDRblock::bounds() const
-{
-    return bounds_;
-}
-
 
 inline Foam::scalar Foam::PDRblock::dx(const label i) const
 {

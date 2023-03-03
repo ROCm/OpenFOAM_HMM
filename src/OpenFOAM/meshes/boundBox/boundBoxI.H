@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,6 +109,13 @@ inline Foam::boundBox::boundBox()
 :
     min_(invertedBox.min()),
     max_(invertedBox.max())
+{}
+
+
+inline Foam::boundBox::boundBox(const Foam::zero_one)
+:
+    min_(point::zero),
+    max_(point::one)
 {}
 
 
@@ -296,6 +303,13 @@ inline void Foam::boundBox::reset()
 {
     min_ = invertedBox.min();
     max_ = invertedBox.max();
+}
+
+
+inline void Foam::boundBox::reset(const Foam::zero_one)
+{
+    min_ = point::zero;
+    max_ = point::one;
 }
 
 
