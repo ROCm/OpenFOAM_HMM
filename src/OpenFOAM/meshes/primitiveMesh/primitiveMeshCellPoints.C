@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "primitiveMesh.H"
 #include "cell.H"
 #include "bitSet.H"
+#include "DynamicList.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -57,11 +58,50 @@ void Foam::primitiveMesh::calcCellPoints() const
             << "cellPoints already calculated"
             << abort(FatalError);
     }
-    else
+    else if (hasPointCells())
     {
         // Invert pointCells
         cpPtr_ = new labelListList(nCells());
         invertManyToMany(nCells(), pointCells(), *cpPtr_);
+    }
+    else
+    {
+        // Calculate cell-point topology
+
+        cpPtr_ = new labelListList(nCells());
+        auto& cellPointAddr = *cpPtr_;
+
+        const cellList& cellLst = cells();
+        const faceList& faceLst = faces();
+
+        // Tracking (only use each point id once)
+        bitSet usedPoints(nPoints());
+
+        // Vertex labels for the current cell
+        DynamicList<label> currPoints(256);
+
+        const label loopLen = nCells();
+
+        for (label celli = 0; celli < loopLen; ++celli)
+        {
+            // Clear any previous contents
+            usedPoints.unset(currPoints);
+            currPoints.clear();
+
+            for (const label facei : cellLst[celli])
+            {
+                for (const label pointi : faceLst[facei])
+                {
+                    // Only once for each point id
+                    if (usedPoints.set(pointi))
+                    {
+                        currPoints.push_back(pointi);
+                    }
+                }
+            }
+
+            cellPointAddr[celli] = currPoints;  // NB: unsorted
+        }
     }
 }
 
