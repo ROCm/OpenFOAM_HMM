@@ -43,8 +43,8 @@ PIMPLE
 
 relaxationFactors
 {
-    hf_Film    1;
-    Uf_Film    1;
+    hf_film    1;
+    Uf_film    1;
 }
 
 

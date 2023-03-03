@@ -30,8 +30,11 @@ boundaryField
 
     bottom
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        // zeroGradient is probably enough
+        type            inletOutlet;
+        phi             phif_film;
+        value           $internalField;
+        inletValue      uniform (0 0 0);
     }
 
     frontAndBack

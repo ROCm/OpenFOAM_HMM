@@ -34,7 +34,7 @@ limitHeight1
     region      velocityFilmShell;
     h           hf_film;
     selectionMode all;
-    max         0.001;
+    max         0.005;
 }
 
 // ************************************************************************* //
