@@ -173,6 +173,10 @@ public:
         //- (discard old element at that location).
         //- Return reference to the new list element.
         template<class... Args>
+        inline T& emplace_set(const label i, Args&&... args);
+
+        //- Same as emplace_set()
+        template<class... Args>
         inline T& emplace(const label i, Args&&... args);
 
         //- Set element to given pointer and return old element (can be null)

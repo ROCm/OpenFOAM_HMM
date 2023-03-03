@@ -172,11 +172,17 @@ inline void Foam::PtrList<T>::push_back(PtrList<T>&& other)
 
 template<class T>
 template<class... Args>
-inline T& Foam::PtrList<T>::emplace
-(
-    const label i,
-    Args&&... args
-)
+inline T& Foam::PtrList<T>::emplace_set(const label i, Args&&... args)
+{
+    T* ptr = new T(std::forward<Args>(args)...);
+    (void)this->set(i, ptr);
+    return *ptr;
+}
+
+
+template<class T>
+template<class... Args>
+inline T& Foam::PtrList<T>::emplace(const label i, Args&&... args)
 {
     T* ptr = new T(std::forward<Args>(args)...);
     (void)this->set(i, ptr);
