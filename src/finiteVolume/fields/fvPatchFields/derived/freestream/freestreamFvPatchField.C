@@ -38,7 +38,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(p, iF),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {}
 
 
@@ -51,7 +51,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(p, iF),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
     fvPatchFieldBase::readDict(dict);
 
@@ -93,7 +93,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(ptf, p, iF, mapper),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
     if (ptf.freestreamBCPtr_)
     {
@@ -110,7 +110,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(ptf),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
     if (ptf.freestreamBCPtr_)
     {
@@ -127,7 +127,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(ptf, iF),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
     if (ptf.freestreamBCPtr_)
     {
@@ -160,7 +160,7 @@ void Foam::freestreamFvPatchField<Type>::rmap
 
     const auto& fsptf = refCast<const freestreamFvPatchField<Type>>(ptf);
 
-    if (fsptf.freestreamBCPtr_)
+    if (freestreamBCPtr_ && fsptf.freestreamBCPtr_)
     {
         freestreamBCPtr_->rmap(fsptf.freestreamBCPtr_(), addr);
     }

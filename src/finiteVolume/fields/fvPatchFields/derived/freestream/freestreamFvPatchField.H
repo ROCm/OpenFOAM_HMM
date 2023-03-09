@@ -83,8 +83,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef freestreamFvPatchField_H
-#define freestreamFvPatchField_H
+#ifndef Foam_freestreamFvPatchField_H
+#define Foam_freestreamFvPatchField_H
 
 #include "inletOutletFvPatchField.H"
 
@@ -102,7 +102,7 @@ class freestreamFvPatchField
 :
     public inletOutletFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- BC to supply the freestream value
         tmp<fvPatchField<Type>> freestreamBCPtr_;
@@ -175,7 +175,13 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
+
+    // Access
+
+        const Field<Type>& freestreamValue() const { return this->refValue(); }
+        Field<Type>& freestreamValue() { return this->refValue(); }
+
 
         // Mapping functions
 
@@ -192,19 +198,6 @@ public:
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
-
-        // Return defining fields
-
-            const Field<Type>& freestreamValue() const
-            {
-                return this->refValue();
-            }
-
-            Field<Type>& freestreamValue()
-            {
-                return this->refValue();
-            }
-
 
         //- Write
         virtual void write(Ostream&) const;
