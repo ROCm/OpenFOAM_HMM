@@ -54,7 +54,7 @@ bool Foam::UPstream::broadcast
             << " size:" << label(bufSize)
             << Foam::endl;
     }
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         Pout<< "UPstream::broadcast : root:" << rootProcNo
             << " comm:" << comm

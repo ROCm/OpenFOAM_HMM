@@ -88,12 +88,12 @@ int main(int argc, char *argv[])
 
     //- Process IDs within a given communicator
     Info<< "procIDs: "
-        << flatOutput(UPstream::procID(UPstream::worldComm)) << endl;
+        << flatOutput(UPstream::procID(UPstream::commWorld())) << endl;
 
-    rankInfo(UPstream::worldComm);
+    rankInfo(UPstream::commWorld());
     Pout<< endl;
 
-    const int myProci = UPstream::myProcNo(UPstream::worldComm);
+    const int myProci = UPstream::myProcNo(UPstream::commWorld());
     int localRanki = myProci;
 
     labelList subRanks;
@@ -101,9 +101,9 @@ int main(int argc, char *argv[])
 
     #if 1
     // With first ranks
-    subRanks = identity(UPstream::nProcs(UPstream::worldComm) / 2);
+    subRanks = identity(UPstream::nProcs(UPstream::commWorld()) / 2);
 
-    newComm.reset(UPstream::worldComm, subRanks);
+    newComm.reset(UPstream::commWorld(), subRanks);
     localRanki = UPstream::myProcNo(newComm);
 
     Pout.prefix() =
@@ -120,14 +120,14 @@ int main(int argc, char *argv[])
 
     #if 1
     // With every other rank
-    subRanks = identity(UPstream::nProcs(UPstream::worldComm));
+    subRanks = identity(UPstream::nProcs(UPstream::commWorld()));
 
     for (label& val : subRanks)
     {
         if (val % 2) val = -1;
     }
 
-    newComm.reset(UPstream::worldComm, subRanks);
+    newComm.reset(UPstream::commWorld(), subRanks);
     localRanki = UPstream::myProcNo(newComm);
 
     Pout.prefix() =
@@ -165,19 +165,19 @@ int main(int argc, char *argv[])
     }
     if (Pstream::parRun() && args.found("host-comm"))
     {
-        // Host communicator, based on the current worldComm
+        // Host communicator, based on the current world communicator
         // Use hostname
         // Lowest rank per hostname is the IO rank
 
-        label numprocs = UPstream::nProcs(UPstream::globalComm);
+        label numprocs = UPstream::nProcs(UPstream::commGlobal());
 
         stringList hosts(numprocs);
-        hosts[Pstream::myProcNo(UPstream::globalComm)] = hostName();
+        hosts[Pstream::myProcNo(UPstream::commGlobal())] = hostName();
 
         labelList hostIDs_;
 
         // Compact
-        if (Pstream::master(UPstream::globalComm))
+        if (Pstream::master(UPstream::commGlobal()))
         {
             DynamicList<word> hostNames(numprocs);
             hostIDs_.resize_nocopy(numprocs);
@@ -196,10 +196,10 @@ int main(int argc, char *argv[])
             }
         }
 
-        Pstream::broadcasts(UPstream::globalComm, hostIDs_);
+        Pstream::broadcasts(UPstream::commGlobal(), hostIDs_);
 
         const label myHostId =
-            hostIDs_[Pstream::myProcNo(UPstream::globalComm)];
+            hostIDs_[Pstream::myProcNo(UPstream::commGlobal())];
 
         DynamicList<label> subRanks;
         forAll(hostIDs_, proci)
@@ -210,11 +210,11 @@ int main(int argc, char *argv[])
             }
         }
 
-        // Allocate new communicator with globalComm as its parent
+        // Allocate new communicator with global communicator as its parent
         const label hostComm =
             UPstream::allocateCommunicator
             (
-                UPstream::globalComm,  // parent
+                UPstream::commGlobal(),
                 subRanks,
                 true
             );

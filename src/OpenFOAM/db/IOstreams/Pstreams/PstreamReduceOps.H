@@ -58,7 +58,7 @@ void reduce
     const label comm
 )
 {
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         Pout<< "** reducing:" << value << " with comm:" << comm << endl;
         error::printStack(Pout);

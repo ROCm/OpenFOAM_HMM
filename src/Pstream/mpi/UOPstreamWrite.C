@@ -68,7 +68,7 @@ bool Foam::UOPstream::write
             << " commType:" << UPstream::commsTypeNames[commsType]
             << Foam::endl;
     }
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && communicator != UPstream::warnComm)
     {
         Pout<< "UOPstream::write : starting write to:" << toProcNo
             << " tag:" << tag

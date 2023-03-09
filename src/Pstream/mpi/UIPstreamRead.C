@@ -114,7 +114,7 @@ Foam::label Foam::UIPstream::read
             << " commsType:" << UPstream::commsTypeNames[commsType]
             << Foam::endl;
     }
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && communicator != UPstream::warnComm)
     {
         Pout<< "UIPstream::read : starting read from:" << fromProcNo
             << " tag:" << tag << " comm:" << communicator

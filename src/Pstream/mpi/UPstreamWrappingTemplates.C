@@ -78,7 +78,7 @@ void Foam::PstreamDetail::reduce0
         return;
     }
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         Pout<< "** reducing:";
         if (count == 1)
@@ -135,7 +135,7 @@ void Foam::PstreamDetail::allReduce
 
     const bool immediate = (req || requestID);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         if (immediate)
         {
@@ -246,7 +246,7 @@ void Foam::PstreamDetail::allToAll
 
     const label numProc = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         if (immediate)
         {
@@ -383,7 +383,7 @@ void Foam::PstreamDetail::allToAllv
 
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         if (immediate)
         {
@@ -531,7 +531,7 @@ void Foam::PstreamDetail::allToAllConsensus
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         Pout<< "** non-blocking consensus Alltoall (list):";
         Pout<< " numProc:" << numProc
@@ -717,7 +717,7 @@ void Foam::PstreamDetail::allToAllConsensus
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         Pout<< "** non-blocking consensus Alltoall (map):";
         Pout<< " numProc:" << numProc
@@ -911,7 +911,7 @@ void Foam::PstreamDetail::gather
 
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         if (immediate)
         {
@@ -1037,7 +1037,7 @@ void Foam::PstreamDetail::scatter
 
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         if (immediate)
         {
@@ -1165,7 +1165,7 @@ void Foam::PstreamDetail::gatherv
 
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         if (immediate)
         {
@@ -1317,7 +1317,7 @@ void Foam::PstreamDetail::scatterv
 
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         if (immediate)
         {

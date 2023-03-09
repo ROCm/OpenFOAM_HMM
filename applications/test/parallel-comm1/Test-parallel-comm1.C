@@ -150,11 +150,7 @@ int main(int argc, char *argv[])
     Pout<< "localValue      :" << localValue << endl;
 
 
-    label comm = Pstream::allocateCommunicator
-    (
-        UPstream::worldComm,
-        top
-    );
+    label comm = UPstream::allocateCommunicator(UPstream::worldComm, top);
 
     Pout<< "allocated comm  :" << comm << endl;
     Pout<< "comm myproc     :" << Pstream::myProcNo(comm)
@@ -173,7 +169,7 @@ int main(int argc, char *argv[])
         Pout<< "sum             :" << sum << endl;
     }
 
-    Pstream::freeCommunicator(comm);
+    UPstream::freeCommunicator(comm);
 
 
     Pout<< "End\n" << endl;

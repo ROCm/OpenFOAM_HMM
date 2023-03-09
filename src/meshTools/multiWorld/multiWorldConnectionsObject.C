@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -162,7 +162,8 @@ Foam::label Foam::multiWorldConnections::createCommunicator(const edge& worlds)
     }
 
     // Allocate new communicator with global world
-    comm = UPstream::allocateCommunicator(UPstream::globalComm, subRanks, true);
+    comm =
+        UPstream::allocateCommunicator(UPstream::commGlobal(), subRanks, true);
 
     if (debug & 2)
     {
@@ -234,10 +235,8 @@ void Foam::multiWorldConnections::createComms()
 
 
     // Use MPI_COMM_WORLD
-    const label oldWorldComm(UPstream::worldComm);
-    const label oldWarnComm(UPstream::warnComm);
-    UPstream::worldComm = UPstream::globalComm;
-    UPstream::warnComm = UPstream::worldComm;
+    const label oldWarnComm = UPstream::commWarn(UPstream::commGlobal());
+    const label oldWorldComm = UPstream::commWorld(UPstream::commGlobal());
 
     if (Pstream::parRun())
     {
@@ -258,8 +257,9 @@ void Foam::multiWorldConnections::createComms()
 
     if (brokenConnections)
     {
-        Pstream::warnComm = oldWarnComm;
-        Pstream::worldComm = oldWorldComm;
+        // Restore communicator settings
+        UPstream::commWarn(oldWarnComm);
+        UPstream::commWorld(oldWorldComm);
 
         FatalErrorInFunction
             << "Has " << brokenConnections
@@ -286,8 +286,9 @@ void Foam::multiWorldConnections::createComms()
             }
         }
 
-        Pstream::warnComm = oldWarnComm;
-        Pstream::worldComm = oldWorldComm;
+        // Restore communicator settings
+        UPstream::commWarn(oldWarnComm);
+        UPstream::commWorld(oldWorldComm);
     }
 
     if (debug)

@@ -143,7 +143,7 @@ Foam::OSstream& Foam::messageStream::stream(OSstream* alternative)
 
 Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 {
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && communicator != UPstream::warnComm)
     {
         Pout<< "** messageStream with comm:" << communicator << endl;
         error::printStack(Pout);

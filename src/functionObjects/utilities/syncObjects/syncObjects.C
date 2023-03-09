@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,8 +80,7 @@ void Foam::functionObjects::syncObjects::sync()
         return;
     }
 
-    const label oldWarnComm = UPstream::warnComm;
-    UPstream::warnComm = 0;
+    const label oldWarnComm = UPstream::commWarn(UPstream::commGlobal());
 
 
     // Send my data to all other processors
@@ -90,7 +89,7 @@ void Foam::functionObjects::syncObjects::sync()
     // Note provision of explicit all-world communicator
     PstreamBuffers pBufs
     (
-        UPstream::globalComm,
+        UPstream::commGlobal(),
         UPstream::commsTypes::nonBlocking
     );
 
@@ -164,7 +163,8 @@ void Foam::functionObjects::syncObjects::sync()
     //    Pout<< type() << " : after synchronisation:" << allDict << endl;
     //}
 
-    UPstream::warnComm = oldWarnComm;
+    // Restore communicator settings
+    UPstream::commWarn(oldWarnComm);
 }
 
 

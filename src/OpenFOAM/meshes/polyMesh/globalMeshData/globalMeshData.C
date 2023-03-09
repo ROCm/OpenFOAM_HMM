@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2721,8 +2721,7 @@ void Foam::globalMeshData::updateMesh()
         identity(UPstream::nProcs(UPstream::worldComm)),
         true
     );
-    const label oldWarnComm = UPstream::warnComm;
-    UPstream::warnComm = comm;
+    const label oldWarnComm = UPstream::commWarn(comm);
 
 
     // Total number of faces.
@@ -2760,8 +2759,9 @@ void Foam::globalMeshData::updateMesh()
         comm
     );
 
+    // Restore communicator settings
     UPstream::freeCommunicator(comm);
-    UPstream::warnComm = oldWarnComm;
+    UPstream::commWarn(oldWarnComm);
 
     if (debug)
     {

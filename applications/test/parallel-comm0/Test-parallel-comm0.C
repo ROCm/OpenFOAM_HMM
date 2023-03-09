@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ void printInfo(const label comm)
         << " sub:" << UPstream::subProcs(comm) << nl;
 
 
-    if (UPstream::selfComm == comm)
+    if (UPstream::commSelf() == comm)
     {
         Pout<< "self all:" << UPstream::allProcs(comm)
             << " sub:" << UPstream::subProcs(comm) << nl;
@@ -86,32 +86,32 @@ int main(int argc, char *argv[])
         << "nProcs = " << UPstream::nProcs()
         << " with " << UPstream::nComms() << " predefined comm(s)" << nl;
 
-    Info<< "worldComm : ";
-    printInfo(UPstream::worldComm);
+    Info<< "comm-world : ";
+    printInfo(UPstream::commWorld());
 
-    Info<< "selfComm  : ";
-    printInfo(UPstream::selfComm);
+    Info<< "comm-self  : ";
+    printInfo(UPstream::commSelf());
 
     Info<< nl;
 
     // Reductions (using MPI intrinsics)
     {
-        label val = Pstream::myProcNo(UPstream::worldComm);
+        label val = Pstream::myProcNo(UPstream::commWorld());
 
         label worldVal = returnReduce
         (
             val,
             sumOp<label>(),
-            Pstream::msgType(),
-            UPstream::worldComm
+            UPstream::msgType(),
+            UPstream::commWorld()
         );
 
         label selfVal = returnReduce
         (
             val,
             sumOp<label>(),
-            Pstream::msgType(),
-            UPstream::selfComm
+            UPstream::msgType(),
+            UPstream::commSelf()
         );
 
         Pout<< "value " << val
@@ -123,8 +123,8 @@ int main(int argc, char *argv[])
     {
         Pair<label> val
         (
-            Pstream::myProcNo(UPstream::worldComm),
-            Pstream::myProcNo(UPstream::worldComm)
+            Pstream::myProcNo(UPstream::commWorld()),
+            Pstream::myProcNo(UPstream::commWorld())
         );
 
         Pair<label> worldVal = val;
@@ -133,8 +133,8 @@ int main(int argc, char *argv[])
         (
             worldVal,
             minFirstEqOp<label>(),
-            Pstream::msgType(),
-            UPstream::worldComm
+            UPstream::msgType(),
+            UPstream::commWorld()
         );
 
         Pair<label> selfVal = val;
@@ -143,8 +143,8 @@ int main(int argc, char *argv[])
         (
             worldVal,
             minFirstEqOp<label>(),
-            Pstream::msgType(),
-            UPstream::selfComm
+            UPstream::msgType(),
+            UPstream::commSelf()
         );
 
         Pout<< "value " << val

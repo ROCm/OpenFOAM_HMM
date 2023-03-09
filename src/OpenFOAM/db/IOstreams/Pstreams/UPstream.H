@@ -284,24 +284,52 @@ public:
 
     // Standard Communicators
 
-        //- Default world communicator (all processors).
+        //- Communicator for all ranks.
         //- May differ from globalComm if local worlds are in use
         static label worldComm;
 
         //- Debugging: warn for use of any communicator differing from warnComm
         static label warnComm;
 
-        //- Communicator for all processors, irrespective of any local worlds
+        //- Communicator for all ranks, irrespective of any local worlds
         static constexpr label globalComm = 0;
 
         //- A communicator within the current rank only
         static constexpr label selfComm = 1;
 
+        //- Communicator for all ranks, irrespective of any local worlds
+        static constexpr label commGlobal() noexcept { return 0; }
+
+        //- Communicator within the current rank only
+        static constexpr label commSelf() noexcept { return 1; }
+
+        //- Communicator for all ranks (respecting any local worlds)
+        static label commWorld() noexcept { return worldComm; }
+
+        //- Alter value of world communicator
+        //  \returns the previous value
+        static label commWorld(const label communicator) noexcept
+        {
+            label old(worldComm);
+            worldComm = communicator;
+            return old;
+        }
+
+        //- Alter communicator debugging setting.
+        //- Warns for use of any communicator differing from specified.
+        //  \returns the previous warn communicator
+        static label commWarn(const label communicator) noexcept
+        {
+            label old(warnComm);
+            warnComm = communicator;
+            return old;
+        }
+
         //- Number of currently defined communicators
         static label nComms() noexcept { return parentComm_.size(); }
 
         //- True if communicator appears to be user-allocated
-        static bool isUserComm(label communicator) noexcept
+        static bool isUserComm(const label communicator) noexcept
         {
             return (communicator > worldComm && communicator > selfComm);
         }
