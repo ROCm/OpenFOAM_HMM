@@ -63,10 +63,10 @@ void Foam::cellToFaceZone::selectFaces
     bitSet& doFlip
 ) const
 {
-    selectedFace.setSize(mesh_.nFaces());
+    selectedFace.resize_nocopy(mesh_.nFaces());
     selectedFace = false;
 
-    doFlip.setSize(mesh_.nFaces());
+    doFlip.resize_nocopy(mesh_.nFaces());
     doFlip = false;
 
 
@@ -168,7 +168,7 @@ Foam::cellToFaceZone::cellToFaceZone
     if (!dict.readIfPresent("sets", names_))
     {
         names_.resize(1);
-        dict.readEntry("set", names_.first());
+        dict.readEntry("set", names_.front());
     }
 }
 
@@ -207,17 +207,16 @@ void Foam::cellToFaceZone::applyToSet
         {
             if (verbose_)
             {
+                Info<< "    Adding all faces on outside of cell sets: "
+                    << flatOutput(names_) << "; orientation pointing ";
+
                 if (flip_)
                 {
-                    Info<< "    Adding all faces on outside of cellSet "
-                        << flatOutput(names_)
-                        << "; orientation pointing into cellSet" << endl;
+                    Info<< "into cell sets" << endl;
                 }
                 else
                 {
-                    Info<< "    Adding all faces on outside of cellSet "
-                        << flatOutput(names_)
-                        << "; orientation pointing away from cellSet" << endl;
+                    Info<< "away from cell sets" << endl;
                 }
             }
 
@@ -252,9 +251,8 @@ void Foam::cellToFaceZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Removing all faces on outside of cellSet "
-                    << flatOutput(names_)
-                    << " ..." << endl;
+                Info<< "    Removing all faces on outside of cell sets: "
+                    << flatOutput(names_) << " ..." << endl;
             }
 
             bitSet selectedFace(mesh_.nFaces());

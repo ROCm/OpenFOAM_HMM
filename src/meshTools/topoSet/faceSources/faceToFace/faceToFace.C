@@ -77,7 +77,7 @@ Foam::faceToFace::faceToFace
     if (!dict.readIfPresent("sets", names_))
     {
         names_.resize(1);
-        dict.readEntry("set", names_.first());
+        dict.readEntry("set", names_.front());
     }
 }
 
@@ -105,7 +105,7 @@ void Foam::faceToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all elements of faceSet "
+            Info<< "    Adding all elements of face sets: "
                 << flatOutput(names_) << nl;
         }
 
@@ -120,7 +120,7 @@ void Foam::faceToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing all elements of faceSet "
+            Info<< "    Removing all elements of face sets: "
                 << flatOutput(names_) << nl;
         }
 

@@ -109,11 +109,11 @@ void Foam::setToPointZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Adding all points from pointSet " << setName_
-                    << " ..." << endl;
+                Info<< "    Adding all points from point set: "
+                    << setName_ << " ..." << endl;
             }
 
-            // Load the sets
+            // Load the set
             pointSet loadedSet(mesh_, setName_);
             const labelHashSet& pointLabels = loadedSet;
 
@@ -135,8 +135,8 @@ void Foam::setToPointZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Removing all points from pointSet " << setName_
-                    << " ..." << endl;
+                Info<< "    Removing all points from point set: "
+                    << setName_ << " ..." << endl;
             }
 
             // Load the set

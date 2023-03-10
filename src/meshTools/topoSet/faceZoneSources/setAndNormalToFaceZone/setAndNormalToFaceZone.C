@@ -123,8 +123,8 @@ void Foam::setAndNormalToFaceZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Adding all faces from faceSet " << setName_
-                    << " ..." << endl;
+                Info<< "    Adding all faces from face set: "
+                    << setName_ << " ..." << endl;
             }
 
             // Load the sets
@@ -164,8 +164,8 @@ void Foam::setAndNormalToFaceZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Removing all faces from faceSet " << setName_
-                    << " ..." << endl;
+                Info<< "    Removing all faces from face set: "
+                    << setName_ << " ..." << endl;
             }
 
             // Load the set

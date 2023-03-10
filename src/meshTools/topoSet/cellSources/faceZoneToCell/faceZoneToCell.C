@@ -98,8 +98,9 @@ void Foam::faceZoneToCell::combine
 
         if (verbosity)
         {
-            Info<< "    Using matching zone " << zone.name()
-                << " with " << cellLabels.size() << " cells on "
+            Info<< "    Using matching zone " << zone.name() << " with "
+                << returnReduce(cellLabels.size(), sumOp<label>())
+                << " cells on "
                 << faceActionNames_[option_] << " side" << endl;
         }
 
@@ -131,7 +132,7 @@ void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
         WarningInFunction
             << "Cannot find any faceZone matching "
             << flatOutput(zoneMatcher_) << nl
-            << "Valid names are " << flatOutput(mesh_.faceZones().names())
+            << "Valid names: " << flatOutput(mesh_.faceZones().names())
             << endl;
 
         return;  // Nothing to do
@@ -183,8 +184,7 @@ Foam::faceZoneToCell::faceZoneToCell
     if (!dict.readIfPresent("zones", zoneMatcher_))
     {
         zoneMatcher_.resize(1);
-        zoneMatcher_.first() =
-            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+        zoneMatcher_.front() = dict.getCompat<wordRe>("zone", {{"name", 1806}});
     }
 }
 
@@ -218,7 +218,7 @@ void Foam::faceZoneToCell::zones(const wordRes& zonesSelector)
 void Foam::faceZoneToCell::zones(const wordRe& zoneName)
 {
     zoneMatcher_.resize(1);
-    zoneMatcher_.first() = zoneName;
+    zoneMatcher_.front() = zoneName;
 }
 
 

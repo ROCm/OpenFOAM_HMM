@@ -185,7 +185,7 @@ void Foam::faceZoneSet::subset(const topoSet& set)
 
         if (iter.good())
         {
-            const label index = *iter;
+            const label index = iter.val();
 
             if (zoneSet.flipMap()[i] != flipMap_[index])
             {
@@ -233,7 +233,7 @@ void Foam::faceZoneSet::addSet(const topoSet& set)
 
         if (iter.good())
         {
-            const label index = *iter;
+            const label index = iter.val();
 
             if (zoneSet.flipMap()[i] != flipMap_[index])
             {
@@ -284,7 +284,7 @@ void Foam::faceZoneSet::subtractSet(const topoSet& set)
 
         if (iter.good())
         {
-            const label index = *iter;
+            const label index = iter.val();
 
             if (zoneSet.flipMap()[index] != flipMap_[i])
             {

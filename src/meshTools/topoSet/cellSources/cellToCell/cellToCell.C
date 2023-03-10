@@ -77,7 +77,7 @@ Foam::cellToCell::cellToCell
     if (!dict.readIfPresent("sets", names_))
     {
         names_.resize(1);
-        dict.readEntry("set", names_.first());
+        dict.readEntry("set", names_.front());
     }
 }
 
@@ -105,7 +105,7 @@ void Foam::cellToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all elements of cellSet "
+            Info<< "    Adding all elements of cell sets: "
                 << flatOutput(names_) << nl;
         }
 
@@ -120,7 +120,7 @@ void Foam::cellToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing all elements of cellSet "
+            Info<< "    Removing all elements of cell sets: "
                 << flatOutput(names_) << nl;
         }
 

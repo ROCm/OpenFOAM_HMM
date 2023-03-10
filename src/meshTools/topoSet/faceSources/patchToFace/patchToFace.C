@@ -81,16 +81,11 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
 
         if (verbose_)
         {
-            Info<< "    Found matching patch " << pp.name()
-                << " with " << pp.size() << " faces." << endl;
+            Info<< "    Found matching patch " << pp.name() << " with "
+                << returnReduce(pp.size(), sumOp<label>()) << " faces" << endl;
         }
 
-        for
-        (
-            label facei = pp.start();
-            facei < pp.start() + pp.size();
-            ++facei
-        )
+        for (const label facei : pp.range())
         {
             addOrDelete(set, facei, add);
         }
@@ -101,7 +96,7 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
         WarningInFunction
             << "Cannot find any patches matching "
             << flatOutput(selectedPatches_) << nl
-            << "Valid names are " << flatOutput(mesh_.boundaryMesh().names())
+            << "Valid names: " << flatOutput(mesh_.boundaryMesh().names())
             << endl;
     }
 }
@@ -133,7 +128,7 @@ Foam::patchToFace::patchToFace
     if (!dict.readIfPresent("patches", selectedPatches_))
     {
         selectedPatches_.resize(1);
-        selectedPatches_.first() =
+        selectedPatches_.front() =
             dict.getCompat<wordRe>("patch", {{"name", 1806}});
     }
 }
@@ -162,7 +157,7 @@ void Foam::patchToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all faces of patches "
+            Info<< "    Adding all faces of patches: "
                 << flatOutput(selectedPatches_) << " ..." << endl;
         }
 
@@ -172,7 +167,7 @@ void Foam::patchToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing all faces of patches "
+            Info<< "    Removing all faces of patches: "
                 << flatOutput(selectedPatches_) << " ..." << endl;
         }
 

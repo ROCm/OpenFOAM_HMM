@@ -94,8 +94,9 @@ void Foam::zoneToFace::combine
 
         if (verbosity)
         {
-            Info<< "    Using zone " << zone.name()
-                << " with " << zone.size() << " faces." << endl;
+            Info<< "    Using zone " << zone.name() << " with "
+                << returnReduce(zone.size(), sumOp<label>()) << " faces"
+                << endl;
         }
 
         for (const label facei : zone)
@@ -130,7 +131,7 @@ void Foam::zoneToFace::combine(topoSet& set, const bool add) const
         WarningInFunction
             << "Cannot find any faceZone matching "
             << flatOutput(zoneMatcher_) << nl
-            << "Valid names are " << flatOutput(mesh_.faceZones().names())
+            << "Valid names: " << flatOutput(mesh_.faceZones().names())
             << endl;
 
         return;  // Nothing to do
@@ -189,8 +190,7 @@ Foam::zoneToFace::zoneToFace
     if (!dict.readIfPresent("zones", zoneMatcher_))
     {
         zoneMatcher_.resize(1);
-        zoneMatcher_.first() =
-            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+        zoneMatcher_.front() = dict.getCompat<wordRe>("zone", {{"name", 1806}});
     }
 }
 
@@ -223,7 +223,7 @@ void Foam::zoneToFace::zones(const wordRes& zonesSelector)
 void Foam::zoneToFace::zones(const wordRe& zoneName)
 {
     zoneMatcher_.resize(1);
-    zoneMatcher_.first() = zoneName;
+    zoneMatcher_.front() = zoneName;
     zoneIDs_.clear();
 }
 
@@ -239,7 +239,7 @@ void Foam::zoneToFace::zones(const label zoneID)
 {
     zoneMatcher_.clear();
     zoneIDs_.resize(1);
-    zoneIDs_.first() = zoneID;
+    zoneIDs_.front() = zoneID;
 }
 
 
@@ -253,7 +253,7 @@ void Foam::zoneToFace::applyToSet
     {
         if (verbose_ && !zoneMatcher_.empty())
         {
-            Info<< "    Adding all faces of face zones "
+            Info<< "    Adding all faces of face zones: "
                 << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 
@@ -263,7 +263,7 @@ void Foam::zoneToFace::applyToSet
     {
         if (verbose_ && !zoneMatcher_.empty())
         {
-            Info<< "    Removing all faces of face zones "
+            Info<< "    Removing all faces of face zones: "
                 << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 

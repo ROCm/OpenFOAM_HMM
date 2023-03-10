@@ -1102,20 +1102,21 @@ Foam::holeToFace::holeToFace
     erode_(dict.getOrDefault<bool>("erode", false))
 {
     // Look for 'sets' or 'set'
+    word setName;
     if (!dict.readIfPresent("faceSets", blockedFaceNames_))
     {
-        blockedFaceNames_.resize(1);
-        if (!dict.readEntry("faceSet", blockedFaceNames_.first()))
+        if (dict.readEntry("faceSet", setName))
         {
-            blockedFaceNames_.clear();
+            blockedFaceNames_.resize(1);
+            blockedFaceNames_.front() = std::move(setName);
         }
     }
     if (!dict.readIfPresent("cellSets", blockedCellNames_))
     {
-        blockedCellNames_.resize(1);
-        if (!dict.readEntry("cellSet", blockedCellNames_.first()))
+        if (dict.readEntry("cellSet", setName))
         {
-            blockedCellNames_.clear();
+            blockedCellNames_.resize(1);
+            blockedCellNames_.front() = std::move(setName);
         }
     }
 }
@@ -1129,7 +1130,7 @@ Foam::holeToFace::holeToFace
 :
     topoSetFaceSource(mesh),
     zonePoints_(expand(pointField(is))),
-    blockedFaceNames_(one(), word(checkIs(is))),
+    blockedFaceNames_(one{}, word(checkIs(is))),
     blockedCellNames_(),
     erode_(false)
 {}
@@ -1170,7 +1171,7 @@ void Foam::holeToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all faces to disconnect regions "
+            Info<< "    Adding all faces to disconnect regions: "
                 << flatOutput(zonePoints_) << " ..." << endl;
         }
 
@@ -1180,7 +1181,7 @@ void Foam::holeToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing all faces to disconnect regions "
+            Info<< "    Removing all faces to disconnect regions: "
                 << flatOutput(zonePoints_) << " ..." << endl;
         }
 
@@ -1327,7 +1328,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::holeToFace::calcClosure
 
 
     // Per closure face the seed face
-    closureToBlocked.setSize(pp.size());
+    closureToBlocked.resize_nocopy(pp.size());
     closureToBlocked = -1;
     forAll(allFaceInfo, facei)
     {

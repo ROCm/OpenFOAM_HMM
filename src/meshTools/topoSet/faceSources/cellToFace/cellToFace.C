@@ -241,7 +241,7 @@ Foam::cellToFace::cellToFace
     if (!dict.readIfPresent("sets", names_))
     {
         names_.resize(1);
-        dict.readEntry("set", names_.first());
+        dict.readEntry("set", names_.front());
     }
 }
 
@@ -270,7 +270,7 @@ void Foam::cellToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding faces according to cellSet "
+            Info<< "    Adding faces according to cell sets: "
                 << flatOutput(names_) << nl;
         }
 
@@ -283,7 +283,7 @@ void Foam::cellToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing faces according to cellSet "
+            Info<< "    Removing faces according to cell sets: "
                 << flatOutput(names_) << nl;
         }
 
