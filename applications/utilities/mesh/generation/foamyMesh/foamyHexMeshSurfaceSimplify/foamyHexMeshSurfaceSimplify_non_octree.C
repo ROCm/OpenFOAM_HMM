@@ -327,8 +327,8 @@ int main(int argc, char *argv[])
                 "triSurface",
                 runTime,            // registry
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             s
         );

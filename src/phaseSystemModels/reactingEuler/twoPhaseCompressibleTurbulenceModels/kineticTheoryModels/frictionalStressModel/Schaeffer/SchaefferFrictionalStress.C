@@ -131,10 +131,10 @@ Foam::kineticTheoryModels::frictionalStressModels::Schaeffer::nu
                 phase.mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             phase.mesh(),
-            dimensionedScalar(dimensionSet(0, 2, -1, 0, 0))
+            dimensionedScalar(dimensionSet(0, 2, -1, 0, 0), Zero)
         )
     );
 

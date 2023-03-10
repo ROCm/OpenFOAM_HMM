@@ -608,7 +608,7 @@ bool Foam::ccm::reader::remapMeshInfo
                 registry,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
     }

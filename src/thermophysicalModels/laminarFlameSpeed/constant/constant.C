@@ -82,7 +82,7 @@ Foam::laminarFlameSpeedModels::constant::operator()() const
                 psiuReactionThermo_.T().db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             psiuReactionThermo_.T().mesh(),
             Su_

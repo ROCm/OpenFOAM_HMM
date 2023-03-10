@@ -84,7 +84,7 @@ bool Foam::dynamicMultiMotionSolverFvMesh::init(const bool doInit)
             *this,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
     const dictionary& dynamicMeshCoeffs = dynDict.subDict(typeName + "Coeffs");

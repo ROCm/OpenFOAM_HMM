@@ -157,7 +157,7 @@ Foam::cyclicACMIFvPatch::cyclicACMIFvPatch
             boundaryMesh().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dimensionedScalar("time", dimTime, -GREAT)
     )

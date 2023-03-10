@@ -82,7 +82,7 @@ bool Foam::functionObjects::writeCellCentres::write()
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_.C(),
         calculatedFvPatchScalarField::typeName
@@ -105,7 +105,7 @@ bool Foam::functionObjects::writeCellCentres::write()
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_.C().component(i)
         );

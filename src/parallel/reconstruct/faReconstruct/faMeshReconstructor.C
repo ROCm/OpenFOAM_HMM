@@ -672,7 +672,7 @@ void Foam::faMeshReconstructor::writeAddressing(const word& timeName) const
         procMesh_.thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false  // not registered
+        IOobject::NO_REGISTER
     );
 
     // boundaryProcAddressing

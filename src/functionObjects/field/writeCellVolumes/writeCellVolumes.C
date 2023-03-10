@@ -82,7 +82,7 @@ bool Foam::functionObjects::writeCellVolumes::write()
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(mesh_.V().dimensions(), Zero),

@@ -327,7 +327,7 @@ void Foam::cellTable::readDict
             registry,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -360,7 +360,7 @@ void Foam::cellTable::writeDict
             registry,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

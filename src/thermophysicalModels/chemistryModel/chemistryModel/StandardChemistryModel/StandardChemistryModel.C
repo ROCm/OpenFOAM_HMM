@@ -481,7 +481,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::tc() const
                 this->mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh(),
             dimensionedScalar("small", dimTime, SMALL),
@@ -555,7 +555,7 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::Qdot() const
                 this->mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh_,
             dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

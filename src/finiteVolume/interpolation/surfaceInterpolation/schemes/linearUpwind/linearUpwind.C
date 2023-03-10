@@ -50,7 +50,7 @@ Foam::linearUpwind<Type>::correction
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensioned<Type>(vf.name(), vf.dimensions(), Zero)
@@ -161,7 +161,7 @@ Foam::linearUpwind<Foam::vector>::correction
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensioned<vector>(vf.name(), vf.dimensions(), Zero)

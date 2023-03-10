@@ -521,7 +521,7 @@ void Foam::DMDModels::STDMD::amplitudes()
             mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -977,7 +977,7 @@ bool Foam::DMDModels::STDMD::initialise(const RMatrix& z)
                     mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 nSnap
             );

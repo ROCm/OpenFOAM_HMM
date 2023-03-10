@@ -108,7 +108,7 @@ Foam::dictionary Foam::solverTemplate::readFluidFieldTemplates
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 )
             );
 

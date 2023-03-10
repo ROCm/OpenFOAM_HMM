@@ -154,7 +154,7 @@ Foam::combustionModels::laminar<ReactionThermo>::Qdot() const
                 this->mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh(),
             dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

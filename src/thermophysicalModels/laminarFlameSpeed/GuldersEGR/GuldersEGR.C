@@ -123,7 +123,7 @@ Foam::laminarFlameSpeedModels::GuldersEGR::Su0pTphi
                 p.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             p.mesh(),
             dimensionedScalar(dimVelocity, Zero)
@@ -178,7 +178,7 @@ Foam::laminarFlameSpeedModels::GuldersEGR::Su0pTphi
                 p.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             p.mesh(),
             dimensionedScalar(dimVelocity, Zero)

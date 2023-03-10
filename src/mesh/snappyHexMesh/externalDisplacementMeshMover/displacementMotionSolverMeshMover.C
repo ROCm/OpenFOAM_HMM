@@ -133,7 +133,7 @@ Foam::displacementMotionSolverMeshMover::displacementMotionSolverMeshMover
                     pointDisplacement.db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 dict
             ),
@@ -147,7 +147,7 @@ Foam::displacementMotionSolverMeshMover::displacementMotionSolverMeshMover
                     pointDisplacement.db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 pointDisplacement.mesh()().points()
             )

@@ -148,7 +148,7 @@ IOobject createIOobject
             mesh,
             rOpt,
             IOobject::NO_WRITE,
-            false // do not register
+            IOobject::NO_REGISTER
         );
 }
 
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // do not register
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(dimless, scalar(1)),

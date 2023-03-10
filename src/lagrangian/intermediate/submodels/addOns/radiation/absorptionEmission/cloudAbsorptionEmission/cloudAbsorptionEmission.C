@@ -83,7 +83,7 @@ Foam::radiation::cloudAbsorptionEmission::aDisp(const label) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless/dimLength, Zero)
@@ -116,7 +116,7 @@ Foam::radiation::cloudAbsorptionEmission::eDisp(const label bandI) const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimless/dimLength, Zero)
@@ -138,7 +138,7 @@ Foam::radiation::cloudAbsorptionEmission::EDisp(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)

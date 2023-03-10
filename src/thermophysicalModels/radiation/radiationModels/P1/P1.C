@@ -265,7 +265,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::P1::Rp() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             4.0*absorptionEmission_->eCont()*physicoChemical::sigma
         )

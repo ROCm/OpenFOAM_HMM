@@ -79,7 +79,7 @@ void Foam::radiation::viewFactor::initialise()
                 mesh_.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             finalAgglom_
@@ -123,7 +123,7 @@ void Foam::radiation::viewFactor::initialise()
                 mesh_,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
     );
@@ -139,7 +139,7 @@ void Foam::radiation::viewFactor::initialise()
                 mesh_,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
     );
@@ -155,7 +155,7 @@ void Foam::radiation::viewFactor::initialise()
                 mesh_,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
     );
@@ -548,7 +548,7 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
             mesh_,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
     map_(),
@@ -561,7 +561,7 @@ Foam::radiation::viewFactor::viewFactor(const volScalarField& T)
 //             mesh_.time(),
 //             IOobject::NO_READ,
 //             IOobject::NO_WRITE,
-//             false
+//             IOobject::NO_REGISTER
 //         ),
 //         mesh_,
 //         finalAgglom_
@@ -611,7 +611,7 @@ Foam::radiation::viewFactor::viewFactor
             mesh_,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
     map_(),
@@ -624,7 +624,7 @@ Foam::radiation::viewFactor::viewFactor
 //             mesh_.time(),
 //             IOobject::NO_READ,
 //             IOobject::NO_WRITE,
-//             false
+//             IOobject::NO_REGISTER
 //         ),
 //         mesh_,
 //         finalAgglom_
@@ -1149,7 +1149,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::viewFactor::Rp() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar
@@ -1172,7 +1172,7 @@ Foam::radiation::viewFactor::Ru() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)

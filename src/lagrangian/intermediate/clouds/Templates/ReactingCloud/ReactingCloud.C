@@ -177,7 +177,7 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
                     this->db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 c.rhoTrans_[i]
             )

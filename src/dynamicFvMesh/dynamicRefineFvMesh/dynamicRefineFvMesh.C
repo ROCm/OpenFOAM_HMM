@@ -174,9 +174,9 @@ void Foam::dynamicRefineFvMesh::readDict()
                 "dynamicMeshDict",
                 time().constant(),
                 *this,
-                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         ).optionalSubDict(typeName + "Coeffs")
     );
@@ -1293,9 +1293,9 @@ bool Foam::dynamicRefineFvMesh::updateTopology()
                 "dynamicMeshDict",
                 time().constant(),
                 *this,
-                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         ).optionalSubDict(typeName + "Coeffs")
     );
@@ -1509,8 +1509,8 @@ bool Foam::dynamicRefineFvMesh::writeObject
                 time().timeName(),
                 *this,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimensionedScalar(dimless, Zero)

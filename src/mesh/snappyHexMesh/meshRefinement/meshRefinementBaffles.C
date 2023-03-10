@@ -3571,8 +3571,8 @@ void Foam::meshRefinement::zonify
                 timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),

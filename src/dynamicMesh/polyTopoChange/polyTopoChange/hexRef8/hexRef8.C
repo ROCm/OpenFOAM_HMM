@@ -3049,7 +3049,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     //            fMesh,
     //            IOobject::NO_READ,
     //            IOobject::NO_WRITE,
-    //            false
+    //            IOobject::NO_REGISTER
     //        ),
     //        fMesh,
     //        dimensionedScalar(dimless, Zero)

@@ -397,7 +397,7 @@ void writeDecomposition
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         decomp
     );
@@ -415,7 +415,7 @@ void writeDecomposition
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false                   // do not register
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(name, dimless, -1),
@@ -891,7 +891,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         hexRef8Data refData(io);
@@ -2592,7 +2592,7 @@ int main(int argc, char *argv[])
                             areaProcMeshPtr->thisDb(),
                             IOobject::NO_READ,
                             IOobject::NO_WRITE,
-                            false
+                            IOobject::NO_REGISTER
                         ),
                         faDistMap
                     ).write();

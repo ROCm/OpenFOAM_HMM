@@ -51,7 +51,7 @@ Foam::isoSurfacePoint::adaptPatchFields
             fld.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         fld,        // internal field
         true        // preserveCouples

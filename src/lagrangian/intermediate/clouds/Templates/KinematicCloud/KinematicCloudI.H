@@ -529,7 +529,7 @@ Foam::KinematicCloud<CloudType>::vDotSweep() const
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless/dimTime, Zero),
@@ -567,7 +567,7 @@ Foam::KinematicCloud<CloudType>::theta() const
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
@@ -605,7 +605,7 @@ Foam::KinematicCloud<CloudType>::alpha() const
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero)
@@ -641,7 +641,7 @@ Foam::KinematicCloud<CloudType>::rhoEff() const
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimDensity, Zero)

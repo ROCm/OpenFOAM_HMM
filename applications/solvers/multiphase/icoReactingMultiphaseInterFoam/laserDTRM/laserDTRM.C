@@ -724,7 +724,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::laserDTRM::Rp() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimPower/dimVolume/pow4(dimTemperature), Zero)

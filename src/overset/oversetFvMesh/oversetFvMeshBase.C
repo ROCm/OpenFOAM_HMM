@@ -441,7 +441,7 @@ void Foam::oversetFvMeshBase::writeAgglomeration
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero)
@@ -496,7 +496,7 @@ void Foam::oversetFvMeshBase::writeAgglomeration
                     mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 mesh_,
                 dimensionedScalar(dimless, Zero)
@@ -652,7 +652,7 @@ bool Foam::oversetFvMeshBase::writeObject
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
@@ -676,7 +676,7 @@ bool Foam::oversetFvMeshBase::writeObject
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
@@ -716,7 +716,7 @@ bool Foam::oversetFvMeshBase::writeObject
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar("minOne", dimless, scalar(-1)),

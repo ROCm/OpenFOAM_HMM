@@ -498,7 +498,7 @@ Foam::fvMeshTools::newMesh
                 io.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -766,7 +766,7 @@ Foam::fvMeshTools::loadOrCreateMesh
                 io.db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -1077,7 +1077,7 @@ void Foam::fvMeshTools::createDummyFvMeshFiles
             mesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (!io.typeHeaderOk<IOdictionary>(false))
@@ -1103,7 +1103,7 @@ void Foam::fvMeshTools::createDummyFvMeshFiles
             mesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (!io.typeHeaderOk<IOdictionary>(false))

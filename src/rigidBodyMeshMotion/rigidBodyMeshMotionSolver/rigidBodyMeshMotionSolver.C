@@ -95,7 +95,7 @@ Foam::rigidBodyMeshMotionSolver::rigidBodyMeshMotionSolver
                 mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
       : coeffDict()
@@ -295,7 +295,7 @@ bool Foam::rigidBodyMeshMotionSolver::writeObject
             mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

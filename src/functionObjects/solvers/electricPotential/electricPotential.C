@@ -79,7 +79,7 @@ Foam::functionObjects::electricPotential::sigma() const
         mesh_.time(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (phases_.size())
@@ -126,7 +126,7 @@ Foam::functionObjects::electricPotential::epsilonm() const
         mesh_.time(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (phases_.size())
@@ -356,7 +356,7 @@ bool Foam::functionObjects::electricPotential::write()
                 mesh_.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             -fvc::grad(eV),
             calculatedFvPatchField<vector>::typeName
@@ -379,7 +379,7 @@ bool Foam::functionObjects::electricPotential::write()
                 mesh_.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             -tsigma*fvc::grad(eV),
             calculatedFvPatchField<vector>::typeName
@@ -402,7 +402,7 @@ bool Foam::functionObjects::electricPotential::write()
                 mesh_.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             fvc::div(tepsilonm*E),
             calculatedFvPatchField<scalar>::typeName

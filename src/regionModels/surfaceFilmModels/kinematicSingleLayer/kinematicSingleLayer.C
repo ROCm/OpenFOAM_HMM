@@ -807,8 +807,8 @@ kinematicSingleLayer::kinematicSingleLayer
                 time().timeName(),
                 regionMesh(),
                 IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             fvc::flux(deltaRho_*U_)
         );
@@ -1093,7 +1093,7 @@ tmp<volScalarField::Internal> kinematicSingleLayer::Srho() const
             primaryMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         primaryMesh(),
         dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
@@ -1115,7 +1115,7 @@ tmp<volScalarField::Internal> kinematicSingleLayer::Srho
             primaryMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         primaryMesh(),
         dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
@@ -1134,7 +1134,7 @@ tmp<volScalarField::Internal> kinematicSingleLayer::Sh() const
             primaryMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         primaryMesh(),
         dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

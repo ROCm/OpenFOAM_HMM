@@ -1293,7 +1293,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             pointDisplacement.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         pMesh(),
         dimensionedVector(dimLength, Zero)
@@ -1307,7 +1307,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             pointDisplacement.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         pMesh(),
         dimensionedScalar(dimless, Zero)
@@ -1321,7 +1321,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             pointDisplacement.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         pMesh(),
         dimensionedScalar(dimLength, Zero)
@@ -1335,7 +1335,7 @@ Foam::medialAxisMeshMover::medialAxisMeshMover
             pointDisplacement.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         pMesh(),
         dimensionedVector(dimLength, Zero)

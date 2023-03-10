@@ -133,9 +133,9 @@ Foam::topoBoolSet::topoBoolSet
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
-        0  // zero-sized (unallocated) labelHashSet
+        label(0)  // zero-sized (unallocated) labelHashSet
     ),
     selected_()
 {}

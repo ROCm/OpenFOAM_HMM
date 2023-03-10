@@ -161,10 +161,10 @@ bool Foam::functionObjects::age::execute()
             mesh_,
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
-        dimensionedScalar(dimTime, 0),
+        dimensionedScalar(dimTime, Zero),
         patchTypes()
     );
     volScalarField& age = tage.ref();

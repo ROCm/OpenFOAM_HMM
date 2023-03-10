@@ -66,16 +66,17 @@ Foam::labelList Foam::manualRenumber::renumber
     const pointField& points
 ) const
 {
-    labelIOList newToOld
+    labelList newToOld
     (
-        IOobject
+        labelIOList::readContents
         (
-            dataFile_,
-            mesh.facesInstance(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobject
+            (
+                dataFile_,
+                mesh.facesInstance(),
+                mesh.thisDb(),
+                IOobject::MUST_READ
+            )
         )
     );
 
@@ -104,7 +105,7 @@ Foam::labelList Foam::manualRenumber::renumber
                 << "Renumbering is not one-to-one. Index "
                 << i << " maps onto original cell " << origCelli
                 << ".\n" << "Manual renumbering data read from file "
-                << dataFile_ << "." << endl
+                << dataFile_ << nl
                 << exit(FatalError);
         }
 
@@ -115,16 +116,15 @@ Foam::labelList Foam::manualRenumber::renumber
         else
         {
             FatalErrorInFunction
-                << "Renumbering is not one-to-one. Both index "
-                << oldToNew[origCelli]
-                << " and " << i << " map onto " << origCelli
-                << ".\n" << "Manual renumbering data read from file "
-                << dataFile_ << "." << endl
+                << "Renumbering is not one-to-one. Index " << i << " and "
+                << oldToNew[origCelli] << " map onto " << origCelli << nl
+                << "Manual renumbering data read from file "
+                << dataFile_ << nl
                 << exit(FatalError);
         }
     }
 
-    return std::move(newToOld);
+    return newToOld;
 }
 
 

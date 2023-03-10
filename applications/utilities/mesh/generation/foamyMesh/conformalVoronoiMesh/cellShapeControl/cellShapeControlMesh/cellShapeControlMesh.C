@@ -387,7 +387,7 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
                 runTime,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             );
 
             if (io.typeHeaderOk<pointScalarField>(true))
@@ -404,7 +404,7 @@ Foam::cellShapeControlMesh::cellShapeControlMesh(const Time& runTime)
                         mesh.time(),
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     )
                 );
 

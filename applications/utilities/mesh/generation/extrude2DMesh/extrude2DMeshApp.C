@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
             runTimeExtruded,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
                 runTimeExtruded,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             std::move(poly2DMesh.points()),
             std::move(poly2DMesh.faces()),

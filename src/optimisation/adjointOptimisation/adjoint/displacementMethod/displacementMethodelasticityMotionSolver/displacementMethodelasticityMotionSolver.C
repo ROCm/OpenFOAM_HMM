@@ -78,16 +78,14 @@ displacementMethodelasticityMotionSolver
     */
     resetFields_
     (
-        IOdictionary
+        IOdictionary::readContents
         (
             IOobject
             (
                 "dynamicMeshDict",
                 mesh.time().constant(),
                 mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::MUST_READ
             )
         ).subDict("elasticityMotionSolverCoeffs").getOrDefault<bool>
         (

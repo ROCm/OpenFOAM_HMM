@@ -16,7 +16,7 @@
             runTime,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (io.typeHeaderOk<IOdictionary>(true))

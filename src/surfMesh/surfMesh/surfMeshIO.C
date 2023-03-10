@@ -92,7 +92,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -106,7 +106,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -121,7 +121,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
                 *this,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -176,7 +176,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 

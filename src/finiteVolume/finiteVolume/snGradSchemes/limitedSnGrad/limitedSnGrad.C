@@ -103,9 +103,9 @@ limitedSnGrad<Type>::correction
                     vf.mesh().thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
-                fvc::cellReduce(limiter, minEqOp<scalar>(), scalar(1.0))
+                fvc::cellReduce(limiter, minEqOp<scalar>(), scalar(1))
             );
             Info<< "Writing limiter field to " << volLimiter.objectPath()
                 << endl;

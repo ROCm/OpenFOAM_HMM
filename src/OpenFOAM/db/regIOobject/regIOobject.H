@@ -147,7 +147,7 @@ public:
         regIOobject(const regIOobject& rio, bool registerCopy);
 
         //- Copy construct with new name, transferring registry registration
-        //- to the copy f registerCopy is true
+        //- to the copy if registerCopy is true
         regIOobject(const word& newName, const regIOobject&, bool registerCopy);
 
         //- Copy construct with new IO parameters

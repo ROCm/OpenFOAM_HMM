@@ -213,7 +213,7 @@ Foam::mappedPatchBase::updateSampleMeshTime() const
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 )
             );
     }
@@ -239,7 +239,7 @@ Foam::mappedPatchBase::updateMeshTime() const
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 )
             );
     }

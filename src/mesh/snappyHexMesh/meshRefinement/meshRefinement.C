@@ -1718,7 +1718,7 @@ Foam::meshRefinement::meshRefinement
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         labelList(mesh_.nFaces(), -1)
     ),
@@ -3590,8 +3590,8 @@ void Foam::meshRefinement::dumpRefinementLevel() const
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
@@ -3621,7 +3621,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pMesh,
             dimensionedScalar(dimless, Zero)

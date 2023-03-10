@@ -656,7 +656,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::fvDOM::Rp() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             (
                 4
@@ -699,7 +699,7 @@ Foam::radiation::fvDOM::Ru() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimensionSet(1, -1, -3, 0, 0), Zero)

@@ -209,7 +209,7 @@ void Foam::edgeInterpolation::makeLPN() const
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimLength
@@ -290,7 +290,7 @@ void Foam::edgeInterpolation::makeWeights() const
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedScalar(dimless, 1)
@@ -370,7 +370,7 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedScalar(dimless/dimLength, SMALL)
@@ -464,7 +464,7 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimless
@@ -571,7 +571,7 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedVector(dimless, Zero)

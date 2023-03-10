@@ -1732,7 +1732,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimless, Zero),
@@ -1762,7 +1762,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
         mesh_,
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
     if (io.typeHeaderOk<volScalarField>(true))
     {

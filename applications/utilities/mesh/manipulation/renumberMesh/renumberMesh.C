@@ -73,7 +73,7 @@ tmp<volScalarField> createScalarField
 (
     const fvMesh& mesh,
     const word& name,
-    const labelList& elems
+    const labelUList& elems
 )
 {
     tmp<volScalarField> tfld
@@ -87,7 +87,7 @@ tmp<volScalarField> createScalarField
                 mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
@@ -1343,7 +1343,7 @@ int main(int argc, char *argv[])
                 mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
         refData.updateMesh(map());
@@ -1387,7 +1387,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 map().cellMap()
             ).write();
@@ -1402,7 +1402,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 map().faceMap()
             ).write();
@@ -1417,7 +1417,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 map().pointMap()
             ).write();

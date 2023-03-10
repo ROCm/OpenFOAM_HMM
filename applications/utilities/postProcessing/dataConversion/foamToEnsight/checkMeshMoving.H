@@ -49,7 +49,7 @@ if (timeDirs.size() > 1)
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false  // no register
+                    IOobject::NO_REGISTER
                 ).typeHeaderOk<pointIOField>(true, false)
             )
             {

@@ -30,7 +30,7 @@
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimless,

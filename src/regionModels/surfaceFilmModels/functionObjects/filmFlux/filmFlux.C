@@ -125,7 +125,7 @@ bool Foam::functionObjects::filmFlux::execute()
             filmMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         filmMesh,
         dimensionedScalar(dimLength, Zero),

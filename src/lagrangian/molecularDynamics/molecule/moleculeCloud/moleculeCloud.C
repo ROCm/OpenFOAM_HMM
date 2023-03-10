@@ -58,7 +58,7 @@ void Foam::moleculeCloud::buildConstProps()
             mesh_,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

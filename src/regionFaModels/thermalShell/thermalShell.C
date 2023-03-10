@@ -195,7 +195,7 @@ const tmp<areaScalarField> thermalShell::Cp() const
                 primaryMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             regionMesh(),
             dimensionedScalar(dimEnergy/dimTemperature/dimMass, thermo_.Cp()),
@@ -218,7 +218,7 @@ const tmp<areaScalarField> thermalShell::rho() const
                 primaryMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             regionMesh(),
             dimensionedScalar(dimDensity, thermo_.rho()),
@@ -241,7 +241,7 @@ const tmp<areaScalarField> thermalShell::kappa() const
                 primaryMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             regionMesh(),
             dimensionedScalar

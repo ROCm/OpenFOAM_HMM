@@ -97,7 +97,7 @@ Foam::radiation::localDensityAbsorptionEmission::aCont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(inv(dimLength), Zero)
@@ -130,7 +130,7 @@ Foam::radiation::localDensityAbsorptionEmission::eCont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(inv(dimLength), Zero)
@@ -163,7 +163,7 @@ Foam::radiation::localDensityAbsorptionEmission::ECont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)

@@ -254,10 +254,10 @@ void Foam::multiDirRefinement::refineHex8
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
-            List<refinementHistory::splitCell8>(0),
-            labelList(0),
+            List<refinementHistory::splitCell8>(),
+            labelList(),
             false
         )                                   // refinement history
     );

@@ -88,7 +88,7 @@ inline static IOobject selectReadIO(const word& name, const Time& runTime)
         runTime,                // registry
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false   // no register
+        IOobject::NO_REGISTER
     );
 }
 

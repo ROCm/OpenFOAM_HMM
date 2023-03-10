@@ -163,7 +163,7 @@ bool setField
                 mesh.thisDb(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false  // No register
+                IOobject::NO_REGISTER
             ),
             mesh
         );

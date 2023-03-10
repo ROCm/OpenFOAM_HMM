@@ -108,7 +108,7 @@ void Foam::cuttingSurface::calcCellCuts
                 fvm.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             fvm,
             dimensionedScalar(dimless, Zero)
@@ -131,7 +131,7 @@ void Foam::cuttingSurface::calcCellCuts
                 fvm.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pointMesh::New(fvm),
             dimensionedScalar(dimLength, Zero)

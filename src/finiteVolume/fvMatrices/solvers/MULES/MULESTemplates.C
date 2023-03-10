@@ -265,7 +265,7 @@ void Foam::MULES::limiter
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimless,
@@ -622,7 +622,7 @@ void Foam::MULES::limit
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimless,

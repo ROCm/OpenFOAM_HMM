@@ -231,7 +231,7 @@ Foam::fvMeshTools::readProcAddressing
         mesh.thisDb(),
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE,
-        false  // no register
+        IOobject::NO_REGISTER
     );
 
     //if (ioAddr.typeHeaderOk<labelIOList>(true))
@@ -323,7 +323,7 @@ void Foam::fvMeshTools::writeProcAddressing
         mesh.thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false  // no register
+        IOobject::NO_REGISTER
     );
 
     // cellProcAddressing (polyMesh)

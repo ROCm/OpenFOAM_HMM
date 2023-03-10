@@ -116,7 +116,7 @@ bool Foam::functionObjects::vtkCloud::writeCloud
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

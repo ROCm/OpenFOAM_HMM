@@ -353,7 +353,7 @@ boundBox procBounds
                 procDb,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -382,7 +382,7 @@ void writeDistribution
             masterMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         masterMesh.nCells()
     );
@@ -418,7 +418,7 @@ void writeDistribution
                 masterMesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             masterMesh,
             dimensionedScalar("cellDist", dimless, -1),
@@ -498,7 +498,7 @@ void writeMaps
         procMesh,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false                       // Do not register
+        IOobject::NO_REGISTER
     );
 
 

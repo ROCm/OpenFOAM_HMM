@@ -86,7 +86,7 @@ Foam::virtualMassModels::constantVirtualMassCoefficient::Cvm() const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             Cvm_

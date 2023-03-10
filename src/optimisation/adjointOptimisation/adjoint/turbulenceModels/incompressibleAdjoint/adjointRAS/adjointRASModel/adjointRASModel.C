@@ -175,9 +175,9 @@ autoPtr<adjointRASModel> adjointRASModel::New
             "adjointRASProperties",
             primalVars.U().time().constant(),
             primalVars.U().db(),
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false // Do not register
+            IOobject::NO_REGISTER
         )
     );
 

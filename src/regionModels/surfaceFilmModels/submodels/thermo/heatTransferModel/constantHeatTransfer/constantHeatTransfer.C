@@ -87,7 +87,7 @@ tmp<volScalarField> constantHeatTransfer::h() const
                 filmModel_.regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             filmModel_.regionMesh(),
             dimensionedScalar

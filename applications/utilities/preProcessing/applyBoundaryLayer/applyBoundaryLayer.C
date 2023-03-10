@@ -84,7 +84,7 @@ void blendField
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (fieldHeader.typeHeaderOk<volScalarField>(true))
@@ -122,7 +122,7 @@ void calcOmegaField
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (omegaHeader.typeHeaderOk<volScalarField>(true))
@@ -159,7 +159,7 @@ void setField
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (fldHeader.typeHeaderOk<volScalarField>(true))

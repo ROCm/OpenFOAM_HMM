@@ -299,8 +299,8 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //                "tetDualMesh"/polyMesh::meshSubDir,
 //                runTime_,
 //                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE,
-//                false
+//                IOobject::NO_WRITE,
+//                IOobject::NO_REGISTER
 //            ),
 //            labelUIndList
 //            (
@@ -346,8 +346,8 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //                    "tetDualMesh"/polyMesh::meshSubDir,
 //                    runTime_,
 //                    IOobject::NO_READ,
-//                    IOobject::AUTO_WRITE,
-//                    false
+//                    IOobject::NO_WRITE,
+//                    IOobject::NO_REGISTER
 //                ),
 //                points
 //            );
@@ -605,7 +605,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
                 runTime_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             patchNames,
             patchDicts

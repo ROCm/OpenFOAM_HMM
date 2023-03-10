@@ -62,7 +62,7 @@ Foam::lineSearch::lineSearch(const dictionary& dict, const Time& time)
             time,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
     directionalDeriv_(Zero),

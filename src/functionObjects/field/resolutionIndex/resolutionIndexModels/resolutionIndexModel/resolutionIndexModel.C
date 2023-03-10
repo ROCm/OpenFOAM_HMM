@@ -54,7 +54,7 @@ Foam::tmp<Foam::volScalarField> Foam::resolutionIndexModel::V() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimVolume,

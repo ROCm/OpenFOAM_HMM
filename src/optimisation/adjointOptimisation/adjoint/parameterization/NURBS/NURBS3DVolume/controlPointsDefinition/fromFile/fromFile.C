@@ -63,7 +63,7 @@ void Foam::fromFile::computeControlPoints()
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

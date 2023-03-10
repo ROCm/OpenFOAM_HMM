@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeMeshObject_H
-#define writeMeshObject_H
+#ifndef Foam_writeMeshObject_H
+#define Foam_writeMeshObject_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +59,7 @@ inline bool writeMeshObject
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     bool writeOk = false;

@@ -89,7 +89,7 @@ tmp<volScalarField> kL<BasicTurbulenceModel>::epsilonCanopy() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(sqr(dimLength)/pow3(dimTime), Zero)
@@ -136,7 +136,7 @@ tmp<volScalarField> kL<BasicTurbulenceModel>::canopyHeight() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(dimLength, Zero)

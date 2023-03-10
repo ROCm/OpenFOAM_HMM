@@ -78,7 +78,7 @@ Foam::radiation::constantAbsorptionEmission::aCont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             a_
@@ -103,7 +103,7 @@ Foam::radiation::constantAbsorptionEmission::eCont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             e_
@@ -128,7 +128,7 @@ Foam::radiation::constantAbsorptionEmission::ECont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             E_

@@ -287,7 +287,7 @@ void rewriteField
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
     const_cast<word&>(IOdictionary::typeName) = oldTypeName;
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (io.typeHeaderOk<IOPtrList<entry>>(false))
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (io.typeHeaderOk<IOPtrList<entry>>(false))

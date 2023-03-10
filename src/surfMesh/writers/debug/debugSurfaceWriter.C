@@ -283,7 +283,7 @@ Foam::fileName Foam::surfaceWriters::debugWriter::write()
                 *dummyTimePtr,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false  // Do not register
+                IOobject::NO_REGISTER
             )
         );
         iopts.note() = (this->isPointData() ? "point data" : "face data");
@@ -351,7 +351,7 @@ Foam::fileName Foam::surfaceWriters::debugWriter::writeTemplate
                     *dummyTimePtr,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false  // Do not register
+                    IOobject::NO_REGISTER
                 )
             );
             iopts.note() = (this->isPointData() ? "point data" : "face data");
@@ -369,7 +369,7 @@ Foam::fileName Foam::surfaceWriters::debugWriter::writeTemplate
                     *dummyTimePtr,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false  // Do not register
+                    IOobject::NO_REGISTER
                 )
             );
             iofld.note() = (this->isPointData() ? "point data" : "face data");

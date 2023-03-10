@@ -74,7 +74,7 @@ void Foam::faMeshDecomposition::distributeFaces()
             procFvMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false  // not registered
+            IOobject::NO_REGISTER
         );
 
 
@@ -256,7 +256,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
             procFvMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false  // not registered
+            IOobject::NO_REGISTER
         );
 
 
@@ -1326,7 +1326,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
             procMesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // not registered
+            IOobject::NO_REGISTER
         );
 
         // pointProcAddressing

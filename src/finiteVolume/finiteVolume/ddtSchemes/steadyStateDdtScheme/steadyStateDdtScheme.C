@@ -383,7 +383,7 @@ tmp<surfaceScalarField> steadyStateDdtScheme<Type>::meshPhi
             mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedScalar(dimVolume/dimTime, Zero)

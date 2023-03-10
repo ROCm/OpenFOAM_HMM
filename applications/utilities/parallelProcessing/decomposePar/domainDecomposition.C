@@ -91,7 +91,7 @@ Foam::domainDecomposition::domainDecomposition
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
       : nullptr
@@ -221,7 +221,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             *this,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -767,7 +767,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                     procMesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 std::move(procPoints)
             );
@@ -831,7 +831,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                 procMesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             baseMeshData,
             procCellAddressing_[proci],
@@ -907,7 +907,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             procMesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // not registered
+            IOobject::NO_REGISTER
         );
 
         // pointProcAddressing

@@ -240,7 +240,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             c.hsTrans()
         )
@@ -256,7 +256,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             c.hsCoeff()
         )
@@ -275,7 +275,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
                     this->db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 c.radAreaP()
             )
@@ -292,7 +292,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
                     this->db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 c.radT4()
             )
@@ -309,7 +309,7 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
                     this->db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 c.radAreaPT4()
             )

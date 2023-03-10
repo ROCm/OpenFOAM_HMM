@@ -88,19 +88,21 @@ bool Foam::dynamicMotionSolverListFvMesh::init
         *this,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     IOdictionary dict(ioDict);
 
     label i = 0;
-    if (dict.found("solvers"))
+
+    const auto* dictptr = dict.findDict("solvers");
+    if (dictptr)
     {
-        const dictionary& solvertDict = dict.subDict("solvers");
+        const dictionary& solverDict = *dictptr;
 
-        motionSolvers_.setSize(solvertDict.size());
+        motionSolvers_.setSize(solverDict.size());
 
-        for (const entry& dEntry : solvertDict)
+        for (const entry& dEntry : solverDict)
         {
             if (dEntry.isDict())
             {

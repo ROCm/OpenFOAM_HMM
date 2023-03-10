@@ -12,7 +12,7 @@ Info<< "Creating base fields for time " << runTime.timeName() << endl;
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar("Ydefault", dimless, 1)
@@ -29,7 +29,7 @@ Info<< "Creating base fields for time " << runTime.timeName() << endl;
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar("p", dimPressure, p0)
@@ -46,7 +46,7 @@ Info<< "Creating base fields for time " << runTime.timeName() << endl;
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar("T", dimTemperature, T0)

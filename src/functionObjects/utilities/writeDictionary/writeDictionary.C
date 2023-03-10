@@ -97,7 +97,7 @@ bool Foam::functionObjects::writeDictionary::tryDirectory
         obr_,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (dictIO.typeHeaderOk<IOdictionary>(true))

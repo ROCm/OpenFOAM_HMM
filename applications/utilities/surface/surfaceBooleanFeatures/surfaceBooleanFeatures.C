@@ -1811,7 +1811,7 @@ int main(int argc, char *argv[])
                 runTime,                    // registry
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             feMesh.points(),
             feMesh.edges()

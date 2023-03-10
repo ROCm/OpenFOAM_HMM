@@ -106,7 +106,7 @@ bool writeZones
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     bool writeOk = false;
@@ -214,7 +214,7 @@ bool writeOptionalMeshObject
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     bool writeOk = false;

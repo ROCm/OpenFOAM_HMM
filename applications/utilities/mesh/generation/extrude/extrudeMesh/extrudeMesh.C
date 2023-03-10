@@ -679,7 +679,7 @@ int main(int argc, char *argv[])
                         runTimeExtruded,        //mesh,
                         IOobject::READ_IF_PRESENT,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     )
                 )
             );
@@ -774,7 +774,7 @@ int main(int argc, char *argv[])
                 runTimeExtruded,
                 IOobject::READ_IF_PRESENT,  // Read fv* if present
                 IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh
         );

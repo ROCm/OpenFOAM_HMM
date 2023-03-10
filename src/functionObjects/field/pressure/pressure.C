@@ -140,7 +140,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
                 p.mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             p,
             fvPatchField<scalar>::calculatedType()

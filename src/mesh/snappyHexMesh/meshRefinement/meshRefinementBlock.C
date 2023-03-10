@@ -431,7 +431,7 @@ void Foam::meshRefinement::growSet
 //                mesh_,
 //                IOobject::NO_READ,
 //                IOobject::NO_WRITE,
-//                false
+//                IOobject::NO_REGISTER
 //            ),
 //            mesh_,
 //            dimensionedScalar
@@ -741,7 +741,7 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar
@@ -893,15 +893,10 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
-            dimensionedScalar
-            (
-                "zero",
-                dimensionSet(0, 1, 0, 0, 0),
-                0.0
-            )
+            dimensionedScalar(dimLength, Zero)
         );
         distance.field() = smallGapDistance;
         distance.correctBoundaryConditions();

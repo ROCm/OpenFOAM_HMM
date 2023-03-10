@@ -43,7 +43,7 @@ Foam::autoPtr<CombustionModel> Foam::combustionModel::New
         thermo.db(),
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     word combModelName("none");

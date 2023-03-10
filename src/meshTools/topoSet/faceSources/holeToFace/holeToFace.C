@@ -220,10 +220,10 @@ Foam::topoSetSource::addToUsageTable Foam::holeToFace::usage_
 //            fvm,
 //            IOobject::NO_READ,
 //            IOobject::NO_WRITE,
-//            false
+//            IOobject::NO_REGISTER
 //        ),
 //        fvm,
-//        dimensionedScalar("zero", dimless, scalar(0))
+//        dimensionedScalar(dimless, Zero)
 //    );
 //    forAll(labelFld, i)
 //    {
@@ -257,10 +257,10 @@ Foam::topoSetSource::addToUsageTable Foam::holeToFace::usage_
 //            fvm,
 //            IOobject::NO_READ,
 //            IOobject::NO_WRITE,
-//            false
+//            IOobject::NO_REGISTER
 //        ),
 //        fvm,
-//        dimensionedScalar("zero", dimless, scalar(0))
+//        dimensionedScalar(dimless, Zero)
 //    );
 //    for (label i = 0; i < mesh_.nInternalFaces(); i++)
 //    {

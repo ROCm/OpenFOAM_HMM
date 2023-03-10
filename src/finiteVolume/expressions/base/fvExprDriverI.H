@@ -157,7 +157,7 @@ Foam::expressions::fvExprDriver::readAndRegister
             meshRef.thisDb(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false  // Unregistered
+            IOobject::NO_REGISTER
         ),
         meshRef
     );

@@ -148,7 +148,7 @@ solidBodyMotionDisplacementPointPatchVectorField::localPoints0() const
                 this->db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 

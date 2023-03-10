@@ -49,7 +49,7 @@ void Foam::domainDecomposition::writeVolField
             this->mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh(),
         dimensionedScalar("cellDist", dimless, -1),

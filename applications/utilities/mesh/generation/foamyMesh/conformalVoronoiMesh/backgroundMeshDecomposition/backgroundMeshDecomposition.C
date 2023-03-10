@@ -726,7 +726,7 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
             runTime_,
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
     meshCutter_

@@ -345,7 +345,7 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
                     mesh(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 pointDisplacement_  // to inherit the boundary conditions
             )
@@ -438,7 +438,7 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
                 mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pointMesh::New(mesh()),
             dimensionedScalar(dimLength, Zero)

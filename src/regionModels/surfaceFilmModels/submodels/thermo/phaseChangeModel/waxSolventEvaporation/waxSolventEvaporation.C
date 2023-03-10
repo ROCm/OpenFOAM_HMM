@@ -196,7 +196,7 @@ void waxSolventEvaporation::correctModel
             film.regionMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         film.regionMesh(),
         dimensionedScalar(dimDensity*dimVelocity, Zero)
@@ -211,7 +211,7 @@ void waxSolventEvaporation::correctModel
             film.regionMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         film.regionMesh(),
         dimensionedScalar(dimDensity*dimVelocity, Zero)

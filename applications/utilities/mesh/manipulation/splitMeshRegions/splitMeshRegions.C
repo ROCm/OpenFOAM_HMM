@@ -913,7 +913,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         map().pointMap()
     );
@@ -932,7 +932,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         newMesh().nFaces()
     );
@@ -970,7 +970,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         map().cellMap()
     );
@@ -989,7 +989,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         labelList(nNewPatches, -1)
     );
@@ -1409,7 +1409,7 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             cellRegion
         );
@@ -1429,7 +1429,7 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
@@ -1716,7 +1716,7 @@ int main(int argc, char *argv[])
                 mesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh
         );

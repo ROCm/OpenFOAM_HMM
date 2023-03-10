@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
                 runTime,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false, // no register
+                IOobject::NO_REGISTER,
                 true   // global-like
             )
         );

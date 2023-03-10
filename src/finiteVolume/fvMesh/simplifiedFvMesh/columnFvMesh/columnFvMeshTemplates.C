@@ -46,7 +46,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialiseZone
                 zoneType.mesh(),
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             zoneType.mesh()
         ).names()

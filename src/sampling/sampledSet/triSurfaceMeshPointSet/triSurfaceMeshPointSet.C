@@ -147,7 +147,7 @@ Foam::triSurfaceMeshPointSet::triSurfaceMeshPointSet
                 mesh.time(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             dictionary::null
         ).points();

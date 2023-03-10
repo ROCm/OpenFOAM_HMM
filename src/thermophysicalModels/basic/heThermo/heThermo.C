@@ -229,7 +229,7 @@ Foam::tmp<Foam::volScalarField> Foam::heThermo<BasicThermo, MixtureType>::he
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             he_.dimensions()
@@ -324,7 +324,7 @@ Foam::heThermo<BasicThermo, MixtureType>::hc() const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             he_.dimensions()
@@ -415,7 +415,7 @@ Foam::heThermo<BasicThermo, MixtureType>::Cp() const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimEnergy/dimMass/dimTemperature
@@ -510,7 +510,7 @@ Foam::heThermo<BasicThermo, MixtureType>::Cv() const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimEnergy/dimMass/dimTemperature
@@ -579,7 +579,7 @@ Foam::heThermo<BasicThermo, MixtureType>::gamma() const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimless
@@ -654,7 +654,7 @@ Foam::heThermo<BasicThermo, MixtureType>::Cpv() const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimEnergy/dimMass/dimTemperature
@@ -726,7 +726,7 @@ Foam::heThermo<BasicThermo, MixtureType>::CpByCpv() const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimless
@@ -832,7 +832,7 @@ Foam::tmp<Foam::volScalarField> Foam::heThermo<BasicThermo, MixtureType>::W
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimMass/dimMoles

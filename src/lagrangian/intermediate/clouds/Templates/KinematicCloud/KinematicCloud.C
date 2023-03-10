@@ -528,7 +528,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             c.UTrans_()
         )
@@ -544,7 +544,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             c.UCoeff_()
         )
@@ -574,7 +574,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
     outputProperties_
@@ -587,7 +587,7 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
     solution_(mesh),

@@ -62,7 +62,7 @@ bool Foam::fileFormats::extendedEdgeMeshFormat::read
         *dummyTimePtr,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (!io.typeHeaderOk<extendedFeatureEdgeMesh>(false))

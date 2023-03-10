@@ -114,7 +114,7 @@ Foam::label Foam::parLagrangianDistributor::distributeFields
                 srcMesh_,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             label(0)
         );
@@ -130,7 +130,7 @@ Foam::label Foam::parLagrangianDistributor::distributeFields
             tgtMesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (field.size())
@@ -218,7 +218,7 @@ Foam::label Foam::parLagrangianDistributor::distributeFieldFields
                 srcMesh_,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             label(0)
         );
@@ -235,7 +235,7 @@ Foam::label Foam::parLagrangianDistributor::distributeFieldFields
             tgtMesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (field.size())
@@ -363,7 +363,7 @@ Foam::label Foam::parLagrangianDistributor::distributeStoredFields
             tgtMesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (field.size())

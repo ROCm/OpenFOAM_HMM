@@ -64,7 +64,7 @@ bool Foam::fileFormats::edgeMeshFormat::read
         *dummyTimePtr,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (!io.typeHeaderOk<featureEdgeMesh>(false))
@@ -156,7 +156,7 @@ void Foam::fileFormats::edgeMeshFormat::write
         *dummyTimePtr,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
     io.note() = "written " + clock::dateTime();
 

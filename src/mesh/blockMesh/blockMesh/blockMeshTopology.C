@@ -554,7 +554,7 @@ Foam::blockMesh::createTopology
             meshDescription.time(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         pointField(vertices_),   // Use a copy of vertices
         getBlockShapes(),

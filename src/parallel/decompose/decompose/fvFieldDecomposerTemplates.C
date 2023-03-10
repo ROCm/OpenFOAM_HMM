@@ -58,7 +58,7 @@ Foam::fvFieldDecomposer::decomposeField
                 procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             procMesh_,
             field.dimensions(),

@@ -105,7 +105,7 @@ Foam::functionObjects::fieldCoordinateSystemTransform::srotTensor() const
                     mesh_.objectRegistry::db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false // no register
+                    IOobject::NO_REGISTER
                 ),
                 mesh_,
                 dimless,
@@ -150,7 +150,7 @@ Foam::functionObjects::fieldCoordinateSystemTransform::vrotTensor() const
                     mesh_.objectRegistry::db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false // no register
+                    IOobject::NO_REGISTER
                 ),
                 mesh_,
                 dimless,

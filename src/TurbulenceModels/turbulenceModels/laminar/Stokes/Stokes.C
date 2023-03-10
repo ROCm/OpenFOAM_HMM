@@ -98,7 +98,7 @@ Stokes<BasicTurbulenceModel>::nut() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(dimViscosity, Zero)

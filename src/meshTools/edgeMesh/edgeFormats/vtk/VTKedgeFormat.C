@@ -69,7 +69,7 @@ bool Foam::fileFormats::VTKedgeFormat::read
             *dummyTimePtr,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

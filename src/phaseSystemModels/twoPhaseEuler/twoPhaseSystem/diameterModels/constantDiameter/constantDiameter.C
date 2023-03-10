@@ -80,7 +80,7 @@ Foam::tmp<Foam::volScalarField> Foam::diameterModels::constant::d() const
                 phase_.U().mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             phase_.U().mesh(),
             d_

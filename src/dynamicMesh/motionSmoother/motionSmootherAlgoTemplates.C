@@ -153,7 +153,7 @@ Foam::motionSmootherAlgo::avg
             fld.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         fld.mesh(),
         dimensioned<Type>(fld.dimensions(), Zero)

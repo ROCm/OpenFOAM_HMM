@@ -109,7 +109,7 @@ Foam::XiEqModel::calculateSchelkinEffect(const scalar uPrimeCoef) const
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(Nv.dimensions(), Zero)

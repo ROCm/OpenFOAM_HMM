@@ -92,7 +92,7 @@ void Foam::rawTopoChangerFvMesh::zeroUnmappedValues
                     *this,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 *this,
                 dimensioned<Type>(fld.dimensions(), Zero)

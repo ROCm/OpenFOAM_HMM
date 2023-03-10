@@ -62,7 +62,7 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (boundaryIO.typeHeaderOk<IOdictionary>(true))

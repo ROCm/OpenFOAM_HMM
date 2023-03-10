@@ -91,7 +91,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::createAveragingWeights()
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false // do not register
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(dimless, Zero)

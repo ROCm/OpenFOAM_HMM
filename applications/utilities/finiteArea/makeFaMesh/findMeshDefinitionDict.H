@@ -74,7 +74,7 @@ autoPtr<IOdictionary> meshDictPtr;
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false,  // no registerObject
+        IOobject::NO_REGISTER,
         true    // is globalObject
     );
 

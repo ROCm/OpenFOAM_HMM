@@ -67,7 +67,7 @@ Foam::decompositionModel::decompositionModel
                 mesh.thisDb(),
                 (fallback ? IOobject::READ_IF_PRESENT : IOobject::MUST_READ),
                 IOobject::NO_WRITE,
-                false,  //io.registerObject(),
+                IOobject::NO_REGISTER,
                 true    //io.globalObject()
             ),
             decompDictFile

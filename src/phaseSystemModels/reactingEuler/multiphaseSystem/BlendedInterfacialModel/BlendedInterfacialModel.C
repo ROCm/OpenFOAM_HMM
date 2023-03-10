@@ -136,10 +136,10 @@ Foam::BlendedInterfacialModel<ModelType>::evaluate
                 phase1_.mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             phase1_.mesh(),
-            dimensioned<Type>("zero", dims, Zero)
+            dimensioned<Type>(dims, Zero)
         )
     );
 

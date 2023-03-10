@@ -56,7 +56,7 @@ Foam::IOobject Foam::points0MotionSolver::points0IO(const polyMesh& mesh)
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     // If points0 are located in constant directory, verify their existence
@@ -111,7 +111,7 @@ Foam::points0MotionSolver::points0MotionSolver
                         mesh,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     )
                 )
             << exit(FatalError);

@@ -193,7 +193,7 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
                     *this,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 *this,
                 dimVolume
@@ -302,7 +302,7 @@ bool Foam::fvMesh::init(const bool doInit)
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this
         );
@@ -327,7 +327,7 @@ bool Foam::fvMesh::init(const bool doInit)
                 *this,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this
         );
@@ -346,7 +346,7 @@ bool Foam::fvMesh::init(const bool doInit)
                     *this,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 V()
             );
@@ -914,7 +914,7 @@ void Foam::fvMesh::movePoints(const pointField& p)
                 *this,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this,
             dimensionedScalar(dimVolume/dimTime, Zero)
@@ -1021,7 +1021,7 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
                 *this,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this,
             dimensionedScalar(dimVolume/dimTime, Zero)

@@ -313,7 +313,7 @@ int main(int argc, char *argv[])
                 runTimeTarget,
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 

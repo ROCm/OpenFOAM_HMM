@@ -88,7 +88,7 @@ void Foam::meshReader::writeInterfaces(const objectRegistry& registry) const
             registry,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -113,7 +113,7 @@ void Foam::meshReader::writeMeshLabelList
 ) const
 {
     // write constant/polyMesh/propertyName
-    IOList<label> ioObj
+    IOListRef<label> ioObj
     (
         IOobject
         (
@@ -122,8 +122,8 @@ void Foam::meshReader::writeMeshLabelList
             polyMesh::meshSubDir,
             registry,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         ),
         list
     );

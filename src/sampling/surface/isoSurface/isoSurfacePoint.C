@@ -1366,7 +1366,7 @@ Foam::isoSurfacePoint::isoSurfacePoint
             fvmesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         fvmesh,
         dimLength,
@@ -1448,7 +1448,7 @@ Foam::isoSurfacePoint::isoSurfacePoint
                 fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             fvmesh,
             dimensionedScalar(dimless, Zero)

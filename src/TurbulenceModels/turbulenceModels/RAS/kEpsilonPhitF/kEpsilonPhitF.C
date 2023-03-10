@@ -304,7 +304,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(dimTime, Zero)

@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         boundary.size()
     );

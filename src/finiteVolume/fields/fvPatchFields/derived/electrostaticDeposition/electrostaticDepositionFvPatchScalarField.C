@@ -112,7 +112,7 @@ void Foam::electrostaticDepositionFvPatchScalarField::writeFilmFields() const
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false // do not register
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(dimLength)

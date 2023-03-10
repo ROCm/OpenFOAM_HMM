@@ -1630,7 +1630,7 @@ tmp<surfaceScalarField> CrankNicolsonDdtScheme<Type>::meshPhi
                 mesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             coef_(meshPhi0)*mesh().phi() - offCentre_(meshPhi0())
         )

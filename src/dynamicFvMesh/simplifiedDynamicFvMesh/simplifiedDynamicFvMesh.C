@@ -55,7 +55,7 @@ Foam::simplifiedMeshes::simplifiedDynamicFvMeshBase::New
         io.db(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (dictHeader.typeHeaderOk<IOdictionary>(true))

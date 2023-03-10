@@ -256,16 +256,14 @@ Foam::mixerFvMesh::mixerFvMesh
     topoChangerFvMesh(io),
     motionDict_
     (
-        IOdictionary
+        IOdictionary::readContents
         (
             IOobject
             (
                 "dynamicMeshDict",
                 time().constant(),
                 *this,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
+                IOobject::MUST_READ
             )
         ).optionalSubDict(typeName + "Coeffs")
     ),

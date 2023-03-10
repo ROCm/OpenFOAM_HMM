@@ -58,7 +58,7 @@ GeometricField<Type, PatchField, GeoMesh>* variablesSet::allocateNamedField
             io.db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         fieldType::typeName
     );
@@ -313,7 +313,7 @@ void variablesSet::renameTurbulenceField
         mesh,
         IOobject::MUST_READ,
         IOobject::AUTO_WRITE,
-        false // Do not register
+        IOobject::NO_REGISTER
     );
 
     if (headerCustomName.typeHeaderOk<VolFieldType>(true))

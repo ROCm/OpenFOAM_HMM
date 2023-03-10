@@ -47,7 +47,7 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
         io.db(),
         IOobject::MUST_READ_IF_MODIFIED,
         IOobject::NO_WRITE,
-        false // Do not register
+        IOobject::NO_REGISTER
     );
 
     if (dictHeader.typeHeaderOk<IOdictionary>(true))

@@ -80,7 +80,7 @@ Foam::radiation::absorptionEmissionModel::aCont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless/dimLength, Zero)
@@ -103,7 +103,7 @@ Foam::radiation::absorptionEmissionModel::aDisp(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless/dimLength, Zero)
@@ -133,7 +133,7 @@ Foam::radiation::absorptionEmissionModel::eCont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless/dimLength, Zero)
@@ -156,7 +156,7 @@ Foam::radiation::absorptionEmissionModel::eDisp(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless/dimLength, Zero)
@@ -186,7 +186,7 @@ Foam::radiation::absorptionEmissionModel::ECont(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
@@ -209,7 +209,7 @@ Foam::radiation::absorptionEmissionModel::EDisp(const label bandI) const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)

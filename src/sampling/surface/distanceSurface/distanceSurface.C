@@ -433,7 +433,7 @@ void Foam::distanceSurface::createGeometry()
                 fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             fvmesh,
             dimensionedScalar(dimLength, GREAT)
@@ -676,7 +676,7 @@ void Foam::distanceSurface::createGeometry()
                 fvmesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pointMesh::New(fvmesh),
             dimensionedScalar(dimLength, Zero)

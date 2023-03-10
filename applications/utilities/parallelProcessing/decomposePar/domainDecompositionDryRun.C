@@ -153,7 +153,7 @@ void Foam::domainDecompositionDryRun::execute
 //                mesh_,
 //                IOobject::NO_READ,
 //                IOobject::NO_WRITE,
-//                false
+//                IOobject::NO_REGISTER
 //            ),
 //            std::move(cellToProc)
 //        );
