@@ -123,8 +123,9 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
     tmp<volScalarField> tepsilon = turbPtr->epsilon();
     tmp<volScalarField> tomega = turbPtr->omega();
 
-    if (!tepsilon.isTmp())
+    if (tepsilon.is_reference())
     {
+        isEpsilon_ = true;
         fieldNames_[0] = tepsilon().name();
 
         const dictionary& turbDict = turbPtr->coeffDict();
@@ -132,7 +133,7 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
         C1_.read("C1", turbDict);
         C2_.read("C2", turbDict);
     }
-    else if (!tomega.isTmp())
+    else if (tomega.is_reference())
     {
         isEpsilon_ = false;
         fieldNames_[0] = tomega().name();
@@ -143,8 +144,7 @@ Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSource
     else
     {
         FatalErrorInFunction
-            << "Unable to find neither epsilon nor omega field." << nl
-            << "atmPlantCanopyTurbSource needs either epsilon or omega field."
+            << "Needs either epsilon or omega field."
             << abort(FatalError);
     }
 

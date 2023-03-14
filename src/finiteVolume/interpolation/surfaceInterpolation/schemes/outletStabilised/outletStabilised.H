@@ -238,10 +238,7 @@ public:
             }
             else
             {
-                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-                (
-                    nullptr
-                );
+                return nullptr;
             }
         }
 };

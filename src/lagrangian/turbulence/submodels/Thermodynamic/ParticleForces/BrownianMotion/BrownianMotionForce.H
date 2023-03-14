@@ -65,7 +65,7 @@ class BrownianMotionForce
 :
     public ParticleForce<CloudType>
 {
-    // Private data
+    // Private Data
 
         //- Reference to the cloud random number generator
         Random& rndGen_;
@@ -73,13 +73,13 @@ class BrownianMotionForce
         //- Molecular free path length [m]
         const scalar lambda_;
 
-        //- Turbulence flag
-        bool turbulence_;
-
         //- Pointer to the turbulence kinetic energy field
         const volScalarField* kPtr_;
 
-        //- Flag that indicates ownership of turbulence k field
+        //- Turbulence flag
+        bool turbulence_;
+
+        //- Local ownership of the turbulence k field
         bool ownK_;
 
 

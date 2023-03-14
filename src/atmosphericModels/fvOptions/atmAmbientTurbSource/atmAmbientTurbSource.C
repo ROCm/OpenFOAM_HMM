@@ -134,8 +134,7 @@ Foam::fv::atmAmbientTurbSource::atmAmbientTurbSource
     else
     {
         FatalErrorInFunction
-            << "Unable to find neither epsilon nor omega field." << nl
-            << "atmAmbientTurbSource needs either epsilon or omega field."
+            << "Needs either epsilon or omega field."
             << abort(FatalError);
     }
 

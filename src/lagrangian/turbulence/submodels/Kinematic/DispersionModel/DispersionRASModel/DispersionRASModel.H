@@ -60,13 +60,13 @@ protected:
             //- Turbulence k
             const volScalarField* kPtr_;
 
-            //- Take ownership of the k field
-            mutable bool ownK_;
-
             //- Turbulence epsilon
             const volScalarField* epsilonPtr_;
 
-            //- Take ownership of the epsilon field
+            //- Local ownership of the k field
+            mutable bool ownK_;
+
+            //- Local ownership of the epsilon field
             mutable bool ownEpsilon_;
 
 

@@ -50,7 +50,7 @@ uncorrectedSnGrad<Type>::correction
 ) const
 {
     NotImplemented;
-    return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>(nullptr);
+    return nullptr;
 }
 
 

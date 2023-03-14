@@ -77,8 +77,8 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
     ParticleForce<CloudType>(owner, mesh, dict, typeName, true),
     rndGen_(owner.rndGen()),
     lambda_(this->coeffs().getScalar("lambda")),
-    turbulence_(this->coeffs().getBool("turbulence")),
     kPtr_(nullptr),
+    turbulence_(this->coeffs().getBool("turbulence")),
     ownK_(false)
 {}
 
@@ -92,8 +92,8 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
     ParticleForce<CloudType>(bmf),
     rndGen_(bmf.rndGen_),
     lambda_(bmf.lambda_),
-    turbulence_(bmf.turbulence_),
     kPtr_(nullptr),
+    turbulence_(bmf.turbulence_),
     ownK_(false)
 {}
 
@@ -102,7 +102,9 @@ Foam::BrownianMotionForce<CloudType>::BrownianMotionForce
 
 template<class CloudType>
 Foam::BrownianMotionForce<CloudType>::~BrownianMotionForce()
-{}
+{
+    cacheFields(false);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -115,20 +117,21 @@ void Foam::BrownianMotionForce<CloudType>::cacheFields(const bool store)
         if (store)
         {
             tmp<volScalarField> tk = kModel();
-            if (tk.isTmp())
+            if (tk.movable())
             {
+                // Take ownership
                 kPtr_ = tk.ptr();
                 ownK_ = true;
             }
             else
             {
-                kPtr_ = &tk();
+                kPtr_ = &tk.cref();
                 ownK_ = false;
             }
         }
         else
         {
-            if (ownK_ && kPtr_)
+            if (ownK_)
             {
                 deleteDemandDrivenData(kPtr_);
                 ownK_ = false;

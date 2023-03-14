@@ -226,8 +226,7 @@ Foam::fv::atmBuoyancyTurbSource::atmBuoyancyTurbSource
     else
     {
         FatalErrorInFunction
-            << "Unable to find neither epsilon nor omega field." << nl
-            << "atmBuoyancyTurbSource needs either epsilon or omega field."
+            << "Needs either epsilon or omega field."
             << abort(FatalError);
     }
 

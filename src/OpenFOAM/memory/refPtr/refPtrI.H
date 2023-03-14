@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,7 +62,6 @@ inline constexpr Foam::refPtr<T>::refPtr(T* p) noexcept
     ptr_(p),
     type_(PTR)
 {}
-
 
 
 template<class T>
@@ -191,16 +190,39 @@ inline Foam::refPtr<T>::~refPtr() noexcept
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline bool Foam::refPtr<T>::is_const() const noexcept
+{
+    return (type_ == CREF);
+}
+
+
+template<class T>
+inline bool Foam::refPtr<T>::is_pointer() const noexcept
+{
+    //OR: return (type_ == PTR);
+    return (type_ < REF_Types);
+}
+
+
+template<class T>
+inline bool Foam::refPtr<T>::is_reference() const noexcept
+{
+    //OR: return (type_ == CREF || type_ == REF);
+    return (type_ > REF_Types);
+}
+
+
+template<class T>
 inline bool Foam::refPtr<T>::movable() const noexcept
 {
-    return (is_pointer() && ptr_);
+    return (ptr_ && is_pointer());
 }
 
 
 template<class T>
 inline const T& Foam::refPtr<T>::cref() const
 {
-    if (is_pointer() && !ptr_)
+    if (!ptr_ && is_pointer())
     {
         FatalErrorInFunction
             << this->typeName() << " deallocated"
@@ -221,7 +243,7 @@ inline T& Foam::refPtr<T>::ref() const
             << this->typeName()
             << abort(FatalError);
     }
-    else if (is_pointer() && !ptr_)
+    else if (!ptr_ && is_pointer())
     {
         FatalErrorInFunction
             << this->typeName() << " deallocated"
