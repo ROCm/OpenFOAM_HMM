@@ -109,6 +109,10 @@ protected:
             updated_ = state;
         }
 
+        //- Set matrix manipulated state. Currently a no-op for faPatchField.
+        void setManipulated(bool state) noexcept
+        {}
+
 
 public:
 
@@ -173,6 +177,13 @@ public:
         bool updated() const noexcept
         {
             return updated_;
+        }
+
+        //- True if the matrix has already been manipulated.
+        //- Currently ignored (always false) for faPatchField
+        bool manipulatedMatrix() const noexcept
+        {
+            return false;
         }
 
 
@@ -486,7 +497,7 @@ public:
             )
             {}
 
-            //- Evaluate the patch field, sets Updated to false
+            //- Evaluate the patch field, sets updated() to false
             virtual void evaluate
             (
                 const Pstream::commsTypes commsType =
@@ -532,16 +543,13 @@ public:
             }
 
 
-        // IO
+    // Other
 
-            //- Write
-            virtual void write(Ostream&) const;
+        //- Write
+        virtual void write(Ostream& os) const;
 
-
-        // Check
-
-            //- Check faPatchField<Type> against given faPatchField<Type>
-            void check(const faPatchField<Type>&) const;
+        //- Check against given patch field
+        void check(const faPatchField<Type>&) const;
 
 
     // Member Operators

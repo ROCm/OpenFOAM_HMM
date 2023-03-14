@@ -247,7 +247,7 @@ public:
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
-        //- Evaluate the patch field, sets Updated to false
+        //- Evaluate the patch field, sets updated() to false
         virtual void evaluate
         (
             const Pstream::commsTypes commsType=Pstream::commsTypes::blocking

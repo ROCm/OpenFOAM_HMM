@@ -91,6 +91,14 @@ protected:
         //  Useful when initially constructed without a dictionary
         virtual void readDict(const dictionary& dict);
 
+        //- Set updated state. This is a no-op for faePatchField
+        void setUpdated(bool state) noexcept
+        {}
+
+        //- Set matrix manipulated state. This is a no-op for faePatchField
+        void setManipulated(bool state) noexcept
+        {}
+
 
 public:
 
@@ -134,6 +142,23 @@ public:
         const faPatch& patch() const noexcept
         {
             return patch_;
+        }
+
+
+    // Solution
+
+        //- True if the boundary condition has already been updated.
+        //- This is always true for faePatchField
+        bool updated() const noexcept
+        {
+            return true;
+        }
+
+        //- True if the matrix has already been manipulated.
+        //- Currently ignored (always false) for faePatchField
+        bool manipulatedMatrix() const noexcept
+        {
+            return false;
         }
 
 
@@ -401,29 +426,45 @@ public:
         }
 
 
-        // Mapping
+    // Mapping
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const faPatchFieldMapper&
-            );
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap
+        (
+            const faPatchFieldMapper&
+        );
 
-            //- Reverse map the given faePatchField onto this faePatchField
-            virtual void rmap
-            (
-                const faePatchField<Type>&,
-                const labelList&
-            );
+        //- Reverse map the given faePatchField onto this faePatchField
+        virtual void rmap
+        (
+            const faePatchField<Type>&,
+            const labelList&
+        );
 
+
+    // Evaluation Functions
+
+        //- Initialise the evaluation of the patch field, generally a no-op
+        virtual void initEvaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        )
+        {}
+
+        //- Evaluate the patch field, generally a no-op
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        )
+        {}
+
+
+    // Other
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
-
-    // Check
-
-        //- Check faePatchField<Type> against given faePatchField<Type>
+        //- Check against given patch field
         void check(const faePatchField<Type>&) const;
 
 

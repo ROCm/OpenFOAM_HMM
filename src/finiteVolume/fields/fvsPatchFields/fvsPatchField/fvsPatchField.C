@@ -167,9 +167,9 @@ Foam::fvsPatchField<Type>::fvsPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::fvsPatchField<Type>::check(const fvsPatchField<Type>& ptf) const
+void Foam::fvsPatchField<Type>::check(const fvsPatchField<Type>& rhs) const
 {
-    fvsPatchFieldBase::checkPatch(ptf);
+    fvsPatchFieldBase::checkPatch(rhs);
 }
 
 

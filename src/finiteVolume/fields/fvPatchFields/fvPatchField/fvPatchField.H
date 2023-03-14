@@ -583,7 +583,7 @@ public:
             )
             {}
 
-            //- Evaluate the patch field, sets Updated to false
+            //- Evaluate the patch field, sets updated() to false
             virtual void evaluate
             (
                 const Pstream::commsTypes commsType =
@@ -673,16 +673,13 @@ public:
             );
 
 
-        // I-O
+    // Other
 
-            //- Write
-            virtual void write(Ostream&) const;
+        //- Write
+        virtual void write(Ostream&) const;
 
-
-        // Check
-
-            //- Check fvPatchField<Type> against given fvPatchField<Type>
-            void check(const fvPatchField<Type>&) const;
+        //- Check against given patch field
+        void check(const fvPatchField<Type>&) const;
 
 
     // Member Operators

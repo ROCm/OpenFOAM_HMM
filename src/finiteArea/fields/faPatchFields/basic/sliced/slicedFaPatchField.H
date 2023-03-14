@@ -177,7 +177,7 @@ public:
             )
             {}
 
-            //- Evaluate the patch field, sets Updated to false
+            //- Evaluate the patch field, sets updated() to false
             virtual void evaluate
             (
                 const Pstream::commsTypes commsType =

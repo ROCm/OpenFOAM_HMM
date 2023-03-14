@@ -104,6 +104,10 @@ protected:
             updated_ = state;
         }
 
+        //- Set matrix manipulated state. Currently a no-op for pointPatchField.
+        void setManipulated(bool state) noexcept
+        {}
+
 
 public:
 
@@ -168,6 +172,13 @@ public:
         bool updated() const noexcept
         {
             return updated_;
+        }
+
+        //- True if the matrix has already been manipulated.
+        //- Currently ignored (always false) for pointPatchField
+        bool manipulatedMatrix() const noexcept
+        {
+            return false;
         }
 
 
@@ -465,50 +476,48 @@ public:
             ) const;
 
 
-        // Mapping Functions
+    // Mapping Functions
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const pointPatchFieldMapper&
-            )
-            {}
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap
+        (
+            const pointPatchFieldMapper&
+        )
+        {}
 
-            //- Reverse map the given pointPatchField onto this pointPatchField
-            virtual void rmap
-            (
-                const pointPatchField<Type>&,
-                const labelList&
-            )
-            {}
-
-
-        // Evaluation Functions
-
-            //- Update the coefficients associated with the patch field
-            //  Sets Updated to true
-            virtual void updateCoeffs();
-
-            //- Initialise evaluation of the patch field (do nothing)
-            virtual void initEvaluate
-            (
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::blocking
-            )
-            {}
-
-            //- Evaluate the patch field
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType =
-                    Pstream::commsTypes::blocking
-            );
+        //- Reverse map the given pointPatchField onto this pointPatchField
+        virtual void rmap
+        (
+            const pointPatchField<Type>&,
+            const labelList&
+        )
+        {}
 
 
-        // I-O
+    // Evaluation Functions
 
-            //- Write
-            virtual void write(Ostream&) const;
+        //- Update the coefficients associated with the patch field
+        //  Sets Updated to true
+        virtual void updateCoeffs();
+
+        //- Initialise evaluation of the patch field (do nothing)
+        virtual void initEvaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        )
+        {}
+
+        //- Evaluate the patch field, sets updated() to false
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        );
+
+
+    // Other
+
+        //- Write
+        virtual void write(Ostream& os) const;
 
 
     // Member Operators

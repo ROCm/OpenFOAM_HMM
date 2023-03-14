@@ -89,6 +89,14 @@ protected:
         //  Useful when initially constructed without a dictionary
         virtual void readDict(const dictionary& dict);
 
+        //- Set updated state. This is a no-op for fvsPatchField
+        void setUpdated(bool state) noexcept
+        {}
+
+        //- Set matrix manipulated state. This is a no-op for fvsPatchField
+        void setManipulated(bool state) noexcept
+        {}
+
 
 public:
 
@@ -129,6 +137,22 @@ public:
         const fvPatch& patch() const noexcept
         {
             return patch_;
+        }
+
+
+    // Solution
+
+        //- True if the boundary condition has already been updated.
+        //- This is always true for fvsPatchField
+        bool updated() const noexcept
+        {
+            return true;
+        }
+
+        //- True if the matrix has already been manipulated
+        bool manipulatedMatrix() const noexcept
+        {
+            return false;
         }
 
 
@@ -416,30 +440,46 @@ public:
         }
 
 
-        // Mapping Functions
+    // Mapping Functions
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap
+        (
+            const fvPatchFieldMapper&
+        );
 
-            //- Reverse map the given fvsPatchField onto this fvsPatchField
-            virtual void rmap
-            (
-                const fvsPatchField<Type>&,
-                const labelList&
-            );
+        //- Reverse map the given fvsPatchField onto this fvsPatchField
+        virtual void rmap
+        (
+            const fvsPatchField<Type>&,
+            const labelList&
+        );
 
+
+    // Evaluation Functions
+
+        //- Initialise the evaluation of the patch field, generally a no-op
+        virtual void initEvaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        )
+        {}
+
+        //- Evaluate the patch field, generally a no-op
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        )
+        {}
+
+
+    // Other
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
-
-        // Check
-
-            //- Check fvsPatchField<Type> against given fvsPatchField<Type>
-            void check(const fvsPatchField<Type>&) const;
+        //- Check against given patch field
+        void check(const fvsPatchField<Type>&) const;
 
 
     // Member Operators
