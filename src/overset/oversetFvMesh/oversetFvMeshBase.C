@@ -633,7 +633,7 @@ bool Foam::oversetFvMeshBase::interpolateFields()
 bool Foam::oversetFvMeshBase::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // For postprocessing : write cellTypes and zoneID
@@ -664,7 +664,7 @@ bool Foam::oversetFvMeshBase::writeObject
             volTypes[cellI] = cellTypes[cellI];
         }
         volTypes.correctBoundaryConditions();
-        volTypes.writeObject(streamOpt, valid);
+        volTypes.writeObject(streamOpt, writeOnProc);
     }
     {
         volScalarField volZoneID
@@ -691,7 +691,7 @@ bool Foam::oversetFvMeshBase::writeObject
             volZoneID[cellI] = zoneID[cellI];
         }
         volZoneID.correctBoundaryConditions();
-        volZoneID.writeObject(streamOpt, valid);
+        volZoneID.writeObject(streamOpt, writeOnProc);
     }
     if (debug)
     {
@@ -752,7 +752,7 @@ bool Foam::oversetFvMeshBase::writeObject
         (
             volDonorZoneID
         );
-        ok = volDonorZoneID.writeObject(streamOpt, valid);
+        ok = volDonorZoneID.writeObject(streamOpt, writeOnProc);
     }
 
     return ok;

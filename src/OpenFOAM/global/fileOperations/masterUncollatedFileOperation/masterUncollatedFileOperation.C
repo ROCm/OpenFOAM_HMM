@@ -1835,7 +1835,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
     regIOobject& io,
     const fileName& fName,
     const word& typeName,
-    const bool valid
+    const bool readOnProc
 ) const
 {
     if (debug)
@@ -1843,7 +1843,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
         Pout<< "masterUncollatedFileOperation::readStream :"
             << " object : " << io.name()
             << " global : " << io.global()
-            << " fName : " << fName << " valid:" << valid << endl;
+            << " fName : " << fName << " readOnProc:" << readOnProc << endl;
     }
 
 
@@ -2027,10 +2027,13 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
             filePaths[Pstream::myProcNo()] = fName;
             Pstream::gatherList(filePaths);
 
-            boolList procValid(UPstream::listGatherValues<bool>(valid));
+            boolList procValid
+            (
+                UPstream::listGatherValues<bool>(readOnProc)
+            );
             // NB: local proc validity information required on sub-ranks too!
             procValid.resize(Pstream::nProcs());
-            procValid[Pstream::myProcNo()] = valid;
+            procValid[Pstream::myProcNo()] = readOnProc;
 
             return read(io, Pstream::worldComm, true, filePaths, procValid);
         }
@@ -2041,10 +2044,13 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
             filePaths[Pstream::myProcNo(comm_)] = fName;
             Pstream::gatherList(filePaths, Pstream::msgType(), comm_);
 
-            boolList procValid(UPstream::listGatherValues<bool>(valid, comm_));
+            boolList procValid
+            (
+                UPstream::listGatherValues<bool>(readOnProc, comm_)
+            );
             // NB: local proc validity information required on sub-ranks too!
             procValid.resize(Pstream::nProcs(comm_));
-            procValid[Pstream::myProcNo(comm_)] = valid;
+            procValid[Pstream::myProcNo(comm_)] = readOnProc;
 
             // Uniform in local comm
             const bool uniform = uniformFile(filePaths);
@@ -2139,7 +2145,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
 (
     const regIOobject& io,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     fileName pathName(io.objectPath());
@@ -2147,7 +2153,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     if (debug)
     {
         Pout<< "masterUncollatedFileOperation::writeObject :"
-            << " io:" << pathName << " valid:" << valid << endl;
+            << " io:" << pathName << " writeOnProc:" << writeOnProc << endl;
     }
 
     // Make sure to pick up any new times
@@ -2156,7 +2162,7 @@ bool Foam::fileOperations::masterUncollatedFileOperation::writeObject
     // Update meta-data for current state
     const_cast<regIOobject&>(io).updateMetaData();
 
-    autoPtr<OSstream> osPtr(NewOFstream(pathName, streamOpt, valid));
+    autoPtr<OSstream> osPtr(NewOFstream(pathName, streamOpt, writeOnProc));
     OSstream& os = *osPtr;
 
     // If any of these fail, return (leave error handling to Ostream class)
@@ -2406,7 +2412,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
 (
     const fileName& pathName,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return autoPtr<OSstream>
@@ -2416,7 +2422,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
             pathName,
             streamOpt,
             IOstreamOption::NON_APPEND,
-            valid
+            writeOnProc
         )
     );
 }
@@ -2428,7 +2434,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
     IOstreamOption::atomicType atomic,
     const fileName& pathName,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return autoPtr<OSstream>
@@ -2439,7 +2445,7 @@ Foam::fileOperations::masterUncollatedFileOperation::NewOFstream
             pathName,
             streamOpt,
             IOstreamOption::NON_APPEND,
-            valid
+            writeOnProc
         )
     );
 }

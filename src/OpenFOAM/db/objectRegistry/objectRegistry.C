@@ -500,7 +500,7 @@ bool Foam::objectRegistry::readIfModified()
 bool Foam::objectRegistry::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     bool ok = true;
@@ -521,7 +521,7 @@ bool Foam::objectRegistry::writeObject
 
         if (iter.val()->writeOpt() != IOobjectOption::NO_WRITE)
         {
-            ok = iter.val()->writeObject(streamOpt, valid) && ok;
+            ok = iter.val()->writeObject(streamOpt, writeOnProc) && ok;
         }
     }
 

@@ -217,7 +217,7 @@ void Foam::motionSolver::updateMesh(const mapPolyMesh& mpm)
 bool Foam::motionSolver::writeObject
 (
     IOstreamOption,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return true;

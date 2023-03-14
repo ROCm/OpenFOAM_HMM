@@ -364,7 +364,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
 (
     const regIOobject& io,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     const Time& tm = io.time();
@@ -392,7 +392,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
             pathName,
             streamOpt,
             IOstreamOption::NON_APPEND,
-            valid
+            writeOnProc
         );
 
         // If any of these fail, return
@@ -436,7 +436,7 @@ bool Foam::fileOperations::collatedFileOperation::writeObject
                 pathName,
                 streamOpt,
                 IOstreamOption::NON_APPEND,
-                valid
+                writeOnProc
             );
 
             // If any of these fail, return

@@ -59,6 +59,9 @@ class IOField
 {
     // Private Member Functions
 
+        //- Read with optional 'on-proc' value
+        void readFromStream(const bool readOnProc = true);
+
         //- Read if IOobject flags set. Return true if read.
         bool readContents();
 
@@ -80,7 +83,7 @@ public:
         explicit IOField(const IOobject& io);
 
         //- Construct from IOobject, with local processor conditional reading
-        IOField(const IOobject& io, const bool valid);
+        IOField(const IOobject& io, const bool readOnProc);
 
         //- Construct from IOobject and zero size (if not read)
         IOField(const IOobject& io, Foam::zero);

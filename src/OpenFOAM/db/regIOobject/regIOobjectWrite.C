@@ -35,7 +35,7 @@ License
 bool Foam::regIOobject::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     if (!good())
@@ -107,7 +107,7 @@ bool Foam::regIOobject::writeObject
     bool osGood = false;
     if (!masterOnly || Pstream::master())
     {
-        osGood = fileHandler().writeObject(*this, streamOpt, valid);
+        osGood = fileHandler().writeObject(*this, streamOpt, writeOnProc);
     }
     else
     {
@@ -131,12 +131,12 @@ bool Foam::regIOobject::writeObject
 }
 
 
-bool Foam::regIOobject::write(const bool valid) const
+bool Foam::regIOobject::write(const bool writeOnProc) const
 {
     return writeObject
     (
         IOstreamOption(time().writeFormat(), time().writeCompression()),
-        valid
+        writeOnProc
     );
 }
 

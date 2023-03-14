@@ -4911,14 +4911,14 @@ void Foam::distributedTriSurfaceMesh::distribute
 bool Foam::distributedTriSurfaceMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::writeObject :"
             << " surface " << searchableSurface::name()
-            << " writing surface valid:" << valid << endl;
+            << " writing surface:" << writeOnProc << endl;
     }
 
     // Make sure dictionary goes to same directory as surface

@@ -134,18 +134,18 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
 
     IOPosition<Cloud<ParticleType>> ioP(*this, geometryType_);
 
-    const bool valid = ioP.headerOk();
-    Istream& is = ioP.readStream(checkClass ? typeName : "", valid);
-    if (valid)
+    const bool haveFile = ioP.headerOk();
+    Istream& is = ioP.readStream(checkClass ? typeName : word::null, haveFile);
+    if (haveFile)
     {
         ioP.readData(is, *this);
         ioP.close();
     }
 
-    if (!valid && debug)
+    if (!haveFile && debug)
     {
-        Pout<< "Cannot read particle positions file:" << nl
-            << "    " << ioP.objectPath() << nl
+        Pout<< "Not reading particle positions file: "
+            << ioP.objectRelPath() << nl
             << "Assuming the initial cloud contains 0 particles." << endl;
     }
 
@@ -329,13 +329,13 @@ template<class ParticleType>
 bool Foam::Cloud<ParticleType>::writeObject
 (
     IOstreamOption streamOpt,
-    const bool
+    const bool /* writeOnProc */
 ) const
 {
     writeCloudUniformProperties();
 
     writeFields();
-    return cloud::writeObject(streamOpt, this->size());
+    return cloud::writeObject(streamOpt, (this->size() > 0));
 }
 
 

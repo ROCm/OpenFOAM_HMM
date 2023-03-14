@@ -548,10 +548,10 @@ Foam::fileOperations::uncollatedFileOperation::readStream
     regIOobject& io,
     const fileName& fName,
     const word& typeName,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
-    if (!valid)
+    if (!writeOnProc)
     {
         return autoPtr<ISstream>(new dummyISstream());
     }
@@ -718,7 +718,7 @@ Foam::fileOperations::uncollatedFileOperation::NewOFstream
 (
     const fileName& pathName,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return autoPtr<OSstream>(new OFstream(pathName, streamOpt));
@@ -731,7 +731,7 @@ Foam::fileOperations::uncollatedFileOperation::NewOFstream
     IOstreamOption::atomicType atomic,
     const fileName& pathName,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return autoPtr<OSstream>(new OFstream(atomic, pathName, streamOpt));

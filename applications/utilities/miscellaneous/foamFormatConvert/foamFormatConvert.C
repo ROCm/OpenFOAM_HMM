@@ -203,7 +203,7 @@ bool writeOptionalMeshObject
     const word& name,
     const fileName& meshDir,
     Time& runTime,
-    const bool valid
+    const bool writeOnProc
 )
 {
     IOobject io
@@ -218,8 +218,7 @@ bool writeOptionalMeshObject
     );
 
     bool writeOk = false;
-
-    bool haveFile = io.typeHeaderOk<IOField<label>>(false);
+    const bool haveFile = io.typeHeaderOk<IOField<label>>(false);
 
     // Make sure all know if there is a valid class name
     wordList classNames(1, io.headerClassName());
@@ -230,10 +229,10 @@ bool writeOptionalMeshObject
     {
         Info<< "        Reading " << classNames[0]
             << " : " << name << endl;
-        T meshObject(io, valid && haveFile);
+        T meshObject(io, writeOnProc && haveFile);
 
         Info<< "        Writing " << name << endl;
-        writeOk = meshObject.regIOobject::write(valid && haveFile);
+        writeOk = meshObject.regIOobject::write(writeOnProc && haveFile);
     }
 
     return writeOk;

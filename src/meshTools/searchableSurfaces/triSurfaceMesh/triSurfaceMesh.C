@@ -1265,7 +1265,7 @@ void Foam::triSurfaceMesh::getVolumeType
 bool Foam::triSurfaceMesh::writeObject
 (
     IOstreamOption,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     const Time& runTime = searchableSurface::time();

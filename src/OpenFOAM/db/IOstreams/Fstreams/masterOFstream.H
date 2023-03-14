@@ -68,7 +68,7 @@ class masterOFstream
         const IOstreamOption::appendType append_;
 
         //- Should file be written (on this processor)
-        const bool valid_;
+        const bool writeOnProc_;
 
 
     // Private Member Functions
@@ -100,7 +100,7 @@ public:
             const fileName& pathname,
             IOstreamOption streamOpt = IOstreamOption(),
             IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
-            const bool valid = true
+            const bool writeOnProc = true
         );
 
         //- Construct (with worldComm)
@@ -110,7 +110,7 @@ public:
             const fileName& pathname,
             IOstreamOption streamOpt = IOstreamOption(),
             IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
-            const bool valid = true
+            const bool writeOnProc = true
         )
         :
             masterOFstream
@@ -119,7 +119,7 @@ public:
                 pathname,
                 streamOpt,
                 append,
-                valid
+                writeOnProc
             )
         {}
 

@@ -101,7 +101,7 @@ void Foam::masterOFstream::commit()
 
         if (uniform)
         {
-            if (Pstream::master() && valid_)
+            if (Pstream::master() && writeOnProc_)
             {
                 checkWrite(pathName_, this->str());
             }
@@ -116,7 +116,7 @@ void Foam::masterOFstream::commit()
         // Send my (valid) buffer to master
         if (!Pstream::master())
         {
-            if (valid_)
+            if (writeOnProc_)
             {
                 string s(this->str());
 
@@ -131,7 +131,7 @@ void Foam::masterOFstream::commit()
         if (Pstream::master())
         {
             // Write (valid) master data
-            if (valid_)
+            if (writeOnProc_)
             {
                 checkWrite(filePaths[Pstream::masterNo()], this->str());
             }
@@ -173,7 +173,7 @@ Foam::masterOFstream::masterOFstream
     const fileName& pathName,
     IOstreamOption streamOpt,
     IOstreamOption::appendType append,
-    const bool valid
+    const bool writeOnProc
 )
 :
     OStringStream(streamOpt),
@@ -181,7 +181,7 @@ Foam::masterOFstream::masterOFstream
     atomic_(atomic),
     compression_(streamOpt.compression()),
     append_(append),
-    valid_(valid)
+    writeOnProc_(writeOnProc)
 {}
 
 

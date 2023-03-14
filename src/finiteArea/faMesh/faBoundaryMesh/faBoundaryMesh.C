@@ -909,14 +909,14 @@ bool Foam::faBoundaryMesh::writeData(Ostream& os) const
 bool Foam::faBoundaryMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Allow/disallow compression?
     // 1. keep readable
     // 2. save some space
     // ??? streamOpt.compression(IOstreamOption::UNCOMPRESSED);
-    return regIOobject::writeObject(streamOpt, valid);
+    return regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

@@ -291,7 +291,7 @@ public:
             (
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
             //- Generate an OSstream that writes a file
@@ -300,7 +300,7 @@ public:
                 IOstreamOption::atomicType,
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 };
 

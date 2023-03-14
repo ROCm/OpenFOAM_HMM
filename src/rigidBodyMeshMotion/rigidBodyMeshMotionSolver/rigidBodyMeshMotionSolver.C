@@ -279,7 +279,7 @@ void Foam::rigidBodyMeshMotionSolver::solve()
 bool Foam::rigidBodyMeshMotionSolver::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Force ASCII writing
@@ -300,7 +300,7 @@ bool Foam::rigidBodyMeshMotionSolver::writeObject
     );
 
     model_.state().write(dict);
-    return dict.regIOobject::writeObject(streamOpt, valid);
+    return dict.regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

@@ -260,7 +260,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption /*ignore*/,
-            const bool valid
+            const bool writeOnProc
         ) const;
 };
 

@@ -585,7 +585,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
 

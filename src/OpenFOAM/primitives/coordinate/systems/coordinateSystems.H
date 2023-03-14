@@ -84,7 +84,7 @@ class coordinateSystems
     // Private Member Functions
 
         //- Read "coordinateSystems" or older "IOPtrList<coordinateSystem>"
-        void readFromStream(const bool valid = true);
+        void readFromStream(const bool readOnProc = true);
 
         //- Read if IOobject flags set. Return true if read.
         bool readContents();
@@ -184,7 +184,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid = true
+            const bool writeOnProc = true
         ) const;
 
 

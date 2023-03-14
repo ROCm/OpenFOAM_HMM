@@ -465,7 +465,7 @@ public:
             virtual bool writeObject
             (
                 IOstreamOption streamOpt,
-                const bool valid
+                const bool writeOnProc
             ) const;
 
             //- Write the objects immediately (not at end of iteration)

@@ -32,11 +32,11 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T, class BaseType>
-void Foam::CompactIOField<T, BaseType>::readFromStream(const bool valid)
+void Foam::CompactIOField<T, BaseType>::readFromStream(const bool readOnProc)
 {
-    Istream& is = readStream(word::null, valid);
+    Istream& is = readStream(word::null, readOnProc);
 
-    if (valid)
+    if (readOnProc)
     {
         if (headerClassName() == IOField<T>::typeName)
         {
@@ -93,19 +93,19 @@ template<class T, class BaseType>
 Foam::CompactIOField<T, BaseType>::CompactIOField
 (
     const IOobject& io,
-    const bool valid
+    const bool readOnProc
 )
 :
     regIOobject(io)
 {
     if (readOpt() == IOobject::MUST_READ)
     {
-        readFromStream(valid);
+        readFromStream(readOnProc);
     }
     else if (isReadOptional())
     {
-        bool haveFile = headerOk();
-        readFromStream(valid && haveFile);
+        const bool haveFile = headerOk();
+        readFromStream(readOnProc && haveFile);
     }
 }
 
@@ -176,7 +176,7 @@ template<class T, class BaseType>
 bool Foam::CompactIOField<T, BaseType>::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     if (streamOpt.format() == IOstreamOption::ASCII)
@@ -186,7 +186,7 @@ bool Foam::CompactIOField<T, BaseType>::writeObject
 
         const_cast<word&>(typeName) = IOField<T>::typeName;
 
-        bool good = regIOobject::writeObject(streamOpt, valid);
+        bool good = regIOobject::writeObject(streamOpt, writeOnProc);
 
         // Restore type
         const_cast<word&>(typeName) = oldTypeName;
@@ -194,7 +194,7 @@ bool Foam::CompactIOField<T, BaseType>::writeObject
         return good;
     }
 
-    return regIOobject::writeObject(streamOpt, valid);
+    return regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

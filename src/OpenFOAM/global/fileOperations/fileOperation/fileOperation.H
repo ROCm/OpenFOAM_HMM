@@ -433,7 +433,7 @@ public:
                 regIOobject&,
                 const fileName&,
                 const word& typeName,
-                const bool valid = true
+                const bool readOnProc = true
             ) const = 0;
 
             //- Top-level read
@@ -447,14 +447,14 @@ public:
 
             //- Writes a regIOobject (so header, contents and divider).
             //  Returns success state. Default action is to write to
-            //  the objectPath using writeData. If !valid the
+            //  the objectPath using writeData. If !writeOnProc the
             //  file does not need to be written (this is used e.g. to
             //  suppress empty local lagrangian data)
             virtual bool writeObject
             (
                 const regIOobject& io,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
 
@@ -477,7 +477,7 @@ public:
             (
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const = 0;
 
             //- Generate an OSstream that writes a file
@@ -486,7 +486,7 @@ public:
                 IOstreamOption::atomicType atomic,
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const = 0;
 
 

@@ -269,7 +269,7 @@ public:
             virtual bool writeObject
             (
                 IOstreamOption streamOpt,
-                const bool valid
+                const bool writeOnProc
             ) const;
 
             //- Write positions to \<cloudName\>_positions.obj file

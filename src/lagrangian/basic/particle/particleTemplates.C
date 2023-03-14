@@ -139,19 +139,19 @@ void Foam::particle::writeProperty
 template<class TrackCloudType>
 void Foam::particle::readFields(TrackCloudType& c)
 {
-    const bool valid = c.size();
+    const bool readOnProc = c.size();
 
     IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
 
     const bool haveFile = procIO.typeHeaderOk<IOField<label>>(true);
 
-    IOField<label> origProcId(procIO, valid && haveFile);
+    IOField<label> origProcId(procIO, readOnProc && haveFile);
     c.checkFieldIOobject(c, origProcId);
 
     IOField<label> origId
     (
         c.fieldIOobject("origId", IOobject::MUST_READ),
-        valid && haveFile
+        readOnProc && haveFile
     );
     c.checkFieldIOobject(c, origId);
 
@@ -170,12 +170,12 @@ template<class TrackCloudType>
 void Foam::particle::writeFields(const TrackCloudType& c)
 {
     const label np = c.size();
-    const bool valid = np;
+    const bool writeOnProc = c.size();
 
     if (writeLagrangianCoordinates)
     {
         IOPosition<TrackCloudType> ioP(c);
-        ioP.write(valid);
+        ioP.write(writeOnProc);
     }
     else if (!writeLagrangianPositions)
     {
@@ -192,7 +192,7 @@ void Foam::particle::writeFields(const TrackCloudType& c)
             c,
             cloud::geometryType::POSITIONS
         );
-        ioP.write(valid);
+        ioP.write(writeOnProc);
     }
 
     IOField<label> origProc
@@ -215,8 +215,8 @@ void Foam::particle::writeFields(const TrackCloudType& c)
         ++i;
     }
 
-    origProc.write(valid);
-    origId.write(valid);
+    origProc.write(writeOnProc);
+    origId.write(writeOnProc);
 }
 
 

@@ -1044,7 +1044,7 @@ Foam::boolList& Foam::faMesh::correctPatchPointNormals() const
 }
 
 
-bool Foam::faMesh::write(const bool valid) const
+bool Foam::faMesh::write(const bool writeOnProc) const
 {
     faceLabels_.write();
     boundary_.write();

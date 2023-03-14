@@ -1486,7 +1486,7 @@ bool Foam::dynamicRefineFvMesh::update()
 bool Foam::dynamicRefineFvMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Force refinement data to go to the current time directory.
@@ -1494,9 +1494,9 @@ bool Foam::dynamicRefineFvMesh::writeObject
 
     bool writeOk =
     (
-        //dynamicFvMesh::writeObject(streamOpt, valid)
-        dynamicMotionSolverListFvMesh::writeObject(streamOpt, valid)
-     && meshCutter_.write(valid)
+        //dynamicFvMesh::writeObject(streamOpt, writeOnProc)
+        dynamicMotionSolverListFvMesh::writeObject(streamOpt, writeOnProc)
+     && meshCutter_.write(writeOnProc)
     );
 
     if (dumpLevel_)

@@ -588,7 +588,7 @@ public:
             void setInstance(const fileName& inst);
 
             //- Force writing refinement+history to polyMesh directory.
-            bool write(const bool valid = true) const;
+            bool write(const bool writeOnProc = true) const;
 
             //- Helper: remove all relevant files from mesh instance
             static void removeFiles(const polyMesh&);

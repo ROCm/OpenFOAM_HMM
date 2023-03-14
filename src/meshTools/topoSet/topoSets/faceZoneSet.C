@@ -445,13 +445,13 @@ Foam::label Foam::faceZoneSet::maxSize(const polyMesh& mesh) const
 bool Foam::faceZoneSet::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Write shadow faceSet
     word oldTypeName = typeName;
     const_cast<word&>(type()) = faceSet::typeName;
-    bool ok = faceSet::writeObject(streamOpt, valid);
+    bool ok = faceSet::writeObject(streamOpt, writeOnProc);
     const_cast<word&>(type()) = oldTypeName;
 
     // Modify faceZone
@@ -482,7 +482,7 @@ bool Foam::faceZoneSet::writeObject
     }
     faceZones.clearAddressing();
 
-    return ok && faceZones.write(valid);
+    return ok && faceZones.write(writeOnProc);
 }
 
 

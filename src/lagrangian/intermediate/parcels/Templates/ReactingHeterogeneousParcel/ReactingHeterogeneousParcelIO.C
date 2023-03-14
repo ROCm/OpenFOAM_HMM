@@ -87,14 +87,14 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::readFields
     const CompositionType& compModel
 )
 {
-    const bool valid = c.size();
+    const bool readOnProc = c.size();
 
     ParcelType::readFields(c);
 
     IOField<scalar> mass0
     (
         c.fieldIOobject("mass0", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, mass0);
 
@@ -128,7 +128,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::readFields
                 "F" + name(i),
                 IOobject::MUST_READ
             ),
-            valid
+            readOnProc
         );
 
         label j = 0;
@@ -149,7 +149,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::readFields
                 "Y" + solidNames[j],
                 IOobject::MUST_READ
             ),
-            valid
+            readOnProc
         );
 
         label i = 0;
@@ -186,7 +186,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
     ThermoParcel<KinematicParcel<particle>>::writeFields(c);
 
     const label np = c.size();
-    const bool valid = np;
+    const bool writeOnProc = c.size();
 
     IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
 
@@ -202,7 +202,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
         }
         ++i;
     }
-    mass0.write(valid);
+    mass0.write(writeOnProc);
 
     for (label i = 0; i < nF; i++)
     {
@@ -221,7 +221,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
             F = p0.F()[i];
         }
 
-        F.write(valid);
+        F.write(writeOnProc);
     }
 
     const label idSolid = compModel.idSolid();
@@ -246,7 +246,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeFields
             ++i;
         }
 
-        Y.write(valid);
+        Y.write(writeOnProc);
     }
 }
 
@@ -310,7 +310,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::readObjects
     // Skip Reacting layer
     ThermoParcel<KinematicParcel<particle>>::readObjects(c, obr);
 
-    // const label np = c.size();
+    // const bool readOnProc = c.size();
 
     WarningInFunction
         << "Reading of objects is still a work-in-progress" << nl;
@@ -332,6 +332,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeObjects
     ThermoParcel<KinematicParcel<particle>>::writeObjects(c, obr);
 
     const label np = c.size();
+    const bool writeOnProc = c.size();
 
     // WIP
     label nF = 0;
@@ -341,7 +342,7 @@ void Foam::ReactingHeterogeneousParcel<ParcelType>::writeObjects
         break;
     }
 
-    if (np > 0)
+    if (writeOnProc)
     {
         for (label i = 0; i < nF; i++)
         {

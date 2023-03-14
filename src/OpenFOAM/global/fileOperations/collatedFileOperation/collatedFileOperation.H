@@ -162,7 +162,7 @@ public:
             (
                 const regIOobject&,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
         // Other

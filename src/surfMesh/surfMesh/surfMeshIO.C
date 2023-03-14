@@ -194,14 +194,14 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 bool Foam::surfMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
-    bool ok = Allocator::writeObject(streamOpt, valid);
+    bool ok = Allocator::writeObject(streamOpt, writeOnProc);
 
     if (ok)
     {
-        surfZones_.writeObject(streamOpt, valid);
+        surfZones_.writeObject(streamOpt, writeOnProc);
     }
 
     return ok;

@@ -169,7 +169,7 @@ template<class T, class BaseType>
 bool Foam::CompactIOList<T, BaseType>::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     if
@@ -193,7 +193,7 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
 
         const_cast<word&>(typeName) = IOList<T>::typeName;
 
-        bool good = regIOobject::writeObject(streamOpt, valid);
+        bool good = regIOobject::writeObject(streamOpt, writeOnProc);
 
         // Change type back
         const_cast<word&>(typeName) = oldTypeName;
@@ -201,7 +201,7 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
         return good;
     }
 
-    return regIOobject::writeObject(streamOpt, valid);
+    return regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

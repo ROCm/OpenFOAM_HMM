@@ -72,11 +72,11 @@ bool Foam::staticOversetFvMesh::update()
 bool Foam::staticOversetFvMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
-    bool ok = staticFvMesh::writeObject(streamOpt, valid);
-    ok = oversetFvMeshBase::writeObject(streamOpt, valid) && ok;
+    bool ok = staticFvMesh::writeObject(streamOpt, writeOnProc);
+    ok = oversetFvMeshBase::writeObject(streamOpt, writeOnProc) && ok;
     return ok;
 }
 

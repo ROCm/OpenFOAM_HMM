@@ -76,8 +76,8 @@ class CompactIOField
 {
     // Private Member Functions
 
-        //- Read according to header type
-        void readFromStream(const bool valid = true);
+        //- Read according to header type, with optional 'on-proc' value
+        void readFromStream(const bool readOnProc = true);
 
         //- Read if IOobject flags set. Return true if read.
         //  Reads according to the header type
@@ -99,7 +99,7 @@ public:
         explicit CompactIOField(const IOobject& io);
 
         //- Construct from IOobject, with local processor conditional reading
-        CompactIOField(const IOobject& io, const bool valid);
+        CompactIOField(const IOobject& io, const bool readOnProc);
 
         //- Construct from IOobject and zero size (if not read)
         CompactIOField(const IOobject& io, Foam::zero);
@@ -124,7 +124,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
         virtual bool writeData(Ostream& os) const;

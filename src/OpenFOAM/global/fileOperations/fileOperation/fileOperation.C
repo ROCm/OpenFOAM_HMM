@@ -801,10 +801,10 @@ bool Foam::fileOperation::writeObject
 (
     const regIOobject& io,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
-    if (valid)
+    if (writeOnProc)
     {
         const fileName pathName(io.objectPath());
 

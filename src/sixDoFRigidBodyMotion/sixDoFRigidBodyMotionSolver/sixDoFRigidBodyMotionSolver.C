@@ -298,7 +298,7 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
 bool Foam::sixDoFRigidBodyMotionSolver::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     IOdictionary dict
@@ -316,7 +316,7 @@ bool Foam::sixDoFRigidBodyMotionSolver::writeObject
     );
 
     motion_.state().write(dict);
-    return dict.regIOobject::write();
+    return dict.regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

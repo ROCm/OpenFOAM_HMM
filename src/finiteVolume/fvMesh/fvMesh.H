@@ -508,11 +508,11 @@ public:
             virtual bool writeObject
             (
                 IOstreamOption streamOpt,
-                const bool valid
+                const bool writeOnProc
             ) const;
 
             //- Write mesh using IO settings from time
-            virtual bool write(const bool valid = true) const;
+            virtual bool write(const bool writeOnProc = true) const;
 
 
     // Member Operators

@@ -74,11 +74,12 @@ bool Foam::dynamicOversetFvMesh::update()
 bool Foam::dynamicOversetFvMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
-    bool ok = dynamicMotionSolverListFvMesh::writeObject(streamOpt, valid);
-    ok = oversetFvMeshBase::writeObject(streamOpt, valid) && ok;
+    bool ok =
+        dynamicMotionSolverListFvMesh::writeObject(streamOpt, writeOnProc);
+    ok = oversetFvMeshBase::writeObject(streamOpt, writeOnProc) && ok;
     return ok;
 }
 

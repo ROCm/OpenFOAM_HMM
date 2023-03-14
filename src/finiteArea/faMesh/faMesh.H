@@ -947,7 +947,7 @@ public:
 
 
         //- Write mesh
-        virtual bool write(const bool valid = true) const;
+        virtual bool write(const bool writeOnProc = true) const;
 
 
     // Member Operators

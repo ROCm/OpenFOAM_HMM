@@ -386,7 +386,7 @@ bool Foam::profiling::writeData(Ostream& os) const
 bool Foam::profiling::writeObject
 (
     IOstreamOption,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return

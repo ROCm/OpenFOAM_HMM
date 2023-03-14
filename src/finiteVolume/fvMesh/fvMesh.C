@@ -1048,13 +1048,13 @@ void Foam::fvMesh::updateMesh(const mapPolyMesh& mpm)
 bool Foam::fvMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     bool ok = true;
     if (phiPtr_)
     {
-        ok = phiPtr_->write(valid);
+        ok = phiPtr_->write(writeOnProc);
         // NOTE: The old old time mesh phi might be necessary for certain
         // solver smooth restart using second order time schemes.
         //ok = phiPtr_->oldTime().write();
@@ -1062,16 +1062,16 @@ bool Foam::fvMesh::writeObject
     if (V0Ptr_ && V0Ptr_->writeOpt() == IOobject::AUTO_WRITE)
     {
         // For second order restarts we need to write V0
-        ok = V0Ptr_->write(valid);
+        ok = V0Ptr_->write(writeOnProc);
     }
 
-    return ok && polyMesh::writeObject(streamOpt, valid);
+    return ok && polyMesh::writeObject(streamOpt, writeOnProc);
 }
 
 
-bool Foam::fvMesh::write(const bool valid) const
+bool Foam::fvMesh::write(const bool writeOnProc) const
 {
-    return polyMesh::write(valid);
+    return polyMesh::write(writeOnProc);
 }
 
 

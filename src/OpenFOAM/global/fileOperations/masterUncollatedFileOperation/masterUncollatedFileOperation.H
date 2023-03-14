@@ -662,13 +662,13 @@ public:
             ) const;
 
             //- Reads header for regIOobject and returns an ISstream
-            //  to read the contents.
+            //- to read the contents.
             virtual autoPtr<ISstream> readStream
             (
                 regIOobject&,
                 const fileName&,
                 const word& typeName,
-                const bool valid = true
+                const bool readOnProc = true
             ) const;
 
             //- Top-level read
@@ -686,7 +686,7 @@ public:
             (
                 const regIOobject& io,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
             //- Generate an ISstream that reads a file
@@ -697,7 +697,7 @@ public:
             (
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
             //- Generate an OSstream that writes a file
@@ -706,7 +706,7 @@ public:
                 IOstreamOption::atomicType atomic,
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
 

@@ -547,7 +547,7 @@ bool Foam::Time::writeTimeDict() const
 bool Foam::Time::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     if (writeTime())
@@ -556,7 +556,7 @@ bool Foam::Time::writeObject
 
         if (writeOK)
         {
-            writeOK = objectRegistry::writeObject(streamOpt, valid);
+            writeOK = objectRegistry::writeObject(streamOpt, writeOnProc);
         }
 
         if (writeOK)
