@@ -82,12 +82,7 @@ Foam::enthalpySorptionFvPatchScalarField::enthalpySorptionFvPatchScalarField
     speciesName_(dict.get<word>("species")),
     pName_(dict.getOrDefault<word>("p", "p")),
     TName_(dict.getOrDefault<word>("T", "T")),
-    dhdt_
-    (
-        dict.found("dhdt")
-      ? scalarField("dhdt", dict, p.size())
-      : scalarField(p.size(), 0)
-    )
+    dhdt_("dhdt", dict, p.size(), IOobjectOption::LAZY_READ)
 {
     switch (enthalpyModel_)
     {

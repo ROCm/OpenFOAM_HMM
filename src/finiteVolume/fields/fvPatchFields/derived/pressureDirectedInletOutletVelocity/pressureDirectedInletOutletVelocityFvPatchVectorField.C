@@ -82,7 +82,7 @@ pressureDirectedInletOutletVelocityFvPatchVectorField
     inletDir_("inletDirection", dict, p.size())
 {
     fvPatchFieldBase::readDict(dict);
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
     refValue() = *this;
     refGrad() = Zero;
     valueFraction() = 0.0;

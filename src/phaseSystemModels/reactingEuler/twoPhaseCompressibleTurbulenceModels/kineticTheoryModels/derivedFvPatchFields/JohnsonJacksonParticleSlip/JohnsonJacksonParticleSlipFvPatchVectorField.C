@@ -91,10 +91,7 @@ JohnsonJacksonParticleSlipFvPatchVectorField
             << abort(FatalError);
     }
 
-    fvPatchVectorField::operator=
-    (
-        vectorField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 

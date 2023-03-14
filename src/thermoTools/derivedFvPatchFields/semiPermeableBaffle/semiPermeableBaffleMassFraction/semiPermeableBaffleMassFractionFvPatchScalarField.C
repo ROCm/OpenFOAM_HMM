@@ -66,7 +66,7 @@ semiPermeableBaffleMassFractionFvPatchScalarField
     c_(dict.getOrDefault<scalar>("c", 0)),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     refValue() = Zero;
     refGrad() = Zero;

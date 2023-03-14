@@ -242,7 +242,7 @@ Foam::displacementLayeredMotionMotionSolver::faceZoneEvaluate
 
     if (type == "fixedValue")
     {
-        fld = vectorField("value", dict, meshPoints.size());
+        fld.assign("value", dict, meshPoints.size());
     }
     else if (type == "timeVaryingUniformFixedValue")
     {

@@ -57,8 +57,8 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     ),
     TnbrName_("undefined-Tnbr")
 {
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 1.0;
 }
 
@@ -153,7 +153,7 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     {
         // Start from user entered data. Assume fixedValue.
         refValue() = *this;
-        refGrad() = 0.0;
+        refGrad() = Zero;
         valueFraction() = 1.0;
     }
 
@@ -377,7 +377,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     //    - mixFraction = nbrKDelta / (nbrKDelta + myKDelta())
 
     this->refValue() = nbrIntFld;
-    this->refGrad() = 0.0;
+    this->refGrad() = Zero;
     this->valueFraction() = nbrKDelta/(nbrKDelta + myKDelta());
 
     mixedFvPatchScalarField::updateCoeffs();

@@ -37,16 +37,14 @@ SourceFiles
 #ifndef mappedVariableThicknessWallPolyPatch_H
 #define mappedVariableThicknessWallPolyPatch_H
 
+#include "scalarField.H"
 #include "wallPolyPatch.H"
 #include "mappedWallPolyPatch.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class polyMesh;
 
 /*---------------------------------------------------------------------------*\
            Class mappedVariableThicknessWallPolyPatch Declaration
@@ -60,7 +58,7 @@ class mappedVariableThicknessWallPolyPatch
     // Private data
 
         //- Thickness
-        scalarList thickness_;
+        scalarField thickness_;
 
 
 public:
@@ -205,24 +203,16 @@ public:
 
 
     //- Destructor
-    virtual ~mappedVariableThicknessWallPolyPatch();
+    virtual ~mappedVariableThicknessWallPolyPatch() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        //- Return non const thickness
-        scalarList& thickness()
-        {
-            return thickness_;
-        }
+        //- Return thickness (non-const access)
+        scalarField& thickness() noexcept { return thickness_; }
 
-
-        //- Return const thickness
-        const scalarList& thickness() const
-        {
-            return thickness_;
-        }
-
+        //- Return thickness (const access)
+        const scalarField& thickness() const noexcept { return thickness_; }
 
         //- Write the polyPatch data as a dictionary
         void write(Ostream&) const;

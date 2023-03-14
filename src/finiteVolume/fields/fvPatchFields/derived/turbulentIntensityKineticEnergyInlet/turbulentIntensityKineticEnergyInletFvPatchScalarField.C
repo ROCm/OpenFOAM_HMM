@@ -45,8 +45,8 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
     intensity_(0.0),
     UName_("U")
 {
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
@@ -91,10 +91,10 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
             << exit(FatalError);
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 

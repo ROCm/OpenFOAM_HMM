@@ -72,10 +72,7 @@ adjointOutletKaFvPatchScalarField::adjointOutletKaFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     adjointScalarBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
-    fvPatchField<scalar>::operator=
-    (
-        scalarField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 

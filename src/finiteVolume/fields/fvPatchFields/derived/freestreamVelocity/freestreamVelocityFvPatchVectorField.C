@@ -49,15 +49,15 @@ Foam::freestreamVelocityFvPatchVectorField::freestreamVelocityFvPatchVectorField
 :
     mixedFvPatchVectorField(p, iF)
 {
-    freestreamValue() = vectorField("freestreamValue", dict, p.size());
+    // freestreamValue() and refValue() are identical
+    freestreamValue().assign("freestreamValue", dict, p.size());
+    refGrad() = Zero;
+    valueFraction() = 1;
 
     if (!this->readValueEntry(dict))
     {
         fvPatchVectorField::operator=(freestreamValue());
     }
-
-    refGrad() = Zero;
-    valueFraction() = 1;
 }
 
 

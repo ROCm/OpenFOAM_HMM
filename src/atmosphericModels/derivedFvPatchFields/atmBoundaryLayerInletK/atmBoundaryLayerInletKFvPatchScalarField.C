@@ -70,7 +70,7 @@ atmBoundaryLayerInletKFvPatchScalarField
 
     if (!initABL_)
     {
-        scalarField::operator=(scalarField("value", dict, p.size()));
+        this->readValueEntry(dict, IOobjectOption::MUST_READ);
     }
     else
     {

@@ -93,10 +93,7 @@ CONSTRUCT
 
     /*
     //Initialise with the value entry if evaluation is not possible
-    FVPATCHF::operator=
-    (
-        FIELD("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
     this->refValue() = *this;
     */
 }

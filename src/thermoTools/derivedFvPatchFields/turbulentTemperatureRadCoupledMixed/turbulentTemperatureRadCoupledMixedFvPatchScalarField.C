@@ -62,8 +62,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     qrName_("undefined-qr"),
     thermalInertia_(false)
 {
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 1.0;
     this->source() = 0.0;
 }
@@ -201,7 +201,7 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     {
         // Start from user entered data. Assume fixedValue.
         refValue() = *this;
-        refGrad() = 0.0;
+        refGrad() = Zero;
         valueFraction() = 1.0;
     }
 

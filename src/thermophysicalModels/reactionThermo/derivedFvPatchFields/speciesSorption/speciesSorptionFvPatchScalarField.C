@@ -174,18 +174,8 @@ Foam::speciesSorptionFvPatchScalarField::speciesSorptionFvPatchScalarField
     max_(dict.getCheck<scalar>("max", scalarMinMax::ge(0))),
     rhoS_(dict.get<scalar>("rhoS")),
     pName_(dict.getOrDefault<word>("p", "p")),
-    dfldp_
-    (
-        dict.found("dfldp")
-      ? scalarField("dfldp", dict, p.size())
-      : scalarField(p.size(), 0)
-    ),
-    mass_
-    (
-        dict.found("mass")
-      ? scalarField("mass", dict, p.size())
-      : scalarField(p.size(), 0)
-    )
+    dfldp_("dfldp", dict, p.size(), IOobjectOption::LAZY_READ),
+    mass_("mass", dict, p.size(), IOobjectOption::LAZY_READ)
 {
     if (!this->readValueEntry(dict))
     {

@@ -81,7 +81,7 @@ pressureInletOutletVelocityFvPatchVectorField
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
     fvPatchFieldBase::readDict(dict);
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     if (dict.found("tangentialVelocity"))
     {

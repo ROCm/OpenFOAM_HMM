@@ -42,8 +42,8 @@ Foam::wallHeatTransferFvPatchScalarField::wallHeatTransferFvPatchScalarField
     Tinf_(p.size(), Zero),
     alphaWall_(p.size(), Zero)
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 0.0;
 }
 
@@ -74,7 +74,7 @@ Foam::wallHeatTransferFvPatchScalarField::wallHeatTransferFvPatchScalarField
     alphaWall_("alphaWall", dict, p.size())
 {
     refValue() = Tinf_;
-    refGrad() = 0.0;
+    refGrad() = Zero;
     valueFraction() = 0.0;
 
     if (!this->readValueEntry(dict))

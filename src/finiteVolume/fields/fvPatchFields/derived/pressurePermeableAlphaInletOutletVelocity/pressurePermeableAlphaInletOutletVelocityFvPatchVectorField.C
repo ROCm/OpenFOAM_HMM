@@ -84,7 +84,7 @@ pressurePermeableAlphaInletOutletVelocityFvPatchVectorField
     alphaMin_(dict.getOrDefault<scalar>("alphaMin", 1))
 {
     fvPatchFieldBase::readDict(dict);
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
     refValue() = Zero;
     refGrad() = Zero;
     valueFraction() = 1.0;

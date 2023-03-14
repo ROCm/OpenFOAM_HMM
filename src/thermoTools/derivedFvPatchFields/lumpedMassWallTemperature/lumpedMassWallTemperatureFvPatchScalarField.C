@@ -83,11 +83,11 @@ lumpedMassWallTemperatureFvPatchScalarField
     mass_(dict.get<scalar>("mass")),
     curTimeIndex_(-1)
 {
-    refGrad() = 0.0;
+    fvPatchFieldBase::readDict(dict);
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
+    refValue() = *this;
+    refGrad() = Zero;
     valueFraction() = 1.0;
-    refValue() = scalarField("value", dict, p.size());
-
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 }
 
 

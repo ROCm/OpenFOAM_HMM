@@ -177,23 +177,24 @@ public:
 
     // Member Functions
 
-    // Access
-
+        //- Same as refValue()
         const Field<Type>& freestreamValue() const { return this->refValue(); }
+
+        //- Same as refValue()
         Field<Type>& freestreamValue() { return this->refValue(); }
 
 
-        // Mapping functions
+    // Mapping Functions
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap(const fvPatchFieldMapper& mapper);
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap(const fvPatchFieldMapper& mapper);
 
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<Type>& ptf,
-                const labelList& addr
-            );
+        //- Reverse map the given fvPatchField onto this fvPatchField
+        virtual void rmap
+        (
+            const fvPatchField<Type>& ptf,
+            const labelList& addr
+        );
 
 
         //- Update the coefficients associated with the patch field

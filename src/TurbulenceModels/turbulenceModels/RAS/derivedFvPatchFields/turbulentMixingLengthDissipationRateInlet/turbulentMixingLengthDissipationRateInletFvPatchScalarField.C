@@ -52,8 +52,8 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
     mixingLength_(0.0),
     Cmu_(0.0)
 {
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
@@ -92,10 +92,10 @@ turbulentMixingLengthDissipationRateInletFvPatchScalarField
 {
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 

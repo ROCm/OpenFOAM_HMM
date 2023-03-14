@@ -71,10 +71,7 @@ adjointInletVelocityFvPatchVectorField
     fixedValueFvPatchVectorField(p, iF),
     adjointVectorBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
-    fvPatchField<vector>::operator=
-    (
-        vectorField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 

@@ -157,24 +157,17 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-            const scalarField& freestreamValue() const
-            {
-                return refValue();
-            }
+        //- Same as refValue()
+        const scalarField& freestreamValue() const { return refValue(); }
 
-            scalarField& freestreamValue()
-            {
-                return refValue();
-            }
+        //- Same as refValue()
+        scalarField& freestreamValue() { return refValue(); }
 
 
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;

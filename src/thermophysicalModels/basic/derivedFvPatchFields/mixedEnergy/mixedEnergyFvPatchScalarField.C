@@ -46,8 +46,8 @@ mixedEnergyFvPatchScalarField
     mixedFvPatchScalarField(p, iF)
 {
     valueFraction() = 0.0;
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     source() = 0.0;
 }
 

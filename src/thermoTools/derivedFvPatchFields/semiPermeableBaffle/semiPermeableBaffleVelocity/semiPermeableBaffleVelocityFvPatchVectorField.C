@@ -86,7 +86,7 @@ semiPermeableBaffleVelocityFvPatchVectorField
     fixedValueFvPatchVectorField(p, iF),
     rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {
-    fvPatchVectorField::operator==(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 

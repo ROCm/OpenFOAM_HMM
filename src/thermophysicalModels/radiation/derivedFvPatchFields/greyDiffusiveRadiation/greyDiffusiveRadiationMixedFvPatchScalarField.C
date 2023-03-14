@@ -53,8 +53,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     qRadExt_(0),
     qRadExtDir_(Zero)
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 1.0;
 }
 
@@ -95,8 +95,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     }
     else
     {
-        refValue() = 0.0;
-        refGrad() = 0.0;
+        refValue() = Zero;
+        refGrad() = Zero;
         valueFraction() = 1.0;
 
         fvPatchScalarField::operator=(refValue());

@@ -77,8 +77,7 @@ SRFFreestreamVelocityFvPatchVectorField
     UInf_(dict.get<vector>("UInf"))
 {
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
-
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 

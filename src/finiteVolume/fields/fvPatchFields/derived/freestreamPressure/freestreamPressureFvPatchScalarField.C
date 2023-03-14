@@ -55,15 +55,15 @@ freestreamPressureFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     UName_(dict.getOrDefault<word>("U", "U"))
 {
-    freestreamValue() = scalarField("freestreamValue", dict, p.size());
+    // freestreamValue() and refValue() are identical
+    freestreamValue().assign("freestreamValue", dict, p.size());
+    refGrad() = Zero;
+    valueFraction() = 0;
 
     if (!this->readValueEntry(dict))
     {
         fvPatchScalarField::operator=(freestreamValue());
     }
-
-    refGrad() = Zero;
-    valueFraction() = 0;
 }
 
 
