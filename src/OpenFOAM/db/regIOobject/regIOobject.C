@@ -178,6 +178,9 @@ Foam::regIOobject::~regIOobject()
     //    checkOut(). By being 'unowned', the registry will not attempt a
     //    second deletion when the object name is removed from the registry.
 
+    // Reset the cache state (if any)
+    db().resetCacheTemporaryObject(this);
+
     // Revoke any registry ownership: we are already deleting
     ownedByRegistry_ = false;
 

@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -214,6 +214,9 @@ private:
 
         //- Is runtime modification of dictionaries allowed?
         Switch runTimeModifiable_;
+
+        //- Is temporary object cache enabled?
+        mutable bool cacheTemporaryObjects_;
 
         //- Function objects executed at start and on ++, +=
         mutable functionObjectList functionObjects_;

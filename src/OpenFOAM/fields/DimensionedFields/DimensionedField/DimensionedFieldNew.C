@@ -37,8 +37,11 @@ Foam::DimensionedField<Type, GeoMesh>::New
     const Field<Type>& iField
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    const bool caching = mesh.thisDb().cacheTemporaryObject(name);
+
+    return tmp<DimensionedField<Type, GeoMesh>>::NewImmovable
     (
+        caching,        // (true: immovable, false: movable)
         IOobject
         (
             name,
@@ -46,7 +49,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             mesh.thisDb(),
             IOobjectOption::NO_READ,
             IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
+            caching     // (true: REGISTER, false: NO_REGISTER)
         ),
         mesh,
         dims,
@@ -65,8 +68,11 @@ Foam::DimensionedField<Type, GeoMesh>::New
     Field<Type>&& iField
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    const bool caching = mesh.thisDb().cacheTemporaryObject(name);
+
+    return tmp<DimensionedField<Type, GeoMesh>>::NewImmovable
     (
+        caching,        // (true: immovable, false: movable)
         IOobject
         (
             name,
@@ -74,7 +80,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             mesh.thisDb(),
             IOobjectOption::NO_READ,
             IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
+            caching     // (true: REGISTER, false: NO_REGISTER)
         ),
         mesh,
         dims,
@@ -92,8 +98,11 @@ Foam::DimensionedField<Type, GeoMesh>::New
     const dimensionSet& dims
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    const bool caching = mesh.thisDb().cacheTemporaryObject(name);
+
+    return tmp<DimensionedField<Type, GeoMesh>>::NewImmovable
     (
+        caching,        // (true: immovable, false: movable)
         IOobject
         (
             name,
@@ -101,7 +110,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             mesh.thisDb(),
             IOobjectOption::NO_READ,
             IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
+            caching     // (true: REGISTER, false: NO_REGISTER)
         ),
         mesh,
         dims,
@@ -120,8 +129,11 @@ Foam::DimensionedField<Type, GeoMesh>::New
     const dimensionSet& dims
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    const bool caching = mesh.thisDb().cacheTemporaryObject(name);
+
+    return tmp<DimensionedField<Type, GeoMesh>>::NewImmovable
     (
+        caching,        // (true: immovable, false: movable)
         IOobject
         (
             name,
@@ -129,7 +141,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             mesh.thisDb(),
             IOobjectOption::NO_READ,
             IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
+            caching     // (true: REGISTER, false: NO_REGISTER)
         ),
         mesh,
         value,
@@ -166,8 +178,11 @@ Foam::DimensionedField<Type, GeoMesh>::New
     const tmp<DimensionedField<Type, GeoMesh>>& tfld
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    const bool caching = tfld().db().cacheTemporaryObject(name);
+
+    return tmp<DimensionedField<Type, GeoMesh>>::NewImmovable
     (
+        caching,        // (true: immovable, false: movable)
         IOobject
         (
             name,
@@ -176,7 +191,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             tfld().db(),
             IOobjectOption::NO_READ,
             IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
+            caching     // (true: REGISTER, false: NO_REGISTER)
         ),
         tfld
     );
@@ -193,8 +208,11 @@ Foam::DimensionedField<Type, GeoMesh>::New
     const dimensionSet& dims
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    const bool caching = fld.db().cacheTemporaryObject(name);
+
+    return tmp<DimensionedField<Type, GeoMesh>>::NewImmovable
     (
+        caching,        // (true: immovable, false: movable)
         IOobject
         (
             name,
@@ -202,7 +220,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             fld.db(),
             IOobjectOption::NO_READ,
             IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
+            caching     // (true: REGISTER, false: NO_REGISTER)
         ),
         fld.mesh(),
         dims
@@ -220,8 +238,11 @@ Foam::DimensionedField<Type, GeoMesh>::New
     const dimensioned<Type>& dt
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    const bool caching = fld.db().cacheTemporaryObject(name);
+
+    return tmp<DimensionedField<Type, GeoMesh>>::NewImmovable
     (
+        caching,        // (true: immovable, false: movable)
         IOobject
         (
             name,
@@ -229,7 +250,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             fld.db(),
             IOobjectOption::NO_READ,
             IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
+            caching     // (true: REGISTER, false: NO_REGISTER)
         ),
         fld.mesh(),
         dt.value(),

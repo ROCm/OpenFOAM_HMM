@@ -361,6 +361,7 @@ $(regIOobject)/regIOobjectWrite.C
 
 db/IOobjectList/IOobjectList.C
 db/objectRegistry/objectRegistry.C
+db/objectRegistry/objectRegistryCache.C
 db/CallbackRegistry/CallbackRegistryName.C
 
 dll = db/dynamicLibrary

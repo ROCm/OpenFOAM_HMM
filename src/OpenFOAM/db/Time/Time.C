@@ -459,6 +459,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)
@@ -525,6 +526,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     // Functions
@@ -609,6 +611,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)
@@ -683,6 +686,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)
@@ -885,6 +889,11 @@ bool Foam::Time::run() const
                 addProfiling(fo, "functionObjects.end()");
                 functionObjects_.end();
             }
+
+            if (cacheTemporaryObjects_)
+            {
+                cacheTemporaryObjects_ = checkCacheTemporaryObjects();
+            }
         }
     }
 
@@ -914,6 +923,11 @@ bool Foam::Time::run() const
             if (functionObjects_.filesModified())
             {
                 const_cast<Time&>(*this).readModifiedObjects();
+            }
+
+            if (cacheTemporaryObjects_)
+            {
+                cacheTemporaryObjects_ = checkCacheTemporaryObjects();
             }
         }
 

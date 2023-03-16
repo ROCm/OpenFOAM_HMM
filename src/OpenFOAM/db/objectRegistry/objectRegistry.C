@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2011-2019 OpenFOAM Foundation
     Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,10 @@ Foam::objectRegistry::objectRegistry(const Time& t, const label nObjects)
     time_(t),
     parent_(t),
     dbDir_(name()),
-    event_(1)
+    event_(1),
+    cacheTemporaryObjectsActive_(false),
+    cacheTemporaryObjects_(0),
+    temporaryObjects_(0)
 {}
 
 
@@ -109,7 +112,10 @@ Foam::objectRegistry::objectRegistry(const IOobject& io, const label nObjects)
     time_(io.time()),
     parent_(io.db()),
     dbDir_(parent_.dbDir()/local()/name()),
-    event_(1)
+    event_(1),
+    cacheTemporaryObjectsActive_(false),
+    cacheTemporaryObjects_(0),
+    temporaryObjects_(0)
 {
     writeOpt(IOobject::AUTO_WRITE);
 }
@@ -249,6 +255,8 @@ bool Foam::objectRegistry::checkIn(regIOobject* io) const
 {
     if (!io) return false;
 
+    objectRegistry& obr = const_cast<objectRegistry&>(*this);
+
     if (objectRegistry::debug)
     {
         Pout<< "objectRegistry::checkIn : "
@@ -257,7 +265,36 @@ bool Foam::objectRegistry::checkIn(regIOobject* io) const
             << endl;
     }
 
-    objectRegistry& obr = const_cast<objectRegistry&>(*this);
+    // Delete cached object if it has the same name as io, and in the
+    // cacheTemporaryObjects list
+    if (!cacheTemporaryObjects_.empty())
+    {
+        auto cacheIter = cacheTemporaryObjects_.find(io->name());
+
+        if (cacheIter.good())
+        {
+            iterator iter = obr.find(io->name());
+
+            if
+            (
+                iter.good()
+             && iter.val() != io
+             && iter.val()->ownedByRegistry()
+            )
+            {
+                if (objectRegistry::debug)
+                {
+                    Pout<< "objectRegistry::checkIn : "
+                        << name() << " : deleting cached object "
+                        << io->name() << endl;
+                }
+
+                cacheIter.val().first() = false;
+                deleteCachedObject(iter.val());
+            }
+        }
+    }
+
 
     bool ok = obr.insert(io->name(), io);
 
