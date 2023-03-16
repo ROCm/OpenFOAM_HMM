@@ -155,6 +155,14 @@ Foam::label Foam::UPstream::allocateCommunicator
         // LIFO pop
         index = freeComms_.back();
         freeComms_.pop_back();
+
+        // Reset existing
+        myProcNo_[index] = -1;
+        parentComm_[index] = parentIndex;
+
+        procIDs_[index].clear();
+        linearCommunication_[index].clear();
+        treeCommunication_[index].clear();
     }
     else
     {
@@ -162,8 +170,9 @@ Foam::label Foam::UPstream::allocateCommunicator
         index = parentComm_.size();
 
         myProcNo_.push_back(-1);
+        parentComm_.push_back(parentIndex);
+
         procIDs_.emplace_back();
-        parentComm_.push_back(-1);
         linearCommunication_.emplace_back();
         treeCommunication_.emplace_back();
     }
@@ -213,8 +222,6 @@ Foam::label Foam::UPstream::allocateCommunicator
 
     procIds.resize(numSubRanks);
 
-    parentComm_[index] = parentIndex;
-
     // Size but do not fill structure - this is done on-the-fly
     linearCommunication_[index] = List<commsStruct>(numSubRanks);
     treeCommunication_[index] = List<commsStruct>(numSubRanks);
@@ -236,6 +243,14 @@ Foam::label Foam::UPstream::allocateCommunicator
         ///         myProcNo_[index] = -(myProcNo_[parentIndex]+1);
         ///     }
         /// }
+
+        // Did communicator allocation adjust procIDs_ as well?
+        if (numSubRanks != procIDs_[index].size())
+        {
+            numSubRanks = procIDs_[index].size();
+            linearCommunication_[index] = List<commsStruct>(numSubRanks);
+            treeCommunication_[index] = List<commsStruct>(numSubRanks);
+        }
     }
 
     return index;
@@ -268,8 +283,8 @@ void Foam::UPstream::freeCommunicator
     }
 
     myProcNo_[communicator] = -1;
-    //procIDs_[communicator].clear();
     parentComm_[communicator] = -1;
+    //procIDs_[communicator].clear();
     linearCommunication_[communicator].clear();
     treeCommunication_[communicator].clear();
 
@@ -449,26 +464,24 @@ bool Foam::UPstream::haveThreads_(false);
 int Foam::UPstream::msgType_(1);
 
 
-Foam::DynamicList<int> Foam::UPstream::myProcNo_(10);
-
-Foam::DynamicList<Foam::List<int>> Foam::UPstream::procIDs_(10);
-
-Foam::DynamicList<Foam::label> Foam::UPstream::parentComm_(10);
-
-Foam::DynamicList<Foam::label> Foam::UPstream::freeComms_;
-
 Foam::wordList Foam::UPstream::allWorlds_(Foam::one{}, "");
 Foam::labelList Foam::UPstream::worldIDs_(Foam::one{}, 0);
 
-Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
-Foam::UPstream::linearCommunication_(10);
+
+Foam::DynamicList<int> Foam::UPstream::myProcNo_(16);
+Foam::DynamicList<Foam::List<int>> Foam::UPstream::procIDs_(16);
+
+Foam::DynamicList<Foam::label> Foam::UPstream::parentComm_(16);
+Foam::DynamicList<Foam::label> Foam::UPstream::freeComms_;
 
 Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
-Foam::UPstream::treeCommunication_(10);
+Foam::UPstream::linearCommunication_(16);
+
+Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
+Foam::UPstream::treeCommunication_(16);
 
 
 Foam::label Foam::UPstream::worldComm(0);
-
 Foam::label Foam::UPstream::warnComm(-1);
 
 
