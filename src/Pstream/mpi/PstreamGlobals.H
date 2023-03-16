@@ -50,25 +50,12 @@ namespace Foam
 namespace PstreamGlobals
 {
 
-//- Internal enumeration to track the state of MPI_Comm, MPI_Group allocation
-//  Handled as bitmasks
-enum allocationTypes : unsigned
-{
-    NonePending = 0u,   // No MPI free is pending
-    CommPending = 1u,   // MPI_Comm_free() is needed
-    GroupPending = 2u   // MPI_Group_free() is needed
-};
-
-// Track if MPI_Comm_free and/or MPI_Group_free are pending for
-// each communicator index (indexes into MPICommunicators_, MPIGroups_)
-extern DynamicList<unsigned> pendingMPIFree_;
+// Track if MPI_Comm_free is needed for communicator index in MPICommunicators_
+extern DynamicList<bool> pendingMPIFree_;
 
 // Current communicators, which may be allocated or predefined
 // (eg, MPI_COMM_SELF, MPI_COMM_WORLD)
 extern DynamicList<MPI_Comm> MPICommunicators_;
-
-// Groups used to create communicators
-extern DynamicList<MPI_Group> MPIGroups_;
 
 //- Outstanding non-blocking operations.
 extern DynamicList<MPI_Request> outstandingRequests_;

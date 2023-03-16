@@ -30,11 +30,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::DynamicList<unsigned> Foam::PstreamGlobals::pendingMPIFree_;
-
+Foam::DynamicList<bool> Foam::PstreamGlobals::pendingMPIFree_;
 Foam::DynamicList<MPI_Comm> Foam::PstreamGlobals::MPICommunicators_;
-Foam::DynamicList<MPI_Group> Foam::PstreamGlobals::MPIGroups_;
-
 Foam::DynamicList<MPI_Request> Foam::PstreamGlobals::outstandingRequests_;
 
 

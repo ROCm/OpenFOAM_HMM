@@ -511,12 +511,8 @@ void Foam::UPstream::allocatePstreamCommunicator
     if (index == PstreamGlobals::MPICommunicators_.size())
     {
         // Extend storage with null values
-
-        PstreamGlobals::
-            pendingMPIFree_.emplace_back(PstreamGlobals::NonePending);
-
+        PstreamGlobals::pendingMPIFree_.emplace_back(false);
         PstreamGlobals::MPICommunicators_.emplace_back(MPI_COMM_NULL);
-        PstreamGlobals::MPIGroups_.emplace_back(MPI_GROUP_NULL);
     }
     else if (index > PstreamGlobals::MPICommunicators_.size())
     {
@@ -538,18 +534,13 @@ void Foam::UPstream::allocatePstreamCommunicator
                 << Foam::exit(FatalError);
         }
 
-        PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
+        PstreamGlobals::pendingMPIFree_[index] = false;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_WORLD;
 
         // TBD: MPI_Comm_dup(MPI_COMM_WORLD, ...);
-        // with pendingMPIFree_[index] = CommPending ...
+        // with pendingMPIFree_[index] = true
         // Note: freePstreamCommunicator may need an update
 
-        MPI_Comm_group
-        (
-            PstreamGlobals::MPICommunicators_[index],
-           &PstreamGlobals::MPIGroups_[index]
-        );
         MPI_Comm_rank
         (
             PstreamGlobals::MPICommunicators_[index],
@@ -572,10 +563,9 @@ void Foam::UPstream::allocatePstreamCommunicator
     {
         // Self communicator (selfComm)
 
-        PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
+        PstreamGlobals::pendingMPIFree_[index] = false;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_SELF;
 
-        MPI_Comm_group(MPI_COMM_SELF, &PstreamGlobals::MPIGroups_[index]);
         MPI_Comm_rank(MPI_COMM_SELF, &myProcNo_[index]);
 
         // Number of ranks is always 1 (self communicator)
@@ -604,16 +594,23 @@ void Foam::UPstream::allocatePstreamCommunicator
     {
         // General sub-communicator
 
-        PstreamGlobals::pendingMPIFree_[index]
-            = (PstreamGlobals::CommPending | PstreamGlobals::GroupPending);
+        PstreamGlobals::pendingMPIFree_[index] = true;
 
-        // Create new group
+        // Starting from parent
+        MPI_Group parent_group;
+        MPI_Comm_group
+        (
+            PstreamGlobals::MPICommunicators_[parentIndex],
+           &parent_group
+        );
+
+        MPI_Group active_group;
         MPI_Group_incl
         (
-            PstreamGlobals::MPIGroups_[parentIndex],
+            parent_group,
             procIDs_[index].size(),
             procIDs_[index].cdata(),
-           &PstreamGlobals::MPIGroups_[index]
+           &active_group
         );
 
         #if defined(MSMPI_VER)
@@ -621,26 +618,29 @@ void Foam::UPstream::allocatePstreamCommunicator
         MPI_Comm_create
         (
             PstreamGlobals::MPICommunicators_[parentIndex],
-            PstreamGlobals::MPIGroups_[index],
-            &PstreamGlobals::MPICommunicators_[index]
+            active_group,
+           &PstreamGlobals::MPICommunicators_[index]
         );
         #else
         // Create new communicator for this group
         MPI_Comm_create_group
         (
             PstreamGlobals::MPICommunicators_[parentIndex],
-            PstreamGlobals::MPIGroups_[index],
+            active_group,
             UPstream::msgType(),
            &PstreamGlobals::MPICommunicators_[index]
         );
         #endif
 
+        // Groups not needed after this...
+        MPI_Group_free(&parent_group);
+        MPI_Group_free(&active_group);
+
         if (PstreamGlobals::MPICommunicators_[index] == MPI_COMM_NULL)
         {
-            // No communicator created, group only
+            // No communicator created
             myProcNo_[index] = -1;
-            PstreamGlobals::
-                pendingMPIFree_[index] = PstreamGlobals::GroupPending;
+            PstreamGlobals::pendingMPIFree_[index] = false;
         }
         else
         {
@@ -681,33 +681,15 @@ void Foam::UPstream::freePstreamCommunicator(const label index)
     {
         if
         (
-            (MPI_COMM_NULL != PstreamGlobals::MPICommunicators_[index])
-         &&
-            (
-                PstreamGlobals::pendingMPIFree_[index]
-              & PstreamGlobals::CommPending
-            )
+            (true == PstreamGlobals::pendingMPIFree_[index])
+         && (MPI_COMM_NULL != PstreamGlobals::MPICommunicators_[index])
         )
         {
             // Free communicator. Sets communicator to MPI_COMM_NULL
             MPI_Comm_free(&PstreamGlobals::MPICommunicators_[index]);
         }
 
-        if
-        (
-            (MPI_GROUP_NULL != PstreamGlobals::MPIGroups_[index])
-         &&
-            (
-                PstreamGlobals::pendingMPIFree_[index]
-              & PstreamGlobals::GroupPending
-            )
-        )
-        {
-            // Free group. Sets group to MPI_GROUP_NULL
-            MPI_Group_free(&PstreamGlobals::MPIGroups_[index]);
-        }
-
-        PstreamGlobals::pendingMPIFree_[index] = PstreamGlobals::NonePending;
+        PstreamGlobals::pendingMPIFree_[index] = false;
     }
 }
 
