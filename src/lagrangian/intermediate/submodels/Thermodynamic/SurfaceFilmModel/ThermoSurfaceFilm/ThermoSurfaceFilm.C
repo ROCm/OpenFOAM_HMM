@@ -83,14 +83,14 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 
         switch (this->interactionType_)
         {
-            case KinematicSurfaceFilm<CloudType>::itBounce:
+            case KinematicSurfaceFilm<CloudType>::interactionType::bounce:
             {
                 this->bounceInteraction(p, pp, facei, keepParticle);
 
                 break;
             }
 
-            case KinematicSurfaceFilm<CloudType>::itAbsorb:
+            case KinematicSurfaceFilm<CloudType>::interactionType::absorb:
             {
                 const scalar m = p.nParticle()*p.mass();
 
@@ -100,7 +100,7 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
                 break;
             }
 
-            case KinematicSurfaceFilm<CloudType>::itSplashBai:
+            case KinematicSurfaceFilm<CloudType>::interactionType::splashBai:
             {
                 // Local pressure
                 const scalar pc = thermo_.thermo().p()[p.cell()];
@@ -158,14 +158,14 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 
         switch (this->interactionType_)
         {
-            case KinematicSurfaceFilm<CloudType>::itBounce:
+            case KinematicSurfaceFilm<CloudType>::interactionType::bounce:
             {
                 this->bounceInteraction(p, pp, facei, keepParticle);
 
                 break;
             }
 
-            case KinematicSurfaceFilm<CloudType>::itAbsorb:
+            case KinematicSurfaceFilm<CloudType>::interactionType::absorb:
             {
                 const scalar m = p.nParticle()*p.mass();
 
@@ -176,7 +176,7 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
                 break;
             }
 
-            case KinematicSurfaceFilm<CloudType>::itSplashBai:
+            case KinematicSurfaceFilm<CloudType>::interactionType::splashBai:
             {
                 // Local pressure
                 const scalar pc = thermo_.thermo().p()[p.cell()];

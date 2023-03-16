@@ -33,7 +33,7 @@ Description
     Kinematic parcel surface film model.
 
     Responsible for:
-    - injecting parcelss from the film model into the cloud, e.g. for dripping
+    - injecting parcels from the film model into the cloud, e.g. for dripping
     - parcel interaction with the film, e.g absorb, bounce, splash
 
 SourceFiles
@@ -48,6 +48,7 @@ SourceFiles
 #include "SurfaceFilmModel.H"
 #include "UPtrList.H"
 #include "liquidMixtureProperties.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,24 +82,15 @@ public:
     // Public Data
 
         //- Options for the interaction types
-        enum interactionType
+        enum class interactionType
         {
-            itAbsorb,       //!< "absorb"
-            itBounce,       //!< "bounce"
-            itSplashBai     //!< "splashBai"
+            absorb,       //!< absorb
+            bounce,       //!< bounce
+            splashBai     //!< Bai splash model
         };
 
         //- Names for interactionType
-        static wordList interactionTypeNames_;
-
-
-    // Public Member Functions
-
-        //- Return interaction type enum from word
-        interactionType interactionTypeEnum(const word& it) const;
-
-        //- Return word from interaction type enum
-        word interactionTypeStr(const interactionType& it) const;
+        static const Enum<interactionType> interactionTypeNames;
 
 
 protected:
@@ -162,6 +154,13 @@ protected:
             //- Number of new parcels resulting from splash event
             label parcelsPerSplash_;
 
+            //- Maximum splash particle diameter for Chi-square distribution
+            //  Default is incident particle diameter
+            scalar dMaxSplash_;
+
+            //- Minimum splash particle diameter for Chi-square distribution
+            //  Default is 0.1 dMaxSplash
+            scalar dMinSplash_;
 
             // Surface roughness coefficient typically in the range 1300 - 5200
             // and decreases with increasing surface roughness
