@@ -46,14 +46,9 @@ tmp<DimensionedField<scalar, GeoMesh>> stabilise
 )
 {
     auto tres =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        DimensionedField<scalar, GeoMesh>::New
         (
-            IOobject
-            (
-                "stabilise(" + dsf.name() + ',' + ds.name() + ')',
-                dsf.instance(),
-                dsf.db()
-            ),
+            "stabilise(" + dsf.name() + ',' + ds.name() + ')',
             dsf.mesh(),
             dsf.dimensions() + ds.dimensions()
         );
@@ -130,14 +125,9 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
     }
 
     auto tresult =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        DimensionedField<scalar, GeoMesh>::New
         (
-            IOobject
-            (
-                "pow(" + f1.name() + ',' + f2.name() + ')',
-                f1.instance(),
-                f1.db()
-            ),
+            "pow(" + f1.name() + ',' + f2.name() + ')',
             f1.mesh(),
             dimless
         );
@@ -311,14 +301,9 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
     }
 
     auto tresult =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        DimensionedField<scalar, GeoMesh>::New
         (
-            IOobject
-            (
-                "pow(" + f1.name() + ',' + ds.name() + ')',
-                f1.instance(),
-                f1.db()
-            ),
+            "pow(" + f1.name() + ',' + ds.name() + ')',
             f1.mesh(),
             pow(f1.dimensions(), ds)
         );
@@ -417,14 +402,9 @@ tmp<DimensionedField<scalar, GeoMesh>> pow
     }
 
     auto tresult =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        DimensionedField<scalar, GeoMesh>::New
         (
-            IOobject
-            (
-                "pow(" + ds.name() + ',' + f2.name() + ')',
-                f2.instance(),
-                f2.db()
-            ),
+            "pow(" + ds.name() + ',' + f2.name() + ')',
             f2.mesh(),
             dimless
         );
@@ -512,14 +492,9 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
 )
 {
     auto tres =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        DimensionedField<scalar, GeoMesh>::New
         (
-            IOobject
-            (
-                "atan2(" + dsf1.name() + ',' + dsf2.name() + ')',
-                dsf1.instance(),
-                dsf1.db()
-            ),
+            "atan2(" + dsf1.name() + ',' + dsf2.name() + ')',
             dsf1.mesh(),
             atan2(dsf1.dimensions(), dsf2.dimensions())
         );
@@ -614,14 +589,9 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
 )
 {
     auto tres =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        DimensionedField<scalar, GeoMesh>::New
         (
-            IOobject
-            (
-                "atan2(" + dsf.name() + ',' + ds.name() + ')',
-                dsf.instance(),
-                dsf.db()
-            ),
+            "atan2(" + dsf.name() + ',' + ds.name() + ')',
             dsf.mesh(),
             atan2(dsf.dimensions(), ds)
         );
@@ -683,14 +653,9 @@ tmp<DimensionedField<scalar, GeoMesh>> atan2
 )
 {
     auto tres =
-        tmp<DimensionedField<scalar, GeoMesh>>::New
+        DimensionedField<scalar, GeoMesh>::New
         (
-            IOobject
-            (
-                "atan2(" + ds.name() + ',' + dsf.name() + ')',
-                dsf.instance(),
-                dsf.db()
-            ),
+            "atan2(" + ds.name() + ',' + dsf.name() + ')',
             dsf.mesh(),
             atan2(ds, dsf.dimensions())
         );
@@ -805,14 +770,9 @@ tmp<DimensionedField<scalar, GeoMesh>> func                                    \
     }                                                                          \
                                                                                \
     auto tres =                                                                \
-        tmp<DimensionedField<scalar, GeoMesh>>::New                            \
+        DimensionedField<scalar, GeoMesh>::New                                 \
         (                                                                      \
-            IOobject                                                           \
-            (                                                                  \
-                #func "(" + name(n) + ',' + dsf.name() + ')',                  \
-                dsf.instance(),                                                \
-                dsf.db()                                                       \
-            ),                                                                 \
+            #func "(" + name(n) + ',' + dsf.name() + ')',                      \
             dsf.mesh(),                                                        \
             dimless                                                            \
         );                                                                     \

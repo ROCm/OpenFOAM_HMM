@@ -391,14 +391,9 @@ Foam::DimensionedField<Type, GeoMesh>::component
     const direction d
 ) const
 {
-    auto tresult = tmp<DimensionedField<cmptType, GeoMesh>>::New
+    auto tresult = DimensionedField<cmptType, GeoMesh>::New
     (
-        IOobject
-        (
-            name() + ".component(" + ::Foam::name(d) + ')',
-            instance(),
-            db()
-        ),
+        name() + ".component(" + ::Foam::name(d) + ')',
         mesh_,
         dimensions_
     );
@@ -445,14 +440,9 @@ template<class Type, class GeoMesh>
 Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
 Foam::DimensionedField<Type, GeoMesh>::T() const
 {
-    auto tresult = tmp<DimensionedField<Type, GeoMesh>>::New
+    auto tresult = DimensionedField<Type, GeoMesh>::New
     (
-        IOobject
-        (
-            name() + ".T()",
-            instance(),
-            db()
-        ),
+        name() + ".T()",
         mesh_,
         dimensions_
     );

@@ -95,14 +95,9 @@ struct reuseTmpGeometricField
         const dimensionSet& dimensions
     )
     {
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        return GeometricField<TypeR, PatchField, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -118,14 +113,9 @@ struct reuseTmpGeometricField
     {
         const auto& f1 = tf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        return GeometricField<TypeR, PatchField, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -157,21 +147,16 @@ struct reuseTmpGeometricField<TypeR, TypeR, PatchField, GeoMesh>
 
         const auto& f1 = tf1();
 
-        auto tresult = tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        auto tresult = GeometricField<TypeR, PatchField, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
 
         if (initCopy)
         {
-            tresult.ref() == f1;
+            tresult.ref() == tf1();
         }
 
         return tresult;
@@ -223,14 +208,9 @@ struct reuseTmpTmpGeometricField
     {
         const auto& f1 = tf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        return GeometricField<TypeR, PatchField, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -270,14 +250,9 @@ struct reuseTmpTmpGeometricField
 
         const auto& f1 = tf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        return GeometricField<TypeR, PatchField, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -316,14 +291,9 @@ struct reuseTmpTmpGeometricField
 
         const auto& f1 = tf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        return GeometricField<TypeR, PatchField, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -364,14 +334,9 @@ struct reuseTmpTmpGeometricField
 
         const auto& f1 = tf1();
 
-        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>::New
+        return GeometricField<TypeR, PatchField, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );

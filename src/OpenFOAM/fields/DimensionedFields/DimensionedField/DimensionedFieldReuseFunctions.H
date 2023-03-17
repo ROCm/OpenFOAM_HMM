@@ -48,14 +48,9 @@ struct reuseTmpDimensionedField
         const dimensionSet& dimensions
     )
     {
-        return tmp<DimensionedField<TypeR, GeoMesh>>::New
+        return DimensionedField<TypeR, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -71,14 +66,9 @@ struct reuseTmpDimensionedField
     {
         const auto& f1 = tf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>::New
+        return DimensionedField<TypeR, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -110,21 +100,16 @@ struct reuseTmpDimensionedField<TypeR, TypeR, GeoMesh>
 
         const auto& f1 = tf1();
 
-        auto tresult = tmp<DimensionedField<TypeR, GeoMesh>>::New
+        auto tresult = DimensionedField<TypeR, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
 
         if (initCopy)
         {
-            tresult.ref().field() = tf1().field();
+            tresult.ref().field() = f1.field();
         }
 
         return tresult;
@@ -165,14 +150,9 @@ struct reuseTmpTmpDimensionedField
     {
         const auto& f1 = tf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>::New
+        return DimensionedField<TypeR, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -202,14 +182,9 @@ struct reuseTmpTmpDimensionedField<TypeR, Type1, Type12, TypeR, GeoMesh>
 
         const auto& f1 = tf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>::New
+        return DimensionedField<TypeR, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -239,14 +214,9 @@ struct reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, Type2, GeoMesh>
 
         const auto& f1 = tf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>::New
+        return DimensionedField<TypeR, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );
@@ -284,14 +254,9 @@ struct reuseTmpTmpDimensionedField<TypeR, TypeR, TypeR, TypeR, GeoMesh>
 
         const auto& f1 = tf1();
 
-        return tmp<DimensionedField<TypeR, GeoMesh>>::New
+        return DimensionedField<TypeR, GeoMesh>::New
         (
-            IOobject
-            (
-                name,
-                f1.instance(),
-                f1.db()
-            ),
+            name,
             f1.mesh(),
             dimensions
         );

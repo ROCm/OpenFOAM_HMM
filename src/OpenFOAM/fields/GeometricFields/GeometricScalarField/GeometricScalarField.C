@@ -58,21 +58,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> stabilise
     const dimensioned<scalar>& ds
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tRes
+    auto tRes = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "stabilise(" + gsf.name() + ',' + ds.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            ds.dimensions() + gsf.dimensions()
-        )
+        "stabilise(" + gsf.name() + ',' + ds.name() + ')',
+        gsf.mesh(),
+        ds.dimensions() + gsf.dimensions()
     );
 
     stabilise(tRes.ref(), gsf, ds);
@@ -163,21 +153,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
         FatalError << exit(FatalError);
     }
 
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
+    auto tresult = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "pow(" + f1.name() + ',' + f2.name() + ')',
-                f1.instance(),
-                f1.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            f1.mesh(),
-            dimless
-        )
+        "pow(" + f1.name() + ',' + f2.name() + ')',
+        f1.mesh(),
+        dimless
     );
 
     pow(tresult.ref(), f1, f2);
@@ -368,21 +348,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
             << exit(FatalError);
     }
 
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
+    auto tresult = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "pow(" + f1.name() + ',' + ds.name() + ')',
-                f1.instance(),
-                f1.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            f1.mesh(),
-            pow(f1.dimensions(), ds)
-        )
+        "pow(" + f1.name() + ',' + ds.name() + ')',
+        f1.mesh(),
+        pow(f1.dimensions(), ds)
     );
 
     pow(tresult.ref(), f1, ds);
@@ -491,21 +461,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
         FatalError << exit(FatalError);
     }
 
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
+    auto tresult = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "pow(" + ds.name() + ',' + f2.name() + ')',
-                f2.instance(),
-                f2.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            f2.mesh(),
-            dimless
-        )
+        "pow(" + ds.name() + ',' + f2.name() + ')',
+        f2.mesh(),
+        dimless
     );
 
     pow(tresult.ref(), ds, f2);
@@ -615,21 +575,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> atan2
     const GeometricField<scalar, PatchField, GeoMesh>& gsf2
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tAtan2
+    auto tAtan2 = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "atan2(" + gsf1.name() + ',' + gsf2.name() + ')',
-                gsf1.instance(),
-                gsf1.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf1.mesh(),
-            atan2(gsf1.dimensions(), gsf2.dimensions())
-        )
+        "atan2(" + gsf1.name() + ',' + gsf2.name() + ')',
+        gsf1.mesh(),
+        atan2(gsf1.dimensions(), gsf2.dimensions())
     );
 
     atan2(tAtan2.ref(), gsf1, gsf2);
@@ -742,21 +692,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> atan2
     const dimensionedScalar& ds
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tAtan2
+    auto tAtan2 = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "atan2(" + gsf.name() + ',' + ds.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            atan2(gsf.dimensions(), ds)
-        )
+        "atan2(" + gsf.name() + ',' + ds.name() + ')',
+        gsf.mesh(),
+        atan2(gsf.dimensions(), ds)
     );
 
     atan2(tAtan2.ref(), gsf, ds);
@@ -831,21 +771,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> atan2
     const GeometricField<scalar, PatchField, GeoMesh>& gsf
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tAtan2
+    auto tAtan2 = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "atan2(" + ds.name() + ',' + gsf.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            atan2(ds, gsf.dimensions())
-        )
+        "atan2(" + ds.name() + ',' + gsf.name() + ')',
+        gsf.mesh(),
+        atan2(ds, gsf.dimensions())
     );
 
     atan2(tAtan2.ref(), ds, gsf);
@@ -972,21 +902,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> func                          \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tFunc                     \
+    auto tFunc = GeometricField<scalar, PatchField, GeoMesh>::New              \
     (                                                                          \
-        new GeometricField<scalar, PatchField, GeoMesh>                        \
-        (                                                                      \
-            IOobject                                                           \
-            (                                                                  \
-                #func "(" + gsf.name() + ')',                                  \
-                gsf.instance(),                                                \
-                gsf.db(),                                                      \
-                IOobject::NO_READ,                                             \
-                IOobject::NO_WRITE                                             \
-            ),                                                                 \
-            gsf.mesh(),                                                        \
-            dimless                                                            \
-        )                                                                      \
+        #func "(" + gsf.name() + ')',                                          \
+        gsf.mesh(),                                                            \
+        dimless                                                                \
     );                                                                         \
                                                                                \
     func(tFunc.ref(), n, gsf);                                                 \

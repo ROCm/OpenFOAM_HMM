@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,16 +90,9 @@ Foam::transform
     const GeometricField<Type, PatchField, GeoMesh>& fld
 )
 {
-    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<Type, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            "transform(" + rot.name() + ',' + fld.name() + ')',
-            fld.instance(),
-            fld.db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
+        "transform(" + rot.name() + ',' + fld.name() + ')',
         fld.mesh(),
         fld.dimensions()
     );
@@ -161,16 +154,9 @@ Foam::transform
     const GeometricField<Type, PatchField, GeoMesh>& fld
 )
 {
-    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<Type, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            "transform(" + rot.name() + ',' + fld.name() + ')',
-            fld.instance(),
-            fld.db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
+        "transform(" + rot.name() + ',' + fld.name() + ')',
         fld.mesh(),
         fld.dimensions()
     );
@@ -251,16 +237,9 @@ Foam::invTransform
     const GeometricField<Type, PatchField, GeoMesh>& fld
 )
 {
-    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<Type, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            "invTransform(" + rot.name() + ',' + fld.name() + ')',
-            fld.instance(),
-            fld.db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
+        "invTransform(" + rot.name() + ',' + fld.name() + ')',
         fld.mesh(),
         fld.dimensions()
     );
@@ -322,16 +301,9 @@ Foam::invTransform
     const GeometricField<Type, PatchField, GeoMesh>& fld
 )
 {
-    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<Type, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            "invTransform(" + rot.name() + ',' + fld.name() + ')',
-            fld.instance(),
-            fld.db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
+        "invTransform(" + rot.name() + ',' + fld.name() + ')',
         fld.mesh(),
         fld.dimensions()
     );

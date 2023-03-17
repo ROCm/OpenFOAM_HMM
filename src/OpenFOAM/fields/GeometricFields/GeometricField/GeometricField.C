@@ -1214,14 +1214,9 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
 Foam::GeometricField<Type, PatchField, GeoMesh>::T() const
 {
-    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<Type, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            this->name() + ".T()",
-            this->instance(),
-            this->db()
-        ),
+        this->name() + ".T()",
         this->mesh(),
         this->dimensions()
     );
@@ -1248,14 +1243,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::component
     const direction d
 ) const
 {
-    auto tresult = tmp<GeometricField<cmptType, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<cmptType, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            this->name() + ".component(" + Foam::name(d) + ')',
-            this->instance(),
-            this->db()
-        ),
+        this->name() + ".component(" + Foam::name(d) + ')',
         this->mesh(),
         this->dimensions()
     );
