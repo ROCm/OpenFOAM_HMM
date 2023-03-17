@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const word& patchFieldType
 )
 {
@@ -50,7 +50,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        ds,
+        dims,
         patchFieldType
     );
 }
@@ -62,7 +62,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& iField,
     const word& patchFieldType
 )
@@ -79,7 +79,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        ds,
+        dims,
         iField,
         patchFieldType
     );
@@ -92,7 +92,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     Field<Type>&& iField,
     const word& patchFieldType
 )
@@ -109,7 +109,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        ds,
+        dims,
         std::move(iField),
         patchFieldType
     );
@@ -122,7 +122,8 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensioned<Type>& dt,
+    const Type& value,
+    const dimensionSet& dims,
     const word& patchFieldType
 )
 {
@@ -138,7 +139,8 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        dt,
+        value,
+        dims,
         patchFieldType
     );
 }
@@ -150,7 +152,8 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensioned<Type>& dt,
+    const Type& value,
+    const dimensionSet& dims,
     const wordList& patchFieldTypes,
     const wordList& actualPatchTypes
 )
@@ -167,7 +170,8 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        dt,
+        value,
+        dims,
         patchFieldTypes,
         actualPatchTypes
     );
@@ -178,7 +182,78 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
 Foam::GeometricField<Type, PatchField, GeoMesh>::New
 (
-    const word& newName,
+    const word& name,
+    const Mesh& mesh,
+    const dimensioned<Type>& dt,
+    const word& patchFieldType
+)
+{
+    return GeometricField<Type, PatchField, GeoMesh>::New
+    (
+        name,
+        mesh,
+        dt.value(),
+        dt.dimensions(),
+        patchFieldType
+    );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::GeometricField<Type, PatchField, GeoMesh>::New
+(
+    const word& name,
+    const Mesh& mesh,
+    const dimensioned<Type>& dt,
+    const wordList& patchFieldTypes,
+    const wordList& actualPatchTypes
+)
+{
+    return GeometricField<Type, PatchField, GeoMesh>::New
+    (
+        name,
+        mesh,
+        dt.value(),
+        dt.dimensions(),
+        patchFieldTypes,
+        actualPatchTypes
+    );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::GeometricField<Type, PatchField, GeoMesh>::New
+(
+    const word& name,
+    const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
+    const word& patchFieldType
+)
+{
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    (
+        IOobject
+        (
+            name,
+            tgf().instance(),
+            tgf().local(),
+            tgf().db(),
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
+        ),
+        tgf,
+        patchFieldType
+    );
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::GeometricField<Type, PatchField, GeoMesh>::New
+(
+    const word& name,
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 )
 {
@@ -186,7 +261,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
     (
         IOobject
         (
-            newName,
+            name,
             tgf().instance(),
             tgf().local(),
             tgf().db(),
@@ -203,7 +278,7 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
 Foam::GeometricField<Type, PatchField, GeoMesh>::New
 (
-    const word& newName,
+    const word& name,
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
     const wordList& patchFieldTypes,
     const wordList& actualPatchTypes
@@ -213,7 +288,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
     (
         IOobject
         (
-            newName,
+            name,
             tgf().instance(),
             tgf().local(),
             tgf().db(),
@@ -280,7 +355,8 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         fld.mesh(),
-        dt,
+        dt.value(),
+        dt.dimensions(),
         patchFieldType
     );
 }

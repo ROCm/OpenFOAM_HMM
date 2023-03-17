@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,14 +168,15 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensioned<Type>& dt,
+    const Type& value,
+    const dimensionSet& dims,
     const bool checkIOFlags
 )
 :
     regIOobject(io),
-    Field<Type>(GeoMesh::size(mesh), dt.value()),
+    Field<Type>(GeoMesh::size(mesh), value),
     mesh_(mesh),
-    dimensions_(dt.dimensions()),
+    dimensions_(dims),
     oriented_()
 {
     if (checkIOFlags)
@@ -183,6 +184,26 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
         readIfPresent();
     }
 }
+
+
+template<class Type, class GeoMesh>
+Foam::DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensioned<Type>& dt,
+    const bool checkIOFlags
+)
+:
+    DimensionedField<Type, GeoMesh>
+    (
+        io,
+        mesh,
+        dt.value(),
+        dt.dimensions(),
+        checkIOFlags
+    )
+{}
 
 
 template<class Type, class GeoMesh>

@@ -201,7 +201,7 @@ SlicedGeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& completeField,
     const bool preserveCouples
 )
@@ -210,7 +210,7 @@ SlicedGeometricField
     (
         io,
         mesh,
-        ds,
+        dims,
         Field<Type>(),
         // preserveProcessorOnly = false
         // isBoundaryOnly = false
@@ -239,7 +239,7 @@ SlicedGeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& completeIField,
     const Field<Type>& completeBField,
     const bool preserveCouples,
@@ -250,7 +250,7 @@ SlicedGeometricField
     (
         io,
         mesh,
-        ds,
+        dims,
         Field<Type>(),
         makeBoundary
         (

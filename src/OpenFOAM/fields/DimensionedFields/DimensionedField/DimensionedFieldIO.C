@@ -49,8 +49,12 @@ void Foam::DimensionedField<Type, GeoMesh>::readField
         oriented_.read(fieldDict);
     }
 
-    Field<Type> f(fieldDictEntry, fieldDict, GeoMesh::size(mesh_));
-    this->transfer(f);
+
+    // The primitive field
+    auto& fld = static_cast<Field<Type>&>(*this);
+
+    fld.resize_nocopy(GeoMesh::size(mesh_));
+    fld.assign(fieldDictEntry, fieldDict, fld.size());
 }
 
 

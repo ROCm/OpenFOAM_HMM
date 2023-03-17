@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionSets_H
-#define dimensionSets_H
+#ifndef Foam_dimensionSets_H
+#define Foam_dimensionSets_H
 
 #include "scalarMatrices.H"
 #include "dimensionedScalarFwd.H"

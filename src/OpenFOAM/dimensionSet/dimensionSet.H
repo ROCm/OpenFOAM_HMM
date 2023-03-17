@@ -433,6 +433,8 @@ dimensionSet operator&&(const dimensionSet& ds1, const dimensionSet& ds2);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Predefined dimensions (eg, dimless, dimMass, dimLength, dimTime, ...)
+// and unit systems
 #include "dimensionSets.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

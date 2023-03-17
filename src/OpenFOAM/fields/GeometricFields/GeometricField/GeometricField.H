@@ -155,7 +155,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
@@ -166,7 +166,32 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
+            const wordList& wantedPatchTypes,
+            const wordList& actualPatchTypes = wordList()
+        );
+
+        //- Construct given IOobject, mesh, dimensions, initial field value
+        //- and given patch type.
+        //  This assigns both dimensions and values.
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Construct given IOobject, mesh, dimensions, initial field value
+        //- and given patch types.
+        //  This assigns both dimensions and values.
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
             const wordList& wantedPatchTypes,
             const wordList& actualPatchTypes = wordList()
         );
@@ -237,7 +262,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
@@ -247,7 +272,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             Field<Type>&& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
@@ -257,7 +282,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField,
             const PtrList<PatchField<Type>>& ptfl
         );
@@ -267,7 +292,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             Field<Type>&& iField,
             const PtrList<PatchField<Type>>& ptfl
         );
@@ -277,7 +302,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const tmp<Field<Type>>& tiField,
             const PtrList<PatchField<Type>>& ptfl
         );
@@ -387,7 +412,7 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
@@ -399,7 +424,7 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
@@ -412,9 +437,36 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             Field<Type>&& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Return tmp field from name, mesh, dimensions, initial field value
+        //- and patch type.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Return tmp field from name, mesh, dimensioned\<Type\>
+        //- and patch types.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
         //- Return tmp field from name, mesh, dimensioned\<Type\>
@@ -449,6 +501,16 @@ public:
         (
             const word& newName,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
+        );
+
+        //- Rename tmp field and reset patch field type
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& newName,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
+            const word& patchFieldType
         );
 
         //- Rename tmp field and reset patch field types and return

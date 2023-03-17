@@ -140,7 +140,7 @@ public:
         (
             const IOobject&,
             const Mesh&,
-            const dimensionSet&,
+            const dimensionSet& dims,
             const Field<Type>& completeField,
             const bool preserveCouples = true
         );
@@ -151,7 +151,7 @@ public:
         (
             const IOobject&,
             const Mesh&,
-            const dimensionSet&,
+            const dimensionSet& dims,
             const Field<Type>& completeIField,
             const Field<Type>& completeBField,
             const bool preserveCouples = true,

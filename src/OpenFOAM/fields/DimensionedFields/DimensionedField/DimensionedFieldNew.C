@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& iField
 )
 {
@@ -49,7 +49,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        ds,
+        dims,
         iField
     );
 }
@@ -61,7 +61,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     Field<Type>&& iField
 )
 {
@@ -77,7 +77,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        ds,
+        dims,
         std::move(iField)
     );
 }
@@ -89,7 +89,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
 (
     const word& name,
     const Mesh& mesh,
-    const dimensionSet& ds
+    const dimensionSet& dims
 )
 {
     return tmp<DimensionedField<Type, GeoMesh>>::New
@@ -104,8 +104,37 @@ Foam::DimensionedField<Type, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         mesh,
-        ds,
-        false  // checkIOFlags = true
+        dims,
+        false  // checkIOFlags off
+    );
+}
+
+
+template<class Type, class GeoMesh>
+Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
+Foam::DimensionedField<Type, GeoMesh>::New
+(
+    const word& name,
+    const Mesh& mesh,
+    const Type& value,
+    const dimensionSet& dims
+)
+{
+    return tmp<DimensionedField<Type, GeoMesh>>::New
+    (
+        IOobject
+        (
+            name,
+            mesh.thisDb().time().timeName(),
+            mesh.thisDb(),
+            IOobjectOption::NO_READ,
+            IOobjectOption::NO_WRITE,
+            IOobjectOption::NO_REGISTER
+        ),
+        mesh,
+        value,
+        dims,
+        false  // checkIOFlags off
     );
 }
 
@@ -119,20 +148,12 @@ Foam::DimensionedField<Type, GeoMesh>::New
     const dimensioned<Type>& dt
 )
 {
-    return tmp<DimensionedField<Type, GeoMesh>>::New
+    return DimensionedField<Type, GeoMesh>::New
     (
-        IOobject
-        (
-            name,
-            mesh.thisDb().time().timeName(),
-            mesh.thisDb(),
-            IOobjectOption::NO_READ,
-            IOobjectOption::NO_WRITE,
-            IOobjectOption::NO_REGISTER
-        ),
+        name,
         mesh,
-        dt,
-        false  // checkIOFlags = true
+        dt.value(),
+        dt.dimensions()
     );
 }
 
@@ -141,7 +162,7 @@ template<class Type, class GeoMesh>
 Foam::tmp<Foam::DimensionedField<Type, GeoMesh>>
 Foam::DimensionedField<Type, GeoMesh>::New
 (
-    const word& newName,
+    const word& name,
     const tmp<DimensionedField<Type, GeoMesh>>& tfld
 )
 {
@@ -149,7 +170,7 @@ Foam::DimensionedField<Type, GeoMesh>::New
     (
         IOobject
         (
-            newName,
+            name,
             tfld().instance(),
             tfld().local(),
             tfld().db(),
@@ -211,7 +232,8 @@ Foam::DimensionedField<Type, GeoMesh>::New
             IOobjectOption::NO_REGISTER
         ),
         fld.mesh(),
-        dt
+        dt.value(),
+        dt.dimensions()
     );
 }
 

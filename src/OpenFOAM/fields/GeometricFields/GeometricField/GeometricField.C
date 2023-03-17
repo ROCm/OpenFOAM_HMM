@@ -193,18 +193,18 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, ds, false),
+    Internal(io, mesh, dims, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
     boundaryField_(mesh.boundary(), *this, patchFieldType)
 {
     DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
+        << "Creating" << nl << this->info() << endl;
 
     readIfPresent();
 }
@@ -215,19 +215,71 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const wordList& patchFieldTypes,
     const wordList& actualPatchTypes
 )
 :
-    Internal(io, mesh, ds, false),
+    Internal(io, mesh, dims, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
     boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
 {
     DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
+        << "Creating" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const Type& value,
+    const dimensionSet& dims,
+    const word& patchFieldType
+)
+:
+    Internal(io, mesh, value, dims, false),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(mesh.boundary(), *this, patchFieldType)
+{
+    DebugInFunction
+        << "Creating" << nl << this->info() << endl;
+
+    boundaryField_ == value;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const Type& value,
+    const dimensionSet& dims,
+    const wordList& patchFieldTypes,
+    const wordList& actualPatchTypes
+)
+:
+    Internal(io, mesh, value, dims, false),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
+{
+    DebugInFunction
+        << "Creating" << nl << this->info() << endl;
+
+    boundaryField_ == value;
 
     readIfPresent();
 }
@@ -242,19 +294,15 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, dt, false),
-    timeIndex_(this->time().timeIndex()),
-    field0Ptr_(nullptr),
-    fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, patchFieldType)
-{
-    DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
-
-    boundaryField_ == dt.value();
-
-    readIfPresent();
-}
+    GeometricField<Type, PatchField, GeoMesh>
+    (
+        io,
+        mesh,
+        dt.value(),
+        dt.dimensions(),
+        patchFieldType
+    )
+{}
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -267,19 +315,16 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const wordList& actualPatchTypes
 )
 :
-    Internal(io, mesh, dt, false),
-    timeIndex_(this->time().timeIndex()),
-    field0Ptr_(nullptr),
-    fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
-{
-    DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
-
-    boundaryField_ == dt.value();
-
-    readIfPresent();
-}
+    GeometricField<Type, PatchField, GeoMesh>
+    (
+        io,
+        mesh,
+        dt.value(),
+        dt.dimensions(),
+        patchFieldTypes,
+        actualPatchTypes
+    )
+{}
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -390,12 +435,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& iField,
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, ds, iField),
+    Internal(io, mesh, dims, iField),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -413,12 +458,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     Field<Type>&& iField,
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, ds, std::move(iField)),
+    Internal(io, mesh, dims, std::move(iField)),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -436,12 +481,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& iField,
     const PtrList<PatchField<Type>>& ptfl
 )
 :
-    Internal(io, mesh, ds, iField),
+    Internal(io, mesh, dims, iField),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -459,12 +504,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     Field<Type>&& iField,
     const PtrList<PatchField<Type>>& ptfl
 )
 :
-    Internal(io, mesh, ds, std::move(iField)),
+    Internal(io, mesh, dims, std::move(iField)),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -482,12 +527,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const tmp<Field<Type>>& tfield,
     const PtrList<PatchField<Type>>& ptfl
 )
 :
-    Internal(io, mesh, ds, tfield),
+    Internal(io, mesh, dims, tfield),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
