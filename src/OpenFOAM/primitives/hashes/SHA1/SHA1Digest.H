@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,17 +68,11 @@ class SHA1Digest
 
     // Private Member Functions
 
-        //- Pointer to the underlying digest data
-        unsigned char* data()
-        {
-            return dig_.data();
-        }
-
-        //- Byte-wise compare digest contents
-        bool isEqual(const char* hexdigits, std::size_t len) const;
-
         // Permit SHA1 to calculate the digest
         friend class SHA1;
+
+        //- Raw digest data (20 bytes). Non-const access for SHA1
+        unsigned char* data() noexcept { return dig_.data(); }
 
 
 public:
@@ -94,8 +88,18 @@ public:
         //- Default construct a zero digest
         SHA1Digest();
 
-        //- Read construct a digest
+        //- Read construct a digest from stringified content
         explicit SHA1Digest(Istream& is);
+
+        //- Construct digest from raw or stringified content.
+        //- The length is 20 for raw digest content and 40 (or 41) for
+        //- stringified versions.
+        SHA1Digest(const char* content, std::size_t len);
+
+        //- Construct digest from raw or stringified content.
+        //- The length is 20 for raw digest content and 40 (or 41) for
+        //- stringified versions.
+        SHA1Digest(const unsigned char* content, std::size_t len);
 
 
     // Member Functions
@@ -117,6 +121,30 @@ public:
 
         //- Write (40-byte) text representation, optionally with '_' prefix
         Ostream& write(Ostream& os, const bool prefixed=false) const;
+
+
+    // Low-level access
+
+        //- Raw digest data (20 bytes) - const access
+        const unsigned char* cdata() const noexcept { return dig_.data(); }
+
+        //- Raw digest data (20 bytes) - const access
+        const unsigned char* cdata_bytes() const noexcept
+        {
+            return dig_.data();
+        }
+
+        //- Raw digest data (20 bytes) - non-const access. Use with caution!
+        unsigned char* data_bytes() noexcept
+        {
+            return dig_.data();
+        }
+
+        //- The number of bytes in digest (20)
+        static constexpr unsigned size_bytes() noexcept { return 20; }
+
+        //- The dimensioned size of the digest is always 20 bytes
+        static constexpr unsigned max_size() noexcept { return 20; }
 
 
     // Member Operators

@@ -76,9 +76,66 @@ static unsigned char readHexDigit(Istream& is)
 } // End namespace Foam
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+namespace
+{
 
-bool Foam::SHA1Digest::isEqual(const char* hexdigits, std::size_t len) const
+// Copy assign digest from content
+bool assign
+(
+    std::array<unsigned char, 20>& digest,
+    const unsigned char* content,
+    std::size_t len
+)
+{
+    if (!content || !len)
+    {
+        return false;
+    }
+
+    if (len == digest.size())
+    {
+        // ie, std::copy
+        for (auto& val : digest)
+        {
+            val = *content;
+            ++content;
+        }
+
+        return true;
+    }
+
+    // Skip possible '_' prefix
+    if (*content == '_')
+    {
+        ++content;
+        --len;
+    }
+
+    // Incorrect length - can never assign
+    if (len != 2*digest.size())
+    {
+        return false;
+    }
+
+    for (auto& val : digest)
+    {
+        const unsigned char upp = *content++;
+        const unsigned char low = *content++;
+
+        val = (upp << 4) + low;
+    }
+
+    return true;
+}
+
+
+// Byte-wise compare digest contents
+bool isEqual
+(
+    const std::array<unsigned char, 20>& digest,
+    const char* hexdigits,
+    std::size_t len
+)
 {
     // Skip possible '_' prefix
     if (*hexdigits == '_')
@@ -88,12 +145,12 @@ bool Foam::SHA1Digest::isEqual(const char* hexdigits, std::size_t len) const
     }
 
     // Incorrect length - can never match
-    if (len != 2*dig_.size())
+    if (len != 2*digest.size())
     {
         return false;
     }
 
-    for (const auto& byteVal : dig_)
+    for (const auto& byteVal : digest)
     {
         const char upp = hexChars[((byteVal >> 4) & 0xF)];
         const char low = hexChars[(byteVal & 0xF)];
@@ -105,12 +162,28 @@ bool Foam::SHA1Digest::isEqual(const char* hexdigits, std::size_t len) const
     return true;
 }
 
+} // End anonymous namespace
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::SHA1Digest::SHA1Digest()
 {
     clear();
+}
+
+
+Foam::SHA1Digest::SHA1Digest(const char* content, std::size_t len)
+{
+    clear();
+    assign(dig_, reinterpret_cast<const unsigned char*>(content), len);
+}
+
+
+Foam::SHA1Digest::SHA1Digest(const unsigned char* content, std::size_t len)
+{
+    clear();
+    assign(dig_, content, len);
 }
 
 
@@ -214,7 +287,7 @@ bool Foam::SHA1Digest::operator==(const std::string& hexdigits) const
     // Interpret empty string as '0000..'
     size_t len = hexdigits.length();
 
-    return len ? isEqual(hexdigits.data(), len) : empty();
+    return len ? isEqual(dig_, hexdigits.data(), len) : empty();
 }
 
 
@@ -223,7 +296,7 @@ bool Foam::SHA1Digest::operator==(const char* hexdigits) const
     // Interpret nullptr or empty string as '0000..'
     size_t len = (hexdigits ? strlen(hexdigits) : 0);
 
-    return len ? isEqual(hexdigits, len) : empty();
+    return len ? isEqual(dig_, hexdigits, len) : empty();
 }
 
 
