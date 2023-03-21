@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -231,12 +231,12 @@ public:
         operator dictionary() const;
 
 
-        //- Helper function to print a stack,
-        //- used when OpenFOAM IO not yet initialised.
-        static void safePrintStack(std::ostream& os);
+        //- Helper function to print a stack, with optional upper limit.
+        //- Used when OpenFOAM IO not yet initialised.
+        static void safePrintStack(std::ostream& os, int size = -1);
 
-        //- Helper function to print a stack
-        static void printStack(Ostream& os);
+        //- Helper function to print a stack, with optional upper limit.
+        static void printStack(Ostream& os, int size = -1);
 
         //- True if FOAM_ABORT is on.
         static bool useAbort();
