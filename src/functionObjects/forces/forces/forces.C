@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -197,47 +197,60 @@ void Foam::functionObjects::forces::reset()
 
     auto& force = this->force();
     auto& moment = this->moment();
-    force == dimensionedVector(force.dimensions(), Zero);
-    moment == dimensionedVector(moment.dimensions(), Zero);
+
+    if (porosity_)
+    {
+        force == dimensionedVector(force.dimensions(), Zero);
+        moment == dimensionedVector(moment.dimensions(), Zero);
+    }
+    else
+    {
+        constexpr bool updateAccessTime = false;
+        for (const label patchi : patchSet_)
+        {
+            force.boundaryFieldRef(updateAccessTime)[patchi] = Zero;
+            moment.boundaryFieldRef(updateAccessTime)[patchi] = Zero;
+        }
+    }
 }
 
 
-Foam::tmp<Foam::volSymmTensorField>
-Foam::functionObjects::forces::devRhoReff() const
+Foam::tmp<Foam::symmTensorField>
+Foam::functionObjects::forces::devRhoReff
+(
+    const tensorField& gradUp,
+    const label patchi
+) const
 {
-    typedef compressible::turbulenceModel cmpTurbModel;
     typedef incompressible::turbulenceModel icoTurbModel;
+    typedef compressible::turbulenceModel cmpTurbModel;
 
-    if (foundObject<cmpTurbModel>(cmpTurbModel::propertiesName))
-    {
-        const auto& turb =
-            lookupObject<cmpTurbModel>(cmpTurbModel::propertiesName);
-
-        return turb.devRhoReff();
-    }
-    else if (foundObject<icoTurbModel>(icoTurbModel::propertiesName))
+    if (foundObject<icoTurbModel>(icoTurbModel::propertiesName))
     {
         const auto& turb =
             lookupObject<icoTurbModel>(icoTurbModel::propertiesName);
 
-        return rho()*turb.devReff();
+        return -rho(patchi)*turb.nuEff(patchi)*dev(twoSymm(gradUp));
+    }
+    else if (foundObject<cmpTurbModel>(cmpTurbModel::propertiesName))
+    {
+        const auto& turb =
+            lookupObject<cmpTurbModel>(cmpTurbModel::propertiesName);
+
+        return -turb.muEff(patchi)*dev(twoSymm(gradUp));
     }
     else if (foundObject<fluidThermo>(fluidThermo::dictName))
     {
         const auto& thermo = lookupObject<fluidThermo>(fluidThermo::dictName);
 
-        const auto& U = lookupObject<volVectorField>(UName_);
-
-        return -thermo.mu()*dev(twoSymm(fvc::grad(U)));
+        return -thermo.mu(patchi)*dev(twoSymm(gradUp));
     }
     else if (foundObject<transportModel>("transportProperties"))
     {
         const auto& laminarT =
             lookupObject<transportModel>("transportProperties");
 
-        const auto& U = lookupObject<volVectorField>(UName_);
-
-        return -rho()*laminarT.nu()*dev(twoSymm(fvc::grad(U)));
+        return -rho(patchi)*laminarT.nu(patchi)*dev(twoSymm(gradUp));
     }
     else if (foundObject<dictionary>("transportProperties"))
     {
@@ -246,9 +259,7 @@ Foam::functionObjects::forces::devRhoReff() const
 
         const dimensionedScalar nu("nu", dimViscosity, transportProperties);
 
-        const auto& U = lookupObject<volVectorField>(UName_);
-
-        return -rho()*nu*dev(twoSymm(fvc::grad(U)));
+        return -rho(patchi)*nu.value()*dev(twoSymm(gradUp));
     }
     else
     {
@@ -317,6 +328,23 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::forces::rho() const
 }
 
 
+Foam::tmp<Foam::scalarField>
+Foam::functionObjects::forces::rho(const label patchi) const
+{
+    if (rhoName_ == "rhoInf")
+    {
+        return tmp<scalarField>::New
+        (
+            mesh_.boundary()[patchi].size(),
+            rhoRef_
+        );
+    }
+
+    const auto& rho = lookupObject<volScalarField>(rhoName_);
+    return rho.boundaryField()[patchi];
+}
+
+
 Foam::scalar Foam::functionObjects::forces::rho(const volScalarField& p) const
 {
     if (p.dimensions() == dimPressure)
@@ -343,16 +371,18 @@ void Foam::functionObjects::forces::addToPatchFields
     const vectorField& fV
 )
 {
+    constexpr bool updateAccessTime = false;
+
     sumPatchForcesP_ += sum(fP);
     sumPatchForcesV_ += sum(fV);
-    force().boundaryFieldRef()[patchi] += fP + fV;
+    force().boundaryFieldRef(updateAccessTime)[patchi] += fP + fV;
 
     const vectorField mP(Md^fP);
     const vectorField mV(Md^fV);
 
     sumPatchMomentsP_ += sum(mP);
     sumPatchMomentsV_ += sum(mV);
-    moment().boundaryFieldRef()[patchi] += mP + mV;
+    moment().boundaryFieldRef(updateAccessTime)[patchi] += mP + mV;
 }
 
 
@@ -666,28 +696,27 @@ void Foam::functionObjects::forces::calcForcesMoments()
     if (directForceDensity_)
     {
         const auto& fD = lookupObject<volVectorField>(fDName_);
+        const auto& fDb = fD.boundaryField();
 
         const auto& Sfb = mesh_.Sf().boundaryField();
+        const auto& magSfb = mesh_.magSf().boundaryField();
+        const auto& Cb = mesh_.C().boundaryField();
 
         for (const label patchi : patchSet_)
         {
-            const vectorField& d = mesh_.C().boundaryField()[patchi];
-
-            const vectorField Md(d - origin);
-
-            const scalarField sA(mag(Sfb[patchi]));
+            const vectorField Md(Cb[patchi] - origin);
 
             // Pressure force = surfaceUnitNormal*(surfaceNormal & forceDensity)
             const vectorField fP
             (
-                Sfb[patchi]/sA
+                Sfb[patchi]/magSfb[patchi]
                *(
-                    Sfb[patchi] & fD.boundaryField()[patchi]
+                    Sfb[patchi] & fDb[patchi]
                 )
             );
 
             // Viscous force (total force minus pressure fP)
-            const vectorField fV(sA*fD.boundaryField()[patchi] - fP);
+            const vectorField fV(magSfb[patchi]*fDb[patchi] - fP);
 
             addToPatchFields(patchi, Md, fP, fV);
         }
@@ -695,11 +724,15 @@ void Foam::functionObjects::forces::calcForcesMoments()
     else
     {
         const auto& p = lookupObject<volScalarField>(pName_);
+        const auto& pb = p.boundaryField();
 
         const auto& Sfb = mesh_.Sf().boundaryField();
+        const auto& Cb = mesh_.C().boundaryField();
 
-        tmp<volSymmTensorField> tdevRhoReff = devRhoReff();
-        const auto& devRhoReffb = tdevRhoReff().boundaryField();
+        const auto& U = lookupObject<volVectorField>(UName_);
+        tmp<volTensorField> tgradU = fvc::grad(U);
+        const volTensorField& gradU = tgradU();
+        const auto& gradUb = gradU.boundaryField();
 
         // Scale pRef by density for incompressible simulations
         const scalar rhoRef = rho(p);
@@ -707,16 +740,14 @@ void Foam::functionObjects::forces::calcForcesMoments()
 
         for (const label patchi : patchSet_)
         {
-            const vectorField& d = mesh_.C().boundaryField()[patchi];
+            const vectorField Md(Cb[patchi] - origin);
 
-            const vectorField Md(d - origin);
+            const vectorField fP(rhoRef*Sfb[patchi]*(pb[patchi] - pRef));
 
-            const vectorField fP
+            const vectorField fV
             (
-                rhoRef*Sfb[patchi]*(p.boundaryField()[patchi] - pRef)
+                Sfb[patchi] & devRhoReff(gradUb[patchi], patchi)
             );
-
-            const vectorField fV(Sfb[patchi] & devRhoReffb[patchi]);
 
             addToPatchFields(patchi, Md, fP, fV);
         }
