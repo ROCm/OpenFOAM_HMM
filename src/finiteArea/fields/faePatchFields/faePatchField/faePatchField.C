@@ -38,10 +38,8 @@ bool Foam::faePatchField<Type>::readValueEntry
     IOobjectOption::readOption readOpt
 )
 {
-    const auto& p = faePatchFieldBase::patch();
-
-    if (!p.size()) return true;  // Can be exceptionally lazy
     if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = faePatchFieldBase::patch();
 
 
     const auto* eptr = dict.findEntry("value", keyType::LITERAL);

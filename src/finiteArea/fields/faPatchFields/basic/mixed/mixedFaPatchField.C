@@ -37,10 +37,8 @@ bool Foam::mixedFaPatchField<Type>::readMixedEntries
     IOobjectOption::readOption readOpt
 )
 {
-    const auto& p = faPatchFieldBase::patch();
-
-    if (!p.size()) return true;  // Can be exceptionally lazy
     if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = faPatchFieldBase::patch();
 
 
     // If there is a 'refValue', also require all others

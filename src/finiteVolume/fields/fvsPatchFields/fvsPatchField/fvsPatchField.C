@@ -41,10 +41,8 @@ bool Foam::fvsPatchField<Type>::readValueEntry
     IOobjectOption::readOption readOpt
 )
 {
-    const auto& p = fvsPatchFieldBase::patch();
-
-    if (!p.size()) return true;  // Can be exceptionally lazy
     if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = fvsPatchFieldBase::patch();
 
 
     const auto* eptr = dict.findEntry("value", keyType::LITERAL);
