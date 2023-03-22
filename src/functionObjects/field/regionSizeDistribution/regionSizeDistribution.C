@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,10 @@ License
 #include "regionSplit.H"
 #include "volFields.H"
 #include "fvcVolumeIntegrate.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -97,7 +100,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
     const volScalarField& alpha
 ) const
 {
-    const scalar maxDropletVol = 1.0/6.0*pow3(maxDiam_);
+    const scalar maxDropletVol = 1.0/6.0*mathematical::pi*pow3(maxDiam_);
 
     // Split alpha field
     // ~~~~~~~~~~~~~~~~~
@@ -460,7 +463,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
         << endl;
 
     const scalar meshVol = gSum(mesh_.V());
-    const scalar maxDropletVol = 1.0/6.0*pow3(maxDiam_);
+    const scalar maxDropletVol = 1.0/6.0*mathematical::pi*pow3(maxDiam_);
     const scalar delta = (maxDiam_-minDiam_)/nBins_;
 
     Log << "    Mesh volume              = " << meshVol << nl
