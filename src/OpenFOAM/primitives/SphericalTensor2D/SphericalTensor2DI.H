@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,6 +61,15 @@ inline Foam::SphericalTensor2D<Cmpt>::SphericalTensor2D(Istream& is)
 {}
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Cmpt>
+inline Foam::scalar Foam::SphericalTensor2D<Cmpt>::diagSqr() const
+{
+    return 2*Foam::magSqr(this->ii());
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -100,8 +109,8 @@ inline SphericalTensor2D<Cmpt> inv(const SphericalTensor2D<Cmpt>& st)
     if (mag(st.ii()) < VSMALL)
     {
         FatalErrorInFunction
-            << "SphericalTensor2D is not invertible due to zero determinant:"
-            << "det(SphericalTensor2D) = " << det(st)
+            << "SphericalTensor2D not invertible, determinant:"
+            << det(st) << " tensor:" << st << nl
             << abort(FatalError);
     }
     #endif

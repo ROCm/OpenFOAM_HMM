@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,11 +200,23 @@ public:
         //- Set values of the diagonal
         inline void diag(const Vector2D<Cmpt>& v);
 
+        //- The L2-norm squared of the diagonal
+        inline scalar diagSqr() const;
+
 
     // Tensor Operations
 
         //- Return non-Hermitian transpose
         inline Tensor2D<Cmpt> T() const;
+
+        //- The determinate
+        inline Cmpt det() const;
+
+        //- Return cofactor matrix
+        inline Tensor2D<Cmpt> cof() const;
+
+        //- Return inverse
+        inline Tensor2D<Cmpt> inv() const;
 
         //- Inner-product of this with another Tensor2D.
         inline Tensor2D<Cmpt> inner(const Tensor2D<Cmpt>& t2) const;

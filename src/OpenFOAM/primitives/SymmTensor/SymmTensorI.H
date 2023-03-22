@@ -213,9 +213,129 @@ inline void Foam::SymmTensor<Cmpt>::diag(const Vector<Cmpt>& v)
 
 
 template<class Cmpt>
-inline const Foam::SymmTensor<Cmpt>& Foam::SymmTensor<Cmpt>::T() const
+inline void Foam::SymmTensor<Cmpt>::addDiag(const Vector<Cmpt>& v)
 {
-    return *this;
+    this->v_[XX] += v.x(); this->v_[YY] += v.y(); this->v_[ZZ] += v.z();
+}
+
+
+template<class Cmpt>
+inline void Foam::SymmTensor<Cmpt>::subtractDiag(const Vector<Cmpt>& v)
+{
+    this->v_[XX] -= v.x(); this->v_[YY] -= v.y(); this->v_[ZZ] -= v.z();
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::SymmTensor<Cmpt>::diagSqr() const
+{
+    return
+    (
+        Foam::magSqr(this->xx())
+      + Foam::magSqr(this->yy())
+      + Foam::magSqr(this->zz())
+    );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::SymmTensor<Cmpt>::det() const
+{
+    return
+    (
+        xx()*yy()*zz() + xy()*yz()*xz()
+      + xz()*xy()*yz() - xx()*yz()*yz()
+      - xy()*xy()*zz() - xz()*yy()*xz()
+    );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::SymmTensor<Cmpt>::det2D(const direction excludeCmpt) const
+{
+    switch (excludeCmpt)
+    {
+        case 0:  // Eliminate x
+        {
+            return (yy()*zz() - yz()*yz());
+        }
+
+        case 1:  // Eliminate y
+        {
+            return (xx()*zz() - xz()*xz());
+        }
+    }
+
+    // Fall-through: Eliminate z
+    return (xx()*yy() - xy()*xy());
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::cof() const
+{
+    return SymmTensor<Cmpt>
+    (
+        yy()*zz() - yz()*yz(),
+        xz()*yz() - xy()*zz(),
+        xy()*yz() - xz()*yy(),
+
+        xx()*zz() - xz()*xz(),
+        xy()*xz() - xx()*yz(),
+
+        xx()*yy() - xy()*xy()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::cof2D
+(
+    const direction excludeCmpt
+) const
+{
+    switch (excludeCmpt)
+    {
+        case 0:  // Eliminate x
+        {
+            return SymmTensor<Cmpt>
+            (
+                Zero, Zero,  Zero,
+                      zz(), -yz(),
+                             yy()
+            );
+        }
+
+        case 1:  // Eliminate y
+        {
+            return SymmTensor<Cmpt>
+            (
+                zz(), Zero, -xz(),
+                      Zero,  Zero,
+                             xx()
+            );
+        }
+    }
+
+    // Fall-through: Eliminate z
+    return SymmTensor<Cmpt>
+    (
+        yy(), -xy(), Zero,
+               xx(), Zero,
+                     Zero
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::inv2D
+(
+    const direction excludeCmpt
+) const
+{
+    const Cmpt detval = this->det2D(excludeCmpt);
+
+    return this->cof2D(excludeCmpt).T()/detval;
 }
 
 
@@ -292,12 +412,7 @@ inline SymmTensor<Cmpt> dev2(const SymmTensor<Cmpt>& st)
 template<class Cmpt>
 inline Cmpt det(const SymmTensor<Cmpt>& st)
 {
-    return
-    (
-        st.xx()*st.yy()*st.zz() + st.xy()*st.yz()*st.xz()
-      + st.xz()*st.xy()*st.yz() - st.xx()*st.yz()*st.yz()
-      - st.xy()*st.xy()*st.zz() - st.xz()*st.yy()*st.xz()
-    );
+    return st.det();
 }
 
 
@@ -305,35 +420,25 @@ inline Cmpt det(const SymmTensor<Cmpt>& st)
 template<class Cmpt>
 inline SymmTensor<Cmpt> cof(const SymmTensor<Cmpt>& st)
 {
-    return SymmTensor<Cmpt>
-    (
-        st.yy()*st.zz() - st.yz()*st.yz(),
-        st.xz()*st.yz() - st.xy()*st.zz(),
-        st.xy()*st.yz() - st.xz()*st.yy(),
-
-        st.xx()*st.zz() - st.xz()*st.xz(),
-        st.xy()*st.xz() - st.xx()*st.yz(),
-
-        st.xx()*st.yy() - st.xy()*st.xy()
-    );
+    return st.cof();
 }
 
 
-//- Return the inverse of a SymmTensor by using the given determinant
+//- Return the inverse of a SymmTensor, using given determinant value
 template<class Cmpt>
-inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st, const Cmpt detst)
+inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st, const Cmpt detval)
 {
     #ifdef FULLDEBUG
-    if (mag(detst) < VSMALL)
+    if (mag(detval) < VSMALL)
     {
         FatalErrorInFunction
-            << "SymmTensor is not invertible due to the zero determinant:"
-            << "det(symmTensor) = " << mag(detst)
+            << "SymmTensor not properly invertible, determinant:"
+            << detval << " tensor:" << st << nl
             << abort(FatalError);
     }
     #endif
 
-    return cof(st).T()/detst;
+    return st.cof().T()/detval;
 }
 
 
@@ -341,7 +446,14 @@ inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st, const Cmpt detst)
 template<class Cmpt>
 inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st)
 {
-    return inv(st, det(st));
+    return inv(st, st.det());
+}
+
+
+template<class Cmpt>
+inline SymmTensor<Cmpt> SymmTensor<Cmpt>::inv() const
+{
+    return Foam::inv(*this, this->det());
 }
 
 
@@ -392,15 +504,15 @@ innerSqr(const SymmTensor<Cmpt>& st)
 }
 
 
-//- Return the square of Frobenius norm of a SymmTensor as a Cmpt
+//- Return the square of Frobenius norm of a SymmTensor
 template<class Cmpt>
-inline Cmpt magSqr(const SymmTensor<Cmpt>& st)
+inline Foam::scalar magSqr(const SymmTensor<Cmpt>& st)
 {
-    return Cmpt
+    return
     (
-        mag(st.xx()*st.xx()) + 2*mag(st.xy()*st.xy()) + 2*mag(st.xz()*st.xz())
-                             +   mag(st.yy()*st.yy()) + 2*mag(st.yz()*st.yz())
-                                                      +   mag(st.zz()*st.zz())
+        magSqr(st.xx()) + 2*magSqr(st.xy()) + 2*magSqr(st.xz())
+                        +   magSqr(st.yy()) + 2*magSqr(st.yz())
+                                            +   magSqr(st.zz())
     );
 }
 

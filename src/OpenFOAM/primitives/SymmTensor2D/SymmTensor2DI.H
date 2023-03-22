@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,9 +91,31 @@ inline void Foam::SymmTensor2D<Cmpt>::diag(const Vector2D<Cmpt>& v)
 
 
 template<class Cmpt>
-inline const Foam::SymmTensor2D<Cmpt>& Foam::SymmTensor2D<Cmpt>::T() const
+inline Foam::scalar Foam::SymmTensor2D<Cmpt>::diagSqr() const
 {
-    return *this;
+    return
+    (
+        Foam::magSqr(this->xx())
+      + Foam::magSqr(this->yy())
+    );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::SymmTensor2D<Cmpt>::det() const
+{
+    return (xx()*yy() - xy()*xy());
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor2D<Cmpt> Foam::SymmTensor2D<Cmpt>::cof() const
+{
+    return SymmTensor2D<Cmpt>
+    (
+        yy(), -yx(),
+               xx()
+    );
 }
 
 
@@ -172,7 +194,7 @@ inline SymmTensor2D<Cmpt> dev2(const SymmTensor2D<Cmpt>& st)
 template<class Cmpt>
 inline Cmpt det(const SymmTensor2D<Cmpt>& st)
 {
-    return (st.xx()*st.yy() - st.xy()*st.xy());
+    return st.det();
 }
 
 
@@ -180,29 +202,25 @@ inline Cmpt det(const SymmTensor2D<Cmpt>& st)
 template<class Cmpt>
 inline SymmTensor2D<Cmpt> cof(const SymmTensor2D<Cmpt>& st)
 {
-    return SymmTensor2D<Cmpt>
-    (
-        st.yy(), -st.yx(),
-                  st.xx()
-    );
+    return st.cof();
 }
 
 
-//- Return the inverse of a SymmTensor2D using a given determinant
+//- Return the inverse of a SymmTensor2D, using given determinant value
 template<class Cmpt>
-inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st, const Cmpt detst)
+inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st, const Cmpt detval)
 {
     #ifdef FULLDEBUG
-    if (mag(detst) < SMALL)
+    if (mag(detval) < SMALL)
     {
         FatalErrorInFunction
-            << "SymmTensor2D is not invertible due to the zero determinant:"
-            << "det(SymmTensor2D) = " << mag(detst)
+            << "SymmTensor2D not properly invertible, determinant:"
+            << detval << " tensor:" << st << nl
             << abort(FatalError);
     }
     #endif
-    // cofactor and adjugate matrices of SymmTensor are the same, hence no .T()
-    return cof(st)/detst;
+
+    return st.cof().T()/detval;
 }
 
 
@@ -210,7 +228,15 @@ inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st, const Cmpt detst)
 template<class Cmpt>
 inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st)
 {
-    return inv(st, det(st));
+    return inv(st, st.det());
+}
+
+
+// The inverse of this SymmTensor2D
+template<class Cmpt>
+inline SymmTensor2D<Cmpt> SymmTensor2D<Cmpt>::inv() const
+{
+    return Foam::inv(*this, this->det());
 }
 
 
@@ -244,14 +270,14 @@ innerSqr(const SymmTensor2D<Cmpt>& st)
 }
 
 
-//- Return the square of Frobenius norm of a SymmTensor2D as a Cmpt
+//- Return the square of Frobenius norm of a SymmTensor2D
 template<class Cmpt>
-inline Cmpt magSqr(const SymmTensor2D<Cmpt>& st)
+inline Foam::scalar magSqr(const SymmTensor2D<Cmpt>& st)
 {
-    return Cmpt
+    return
     (
-        mag(st.xx()*st.xx()) + 2*mag(st.xy()*st.xy())
-                             +   mag(st.yy()*st.yy())
+        magSqr(st.xx()) + 2*magSqr(st.xy())
+                        +   magSqr(st.yy())
     );
 }
 

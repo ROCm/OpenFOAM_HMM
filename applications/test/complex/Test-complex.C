@@ -34,6 +34,9 @@ Description
 #include "complex.H"
 #include "complexFields.H"
 #include "scalarField.H"
+#include "diagTensor.H"
+#include "symmTensor.H"
+#include "symmTensor2D.H"
 #include "ListOps.H"
 #include "ops.H"
 
@@ -162,6 +165,72 @@ int main(int argc, char *argv[])
         Info<< "unzip " << cmplx << nl
             << " => " << reals << nl
             << " => " << imags << nl;
+    }
+
+    {
+        SymmTensor<complex> st1(SymmTensor<complex>::uniform({3, 4}));
+
+        Info<< "symmTensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << nl;
+
+        SymmTensor<scalar> st2(SymmTensor<scalar>::uniform(5));
+
+        Info<< "symmTensor: " << st2 << nl
+            << "  tr: " << tr(st2) << nl
+            << "  diagSqr: " << st2.diagSqr() << nl
+            << "  magSqr: " << magSqr(st2) << nl
+            << "  mag: " << mag(st2) << nl;
+
+        st2 = Zero;
+
+        DiagTensor<complex> dt1(SphericalTensor<complex>({3, 4}));
+
+        Info<< "diagTensor: " << dt1 << nl
+            << "  tr: " << tr(dt1) << nl
+            << "  diagSqr: " << dt1.diagSqr() << nl
+            << "  magSqr: " << magSqr(dt1) << nl
+            << "  mag: " << mag(dt1) << nl;
+
+
+        // A bit ugly...
+        st1 = SphericalTensor<complex>({3, 4});
+
+        Info<< "symmTensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << nl;
+    }
+
+    {
+        SymmTensor2D<complex> st1(SymmTensor2D<complex>::uniform({3, 4}));
+
+        Info<< "symmTensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << nl;
+    }
+
+    {
+        Tensor<complex> st1(Tensor<complex>::uniform({3, 4}));
+
+        Info<< "tensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << endl;
+
+        Tensor<scalar> st2(Tensor<scalar>::uniform(5));
+
+        Info<< "Tensor: " << st2 << nl
+            << "  tr: " << tr(st2) << nl
+            << "  diagSqr: " << st2.diagSqr() << nl
+            << "  magSqr: " << magSqr(st2) << nl
+            << "  mag: " << mag(st2) << endl;
     }
 
     complexField fld1(3, complex(2.0, 1.0));

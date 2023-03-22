@@ -370,7 +370,7 @@ void test_global_funcs(Type)
                                 Type(126)
         )
     );
-    cmp("  Square of Frobenius norm = ", magSqr(sT), Type(205));
+    cmp("  Square of Frobenius norm = ", magSqr(sT), scalar(205));
 }
 
 
