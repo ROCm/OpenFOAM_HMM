@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,41 +51,54 @@ UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
 UNARY_FUNCTION(symmTensor, symmTensor, cof)
 
-void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
+void inv(Field<symmTensor>& result, const UList<symmTensor>& tf1)
 {
-    if (tf.empty())
+    if (result.empty() || tf1.empty())
     {
         return;
     }
 
     // Attempting to identify 2-D cases
-    const scalar minThreshold = SMALL*magSqr(tf1[0]);
-    const Vector<bool> removeCmpts
-    (
-        magSqr(tf1[0].xx()) < minThreshold,
-        magSqr(tf1[0].yy()) < minThreshold,
-        magSqr(tf1[0].zz()) < minThreshold
-    );
+    const scalar minThreshold = SMALL * magSqr(tf1[0]);
 
-    if (removeCmpts.x() || removeCmpts.y() || removeCmpts.z())
+    const bool small_xx = (magSqr(tf1[0].xx()) < minThreshold);
+    const bool small_yy = (magSqr(tf1[0].yy()) < minThreshold);
+    const bool small_zz = (magSqr(tf1[0].zz()) < minThreshold);
+
+    if (small_xx || small_yy || small_zz)
     {
-        symmTensor adjust(Zero);
+        const vector adjust
+        (
+            (small_xx ? 1 : 0),
+            (small_yy ? 1 : 0),
+            (small_zz ? 1 : 0)
+        );
 
-        if (removeCmpts.x()) adjust.xx() = 1;
-        if (removeCmpts.y()) adjust.yy() = 1;
-        if (removeCmpts.z()) adjust.zz() = 1;
+        // Cannot use TFOR_ALL_F_OP_FUNC_F (additional operations)
 
-        symmTensorField tf1Plus(tf1);
+        const label loopLen = (result).size();
 
-        tf1Plus += adjust;
+        /* pragmas... */
+        for (label i = 0; i < loopLen; ++i)
+        {
+            symmTensor work(tf1[i]);
+            work.addDiag(adjust);
 
-        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1Plus)
-
-        tf -= adjust;
+            result[i] = Foam::inv(work);
+            result[i].subtractDiag(adjust);
+        }
     }
     else
     {
-        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1)
+        // Same as TFOR_ALL_F_OP_FUNC_F
+
+        const label loopLen = (result).size();
+
+        /* pragmas... */
+        for (label i = 0; i < loopLen; ++i)
+        {
+            result[i] = Foam::inv(tf1[i]);
+        }
     }
 }
 
@@ -103,6 +116,8 @@ tmp<symmTensorField> inv(const tmp<symmTensorField>& tf)
     tf.clear();
     return tresult;
 }
+
+UNARY_FUNCTION(symmTensor, symmTensor, pinv)
 
 
 template<>
@@ -143,8 +158,6 @@ tmp<Field<symmTensor>> transformFieldMask<symmTensor>
 {
     return tstf;
 }
-
-UNARY_FUNCTION(symmTensor, symmTensor, pinv)
 
 
 // * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //

@@ -762,9 +762,58 @@ inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t)
 
 
 template<class Cmpt>
-inline Tensor<Cmpt> Tensor<Cmpt>::inv() const
+inline Tensor<Cmpt> Tensor<Cmpt>::inv(const bool failsafe) const
 {
-    return Foam::inv(*this, this->det());
+    const Cmpt detval = this->det();
+
+    if (failsafe)
+    {
+        // Attempt to identify and handle 2-D cases
+        // - use diagSqr instead of magSqr for fewer operations
+
+        const scalar magSqr_xx = Foam::magSqr(xx());
+        const scalar magSqr_yy = Foam::magSqr(yy());
+        const scalar magSqr_zz = Foam::magSqr(zz());
+
+        const scalar threshold = SMALL * (magSqr_xx + magSqr_yy + magSqr_zz);
+
+        const bool small_xx = (magSqr_xx < threshold);
+        const bool small_yy = (magSqr_yy < threshold);
+        const bool small_zz = (magSqr_zz < threshold);
+
+        if (small_xx || small_yy || small_zz)
+        {
+            Tensor<Cmpt> work(*this);
+
+            if (small_xx) { work.xx() += pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() += pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() += pTraits<Cmpt>::one; }
+
+            work = Foam::inv(work, work.det());
+
+            if (small_xx) { work.xx() -= pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() -= pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() -= pTraits<Cmpt>::one; }
+
+            return work;
+        }
+        else if (mag(detval) < VSMALL)
+        {
+            // Really appears to be zero - leave untouched?
+            return Tensor<Cmpt>(Zero);
+        }
+    }
+    #ifdef FULLDEBUG
+    else if (mag(detval) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Tensor not properly invertible, determinant:"
+            << detval << " tensor:" << *this << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    return this->cof().T()/detval;
 }
 
 

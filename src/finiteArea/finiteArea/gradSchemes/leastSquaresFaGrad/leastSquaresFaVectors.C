@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
         mesh(),
         dimensionedVector(dimless/dimLength, Zero)
     );
-    edgeVectorField& lsP = *pVectorsPtr_;
+    auto& lsP = *pVectorsPtr_;
 
     nVectorsPtr_ = new edgeVectorField
     (
@@ -97,7 +97,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
         mesh(),
         dimensionedVector(dimless/dimLength, Zero)
     );
-    edgeVectorField& lsN = *nVectorsPtr_;
+    auto& lsN = *nVectorsPtr_;
 
     // Set local references to mesh data
     const labelUList& owner = mesh().owner();
@@ -148,8 +148,26 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
     }
 
 
-    // Invert the dd tensor
-    const symmTensorField invDd(inv(dd));
+    // Invert the dd tensor.
+
+    // Cannot rely on the usual field inv() since that only uses the
+    // first element to guess if the remaining tensors are 2D (or
+    // singular). We, however, can have a mixture (eg, skipping over
+    // zero-length edges can yield a zero). Instead use the
+    // 'failsafe' inv() that checks each tensor (#2724)
+
+    // Fragile:  const symmTensorField invDd(inv(dd));
+
+    symmTensorField invDd(dd.size());
+    {
+        const label loopLen = dd.size();
+
+        /* pragmas... */
+        for (label i = 0; i < loopLen; ++i)
+        {
+            invDd[i] = dd[i].inv(true);  // With 'failsafe' handling
+        }
+    }
 
 
     // Revisit all faces and calculate the lsP and lsN vectors
