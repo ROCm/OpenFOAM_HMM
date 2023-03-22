@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -107,7 +107,7 @@ void LienCubicKE::correctNonlinearStress(const volTensorField& gradU)
            *(
                 Cbeta1_*dev(innerSqr(S))
               + Cbeta2_*twoSymm(S&W)
-              + Cbeta3_*dev(symm(W&W))
+              + Cbeta3_*devSymm(W&W)
             )
 
             // Cubic terms

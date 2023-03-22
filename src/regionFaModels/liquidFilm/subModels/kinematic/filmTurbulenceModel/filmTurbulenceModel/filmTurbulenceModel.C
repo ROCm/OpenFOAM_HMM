@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -328,14 +328,14 @@ tmp<Foam::volSymmTensorField> filmTurbulenceModel::devRhoReff() const
         const auto& thermo =
             m.lookupObject<fluidThermo>(fluidThermo::dictName);
 
-        return -thermo.mu()*dev(twoSymm(fvc::grad(U)));
+        return -thermo.mu()*devTwoSymm(fvc::grad(U));
     }
     else if (m.foundObject<transportModel>("transportProperties"))
     {
         const auto& laminarT =
             m.lookupObject<transportModel>("transportProperties");
 
-        return -rho()*laminarT.nu()*dev(twoSymm(fvc::grad(U)));
+        return -rho()*laminarT.nu()*devTwoSymm(fvc::grad(U));
     }
     else if (m.foundObject<dictionary>("transportProperties"))
     {
@@ -344,7 +344,7 @@ tmp<Foam::volSymmTensorField> filmTurbulenceModel::devRhoReff() const
 
         const dimensionedScalar nu("nu", dimViscosity, transportProperties);
 
-        return -rho()*nu*dev(twoSymm(fvc::grad(U)));
+        return -rho()*nu*devTwoSymm(fvc::grad(U));
     }
     else
     {

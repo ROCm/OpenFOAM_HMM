@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ void dynamicLagrangian<BasicTurbulenceModel>::correctNut
     const tmp<volTensorField>& gradU
 )
 {
-    this->nut_ = (flm_/fmm_)*sqr(this->delta())*mag(dev(symm(gradU)));
+    this->nut_ = (flm_/fmm_)*sqr(this->delta())*mag(devSymm(gradU));
     this->nut_.correctBoundaryConditions();
     fv::options::New(this->mesh_).correct(this->nut_);
 
@@ -171,11 +171,11 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
     tmp<volTensorField> tgradU(fvc::grad(U));
     const volTensorField& gradU = tgradU();
 
-    volSymmTensorField S(dev(symm(gradU)));
+    volSymmTensorField S(devSymm(gradU));
     volScalarField magS(mag(S));
 
     volVectorField Uf(filter_(U));
-    volSymmTensorField Sf(dev(symm(fvc::grad(Uf))));
+    volSymmTensorField Sf(devSymm(fvc::grad(Uf)));
     volScalarField magSf(mag(Sf));
 
     volSymmTensorField L(dev(filter_(sqr(U)) - (sqr(filter_(U)))));

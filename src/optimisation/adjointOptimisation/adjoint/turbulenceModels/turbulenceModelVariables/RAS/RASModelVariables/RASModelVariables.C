@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -436,7 +436,7 @@ tmp<volSymmTensorField> RASModelVariables::devReff
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-      - (laminarTransport.nu() + nutRef())*dev(twoSymm(fvc::grad(U)))
+      - (laminarTransport.nu() + nutRef())*devTwoSymm(fvc::grad(U))
     );
 }
 

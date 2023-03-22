@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,7 +93,7 @@ void Foam::ReynoldsStress<BasicTurbulenceModel>::correctWallShearStress
                 // Set the wall Reynolds-stress to the near-wall shear-stress
                 // Note: the spherical part of the normal stress is included in
                 // the pressure
-                Rw[facei] = -nutw[facei]*2*dev(symm(gradUw));
+                Rw[facei] = -nutw[facei]*2*devSymm(gradUw);
             }
         }
     }
@@ -288,7 +288,7 @@ Foam::ReynoldsStress<BasicTurbulenceModel>::devRhoReff
             ),
             this->alpha_*this->rho_*R_
           - (this->alpha_*this->rho_*this->nu())
-           *dev(twoSymm(fvc::grad(U)))
+           *devTwoSymm(fvc::grad(U))
         )
     );
 }

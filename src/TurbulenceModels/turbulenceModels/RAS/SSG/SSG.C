@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd
+    Copyright (C) 2018-2023 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -366,7 +366,7 @@ void SSG<BasicTurbulenceModel>::correct()
       + alpha*rho*k_
        *(
             (C3_ - C3s_*mag(b))*dev(S)
-          + C4_*dev(twoSymm(b&S))
+          + C4_*devTwoSymm(b&S)
           + C5_*twoSymm(b&Omega)
         )
       + fvOptions(alpha, rho, R)

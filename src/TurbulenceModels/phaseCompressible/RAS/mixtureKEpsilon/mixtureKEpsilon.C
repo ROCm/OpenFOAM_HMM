@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -612,7 +612,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
             new volScalarField
             (
                 this->GName(),
-                nutl*(tgradUl() && dev(twoSymm(tgradUl())))
+                nutl*(tgradUl() && devTwoSymm(tgradUl()))
             )
         );
         tgradUl.clear();
@@ -632,7 +632,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
             new volScalarField
             (
                 this->GName(),
-                nutg*(tgradUg() && dev(twoSymm(tgradUg())))
+                nutg*(tgradUg() && devTwoSymm(tgradUg()))
             )
         );
         tgradUg.clear();

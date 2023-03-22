@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -160,7 +160,7 @@ void kEqn<BasicTurbulenceModel>::correct()
     volScalarField divU(fvc::div(fvc::absolute(this->phi(), U)));
 
     tmp<volTensorField> tgradU(fvc::grad(U));
-    volScalarField G(this->GName(), nut*(tgradU() && dev(twoSymm(tgradU()))));
+    volScalarField G(this->GName(), nut*(tgradU() && devTwoSymm(tgradU())));
     tgradU.clear();
 
     tmp<fvScalarMatrix> kEqn

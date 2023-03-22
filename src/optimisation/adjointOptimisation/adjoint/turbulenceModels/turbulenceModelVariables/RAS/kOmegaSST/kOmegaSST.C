@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,7 +114,7 @@ tmp<volScalarField::Internal> kOmegaSST::computeG()
     volScalarField::Internal GbyNu0
     (
         IOobject::scopedName(this->type(), "GbyNu"),
-        (tgradU() && dev(twoSymm(tgradU())))
+        (tgradU() && devTwoSymm(tgradU()))
     );
 
     // NB: leave tmp registered (for correctBoundaryConditions)

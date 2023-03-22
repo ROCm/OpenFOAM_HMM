@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,7 +126,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
 
         const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
-        return -thermo.nu()*dev(twoSymm(fvc::grad(U)));
+        return -thermo.nu()*devTwoSymm(fvc::grad(U));
     }
     else if (mesh_.foundObject<transportModel>("transportProperties"))
     {
@@ -135,7 +135,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
 
         const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
-        return -laminarT.nu()*dev(twoSymm(fvc::grad(U)));
+        return -laminarT.nu()*devTwoSymm(fvc::grad(U));
     }
     else if (mesh_.foundObject<dictionary>("transportProperties"))
     {
@@ -146,7 +146,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::devReff() const
 
         const auto& U = mesh_.lookupObject<volVectorField>(UName_);
 
-        return -nu*dev(twoSymm(fvc::grad(U)));
+        return -nu*devTwoSymm(fvc::grad(U));
     }
 
     FatalErrorInFunction

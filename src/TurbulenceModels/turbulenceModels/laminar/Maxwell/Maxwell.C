@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,7 +139,7 @@ Maxwell<BasicTurbulenceModel>::devRhoReff(const volVectorField& U) const
             ),
             this->alpha_*this->rho_*sigma_
           - (this->alpha_*this->rho_*this->nu())
-           *dev(twoSymm(fvc::grad(U)))
+           *devTwoSymm(fvc::grad(U))
         )
     );
 }

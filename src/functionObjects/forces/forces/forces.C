@@ -230,27 +230,27 @@ Foam::functionObjects::forces::devRhoReff
         const auto& turb =
             lookupObject<icoTurbModel>(icoTurbModel::propertiesName);
 
-        return -rho(patchi)*turb.nuEff(patchi)*dev(twoSymm(gradUp));
+        return -rho(patchi)*turb.nuEff(patchi)*devTwoSymm(gradUp);
     }
     else if (foundObject<cmpTurbModel>(cmpTurbModel::propertiesName))
     {
         const auto& turb =
             lookupObject<cmpTurbModel>(cmpTurbModel::propertiesName);
 
-        return -turb.muEff(patchi)*dev(twoSymm(gradUp));
+        return -turb.muEff(patchi)*devTwoSymm(gradUp);
     }
     else if (foundObject<fluidThermo>(fluidThermo::dictName))
     {
         const auto& thermo = lookupObject<fluidThermo>(fluidThermo::dictName);
 
-        return -thermo.mu(patchi)*dev(twoSymm(gradUp));
+        return -thermo.mu(patchi)*devTwoSymm(gradUp);
     }
     else if (foundObject<transportModel>("transportProperties"))
     {
         const auto& laminarT =
             lookupObject<transportModel>("transportProperties");
 
-        return -rho(patchi)*laminarT.nu(patchi)*dev(twoSymm(gradUp));
+        return -rho(patchi)*laminarT.nu(patchi)*devTwoSymm(gradUp);
     }
     else if (foundObject<dictionary>("transportProperties"))
     {
@@ -259,7 +259,7 @@ Foam::functionObjects::forces::devRhoReff
 
         const dimensionedScalar nu("nu", dimViscosity, transportProperties);
 
-        return -rho(patchi)*nu.value()*dev(twoSymm(gradUp));
+        return -rho(patchi)*nu.value()*devTwoSymm(gradUp);
     }
     else
     {

@@ -473,6 +473,22 @@ inline SymmTensor<Cmpt> twoSymm(const SymmTensor<Cmpt>& st)
 }
 
 
+//- Return the deviatoric part of the symmetric part of a SymmTensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devSymm(const SymmTensor<Cmpt>& st)
+{
+    return dev(st);
+}
+
+
+//- Return the deviatoric part of twice the symmetric part of a SymmTensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devTwoSymm(const SymmTensor<Cmpt>& st)
+{
+    return dev2(st);
+}
+
+
 //- Return the deviatoric part of a SymmTensor
 template<class Cmpt>
 inline SymmTensor<Cmpt> dev(const SymmTensor<Cmpt>& st)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -262,7 +262,7 @@ void LaunderSharmaKE<BasicTurbulenceModel>::correct()
     volScalarField D(2.0*this->nu()*magSqr(fvc::grad(sqrt(k_))));
 
     tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField G(this->GName(), nut*(tgradU() && dev(twoSymm(tgradU()))));
+    volScalarField G(this->GName(), nut*(tgradU() && devTwoSymm(tgradU())));
     tgradU.clear();
 
 

@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2021 PCOpt/NTUA
     Copyright (C) 2013-2021 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -723,7 +723,7 @@ tmp<volSymmTensorField> adjointSpalartAllmaras::devReff
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-           -nuEff()*dev(twoSymm(fvc::grad(U)))
+           -nuEff()*devTwoSymm(fvc::grad(U))
         );
 }
 

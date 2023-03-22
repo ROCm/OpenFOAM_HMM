@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])
         volScalarField nut(calcNut(mesh, U));
 
         // Blend nut using boundary layer profile
-        volScalarField S("S", mag(dev(symm(fvc::grad(U)))));
+        volScalarField S("S", mag(devSymm(fvc::grad(U))));
         nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
         // Do not correct BC - wall functions will 'undo' manipulation above
