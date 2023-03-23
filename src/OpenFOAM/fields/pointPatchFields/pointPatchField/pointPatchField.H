@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -140,7 +140,49 @@ public:
     virtual ~pointPatchFieldBase() = default;
 
 
+    // Static Member Functions
+
+        //- The type name for \c empty patch fields
+        static const word& emptyType() noexcept
+        {
+            return Foam::fieldTypes::emptyType;
+        }
+
+        //- The type name for \c calculated patch fields
+        static const word& calculatedType() noexcept
+        {
+            return Foam::fieldTypes::calculatedType;
+        }
+
+        //- The type name for \c zeroGradient patch fields
+        static const word& zeroGradientType() noexcept
+        {
+            return Foam::fieldTypes::zeroGradientType;
+        }
+
+
     // Member Functions
+
+    // Attributes
+
+        //- True if the patch field fixes a value
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
+
+        //- True if the patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
+
+        //- The constraint type the pointPatchField implements
+        virtual const word& constraintType() const
+        {
+            return word::null;
+        }
+
 
     // Access
 
@@ -365,34 +407,6 @@ public:
 
 
     // Member Functions
-
-        //- The type name for calculated patch fields
-        static const word& calculatedType();
-
-        //- The type name for zeroGradient patch fields
-        static const word& zeroGradientType();
-
-
-    // Attributes
-
-        //- True if this patch field fixes a value
-        virtual bool fixesValue() const
-        {
-            return false;
-        }
-
-        //- True if this patch field is coupled
-        virtual bool coupled() const
-        {
-            return false;
-        }
-
-        //- The constraint type this pointPatchField implements.
-        virtual const word& constraintType() const
-        {
-            return word::null;
-        }
-
 
     // Access
 

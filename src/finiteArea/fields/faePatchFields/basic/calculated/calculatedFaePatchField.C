@@ -29,15 +29,6 @@ License
 #include "calculatedFaePatchField.H"
 #include "faPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::faePatchField<Type>::calculatedType()
-{
-    return Foam::calculatedFaePatchField<Type>::typeName;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

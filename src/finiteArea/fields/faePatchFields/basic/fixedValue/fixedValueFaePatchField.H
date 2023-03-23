@@ -130,24 +130,19 @@ public:
     virtual ~fixedValueFaePatchField() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
 
+    // Other
 
         //- Write
         virtual void write(Ostream&) const;
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&) {}
 

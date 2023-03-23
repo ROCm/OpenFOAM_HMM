@@ -47,7 +47,7 @@ tractionDisplacementCorrectionFvPatchVectorField
     traction_(p.size(), Zero),
     pressure_(p.size(), Zero)
 {
-    fvPatchVectorField::operator=(patchInternalField());
+    fvPatchField<vector>::patchInternalField(*this);
     gradient() = Zero;
 }
 
@@ -79,7 +79,7 @@ tractionDisplacementCorrectionFvPatchVectorField
     traction_("traction", dict, p.size()),
     pressure_("pressure", dict, p.size())
 {
-    fvPatchVectorField::operator=(patchInternalField());
+    fvPatchField<vector>::patchInternalField(*this);
     gradient() = Zero;
 }
 

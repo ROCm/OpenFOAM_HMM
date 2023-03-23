@@ -114,8 +114,8 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     }
     else
     {
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        fvPatchField<scalar>::patchInternalField(*this);
+        gradient() = Zero;
     }
 }
 

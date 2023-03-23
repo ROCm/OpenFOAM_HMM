@@ -28,16 +28,6 @@ License
 #include "zeroGradientFvPatchField.H"
 #include "fvPatchFieldMapper.H"
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::fvPatchField<Type>::zeroGradientType()
-{
-    return zeroGradientFvPatchField<Type>::typeName;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -61,7 +51,8 @@ Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 :
     fvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    fvPatchField<Type>::operator=(this->patchInternalField());
+    // Set to the internal field
+    fvPatchField<Type>::patchInternalField(*this);
 }
 
 
@@ -109,7 +100,8 @@ void Foam::zeroGradientFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    fvPatchField<Type>::operator==(this->patchInternalField());
+    // Set to the internal field
+    fvPatchField<Type>::patchInternalField(*this);
     fvPatchField<Type>::evaluate();
 }
 

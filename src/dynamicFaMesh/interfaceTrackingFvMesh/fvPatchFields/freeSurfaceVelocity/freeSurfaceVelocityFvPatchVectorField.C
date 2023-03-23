@@ -70,7 +70,7 @@ freeSurfaceVelocityFvPatchVectorField
     fixedGradientFvPatchVectorField(p, iF)
 {
     fvPatchFieldBase::readDict(dict);
-    fvPatchVectorField::operator=(patchInternalField());
+    fvPatchField<vector>::patchInternalField(*this);
 }
 
 

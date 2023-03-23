@@ -126,7 +126,39 @@ public:
     virtual ~fvsPatchFieldBase() = default;
 
 
+    // Static Member Functions
+
+        //- The type name for \c empty patch fields
+        static const word& emptyType() noexcept
+        {
+            return Foam::fieldTypes::emptyType;
+        }
+
+        //- The type name for \c calculated patch fields
+        static const word& calculatedType() noexcept
+        {
+            return Foam::fieldTypes::calculatedType;
+        }
+
+
     // Member Functions
+
+    // Attributes
+
+        //- True if the patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
+
+        //- True if the patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
+
 
     // Access
 
@@ -402,27 +434,6 @@ public:
 
 
     // Member Functions
-
-        //- The type name for calculated patch fields
-        static const word& calculatedType();
-
-
-    // Attributes
-
-        //- True if this patch field fixes a value.
-        //  Needed to check if a level has to be specified while solving
-        //  Poissons equations.
-        virtual bool fixesValue() const
-        {
-            return false;
-        }
-
-        //- True if this patch field is coupled
-        virtual bool coupled() const
-        {
-            return false;
-        }
-
 
     // Access
 

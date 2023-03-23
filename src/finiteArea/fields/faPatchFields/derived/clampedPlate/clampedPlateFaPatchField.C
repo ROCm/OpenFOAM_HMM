@@ -58,7 +58,8 @@ clampedPlateFaPatchField<Type>::clampedPlateFaPatchField
 :
     faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    faPatchField<Type>::operator=(this->patchInternalField());
+    // Set to the internal field
+    faPatchField<Type>::patchInternalField(*this);
 }
 
 

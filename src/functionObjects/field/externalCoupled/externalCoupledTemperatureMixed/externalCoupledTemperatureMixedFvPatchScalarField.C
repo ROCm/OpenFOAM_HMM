@@ -160,7 +160,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
         // or extrapolated value
         if (!this->readValueEntry(dict))
         {
-            fvPatchField<scalar>::operator=(this->patchInternalField());
+            fvPatchField<scalar>::patchInternalField(*this);
         }
 
         // Initialise as a fixed value

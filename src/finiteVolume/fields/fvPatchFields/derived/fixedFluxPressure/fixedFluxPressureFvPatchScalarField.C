@@ -65,7 +65,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     }
     else
     {
-        fvPatchField<scalar>::operator=(patchInternalField());
+        fvPatchField<scalar>::patchInternalField(*this);
         gradient() = Zero;
     }
 }

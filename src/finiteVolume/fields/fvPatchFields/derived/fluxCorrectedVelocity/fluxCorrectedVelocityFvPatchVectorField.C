@@ -75,7 +75,7 @@ fluxCorrectedVelocityFvPatchVectorField
     rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {
     fvPatchFieldBase::readDict(dict);
-    fvPatchVectorField::operator=(patchInternalField());
+    fvPatchField<vector>::patchInternalField(*this);
 }
 
 

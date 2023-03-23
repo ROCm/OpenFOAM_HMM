@@ -82,13 +82,14 @@ Foam::variableHeightFlowRateFvPatchScalarField
     upperBound_(dict.get<scalar>("upperBound"))
 {
     fvPatchFieldBase::readDict(dict);
-    this->refValue() = 0.0;
 
     if (!this->readValueEntry(dict))
     {
-        fvPatchScalarField::operator=(this->patchInternalField());
+        // Fallback: set to the internal field
+        fvPatchField<scalar>::patchInternalField(*this);
     }
 
+    this->refValue() = 0.0;
     this->refGrad() = 0.0;
     this->valueFraction() = 0.0;
 }

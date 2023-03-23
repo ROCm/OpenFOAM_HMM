@@ -359,7 +359,7 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     cornerWeights_()
 {
     // apply zero-gradient condition on start-up
-    this->operator==(patchInternalField());
+    fvPatchField<scalar>::patchInternalField(*this);
 }
 
 

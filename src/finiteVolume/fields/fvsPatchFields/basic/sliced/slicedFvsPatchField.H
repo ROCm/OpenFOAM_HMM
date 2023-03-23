@@ -130,20 +130,13 @@ public:
     virtual ~slicedFvsPatchField<Type>();
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&) {}
 

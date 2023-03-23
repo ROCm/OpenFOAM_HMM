@@ -137,15 +137,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Attributes
-
-            //- Return true: this patch field is altered by assignment
-            virtual bool assignable() const
-            {
-                return true;
-            }
+        //- True: this patch field is altered by assignment
+        virtual bool assignable() const { return true; }
 
 
         //- Update the coefficients associated with the patch field

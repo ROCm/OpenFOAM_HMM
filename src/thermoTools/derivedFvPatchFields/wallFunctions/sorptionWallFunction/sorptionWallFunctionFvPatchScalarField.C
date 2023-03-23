@@ -311,8 +311,9 @@ sorptionWallFunctionFvPatchScalarField::sorptionWallFunctionFvPatchScalarField
     }
     else
     {
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        // Fallback: set to zero-gradient
+        fvPatchField<scalar>::patchInternalField(*this);
+        gradient() = Zero;
     }
 }
 

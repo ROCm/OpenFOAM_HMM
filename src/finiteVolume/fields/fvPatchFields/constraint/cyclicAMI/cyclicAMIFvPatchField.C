@@ -77,7 +77,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
         }
         else
         {
-            fvPatchField<Type>::operator=(this->patchInternalField());
+            fvPatchField<Type>::patchInternalField(*this);
         }
     }
 }

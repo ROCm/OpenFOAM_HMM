@@ -139,18 +139,13 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
-    // Member operators
+    // Member Operators
 
         // Disable assignment operators
 

@@ -60,7 +60,7 @@ class calculatedFaPatchField
 public:
 
     //- Runtime type information
-    TypeName("calculated");
+    TypeName("calculated");  // fieldTypes::calculatedTypeName_()
 
 
     // Constructors
@@ -126,17 +126,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
         // Evaluation functions

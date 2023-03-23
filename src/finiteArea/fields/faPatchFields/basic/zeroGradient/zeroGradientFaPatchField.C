@@ -28,15 +28,6 @@ License
 #include "zeroGradientFaPatchField.H"
 #include "faPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::faPatchField<Type>::zeroGradientType()
-{
-    return Foam::zeroGradientFaPatchField<Type>::typeName;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -109,7 +100,8 @@ void Foam::zeroGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    this->operator==(this->patchInternalField());
+    // Set to the internal field
+    faPatchField<Type>::patchInternalField(*this);
     faPatchField<Type>::evaluate();
 }
 

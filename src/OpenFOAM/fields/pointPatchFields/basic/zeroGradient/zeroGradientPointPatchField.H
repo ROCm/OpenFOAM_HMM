@@ -56,7 +56,7 @@ class zeroGradientPointPatchField
 public:
 
     //- Runtime type information
-    TypeName("zeroGradient");
+    TypeName("zeroGradient");  // fieldTypes::zeroGradientTypeName_()
 
 
     // Constructors

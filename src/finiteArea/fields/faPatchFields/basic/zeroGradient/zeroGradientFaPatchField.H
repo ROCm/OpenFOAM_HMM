@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zeroGradientFaPatchField_H
-#define zeroGradientFaPatchField_H
+#ifndef Foam_zeroGradientFaPatchField_H
+#define Foam_zeroGradientFaPatchField_H
 
 #include "faPatchField.H"
 
@@ -60,7 +60,7 @@ class zeroGradientFaPatchField
 public:
 
     //- Runtime type information
-    TypeName("zeroGradient");
+    TypeName("zeroGradient");  // fieldTypes::zeroGradientTypeName_()
 
 
     // Constructors
@@ -132,16 +132,14 @@ public:
             //- Return gradient at boundary
             virtual tmp<Field<Type>> snGrad() const
             {
-                return tmp<Field<Type>>
-                (
-                    new Field<Type>(this->size(), Zero)
-                );
+                return tmp<Field<Type>>::New(this->size(), Zero);
             }
 
             //- Evaluate the patch field
             virtual void evaluate
             (
-                const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::blocking
             );
 
             //- Return the matrix diagonal coefficients corresponding to the

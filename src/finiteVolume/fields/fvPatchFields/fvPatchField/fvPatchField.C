@@ -169,7 +169,7 @@ Foam::fvPatchField<Type>::fvPatchField
     // For unmapped faces set to internal field value (zero-gradient)
     if (notNull(iF) && mapper.hasUnmapped())
     {
-        fvPatchField<Type>::operator=(this->patchInternalField());
+        fvPatchField<Type>::patchInternalField(*this);
     }
     this->map(ptf, mapper);
 }
@@ -241,7 +241,7 @@ void Foam::fvPatchField<Type>::autoMap
 
     if (!this->size() && !mapper.distributed())
     {
-        f.setSize(mapper.size());
+        f.resize_nocopy(mapper.size());
         if (f.size())
         {
             f = this->patchInternalField();

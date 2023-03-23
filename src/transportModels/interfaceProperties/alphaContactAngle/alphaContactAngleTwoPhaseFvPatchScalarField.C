@@ -80,7 +80,8 @@ alphaContactAngleTwoPhaseFvPatchScalarField
     }
     else
     {
-        fvPatchField<scalar>::operator=(patchInternalField());
+        // Fallback: set to zero-gradient
+        fvPatchField<scalar>::patchInternalField(*this);
         gradient() = Zero;
     }
 }

@@ -132,8 +132,6 @@ public:
 
     // Member Functions
 
-    // Attributes
-
         //- True: this patch field fixes a value.
         virtual bool fixesValue() const { return true; }
 

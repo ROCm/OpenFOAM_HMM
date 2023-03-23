@@ -54,7 +54,8 @@ extrapolatedCalculatedFaPatchField
 :
     calculatedFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    calculatedFaPatchField<Type>::operator==(this->patchInternalField());
+    // Set to the internal field
+    faPatchField<Type>::patchInternalField(*this);
 }
 
 

@@ -54,7 +54,8 @@ extrapolatedCalculatedFvPatchField
 :
     calculatedFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    calculatedFvPatchField<Type>::operator==(this->patchInternalField());
+    // Set to the internal field
+    fvPatchField<Type>::patchInternalField(*this);
 }
 
 
@@ -108,7 +109,8 @@ void Foam::extrapolatedCalculatedFvPatchField<Type>::evaluate
         this->updateCoeffs();
     }
 
-    calculatedFvPatchField<Type>::operator==(this->patchInternalField());
+    // Set to the internal field
+    fvPatchField<Type>::patchInternalField(*this);
     calculatedFvPatchField<Type>::evaluate();
 }
 

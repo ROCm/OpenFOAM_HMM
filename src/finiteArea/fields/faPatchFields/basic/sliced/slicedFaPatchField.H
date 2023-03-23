@@ -139,12 +139,10 @@ public:
 
     // Member Functions
 
-    // Attributes
-
         //- True: this patch field fixes a value.
         virtual bool fixesValue() const { return true; }
 
-        //- False: this patch field is not altered by assignment
+        //- False: this patch field is not altered by assignment.
         virtual bool assignable() const { return false; }
 
 

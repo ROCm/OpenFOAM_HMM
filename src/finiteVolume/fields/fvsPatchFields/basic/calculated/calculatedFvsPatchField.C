@@ -29,14 +29,6 @@ License
 #include "calculatedFvsPatchField.H"
 #include "fvPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::fvsPatchField<Type>::calculatedType()
-{
-    return Foam::calculatedFvsPatchField<Type>::typeName;
-}
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>

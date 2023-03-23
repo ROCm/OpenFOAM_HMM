@@ -105,7 +105,8 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
 
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator=(patchInternalField());
+        // Fallback: set to the internal field
+        fvPatchField<scalar>::patchInternalField(*this);
     }
 
     refValue() = *this;

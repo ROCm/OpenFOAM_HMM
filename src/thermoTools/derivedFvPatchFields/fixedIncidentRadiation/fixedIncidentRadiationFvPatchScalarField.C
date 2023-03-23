@@ -86,8 +86,8 @@ fixedIncidentRadiationFvPatchScalarField
     else
     {
         // Still reading so cannot yet evaluate. Make up a value.
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        fvPatchField<scalar>::patchInternalField(*this);
+        gradient() = Zero;
     }
 }
 

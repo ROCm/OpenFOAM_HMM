@@ -208,7 +208,7 @@ electrostaticDepositionFvPatchScalarField
 {
     if (!this->readValueEntry(dict))
     {
-        fvPatchScalarField::operator=(patchInternalField());
+        fvPatchField<scalar>::patchInternalField(*this);
     }
 
     // If flow is multiphase

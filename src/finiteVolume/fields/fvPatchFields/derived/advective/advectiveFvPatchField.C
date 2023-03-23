@@ -91,7 +91,7 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
     // Use 'value' supplied, or set to internal field
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::operator=(this->patchInternalField());
+        fvPatchField<Type>::patchInternalField(*this);
     }
 
     this->refValue() = *this;

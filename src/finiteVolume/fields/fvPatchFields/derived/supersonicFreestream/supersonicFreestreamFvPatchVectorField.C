@@ -76,7 +76,7 @@ supersonicFreestreamFvPatchVectorField
 
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<vector>::operator=(patchInternalField());
+        fvPatchField<vector>::patchInternalField(*this);
     }
 
     refValue() = *this;

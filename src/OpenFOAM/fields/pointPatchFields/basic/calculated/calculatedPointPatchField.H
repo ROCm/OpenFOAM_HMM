@@ -53,11 +53,10 @@ class calculatedPointPatchField
 :
     public pointPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("calculated");
+    TypeName("calculated");  // fieldTypes::calculatedTypeName_()
 
 
     // Constructors

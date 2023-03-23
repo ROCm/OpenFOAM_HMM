@@ -145,7 +145,52 @@ public:
     virtual ~faPatchFieldBase() = default;
 
 
+    // Static Member Functions
+
+        //- The type name for \c empty patch fields
+        static const word& emptyType() noexcept
+        {
+            return Foam::fieldTypes::emptyType;
+        }
+
+        //- The type name for \c calculated patch fields
+        static const word& calculatedType() noexcept
+        {
+            return Foam::fieldTypes::calculatedType;
+        }
+
+        //- The type name for \c extrapolatedCalculated patch fields
+        //- combines \c zero-gradient and \c calculated
+        static const word& extrapolatedCalculatedType() noexcept
+        {
+            return Foam::fieldTypes::extrapolatedCalculatedType;
+        }
+
+        //- The type name for \c zeroGradient patch fields
+        static const word& zeroGradientType() noexcept
+        {
+            return Foam::fieldTypes::zeroGradientType;
+        }
+
+
     // Member Functions
+
+    // Attributes
+
+        //- True if the patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
+
+        //- True if the patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
+
 
     // Access
 
@@ -410,30 +455,6 @@ public:
 
 
     // Member Functions
-
-        //- The type name for calculated patch fields
-        static const word& calculatedType();
-
-        //- The type name for zeroGradient patch fields
-        static const word& zeroGradientType();
-
-
-    // Attributes
-
-        //- True if this patch field fixes a value.
-        //  Needed to check if a level has to be specified while solving
-        //  Poissons equations.
-        virtual bool fixesValue() const
-        {
-            return false;
-        }
-
-        //- True if this patch field is coupled
-        virtual bool coupled() const
-        {
-            return false;
-        }
-
 
     // Access
 
