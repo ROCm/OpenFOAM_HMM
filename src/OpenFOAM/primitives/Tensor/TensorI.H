@@ -746,6 +746,7 @@ inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t, const Cmpt detval)
         FatalErrorInFunction
             << "Tensor not properly invertible, determinant:"
             << detval << " tensor:" << t << nl
+            << abort(FatalError);
     }
     #endif
 
