@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,7 +130,11 @@ void Foam::uniformFixedValueFvPatchField<Type>::autoMap
 )
 {
     fixedValueFvPatchField<Type>::autoMap(mapper);
-    refValueFunc_().autoMap(mapper);
+
+    if (refValueFunc_)
+    {
+        refValueFunc_().autoMap(mapper);
+    }
 
     if (refValueFunc_().constant())
     {
@@ -152,7 +156,10 @@ void Foam::uniformFixedValueFvPatchField<Type>::rmap
     const uniformFixedValueFvPatchField& tiptf =
         refCast<const uniformFixedValueFvPatchField>(ptf);
 
-    refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
+    if (refValueFunc_)
+    {
+        refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
+    }
 }
 
 
@@ -174,7 +181,12 @@ template<class Type>
 void Foam::uniformFixedValueFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    refValueFunc_->writeData(os);
+
+    if (refValueFunc_)
+    {
+        refValueFunc_->writeData(os);
+    }
+
     fvPatchField<Type>::writeValueEntry(os);
 }
 
