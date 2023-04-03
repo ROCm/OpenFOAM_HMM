@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -356,24 +356,14 @@ Foam::tmp<Foam::scalarField> Foam::fvMatrix<Foam::scalar>::residual() const
 template<>
 Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Foam::scalar>::H() const
 {
-    tmp<volScalarField> tHphi
+    auto tHphi = volScalarField::New
     (
-        new volScalarField
-        (
-            IOobject
-            (
-                "H("+psi_.name()+')',
-                psi_.instance(),
-                psi_.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi_.mesh(),
-            dimensions_/dimVol,
-            extrapolatedCalculatedFvPatchScalarField::typeName
-        )
+        "H(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions_/dimVol,
+        fvPatchFieldBase::extrapolatedCalculatedType()
     );
-    volScalarField& Hphi = tHphi.ref();
+    auto& Hphi = tHphi.ref();
 
     Hphi.primitiveFieldRef() = (lduMatrix::H(psi_.primitiveField()) + source_);
     addBoundarySource(Hphi.primitiveFieldRef());
@@ -388,24 +378,14 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Foam::scalar>::H() const
 template<>
 Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Foam::scalar>::H1() const
 {
-    tmp<volScalarField> tH1
+    auto tH1 = volScalarField::New
     (
-        new volScalarField
-        (
-            IOobject
-            (
-                "H(1)",
-                psi_.instance(),
-                psi_.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi_.mesh(),
-            dimensions_/(dimVol*psi_.dimensions()),
-            extrapolatedCalculatedFvPatchScalarField::typeName
-        )
+        "H(1)",
+        psi_.mesh(),
+        dimensions_/(dimVol*psi_.dimensions()),
+        fvPatchFieldBase::extrapolatedCalculatedType()
     );
-    volScalarField& H1_ = tH1.ref();
+    auto& H1_ = tH1.ref();
 
     H1_.primitiveFieldRef() = lduMatrix::H1();
     //addBoundarySource(Hphi.primitiveField());
