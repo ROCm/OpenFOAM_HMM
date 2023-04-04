@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,7 @@ Usage
         // Report stats on exit only (instead of every time step)
         executeControl  onEnd;
         writeControl    none;
+        detail          0;
     }
     \endverbatim
 
@@ -60,10 +61,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward Declarations
-class Time;
-
 namespace functionObjects
 {
 
@@ -75,7 +72,15 @@ class parProfiling
 :
     public functionObject
 {
-    // Private Member Functions
+    // Private Data
+
+        //- The level of detail
+        //  0: summary, 1: per-proc times, 2: per-proc times/counts
+        int detailLevel_;
+
+public:
+
+    // Generated Methods
 
         //- No copy construct
         parProfiling(const parProfiling&) = delete;
@@ -83,8 +88,6 @@ class parProfiling
         //- No copy assignment
         void operator=(const parProfiling&) = delete;
 
-
-public:
 
     //- Runtime type information
     TypeName("parProfiling");
@@ -116,7 +119,7 @@ public:
         //- Do nothing
         virtual bool write();
 
-        //- Report
+        //- Disables profilingPstream
         virtual bool end();
 };
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,9 +31,10 @@ License
 
 std::unique_ptr<Foam::cpuTime> Foam::profilingPstream::timer_(nullptr);
 
-Foam::profilingPstream::timingList Foam::profilingPstream::times_(Zero);
-
 bool Foam::profilingPstream::suspend_(false);
+
+Foam::profilingPstream::timingList Foam::profilingPstream::times_(double(0));
+Foam::profilingPstream::countList Foam::profilingPstream::counts_(uint64_t(0));
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -52,7 +53,7 @@ Foam::profilingPstream::~profilingPstream()
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 void Foam::profilingPstream::enable()
 {
@@ -63,7 +64,8 @@ void Foam::profilingPstream::enable()
     else
     {
         timer_.reset(new cpuTime);
-        times_ = Zero;
+        times_ = double(0);
+        counts_ = uint64_t(0);
     }
 
     suspend_ = false;
@@ -74,6 +76,18 @@ void Foam::profilingPstream::disable() noexcept
 {
     timer_.reset(nullptr);
     suspend_ = false;
+}
+
+
+double Foam::profilingPstream::elapsedTime()
+{
+    double total = 0;
+    for (const double val : times_)
+    {
+        total += val;
+    }
+
+    return total;
 }
 
 

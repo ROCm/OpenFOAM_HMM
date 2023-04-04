@@ -179,7 +179,7 @@ bool Foam::UOPstream::write
             );
         }
 
-        profilingPstream::addWaitTime();
+        profilingPstream::addRequestTime();
 
         if (debug)
         {

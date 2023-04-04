@@ -61,8 +61,7 @@ void Foam::UIPstream::bufferIPCrecv()
         );
         MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
-        // Assume these are from gathers ...
-        profilingPstream::addGatherTime();
+        profilingPstream::addProbeTime();
 
         recvBuf_.resize(messageSize_);
 
@@ -206,7 +205,7 @@ Foam::label Foam::UIPstream::read
             return 0;
         }
 
-        profilingPstream::addWaitTime();
+        profilingPstream::addRequestTime();
 
         if (debug)
         {

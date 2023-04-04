@@ -822,6 +822,8 @@ Foam::UPstream::probeMessage
     if (UPstream::commsTypes::blocking == commsType)
     {
         // Blocking
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Probe
@@ -837,11 +839,15 @@ Foam::UPstream::probeMessage
                 << "MPI_Probe returned with error"
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addProbeTime();
         flag = 1;
     }
     else
     {
         // Non-blocking
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Iprobe
@@ -858,6 +864,8 @@ Foam::UPstream::probeMessage
                 << "MPI_Iprobe returned with error"
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addRequestTime();
     }
 
     if (flag)

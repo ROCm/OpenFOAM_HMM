@@ -3,7 +3,8 @@
 profiling
 {
     #includeEtc "caseDicts/profiling/parallel.cfg"
-    detail  1;
+    detail  2;
 }
+
 
 // ************************************************************************* //

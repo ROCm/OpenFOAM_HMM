@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,20 +57,26 @@ public:
 
     // Public Types
 
-        //- Enumeration within times array
-        enum timingType
+        //- The enumerated timing categories (for times and counts arrays)
+        enum timingType : unsigned
         {
-            GATHER = 0,
-            SCATTER,
-            BROADCAST,
+            BROADCAST = 0,
             REDUCE,
+            PROBE,
+            REQUEST,
             WAIT,
+            GATHER,
+            SCATTER,
             ALL_TO_ALL,
-            OTHER
+            OTHER,
+            nCategories  // Dimensioning size
         };
 
-        //- The timing values
-        typedef FixedList<double, 7> timingList;
+        //- Fixed-size container for timing values
+        typedef FixedList<double, timingType::nCategories> timingList;
+
+        //- Fixed-size container for timing counts
+        typedef FixedList<uint64_t, timingType::nCategories> countList;
 
 
 private:
@@ -80,11 +86,14 @@ private:
         //- The timer to use
         static std::unique_ptr<cpuTime> timer_;
 
-        //- The timing values
-        static timingList times_;
-
         //- Is timer in a suspend state?
         static bool suspend_;
+
+        //- The accumulated values for various timing categories
+        static timingList times_;
+
+        //- The timing frequency for various timing categories
+        static countList counts_;
 
 
 public:
@@ -125,16 +134,25 @@ public:
             return !suspend_ && bool(timer_);
         }
 
-        //- Access to the timing information
-        static timingList& times() noexcept
-        {
-            return times_;
-        }
+        //- The total of times
+        static double elapsedTime();
 
-        //- Access to the timing information at given index
+        //- Access to the timing information
+        static timingList& times() noexcept { return times_; }
+
+        //- Access to the timing counts
+        static countList& counts() noexcept { return counts_; }
+
+        //- Access to the timing information for given timing category
         static double times(const timingType idx)
         {
             return times_[idx];
+        }
+
+        //- Access to the count for given timing category
+        static uint64_t counts(const timingType idx)
+        {
+            return counts_[idx];
         }
 
         //- Update timer prior to measurement
@@ -152,19 +170,8 @@ public:
             if (active())
             {
                 times_[idx] += timer_->cpuTimeIncrement();
+                ++counts_[idx];
             }
-        }
-
-        //- Add time increment to \em gather time
-        static void addGatherTime()
-        {
-            addTime(timingType::GATHER);
-        }
-
-        //- Add time increment to \em scatter time
-        static void addScatterTime()
-        {
-            addTime(timingType::SCATTER);
         }
 
         //- Add time increment to \em broadcast time
@@ -179,10 +186,34 @@ public:
             addTime(timingType::REDUCE);
         }
 
+        //- Add time increment to \em probe time
+        static void addProbeTime()
+        {
+            addTime(timingType::PROBE);
+        }
+
+        //- Add time increment to \em request time
+        static void addRequestTime()
+        {
+            addTime(timingType::REQUEST);
+        }
+
         //- Add time increment to \em wait time
         static void addWaitTime()
         {
             addTime(timingType::WAIT);
+        }
+
+        //- Add time increment to \em gather time
+        static void addGatherTime()
+        {
+            addTime(timingType::GATHER);
+        }
+
+        //- Add time increment to \em scatter time
+        static void addScatterTime()
+        {
+            addTime(timingType::SCATTER);
         }
 
         //- Add time increment to \em allToAll time

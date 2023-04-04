@@ -54,6 +54,7 @@ functions
     // #include "sampleCellCentres"
     #include "isentropicTotalPressure"
     #include "wallHeatFlux"
+    #include "profiling"
 }
 
 

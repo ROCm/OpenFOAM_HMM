@@ -158,14 +158,14 @@ void Foam::PstreamDetail::allReduce
         error::printStack(Pout);
     }
 
-    profilingPstream::beginTiming();
-
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
     // MPI-3 : eg, openmpi-1.7 (2013) and later
     if (immediate)
     {
+        profilingPstream::beginTiming();
+
         handled = true;
         MPI_Request request;
 
@@ -198,11 +198,15 @@ void Foam::PstreamDetail::allReduce
         {
             *requestID = PstreamGlobals::push_request(request);
         }
+
+        profilingPstream::addRequestTime();
     }
 #endif
 
     if (!handled)
     {
+        profilingPstream::beginTiming();
+
         if (req) req->reset();
         if (requestID) *requestID = -1;
 
@@ -224,9 +228,9 @@ void Foam::PstreamDetail::allReduce
                 << UList<Type>(values, count)
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addReduceTime();
+        profilingPstream::addReduceTime();
+    }
 }
 
 
@@ -283,14 +287,14 @@ void Foam::PstreamDetail::allToAll
         return;
     }
 
-    profilingPstream::beginTiming();
-
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
     // MPI-3 : eg, openmpi-1.7 (2013) and later
     if (immediate)
     {
+        profilingPstream::beginTiming();
+
         handled = true;
         MPI_Request request;
 
@@ -326,11 +330,15 @@ void Foam::PstreamDetail::allToAll
         {
             *requestID = PstreamGlobals::push_request(request);
         }
+
+        profilingPstream::addRequestTime();
     }
 #endif
 
     if (!handled)
     {
+        profilingPstream::beginTiming();
+
         if (req) req->reset();
         if (requestID) *requestID = -1;
 
@@ -355,9 +363,9 @@ void Foam::PstreamDetail::allToAll
                 << " For " << sendData
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addAllToAllTime();
+        profilingPstream::addAllToAllTime();
+    }
 }
 
 
@@ -438,14 +446,14 @@ void Foam::PstreamDetail::allToAllv
         return;
     }
 
-    profilingPstream::beginTiming();
-
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
     // MPI-3 : eg, openmpi-1.7 (2013) and later
     if (immediate)
     {
+        profilingPstream::beginTiming();
+
         handled = true;
         MPI_Request request;
 
@@ -482,11 +490,15 @@ void Foam::PstreamDetail::allToAllv
         {
             *requestID = PstreamGlobals::push_request(request);
         }
+
+        profilingPstream::addRequestTime();
     }
 #endif
 
     if (!handled)
     {
+        profilingPstream::beginTiming();
+
         if (req) req->reset();
         if (requestID) *requestID = -1;
 
@@ -512,9 +524,10 @@ void Foam::PstreamDetail::allToAllv
                 << " recvCounts " << recvCounts
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addAllToAllTime();
     }
 
-    profilingPstream::addAllToAllTime();
 }
 
 
@@ -929,14 +942,14 @@ void Foam::PstreamDetail::gather
         error::printStack(Pout);
     }
 
-    profilingPstream::beginTiming();
-
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
     // MPI-3 : eg, openmpi-1.7 (2013) and later
     if (immediate)
     {
+        profilingPstream::beginTiming();
+
         handled = true;
         MPI_Request request;
 
@@ -972,11 +985,15 @@ void Foam::PstreamDetail::gather
         {
             *requestID = PstreamGlobals::push_request(request);
         }
+
+        profilingPstream::addRequestTime();
     }
 #endif
 
     if (!handled)
     {
+        profilingPstream::beginTiming();
+
         if (req) req->reset();
         if (requestID) *requestID = -1;
 
@@ -1001,9 +1018,9 @@ void Foam::PstreamDetail::gather
                 << " recvCount " << recvCount
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addGatherTime();
+        profilingPstream::addGatherTime();
+    }
 }
 
 
@@ -1055,14 +1072,14 @@ void Foam::PstreamDetail::scatter
         error::printStack(Pout);
     }
 
-    profilingPstream::beginTiming();
-
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
     // MPI-3 : eg, openmpi-1.7 (2013) and later
     if (immediate)
     {
+        profilingPstream::beginTiming();
+
         handled = true;
         MPI_Request request;
 
@@ -1098,11 +1115,15 @@ void Foam::PstreamDetail::scatter
         {
             *requestID = PstreamGlobals::push_request(request);
         }
+
+        profilingPstream::addRequestTime();
     }
 #endif
 
     if (!handled)
     {
+        profilingPstream::beginTiming();
+
         if (req) req->reset();
         if (requestID) *requestID = -1;
 
@@ -1127,9 +1148,9 @@ void Foam::PstreamDetail::scatter
                 << " recvCount " << recvCount
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addScatterTime();
+        profilingPstream::addScatterTime();
+    }
 }
 
 
@@ -1200,8 +1221,6 @@ void Foam::PstreamDetail::gatherv
             << Foam::abort(FatalError);
     }
 
-    profilingPstream::beginTiming();
-
     // Ensure send/recv consistency on master
     if (UPstream::master(comm) && !recvCounts[0])
     {
@@ -1214,6 +1233,8 @@ void Foam::PstreamDetail::gatherv
     // MPI-3 : eg, openmpi-1.7 (2013) and later
     if (immediate)
     {
+        profilingPstream::beginTiming();
+
         handled = true;
         MPI_Request request;
 
@@ -1250,11 +1271,15 @@ void Foam::PstreamDetail::gatherv
         {
             *requestID = PstreamGlobals::push_request(request);
         }
+
+        profilingPstream::addRequestTime();
     }
 #endif
 
     if (!handled)
     {
+        profilingPstream::beginTiming();
+
         if (req) req->reset();
         if (requestID) *requestID = -1;
 
@@ -1280,9 +1305,9 @@ void Foam::PstreamDetail::gatherv
                 << " recvCounts " << recvCounts
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addGatherTime();
+        profilingPstream::addGatherTime();
+    }
 }
 
 
@@ -1352,14 +1377,14 @@ void Foam::PstreamDetail::scatterv
             << Foam::abort(FatalError);
     }
 
-    profilingPstream::beginTiming();
-
     bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
     // MPI-3 : eg, openmpi-1.7 (2013) and later
     if (immediate)
     {
+        profilingPstream::beginTiming();
+
         handled = true;
         MPI_Request request;
 
@@ -1396,11 +1421,15 @@ void Foam::PstreamDetail::scatterv
         {
             *requestID = PstreamGlobals::push_request(request);
         }
+
+        profilingPstream::addRequestTime();
     }
 #endif
 
     if (!handled)
     {
+        profilingPstream::beginTiming();
+
         if (req) req->reset();
         if (requestID) *requestID = -1;
 
@@ -1426,9 +1455,9 @@ void Foam::PstreamDetail::scatterv
                 << " sendOffsets " << sendOffsets
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addScatterTime();
+        profilingPstream::addScatterTime();
+    }
 }
 
 
