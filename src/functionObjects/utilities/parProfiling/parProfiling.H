@@ -74,9 +74,9 @@ class parProfiling
 {
     // Private Data
 
-        //- The level of detail
+        //- The reporting level
         //  0: summary, 1: per-proc times, 2: per-proc times/counts
-        int detailLevel_;
+        int reportLevel_;
 
 public:
 

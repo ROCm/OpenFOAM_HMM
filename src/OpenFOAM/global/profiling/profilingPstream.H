@@ -60,16 +60,16 @@ public:
         //- The enumerated timing categories (for times and counts arrays)
         enum timingType : unsigned
         {
-            BROADCAST = 0,
-            REDUCE,
+            ALL_TO_ALL = 0,
+            BROADCAST,
             PROBE,
+            REDUCE,
+            GATHER,         // gather (or recv)
+            SCATTER,        // scatter (or send)
             REQUEST,
             WAIT,
-            GATHER,
-            SCATTER,
-            ALL_TO_ALL,
             OTHER,
-            nCategories  // Dimensioning size
+            nCategories     // Dimensioning size
         };
 
         //- Fixed-size container for timing values
@@ -98,28 +98,29 @@ private:
 
 public:
 
-    // Constructors
+    // Static Member Functions
 
-        //- Default construct, enables global timer
-        profilingPstream();
+    // Management
 
+        //- True if timer is active (ie, enabled and not suspended)
+        static bool active() noexcept { return !suspend_ && timer_; }
 
-    //- Destructor, disables global timer
-    ~profilingPstream();
-
-
-    // Member Functions
-
-        //- Create timer for measuring communication, or reset existing
+        //- Create timer for measuring communication or un-suspend existing
         static void enable();
 
-        //- Remove timer for measuring communication activity
+        //- Remove timer for measuring communication activity.
+        //- Does not affect times/counts.
         static void disable() noexcept;
 
-        //- Suspend use of timer (if active)
-        static void suspend() noexcept
+        //- Reset times/counts. Does not affect the timer itself
+        static void reset();
+
+        //- Suspend use of timer. Return old status
+        static bool suspend() noexcept
         {
+            bool old(suspend_);
             suspend_ = bool(timer_);
+            return old;
         }
 
         //- Resume use of timer (if previously active)
@@ -128,14 +129,8 @@ public:
             suspend_ = false;
         }
 
-        //- Timer is active (not suspended and enabled)
-        static bool active() noexcept
-        {
-            return !suspend_ && bool(timer_);
-        }
 
-        //- The total of times
-        static double elapsedTime();
+    // Timing/Counts
 
         //- Access to the timing information
         static timingList& times() noexcept { return times_; }
@@ -155,10 +150,13 @@ public:
             return counts_[idx];
         }
 
+        //- The total of times
+        static double elapsedTime();
+
         //- Update timer prior to measurement
         static void beginTiming()
         {
-            if (active())
+            if (!suspend_ && timer_)
             {
                 (void) timer_->cpuTimeIncrement();
             }
@@ -167,7 +165,7 @@ public:
         //- Add time increment
         static void addTime(const timingType idx)
         {
-            if (active())
+            if (!suspend_ && timer_)
             {
                 times_[idx] += timer_->cpuTimeIncrement();
                 ++counts_[idx];
@@ -227,6 +225,12 @@ public:
         {
             addTime(timingType::OTHER);
         }
+
+
+    // Output
+
+        //- Report current information. Uses parallel communication!
+        static void report(const int reportLevel = 0);
 };
 
 
