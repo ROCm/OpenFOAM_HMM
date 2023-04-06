@@ -29,7 +29,7 @@ Namespace
 
 Description
     Global functions and variables for working with parallel streams,
-    but principally for mpi
+    but principally for MPI.
 
 SourceFiles
     PstreamGlobals.C
@@ -40,6 +40,7 @@ SourceFiles
 #define Foam_PstreamGlobals_H
 
 #include "DynamicList.H"
+#include "UPstream.H"  // for UPstream::Request
 #include <mpi.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -71,7 +72,6 @@ extern DynamicList<MPI_Group> MPIGroups_;
 
 //- Outstanding non-blocking operations.
 extern DynamicList<MPI_Request> outstandingRequests_;
-extern DynamicList<label> freedRequests_;
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -79,28 +79,50 @@ extern DynamicList<label> freedRequests_;
 //- Fatal if comm is outside the allocated range
 void checkCommunicator(const label comm, const label toProcNo);
 
-//- Push request onto list of outstanding requests,
-//- optionally reusing previously freed request locations
-//
-//  \return index of request within outstandingRequests_
-inline label push_request(MPI_Request request)
+
+//- Reset UPstream::Request to null and/or the index of the outstanding
+//- request to -1.
+//  Does not affect the stack of outstanding requests.
+inline void reset_request
+(
+    UPstream::Request* requestPtr,
+    label* requestIdx = nullptr
+)
 {
-    while (!freedRequests_.empty())
+    if (requestPtr) *requestPtr = UPstream::Request(MPI_REQUEST_NULL);
+    if (requestIdx) *requestIdx = -1;
+}
+
+
+//- Transcribe MPI_Request to UPstream::Request
+//- (does not affect the stack of outstanding requests)
+//- or else push onto list of outstanding requests
+//- and (optionally) record its location
+inline void push_request
+(
+    MPI_Request request,
+    UPstream::Request* requestPtr = nullptr,
+    label* requestIdx = nullptr
+)
+{
+    if (requestPtr)
     {
-        const label index = freedRequests_.back();
-        freedRequests_.pop_back();
+        // Transcribe as UPstream::Request
+        *requestPtr = UPstream::Request(request);
 
-        if (index < outstandingRequests_.size())
-        {
-            outstandingRequests_[index] = request;
-            return index;
-        }
+        // Not on stack of outstanding requests
+        if (requestIdx) *requestIdx = -1;
     }
+    else
+    {
+        if (requestIdx)
+        {
+            // Its index into outstanding requests
+            *requestIdx = PstreamGlobals::outstandingRequests_.size();
+        }
 
-    const label index = outstandingRequests_.size();
-    outstandingRequests_.push_back(request);
-
-    return index;
+        PstreamGlobals::outstandingRequests_.push_back(request);
+    }
 }
 
 

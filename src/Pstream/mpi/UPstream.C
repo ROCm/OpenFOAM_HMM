@@ -442,7 +442,6 @@ void Foam::UPstream::shutdown(int errNo)
         }
 
         PstreamGlobals::outstandingRequests_.clear();
-        PstreamGlobals::freedRequests_.clear();
 
         if (nOutstanding)
         {

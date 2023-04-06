@@ -149,7 +149,7 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
 
     if (!count)
     {
-        // Early exit: non-NULL requests found
+        // Early exit: has NULL requests only
         return;
     }
 
@@ -212,9 +212,18 @@ Foam::label Foam::UPstream::waitAnyRequest(UList<UPstream::Request>& requests)
     }
 
     // Transcribe MPI_Request back into UPstream::Request
-    while (--count >= 0)
+    // - do in reverse order - see note in finishedRequests()
     {
-        requests[count] = UPstream::Request(waitRequests[count]);
+        for (label i = count-1; i >= 0; --i)
+        {
+            requests[i] = UPstream::Request(waitRequests[i]);
+        }
+
+        // Trailing portion
+        for (label i = count; i < requests.size(); ++i)
+        {
+            requests[i] = UPstream::Request(MPI_REQUEST_NULL);
+        }
     }
 
     return index;
@@ -285,9 +294,6 @@ void Foam::UPstream::waitRequest(const label i)
     {
         return;
     }
-
-    // Push index onto free cache (for later reuse)
-    PstreamGlobals::freedRequests_.push_back(i);
 
     auto& request = PstreamGlobals::outstandingRequests_[i];
 
@@ -452,7 +458,7 @@ bool Foam::UPstream::finishedRequests(UList<UPstream::Request>& requests)
 
     if (!count)
     {
-        // Early exit: non-NULL requests found
+        // Early exit: has NULL requests only
         return true;
     }
 
@@ -476,9 +482,15 @@ bool Foam::UPstream::finishedRequests(UList<UPstream::Request>& requests)
         // This is uglier that we'd like, but much better than allocating
         // and freeing a scratch buffer each time we query things.
 
-        while (--count >= 0)
+        for (label i = count-1; i >= 0; --i)
         {
-            requests[count] = UPstream::Request(waitRequests[count]);
+            requests[i] = UPstream::Request(waitRequests[i]);
+        }
+
+        // Trailing portion
+        for (label i = count; i < requests.size(); ++i)
+        {
+            requests[i] = UPstream::Request(MPI_REQUEST_NULL);
         }
     }
 

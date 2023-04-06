@@ -36,7 +36,6 @@ Foam::DynamicList<MPI_Comm> Foam::PstreamGlobals::MPICommunicators_;
 Foam::DynamicList<MPI_Group> Foam::PstreamGlobals::MPIGroups_;
 
 Foam::DynamicList<MPI_Request> Foam::PstreamGlobals::outstandingRequests_;
-Foam::DynamicList<Foam::label> Foam::PstreamGlobals::freedRequests_;
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //

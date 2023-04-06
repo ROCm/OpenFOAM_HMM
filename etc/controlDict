@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -146,6 +146,10 @@ OptimisationSwitches
     // global reduction, even if multi-pass is not needed)
     maxCommsSize    0;
 
+    // Optional (quite experimental) feature in lduMatrixUpdate
+    // to poll (processor) interfaces for individual readiness
+    // instead of waiting for all to complete first.
+    nPollProcInterfaces 0;
 
     // Trap floating point exception.
     // Can override with FOAM_SIGFPE env variable (true|false)

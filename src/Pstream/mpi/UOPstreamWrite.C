@@ -60,6 +60,8 @@ bool Foam::UOPstream::write
     const UPstream::sendModes sendMode
 )
 {
+    PstreamGlobals::reset_request(req);
+
     if (debug)
     {
         Pout<< "UOPstream::write : starting write to:" << toProcNo
@@ -78,7 +80,6 @@ bool Foam::UOPstream::write
             << Foam::endl;
         error::printStack(Pout);
     }
-
 
     PstreamGlobals::checkCommunicator(communicator, toProcNo);
 
@@ -179,27 +180,18 @@ bool Foam::UOPstream::write
             );
         }
 
-        profilingPstream::addRequestTime();
-
         if (debug)
         {
             Pout<< "UOPstream::write : started write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
                 << " commType:" << UPstream::commsTypeNames[commsType]
-                << " request:"
-                <<
+                << " request:" <<
                 (req ? label(-1) : PstreamGlobals::outstandingRequests_.size())
                 << Foam::endl;
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-        }
-        else
-        {
-            PstreamGlobals::outstandingRequests_.push_back(request);
-        }
+        PstreamGlobals::push_request(request, req);
+        profilingPstream::addRequestTime();
     }
     else
     {

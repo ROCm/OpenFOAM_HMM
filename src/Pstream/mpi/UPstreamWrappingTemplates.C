@@ -125,11 +125,10 @@ void Foam::PstreamDetail::allReduce
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
     if (!UPstream::parRun())
     {
-        // No requests generated
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
         return;
     }
 
@@ -189,16 +188,8 @@ void Foam::PstreamDetail::allReduce
                 << Foam::abort(FatalError);
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-            if (requestID) *requestID = -1;
-        }
-        else
-        {
-            *requestID = PstreamGlobals::push_request(request);
-        }
 
+        PstreamGlobals::push_request(request, req, requestID);
         profilingPstream::addRequestTime();
     }
 #endif
@@ -206,9 +197,6 @@ void Foam::PstreamDetail::allReduce
     if (!handled)
     {
         profilingPstream::beginTiming();
-
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
 
         if
         (
@@ -246,6 +234,8 @@ void Foam::PstreamDetail::allToAll
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
     const bool immediate = (req || requestID);
 
     const label numProc = UPstream::nProcs(comm);
@@ -280,10 +270,6 @@ void Foam::PstreamDetail::allToAll
     if (!UPstream::parRun() || numProc < 2)
     {
         recvData.deepCopy(sendData);
-
-        // No requests generated
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
         return;
     }
 
@@ -321,16 +307,7 @@ void Foam::PstreamDetail::allToAll
                 << Foam::abort(FatalError);
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-            if (requestID) *requestID = -1;
-        }
-        else
-        {
-            *requestID = PstreamGlobals::push_request(request);
-        }
-
+        PstreamGlobals::push_request(request, req, requestID);
         profilingPstream::addRequestTime();
     }
 #endif
@@ -338,9 +315,6 @@ void Foam::PstreamDetail::allToAll
     if (!handled)
     {
         profilingPstream::beginTiming();
-
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
 
         if
         (
@@ -387,6 +361,8 @@ void Foam::PstreamDetail::allToAllv
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
     const bool immediate = (req || requestID);
 
     const label np = UPstream::nProcs(comm);
@@ -440,9 +416,6 @@ void Foam::PstreamDetail::allToAllv
             recvCounts[0]*sizeof(Type)
         );
 
-        // No requests generated
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
         return;
     }
 
@@ -481,16 +454,7 @@ void Foam::PstreamDetail::allToAllv
                 << Foam::abort(FatalError);
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-            if (requestID) *requestID = -1;
-        }
-        else
-        {
-            *requestID = PstreamGlobals::push_request(request);
-        }
-
+        PstreamGlobals::push_request(request, req, requestID);
         profilingPstream::addRequestTime();
     }
 #endif
@@ -498,9 +462,6 @@ void Foam::PstreamDetail::allToAllv
     if (!handled)
     {
         profilingPstream::beginTiming();
-
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
 
         if
         (
@@ -910,13 +871,11 @@ void Foam::PstreamDetail::gather
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
     if (!UPstream::parRun())
     {
         std::memmove(recvData, sendData, recvCount*sizeof(Type));
-
-        // No requests generated
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
         return;
     }
 
@@ -976,16 +935,7 @@ void Foam::PstreamDetail::gather
                 << Foam::abort(FatalError);
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-            if (requestID) *requestID = -1;
-        }
-        else
-        {
-            *requestID = PstreamGlobals::push_request(request);
-        }
-
+        PstreamGlobals::push_request(request, req, requestID);
         profilingPstream::addRequestTime();
     }
 #endif
@@ -993,9 +943,6 @@ void Foam::PstreamDetail::gather
     if (!handled)
     {
         profilingPstream::beginTiming();
-
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
 
         if
         (
@@ -1040,13 +987,11 @@ void Foam::PstreamDetail::scatter
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
     if (!UPstream::parRun())
     {
         std::memmove(recvData, sendData, recvCount*sizeof(Type));
-
-        // No requests generated
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
         return;
     }
 
@@ -1106,16 +1051,7 @@ void Foam::PstreamDetail::scatter
                 << Foam::abort(FatalError);
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-            if (requestID) *requestID = -1;
-        }
-        else
-        {
-            *requestID = PstreamGlobals::push_request(request);
-        }
-
+        PstreamGlobals::push_request(request, req, requestID);
         profilingPstream::addRequestTime();
     }
 #endif
@@ -1123,9 +1059,6 @@ void Foam::PstreamDetail::scatter
     if (!handled)
     {
         profilingPstream::beginTiming();
-
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
 
         if
         (
@@ -1171,14 +1104,12 @@ void Foam::PstreamDetail::gatherv
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
     if (!UPstream::parRun())
     {
         // recvCounts[0] may be invalid - use sendCount instead
         std::memmove(recvData, sendData, sendCount*sizeof(Type));
-
-        // No requests generated
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
         return;
     }
 
@@ -1262,16 +1193,7 @@ void Foam::PstreamDetail::gatherv
                 << Foam::abort(FatalError);
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-            if (requestID) *requestID = -1;
-        }
-        else
-        {
-            *requestID = PstreamGlobals::push_request(request);
-        }
-
+        PstreamGlobals::push_request(request, req, requestID);
         profilingPstream::addRequestTime();
     }
 #endif
@@ -1279,9 +1201,6 @@ void Foam::PstreamDetail::gatherv
     if (!handled)
     {
         profilingPstream::beginTiming();
-
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
 
         if
         (
@@ -1328,13 +1247,11 @@ void Foam::PstreamDetail::scatterv
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
     if (!UPstream::parRun())
     {
         std::memmove(recvData, sendData, recvCount*sizeof(Type));
-
-        // No requests generated
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
         return;
     }
 
@@ -1412,16 +1329,7 @@ void Foam::PstreamDetail::scatterv
                 << Foam::abort(FatalError);
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-            if (requestID) *requestID = -1;
-        }
-        else
-        {
-            *requestID = PstreamGlobals::push_request(request);
-        }
-
+        PstreamGlobals::push_request(request, req, requestID);
         profilingPstream::addRequestTime();
     }
 #endif
@@ -1429,9 +1337,6 @@ void Foam::PstreamDetail::scatterv
     if (!handled)
     {
         profilingPstream::beginTiming();
-
-        if (req) req->reset();
-        if (requestID) *requestID = -1;
 
         if
         (

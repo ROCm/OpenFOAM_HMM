@@ -499,55 +499,68 @@ public:
         );
 
 
-        // Non-blocking comms
+    // Requests (non-blocking comms)
 
-            //- Number of outstanding requests
-            static label nRequests() noexcept;
+        //- Number of outstanding requests (on the internal list of requests)
+        static label nRequests() noexcept;
 
-            //- Truncate outstanding requests to given length, which is
-            //- expected to be in the range 0 to nRequests.
-            //  A no-op for out-of-range values.
-            static void resetRequests(const label n);
+        //- Truncate outstanding requests to given length, which is
+        //- expected to be in the range [0 to nRequests()].
+        //  A no-op for out-of-range values.
+        static void resetRequests(const label n);
 
-            //- Wait until all requests (from position onwards) have finished.
-            //  A no-op if parRun() == false, if there are no pending requests
-            //  or if the start is out-of-range (0 to nRequests)
-            static void waitRequests(const label pos);
+        //- Wait until all requests (from position onwards) have finished.
+        //- Corresponds to MPI_Waitall()
+        //  A no-op if parRun() == false,
+        //  if the position is out-of-range [0 to nRequests()],
+        //  or the internal list of requests is empty.
+        //
+        //  \param pos starting position within the internal list of requests
+        static void waitRequests(const label pos);
 
-            //- Wait until all requests have finished.
-            //  A no-op if parRun() == false or the list is empty
-            static void waitRequests(UList<UPstream::Request>& requests);
+        //- Wait until all requests have finished.
+        //- Corresponds to MPI_Waitall()
+        //  A no-op if parRun() == false, or the list is empty.
+        static void waitRequests(UList<UPstream::Request>& requests);
 
-            //- Wait until any request has finished and return its index.
-            //  Returns -1 if parRun() == false, or the list is empty,
-            //  or if all the requests have already been handled
-            static label waitAnyRequest(UList<UPstream::Request>& requests);
+        //- Wait until any request has finished and return its index.
+        //- Corresponds to MPI_Waitany()
+        //  Returns -1 if parRun() == false, or the list is empty,
+        //  or if all the requests have already been handled
+        static label waitAnyRequest(UList<UPstream::Request>& requests);
 
-            //- Wait until request i has finished.
-            //  A no-op if parRun() == false,
-            //  there are no pending requests,
-            //  or if the index is out-of-range (0 to nRequests)
-            static void waitRequest(const label i);
+        //- Wait until request i has finished.
+        //- Corresponds to MPI_Wait()
+        //  A no-op if parRun() == false,
+        //  there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        static void waitRequest(const label i);
 
-            //- Wait until specified request has finished.
-            //  A no-op if parRun() == false or for a null-request
-            static void waitRequest(UPstream::Request& req);
+        //- Wait until specified request has finished.
+        //- Corresponds to MPI_Wait()
+        //  A no-op if parRun() == false or for a null-request
+        static void waitRequest(UPstream::Request& req);
 
-            //- Non-blocking comms: has request i finished?
-            //  A no-op and returns true if parRun() == false,
-            //  there are no pending requests,
-            //  or if the index is out-of-range (0 to nRequests)
-            static bool finishedRequest(const label i);
+        //- Non-blocking comms: has request i finished?
+        //- Corresponds to MPI_Test()
+        //  A no-op and returns true if parRun() == false,
+        //  there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        static bool finishedRequest(const label i);
 
-            //- Non-blocking comms: has request finished?
-            //  A no-op and returns true if parRun() == false
-            //  or for a null-request
-            static bool finishedRequest(UPstream::Request& req);
+        //- Non-blocking comms: has request finished?
+        //- Corresponds to MPI_Test()
+        //  A no-op and returns true if parRun() == false
+        //  or for a null-request
+        static bool finishedRequest(UPstream::Request& req);
 
-            //- Non-blocking comms: have all requests finished?
-            //  A no-op and returns true if parRun() == false or list is empty
-            static bool finishedRequests(UList<UPstream::Request>& requests);
+        //- Non-blocking comms: have all requests finished?
+        //- Corresponds to MPI_Testall()
+        //  A no-op and returns true if parRun() == false or list is empty
+        static bool finishedRequests(UList<UPstream::Request>& requests);
 
+
+    // General
 
         //- Set as parallel run on/off.
         //  \return the previous value

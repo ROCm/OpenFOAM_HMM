@@ -105,6 +105,8 @@ Foam::label Foam::UIPstream::read
     UPstream::Request* req
 )
 {
+    PstreamGlobals::reset_request(req);
+
     if (debug)
     {
         Pout<< "UIPstream::read : starting read from:" << fromProcNo
@@ -205,26 +207,18 @@ Foam::label Foam::UIPstream::read
             return 0;
         }
 
-        profilingPstream::addRequestTime();
-
         if (debug)
         {
             Pout<< "UIPstream::read : started read from:" << fromProcNo
                 << " tag:" << tag << " read size:" << label(bufSize)
                 << " commsType:" << UPstream::commsTypeNames[commsType]
-                <<
+                << " request:" <<
                 (req ? label(-1) : PstreamGlobals::outstandingRequests_.size())
                 << Foam::endl;
         }
 
-        if (req)
-        {
-            *req = UPstream::Request(request);
-        }
-        else
-        {
-            PstreamGlobals::outstandingRequests_.push_back(request);
-        }
+        PstreamGlobals::push_request(request, req);
+        profilingPstream::addRequestTime();
 
         // Assume the message is completely received.
         return bufSize;
