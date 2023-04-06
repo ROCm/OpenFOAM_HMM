@@ -250,32 +250,20 @@ Foam::solverPerformance Foam::PCG::scalarSolve
 
             if (solverPerf.nIterations() == 0)
             {
-                #ifdef USE_HIP
-                   hipLaunchKernelGGL(HIP_KERNEL_NAME(PCG_kernel_A),(nCells + 255)/256, 256, 0,0,
-                           pAPtr, wAPtr,  nCells);
-                   hipDeviceSynchronize();
-                #else
-                  #pragma omp target teams distribute parallel for if(target:nCells>200) //LG1 AMD
+                  #pragma omp target teams distribute parallel for if(target:nCells>2000) //LG1 AMD
                   for (label cell=0; cell<nCells; cell++)
                   {
                       pAPtr[cell] = wAPtr[cell];
                   }
-                #endif  
             }
             else
             {
-                solveScalar beta = wArA/wArAold;
-                #ifdef USE_HIP
-                  hipLaunchKernelGGL(HIP_KERNEL_NAME(PCG_kernel_B),(nCells + 255)/256, 256, 0,0,
-                           pAPtr, wAPtr, beta,  nCells);
-                   hipDeviceSynchronize();
-                #else
-                  #pragma omp target teams distribute parallel for  if(target:nCells>200) //LG1 AMD
+                  solveScalar beta = wArA/wArAold;
+                  #pragma omp target teams distribute parallel for  if(target:nCells>2000) //LG1 AMD
                   for (label cell=0; cell<nCells; cell++)
                   {
                       pAPtr[cell] = wAPtr[cell] + beta*pAPtr[cell];
                   }
-                #endif
             }
             #ifdef USE_ROCTX
             roctxRangePop();
@@ -315,18 +303,12 @@ Foam::solverPerformance Foam::PCG::scalarSolve
             roctxRangePush("PCG::update psi aA");
             #endif
 
-            #ifdef USE_HIP
-                  hipLaunchKernelGGL(HIP_KERNEL_NAME(PCG_kernel_C),(nCells + 255)/256, 256, 0,0,
-                           psiPtr, pAPtr, rAPtr, wAPtr, alpha, nCells);
-                   hipDeviceSynchronize();
-            #else
-              #pragma omp target teams distribute parallel for  if(target:nCells>200) //LG1 AMD
-              for (label cell=0; cell<nCells; cell++)
-              {
+            #pragma omp target teams distribute parallel for  if(target:nCells>2000) //LG1 AMD
+            for (label cell=0; cell<nCells; cell++)
+            {
                 psiPtr[cell] += alpha*pAPtr[cell];
                 rAPtr[cell] -= alpha*wAPtr[cell];
-              }
-            #endif
+            }
 
             #ifdef USE_ROCTX
             roctxRangePop();

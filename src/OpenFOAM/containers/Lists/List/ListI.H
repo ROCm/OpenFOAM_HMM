@@ -34,7 +34,17 @@ inline void Foam::List<T>::doAlloc()
     if (this->size_ > 0)
     {
         // With sign-check to avoid spurious -Walloc-size-larger-than
-        this->v_ = new T[this->size_];
+        #if 1
+          size_t alignement = 16;
+          size_t bytes_needed = sizeof(T)*this->size_;
+          if (bytes_needed > 2*100){ //LG1 AMD
+           alignement = 256;       //LG1 AMD        
+          }
+          this->v_ = new (std::align_val_t( alignement)) T[this->size_];
+
+        #else
+          this->v_ = new T[this->size_];
+        #endif
     }
 }
 

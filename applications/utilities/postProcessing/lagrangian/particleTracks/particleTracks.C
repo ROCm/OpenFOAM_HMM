@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
     args.readIfPresent("format", setFormat);
 
     args.readIfPresent("stride", sampleFrequency);
-    sampleFrequency = max(1, sampleFrequency);  // sanity
+    sampleFrequency = Foam::max(1, sampleFrequency);  // sanity
 
     // Setup the writer
     auto writerPtr =

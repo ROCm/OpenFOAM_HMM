@@ -48,6 +48,14 @@ SourceFiles
 
 #include "gradScheme.H"
 
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif 
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -139,6 +147,42 @@ public:
 
 
 // * * * * * * * * * * * * Inline Member Function  * * * * * * * * * * * * * //
+//LG AMD  consider creating a separate thread safe funciton  
+
+#pragma omp declare target 
+template<>
+inline void faceLimitedGrad<double>::limitFace
+(
+    double& limiter,
+    const double maxDelta,
+    const double minDelta,
+    const double extrapolate
+) const
+{
+
+    if (extrapolate > maxDelta + VSMALL)
+    {
+        #if 1 
+	const double maxDelta_over_extrapolate = maxDelta/extrapolate;    
+	#pragma omp atomic compare
+        limiter = limiter > maxDelta_over_extrapolate ?  maxDelta_over_extrapolate : limiter;
+        #else    
+        limiter = min(limiter, maxDelta/extrapolate);
+        #endif
+    }
+    else if (extrapolate < minDelta - VSMALL)
+    {
+        #if 1    
+	const double minDelta_over_extrapolate = minDelta/extrapolate;    
+	#pragma omp atomic compare
+        limiter = limiter > minDelta_over_extrapolate ? minDelta_over_extrapolate : limiter;
+        #else    
+        limiter = min(limiter, minDelta/extrapolate);
+        #endif
+    }
+}
+#pragma omp end declare target
+
 
 template<class Type>
 inline void faceLimitedGrad<Type>::limitFace
@@ -158,8 +202,6 @@ inline void faceLimitedGrad<Type>::limitFace
         limiter = min(limiter, minDelta/extrapolate);
     }
 }
-
-
 // * * * * * * * * Template Member Function Specialisations  * * * * * * * * //
 
 template<>

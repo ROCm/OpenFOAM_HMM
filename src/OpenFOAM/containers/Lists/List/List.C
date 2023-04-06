@@ -36,6 +36,10 @@ License
 
 #include <stdlib.h>  //LG1 AMD
 
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
+
 //LG using OpenMP offloading and HMM
 //#include <omp.h>
 //#ifndef OMP_UNIFIED_MEMORY_REQUIRED
@@ -62,7 +66,17 @@ void Foam::List<T>::doResize(const label len)
         if (bytes_needed > 2*100){ //LG1 AMD
            alignement = 256;       //LG1 AMD        
         }
+        #ifdef USE_ROCTX
+	//char roctx_name[128];
+	//sprintf(roctx_name,"allocating_%zu",sizeof(T)*len);
+        //roctxRangePush(roctx_name);
+        #endif
+
         T* nv = new (std::align_val_t( alignement)) T[len]; //LG1 AMD
+        #ifdef USE_ROCTX
+        //roctxRangePop();
+        #endif
+
         //if (bytes_needed > 2*128){   //LG1 AMD
         //   #pragma omp target enter data map(to:nv[0:len]) //LG1 AMD
        // } //LG1 AMD

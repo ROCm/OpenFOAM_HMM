@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
     // (M:Eq. 11)
     const volScalarField epsilon
     (
-        pow4(uTau)/(kappa*nu*max(dPlus, dPlusRef))
+        pow4(uTau)/(kappa*nu*Foam::max(dPlus, dPlusRef))
     );
 
     // (M:Eq. 13)
@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
 
         // (M:Eq. 9)
         const dimensionedScalar maxU(dimVelocity, SMALL);
-        U *= min(scalar(1), fRei*uTau/max(mag(U), maxU));
+        U *= Foam::min(scalar(1), fRei*uTau/Foam::max(mag(U), maxU));
     }
 
     if (tepsilon.valid())

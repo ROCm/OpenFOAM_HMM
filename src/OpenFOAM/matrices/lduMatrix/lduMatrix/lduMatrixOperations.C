@@ -29,12 +29,32 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif 
+#endif
+
 #include "lduMatrix.H"
+
+#include "AtomicAccumulator.H"
+#include "macros.H"
+
+#ifdef USE_ROCTX
+#include <roctx.h>
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::lduMatrix::sumDiag()
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("lduMatrix::sumDiag");
+    #endif
+
     const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
     const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
     scalarField& Diag = diag();
@@ -42,16 +62,24 @@ void Foam::lduMatrix::sumDiag()
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
+    #pragma omp target teams distribute parallel for if (target:l.size() > 1)
     for (label face=0; face<l.size(); face++)
     {
-        Diag[l[face]] += Lower[face];
-        Diag[u[face]] += Upper[face];
+        atomicAccumulator(Diag[l[face]]) += Lower[face];
+        atomicAccumulator(Diag[u[face]]) += Upper[face];
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
 void Foam::lduMatrix::negSumDiag()
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("lduMatrix::negSumDiag");
+    #endif
+
     const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
     const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
     scalarField& Diag = diag();
@@ -59,11 +87,15 @@ void Foam::lduMatrix::negSumDiag()
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
+    #pragma omp target teams distribute parallel for if (target:l.size() > 1000)
     for (label face=0; face<l.size(); face++)
     {
-        Diag[l[face]] -= Lower[face];
-        Diag[u[face]] -= Upper[face];
+        atomicAccumulator(Diag[l[face]]) -= Lower[face];
+        atomicAccumulator(Diag[u[face]]) -= Upper[face];
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -72,17 +104,25 @@ void Foam::lduMatrix::sumMagOffDiag
     scalarField& sumOff
 ) const
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("lduMatrix::sumMagOffDiag");
+    #endif
+
     const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
     const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
 
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
+    #pragma omp target teams distribute parallel for if (target:l.size() > 1000)
     for (label face = 0; face < l.size(); face++)
     {
-        sumOff[u[face]] += mag(Lower[face]);
-        sumOff[l[face]] += mag(Upper[face]);
+        atomicAccumulator(sumOff[u[face]]) += mag(Lower[face]);
+        atomicAccumulator(sumOff[l[face]]) += mag(Upper[face]);
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

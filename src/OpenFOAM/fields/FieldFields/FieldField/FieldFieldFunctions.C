@@ -37,21 +37,6 @@ License
   #define OMP_UNIFIED_MEMORY_REQUIRED
   #endif 
 
-#ifdef USE_HIP 
-#include <hip/hip_runtime.h>
-
-template<template<class> class Field, class Type>
-__global__
-static void  FieldFieldFunctions_mag_A(Foam::FieldField<Field, typename Foam::typeOfMag<Type>::type>& sf,
-                                       const Foam::FieldField<Field, Type>& f, Foam::label N){
-    Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
-    Foam::label i_shift = blockDim.x*gridDim.x;
-    
-    for (Foam::label i = i_start; i < N; i+=i_shift)
-        Foam::mag(sf[i],f[i]);
-}
-#endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,13 +53,7 @@ void component
     const direction d
 )
 {
-    //printf("in component, line=%d\n",__LINE__);
-
-    //LG2 could not compile/link with the openmp pragmas ... 
     forAll(sf, i)
-    //label sf_sz = sf.size();
-    //#pragma omp target teams distribute parallel for if(target:sf_sz > 2000)
-    //for (label i=0; i < sf_sz; ++i)
     {
         component(sf[i], f[i], d);
     }
@@ -86,7 +65,7 @@ void T(FieldField<Field, Type>& f1, const FieldField<Field, Type>& f2)
 {
     //forAll(f1, i)
     label f1_sz = f1.size();
-    #pragma omp target teams distribute parallel for if(target:f1_sz > 2000)
+    //LG3 #pragma omp parallel for if (f1_sz > 4)
     for (label i=0; i < f1_sz; ++i)
     {
         T(f1[i], f2[i]);
@@ -101,7 +80,6 @@ void pow
     const FieldField<Field, Type>& vf
 )
 {
-    printf("in pow, line=%d\n",__LINE__);
     forAll(f, i)
     {
         pow(f[i], vf[i]);
@@ -155,7 +133,7 @@ void sqr
 {
     //forAll(f, i)
     label f_sz = f.size();
-    #pragma omp target teams distribute parallel for if(target:f_sz > 2000)
+    //LG3 #pragma omp parallel for if (f_sz > 4)
     for (label i=0; i < f_sz; ++i)
     {
         sqr(f[i], vf[i]);
@@ -201,7 +179,7 @@ void magSqr
 {
     label sf_sz = sf.size();
     //forAll(sf, i)
-    #pragma omp target teams distribute parallel for if(target:sf_sz>2000)
+    //LG3  #pragma omp parallel for if (sf_sz > 4)
     for(label i = 0; i < sf_sz; ++i) 
     {
         magSqr(sf[i], f[i]);
@@ -248,11 +226,7 @@ void mag
     const FieldField<Field, Type>& f
 )
 {
-    #ifdef USE_HIP
-        hipLaunchKernelGGL(HIP_KERNEL_NAME(FieldFieldFunctions_mag_A<Field, Type>),(sf.size() + 255)/256, 256, 0,0,
-                           sf, f,  sf.size() );
-        hipDeviceSynchronize();
-    #else
+
      
       #if 0
     
@@ -262,12 +236,12 @@ void mag
         }
       #else
         const label sf_size = sf.size();
-        #pragma omp target teams distribute parallel for if(target:sf_size>2000)
+	    //LG3 #pragma omp parallel for if (sf_size > 4)
         for (label i = 0; i < sf_size; ++i)  
            mag(sf[i], f[i]);
 
       #endif
-    #endif
+
 }
 
 template<template<class> class Field, class Type>
@@ -309,7 +283,6 @@ void cmptMax
     const FieldField<Field, Type>& f
 )
 {
-    printf("in cmptMax, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptMax(cf[i], f[i]);
@@ -359,7 +332,6 @@ void cmptMin
     const FieldField<Field, Type>& f
 )
 {
-    printf("in cmptMin, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptMin(cf[i], f[i]);
@@ -409,7 +381,6 @@ void cmptAv
     const FieldField<Field, Type>& f
 )
 {
-    printf("in cmptAv, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptAv(cf[i], f[i]);
@@ -459,7 +430,6 @@ void cmptMag
     const FieldField<Field, Type>& f
 )
 {
-    printf("in cmptMag, line=%d\n",__LINE__);
     forAll(cf, i)
     {
         cmptMag(cf[i], f[i]);
@@ -508,7 +478,6 @@ template<template<class> class Field, class Type>
 Type max(const FieldField<Field, Type>& f)
 {
     Type result = pTraits<Type>::min;
-    printf("in max, line=%d\n",__LINE__);
     forAll(f, i)
     {
         if (f[i].size())
@@ -532,7 +501,7 @@ Type min(const FieldField<Field, Type>& f)
 
     //forAll(f, i)
     label f_sz = f.size();
-    #pragma omp target teams distribute parallel for reduction(min:result) map(tofrom:result) if(target:f_sz > 2000) 
+    //LG3 #pragma omp parallel for reduction(min:result)  if(f_sz > 4) 
     for (label i = 0; i < f_sz; ++i)
     {
         if (f[i].size())
@@ -746,7 +715,7 @@ void opFunc                                                                    \
 )                                                                              \
 {                                                                              \
     /*forAll(f, i) */                                                          \
-    _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)")   \
+    /* _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)")*/   \
     for (label i=0; i < f.size(); ++i)                                         \
     {                                                                          \
         opFunc(f[i], f1[i], f2[i]);                                            \
@@ -884,7 +853,7 @@ void opFunc                                                                    \
 )                                                                              \
 {                                                                              \
     /*forAll(f, i)*/                                                           \
-    _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)") \
+    /* _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)")*/ \
     for (label i=0; i < f.size(); ++i)                                         \
     {                                                                          \
         opFunc(f[i], f1[i], vs);                                               \
@@ -956,7 +925,7 @@ void opFunc                                                                    \
 )                                                                              \
 {                                                                              \
     /*forAll(f, i)*/                                                           \
-    _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)")  \
+    /* _Pragma("omp target teams distribute parallel for if(target:f.size()>2000)")*/  \
     for (label i=0; i < f.size(); ++i)                                         \
     {                                                                          \
         opFunc(f[i], vs, f1[i]);                                               \

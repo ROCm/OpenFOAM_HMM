@@ -25,6 +25,14 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif 
+#endif
+
 
 #include "PstreamReduceOps.H"
 #include "FieldReuseFunctions.H"
@@ -118,7 +126,15 @@ void sqr
 )
 {
     typedef typename outerProduct<Type, Type>::type outerProductType;
-    TFOR_ALL_F_OP_FUNC_F(outerProductType, res, =, sqr, Type, vf)
+    if constexpr ( std::is_same<Type,double>() ) {
+       TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(outerProductType, res, =, sqr, double, vf) 
+    } 
+    else if constexpr ( std::is_same<Type,float>() ) {
+        TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(outerProductType, res, =, sqr, float, vf) 
+    }
+    else{ 
+      TFOR_ALL_F_OP_FUNC_F(outerProductType, res, =, sqr, Type, vf) 
+    }
 }
 
 template<class Type>
@@ -154,8 +170,15 @@ void magSqr
 )
 {
     typedef typename typeOfMag<Type>::type magType;
-
-    TFOR_ALL_F_OP_FUNC_F(magType, res, =, magSqr, Type, f)
+    if constexpr ( std::is_same<Type,double>() ) {
+       TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(magType, res, =, magSqr, double, f)
+    }
+    else if constexpr ( std::is_same<Type,double>() ) {
+       TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(magType, res, =, magSqr, float, f)
+    }
+    else {
+       TFOR_ALL_F_OP_FUNC_F(magType, res, =, magSqr, Type, f)
+    }
 }
 
 template<class Type>
@@ -183,9 +206,6 @@ magSqr(const tmp<Field<Type>>& tf)
 
 //LG1 AMD
 template<class Type>
-#ifdef USE_HIP
-__host__  __device__
-#endif
 void mag
 (
     Field<typename typeOfMag<Type>::type>& res,
@@ -194,7 +214,15 @@ void mag
 {
     typedef typename typeOfMag<Type>::type magType;
 
-    TFOR_ALL_F_OP_FUNC_F(magType, res, =, mag, Type, f)
+    if constexpr ( std::is_same<Type,double>() ) {
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(magType, res, =, mag, double, f)
+    }
+    else if constexpr ( std::is_same<Type,float>() ) {
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(magType, res, =, mag, float, f)
+    }
+    else {
+      TFOR_ALL_F_OP_FUNC_F(magType, res, =, mag, Type, f)
+    }
 }
 
 template<class Type>
@@ -366,7 +394,17 @@ Type max(const UList<Type>& f)
     if (f.size())
     {
         Type Max(f[0]);
-        TFOR_ALL_S_OP_FUNC_F_S(Type, Max, =, max, Type, f, Type, Max)
+        if constexpr ( std::is_same<Type,double>() ) {
+            //compute: (s) = (f[i]) > (s) ?  (f[i]) : (s)   
+            TPARALLELFOR_ALL_S_OP_MAX_REDUCTION_F_S_ARITHMETIC(double, Max, =, max, double, f)
+        }
+        else if constexpr ( std::is_same<Type,float>() ) {
+            //compute: (s) = (f[i]) > (s) ?  (f[i]) : (s)   
+            TPARALLELFOR_ALL_S_OP_MAX_REDUCTION_F_S_ARITHMETIC(float, Max, =, max, float, f)
+        }
+        else {
+            TFOR_ALL_S_OP_FUNC_F_S(Type, Max, =, max, Type, f, Type, Max)
+        }
         return Max;
     }
 
@@ -381,7 +419,17 @@ Type min(const UList<Type>& f)
     if (f.size())
     {
         Type Min(f[0]);
-        TFOR_ALL_S_OP_FUNC_F_S(Type, Min, =, min, Type, f, Type, Min)
+        if constexpr ( std::is_same<Type,double>() ) {
+            //compute: (s) = (f[i]) < (s) ?  (f[i]) : (s)   
+            TPARALLELFOR_ALL_S_OP_MIN_REDUCTION_F_S_ARITHMETIC(double, Min, =, min, double, f)
+        }
+        else if constexpr ( std::is_same<Type,float>() ) {
+            //compute: (s) = (f[i]) < (s) ?  (f[i]) : (s)   
+            TPARALLELFOR_ALL_S_OP_MIN_REDUCTION_F_S_ARITHMETIC(float, Min, =, min, float, f)
+        }
+        else {
+          TFOR_ALL_S_OP_FUNC_F_S(Type, Min, =, min, Type, f, Type, Min)
+        }
         return Min;
     }
 
@@ -396,10 +444,17 @@ Type sum(const UList<Type>& f)
     typedef typename Foam::typeOfSolve<Type>::type solveType;
 
     solveType Sum = Zero;
-
     if (f.size())
     {
-        TFOR_ALL_S_OP_FUNC_F(solveType, Sum, +=, solveType, Type, f)
+        if constexpr ( std::is_same<Type,double>() ) {
+           TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(solveType, Sum, +=, solveType, double, f)
+        }
+        else if constexpr ( std::is_same<Type,float>() ) {
+           TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(solveType, Sum, +=, solveType, float, f)
+        }
+        else {
+           TFOR_ALL_S_OP_FUNC_F(solveType, Sum, +=, solveType, Type, f)
+        }
     }
 
     return Type(Sum);
@@ -476,7 +531,16 @@ sumProd(const UList<Type>& f1, const UList<Type>& f2)
     prodType result = Zero;
     if (f1.size() && (f1.size() == f2.size()))
     {
-        TFOR_ALL_S_OP_F_OP_F(prodType, result, +=, Type, f1, &&, Type, f2)
+        if constexpr ( std::is_same<Type,double>() || std::is_same<Type,float>() ) {
+
+          printf("executing sumProd as a loop f1.size = %d\n", (int) f1.size() );
+
+          for (label i = 0; i < f1.size(); ++i)
+             result += f1[i]*f2[i];
+        }
+        else {
+          TFOR_ALL_S_OP_F_OP_F(prodType, result, +=, Type, f1, &&, Type, f2)
+        }
     }
     return result;
 }
@@ -512,7 +576,15 @@ sumSqr(const UList<Type>& f)
     prodType result = Zero;
     if (f.size())
     {
-        TFOR_ALL_S_OP_FUNC_F(prodType, result, +=, sqr, Type, f)
+        if constexpr ( std::is_same<Type,double>() ) {
+           TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(prodType, result, +=, sqr, double, f)
+        }
+        else if constexpr ( std::is_same<Type,float>() ) {
+           TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(prodType, result, +=, sqr, float, f)
+        }
+        else {
+           TFOR_ALL_S_OP_FUNC_F(prodType, result, +=, sqr, Type, f)
+        }
     }
     return result;
 }
@@ -536,7 +608,15 @@ sumMag(const UList<Type>& f)
     magType result = Zero;
     if (f.size())
     {
-        TFOR_ALL_S_OP_FUNC_F(magType, result, +=, mag, Type, f)
+        if constexpr ( std::is_same<Type,double>() ) {
+           TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(magType, result, +=, mag, double, f)
+        }
+        else if constexpr ( std::is_same<Type,float>() ) {
+           TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(magType, result, +=, mag, float, f)
+        }
+        else {
+          TFOR_ALL_S_OP_FUNC_F(magType, result, +=, mag, Type, f)
+        }
     }
     return result;
 }

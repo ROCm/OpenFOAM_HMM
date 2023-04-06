@@ -33,12 +33,14 @@ License
 #include <roctx.h>
 #endif
 
-
-
+#ifdef USE_OMP
+  #include <omp.h>
   #ifndef OMP_UNIFIED_MEMORY_REQUIRED
   #pragma omp requires unified_shared_memory
   #define OMP_UNIFIED_MEMORY_REQUIRED
   #endif 
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,7 +76,9 @@ void Foam::fv::cellLimitedGrad<Type, Limiter>::limitGradient
     #endif
 
 
-    forAll(gIf, celli)
+    //forAll(gIf, celli)
+    #pragma omp target teams distribute parallel for if(target:gIf.size() > 2000)
+    for (label celli=0; celli < gIf.size(); ++celli)
     {
         gIf[celli] = tensor
         (
@@ -120,6 +124,9 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
 
     if (k_ < SMALL)
     {
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
         return tGrad;
     }
 
@@ -139,53 +146,128 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     Field<Type> maxVsf(vsf.primitiveField());
     Field<Type> minVsf(vsf.primitiveField());
 
-    #if 1
-    forAll(owner, facei)
-    #else
-    //LG1 AMD: make sure we do not have any race conditions  
-    #pragma omp target teams distribute parallel for
-    for (label facei = 0; facei < owner.size(); ++facei)
-    #endif
-    {
+    scalar * maxVsfPtr_work_array = NULL, * minVsfPtr_work_array = NULL;
+    if constexpr ( std::is_same<Type,double>() || std::is_same<Type,float>() ) {
+        maxVsfPtr_work_array = (scalar*) omp_target_alloc(sizeof(scalar)*maxVsf.size(),omp_get_default_device());
+        minVsfPtr_work_array = (scalar*) omp_target_alloc(sizeof(scalar)*maxVsf.size(),omp_get_default_device());    
+    }
+
+ 
+    if constexpr ( std::is_same<Type,double>() || std::is_same<Type,float>()  ) {   
+
+      #pragma omp target teams distributed parallel for if(target: maxVsf.size()> 1000)
+      for (label i = 0; i < maxVsf.size(); ++i){
+         maxVsfPtr_work_array[i] = maxVsf[i];
+         minVsfPtr_work_array[i] = minVsf[i];  
+      }
+
+      #pragma omp target teams distributed parallel for if(target: owner.size() > 1000)
+      for (label facei = 0; facei < owner.size(); ++facei){
         const label own = owner[facei];
         const label nei = neighbour[facei];
+        const auto vsfOwn = (scalar) vsf[own];
+        const auto vsfNei = (scalar) vsf[nei];
 
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (maxVsfPtr_work_array[own] < vsfNei) {maxVsfPtr_work_array[own] = vsfNei;}
+
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (minVsfPtr_work_array[own] > vsfNei) minVsfPtr_work_array[own] = vsfNei;
+
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (maxVsfPtr_work_array[nei] < vsfOwn) maxVsfPtr_work_array[nei] = vsfOwn;
+
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (minVsfPtr_work_array[nei] > vsfOwn) minVsfPtr_work_array[nei] = vsfOwn;        
+      }
+
+    }
+    else{
+      for (label facei = 0; facei < owner.size(); ++facei){
+        const label own = owner[facei];
+        const label nei = neighbour[facei];
         const Type& vsfOwn = vsf[own];
         const Type& vsfNei = vsf[nei];
-
         maxVsf[own] = Foam::max(maxVsf[own], vsfNei);
         minVsf[own] = Foam::min(minVsf[own], vsfNei);
-
         maxVsf[nei] = Foam::max(maxVsf[nei], vsfOwn);
         minVsf[nei] = Foam::min(minVsf[nei], vsfOwn);
+      }
     }
 
 
     const auto& bsf = vsf.boundaryField();
 
-    //printf(" bsf.size()=%d\n",bsf.size());
-    #if 1
-    forAll(bsf, patchi)
-    #else
-    //LG2 AMD problem with creating target region here - need investigation
-    #pragma omp target teams distribute 
-    for (label patchi=0; patchi < bsf.size(); ++patchi)
-    #endif
-    {
+   if constexpr ( std::is_same<Type,double>()  || std::is_same<Type,float>() ) { 
+
+     #pragma omp parallel for schedule (dynamic,1)
+     for (label patchi=0; patchi < bsf.size(); ++patchi)
+     {
         const fvPatchField<Type>& psf = bsf[patchi];
         const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
 
         if (psf.coupled())
         {
-            const Field<Type> psfNei(psf.patchNeighbourField());
+            const Field<Type> psfNei(psf.patchNeighbourField()); //LG3  copy constructor ?  can be part of target region on GPU ?
 
-            //printf("patchi=%d :  pOwner.size()=%d\n",patchi,pOwner.size());
-            #if 1
+            #if 0
             forAll(pOwner, pFacei)
             #else
-            #pragma omp target teams distribute parallel for
+            #pragma omp target teams distribute parallel for if(pOwner.size() > 1000)
             for (label pFacei=0; pFacei < pOwner.size(); ++pFacei)            
             #endif 
+            {
+                const label own = pOwner[pFacei];
+                const scalar vsfNei = (scalar) psfNei[pFacei];
+
+                //atomic MAXA/MIN should solve the race condition issue 
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (maxVsfPtr_work_array[own] < vsfNei) {maxVsfPtr_work_array[own] = vsfNei;}
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (minVsfPtr_work_array[own] > vsfNei) {minVsfPtr_work_array[own] = vsfNei;}
+            }
+        }
+        else
+        {
+            #if 0
+            forAll(pOwner, pFacei)
+            #else
+            #pragma omp target teams distribute parallel for if(pOwner.size() > 1000)
+            for (label pFacei=0; pFacei < pOwner.size(); ++pFacei)            
+            #endif             
+            {
+                const label own = pOwner[pFacei];
+                const scalar vsfNei = (scalar) psf[pFacei];
+
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (maxVsfPtr_work_array[own] < vsfNei) {maxVsfPtr_work_array[own] = vsfNei;}
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (minVsfPtr_work_array[own] > vsfNei) {minVsfPtr_work_array[own] = vsfNei;}
+            }
+        }
+     }
+     #pragma omp target teams distributed parallel for if(maxVsf.size()> 1000)
+      for (label i = 0; i < maxVsf.size(); ++i){
+         maxVsf[i] = maxVsfPtr_work_array[i];
+         minVsf[i] = minVsfPtr_work_array[i] ;  
+      }
+
+   }
+   else{
+
+    for (label patchi=0; patchi < bsf.size(); ++patchi)
+    {
+        const fvPatchField<Type>& psf = bsf[patchi];
+        const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
+
+       // printf("patchi=%d :  pOwner.size()=%d\n",patchi,pOwner.size());
+
+        if (psf.coupled())
+        {
+            const Field<Type> psfNei(psf.patchNeighbourField());
+
+            
+            forAll(pOwner, pFacei)
             {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psfNei[pFacei];
@@ -197,21 +279,20 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         }
         else
         {
-            #if 1
-            forAll(pOwner, pFacei)
-            #else
-            #pragma omp target teams distribute parallel for
-            for (label pFacei=0; pFacei < pOwner.size(); ++pFacei)            
-            #endif             
+            forAll(pOwner, pFacei)             
             {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psf[pFacei];
-
                 maxVsf[own] = max(maxVsf[own], vsfNei);
                 minVsf[own] = min(minVsf[own], vsfNei);
             }
         }
-    }
+     }
+   }
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::cellLimitedGrad_C:update");
+    #endif
 
     maxVsf -= vsf;
     minVsf -= vsf;
@@ -222,17 +303,24 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         maxVsf += maxMinVsf;
         minVsf -= maxMinVsf;
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
 
     // Create limiter initialized to 1
     // Note: the limiter is not permitted to be > 1
     Field<Type> limiter(vsf.primitiveField().size(), pTraits<Type>::one);
 
-    #if 1
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::cellLimitedGrad_C:limitFace");
+    #endif
+    
+    #if 0
     forAll(owner, facei)
     #else
     //LG2 AMD race conditions in parallel implementation ?
-    #pragma omp target teams distribute parallel for
+    #pragma omp target teams distribute parallel for if(target:owner.size() > 2000)
     for (label facei=0; facei < owner.size(); ++facei)    
     #endif
     {
@@ -263,7 +351,12 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
         const vectorField& pCf = Cf.boundaryField()[patchi];
 
+        #if 0
         forAll(pOwner, pFacei)
+        #else
+        #pragma omp target teams distribute parallel for if(target:owner.size() > 2000)
+        for (label pFacei = 0; pFacei < pOwner.size(); ++pFacei)
+        #endif
         {
             const label own = pOwner[pFacei];
 
@@ -276,7 +369,9 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
             );
         }
     }
-
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
     if (fv::debug)
     {
         Info<< "gradient limiter for: " << vsf.name()
@@ -285,9 +380,29 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
             << " average: " << gAverage(limiter) << endl;
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::cellLimitedGrad_C:limitGradient");
+    #endif
+
     limitGradient(limiter, g);
+    
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::cellLimitedGrad_C:correctBoundaryConditions");
+    #endif
     g.correctBoundaryConditions();
     gaussGrad<Type>::correctBoundaryConditions(vsf, g);
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    if constexpr ( std::is_same<Type,double>()  || std::is_same<Type,float>() ) {
+      omp_target_free(maxVsfPtr_work_array,omp_get_default_device());
+      omp_target_free(minVsfPtr_work_array,omp_get_default_device());
+    }
 
     #ifdef USE_ROCTX
     roctxRangePop();

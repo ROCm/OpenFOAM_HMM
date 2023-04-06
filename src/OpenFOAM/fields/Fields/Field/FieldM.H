@@ -29,6 +29,14 @@ Description
     dereferencing for scalar machines as appropriate.
 
 \*---------------------------------------------------------------------------*/
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif 
+#endif
+
 
 #ifndef FieldM_H
 #define FieldM_H
@@ -126,8 +134,28 @@ void checkFields
     List_ACCESS(typeF1, f1, f1P);                                              \
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
+    label f1_sz = (f1).size();                                                 \
     /* Loop: f1 OP FUNC(f2) */                                                 \
-    List_FOR_ALL(f1, i)                                                        \
+    /* _Pragma("omp target teams distribute parallel for if(target:f1_sz > 0)")  */ \
+    for (label i = 0; i < f1_sz; ++i)                                          \
+    {                                                                          \
+        (f1P[i]) OP FUNC(f2P[i]);                                              \
+    }
+
+
+#define TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(typeF1, f1, OP, FUNC, typeF2, f2)                 \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, "f1 " #OP " " #FUNC "(f2)");                           \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+                                                                               \
+    label loop_len = (f1).size();                                                 \
+    /* Loop: f1 OP FUNC(f2) */                                                 \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000) ")  \
+    for (label i = 0; i < loop_len; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP FUNC(f2P[i]);                                              \
     }
@@ -218,6 +246,37 @@ void checkFields
     }
 
 
+#define TPARALLELFOR_ALL_S_OP_MIN_REDUCTION_F_S_ARITHMETIC(typeS1, s, OP, FUNC, typeF, f)     \
+                                                                               \
+    /* Field access */                                                         \
+    List_CONST_ACCESS(typeF, f, fP);                                           \
+    label loop_len = (f).size();                                               \
+    typeS1 min_val = (s);                                                      \
+    /* Loop: s OP FUNC(f, s) */                                                \
+    _Pragma("omp target teams distribute parallel for reduction(min:min_val) map(tofrom:min_val) if(target:loop_len > 20000)") \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        /*(s1) OP FUNC((fP[i]), (s2));     */                                  \
+        min_val = (fP[i]) < min_val ?  (fP[i]) : min_val;                      \
+    }                                                                          \
+    (s) = min_val;
+
+
+#define TPARALLELFOR_ALL_S_OP_MAX_REDUCTION_F_S_ARITHMETIC(typeS1, s, OP, FUNC, typeF, f)     \
+                                                                               \
+    /* Field access */                                                         \
+    List_CONST_ACCESS(typeF, f, fP);                                           \
+    label loop_len = (f).size();                                               \
+    typeS1 max_val = (s);                                                      \
+    /* Loop: s OP FUNC(f, s) */                                                \
+    _Pragma("omp target teams distribute parallel for reduction(max:max_val) map(tofrom:max_val) if(target:loop_len > 20000)") \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        /*(s1) OP FUNC((fP[i]), (s2));     */                                  \
+        max_val = (fP[i]) > max_val ?  (fP[i]) : max_val;                      \
+    }                                                                          \
+    (s) = max_val;
+
 // Member function : this f1 OP FUNC(s, f2)
 
 #define TFOR_ALL_F_OP_FUNC_S_F(typeF1, f1, OP, FUNC, typeS, s, typeF2, f2)     \
@@ -279,15 +338,18 @@ void checkFields
     List_ACCESS(typeF1, f1, f1P);                                              \
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
     List_CONST_ACCESS(typeF3, f3, f3P);                                        \
+    label f1_sz = (f1).size();                                                 \
                                                                                \
     /* Loop: f1 OP1 f2 OP2 f3 */                                               \
-    List_FOR_ALL(f1, i)                                                        \
+    /* _Pragma("omp target teams distribute parallel for if(target:f1_sz > 0)") */ \
+    /* _Pragma("omp parallel for if(f1_sz > 1)") */                            \
+    for (label i = 0; i < f1_sz; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP1 (f2P[i]) OP2 (f3P[i]);                                    \
     }
 
 
-// Member operator : this field f1 OP1 s OP2 f2
+// Member operator : this field f1 OP1 www OP2 f2
 
 #define TFOR_ALL_F_OP_S_OP_F(typeF1, f1, OP1, typeS, s, OP2, typeF2, f2)       \
                                                                                \
@@ -334,8 +396,10 @@ void checkFields
     List_ACCESS(typeF1, f1, f1P);                                              \
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
+    label f1_sz = (f1).size();                                                 \
     /* Loop: f1 OP f2 */                                                       \
-    List_FOR_ALL(f1, i)                                                        \
+    _Pragma("omp target teams distribute parallel for if(target:f1_sz > 20000)") \
+    for (label i = 0; i < f1_sz; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP (f2P[i]);                                                  \
     }
@@ -351,8 +415,10 @@ void checkFields
     List_ACCESS(typeF1, f1, f1P);                                              \
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
+    label f1_sz = (f1).size();                                                 \
     /* Loop: f1 OP1 OP2 f2 */                                                  \
-    List_FOR_ALL(f1, i)                                                        \
+    /* _Pragma("omp target teams distribute parallel for if(target:f1_sz > 0)") */  \
+    for (label i = 0; i < f1_sz; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP1 OP2 (f2P[i]);                                             \
     }
@@ -365,8 +431,10 @@ void checkFields
     /* Field access */                                                         \
     List_ACCESS(typeF, f, fP);                                                 \
                                                                                \
+    label f1_sz = (f).size();                                                  \
     /* Loop: f OP s */                                                         \
-    List_FOR_ALL(f, i)                                                         \
+    _Pragma("omp target teams distribute parallel for if(target:f1_sz > 20000)")  \
+    for (label i = 0; i < f1_sz; ++i)                                          \
     {                                                                          \
         (fP[i]) OP (s);                                                        \
     }
@@ -380,9 +448,11 @@ void checkFields
                                                                                \
     /* Field access */                                                         \
     List_CONST_ACCESS(typeF, f, fP);                                           \
+    label loop_len = (f).size();                                                  \
                                                                                \
     /* Loop: s OP f */                                                         \
-    List_FOR_ALL(f, i)                                                         \
+    /* _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") */ \
+    for (label i = 0; i < loop_len; ++i)                                          \
     {                                                                          \
         (s) OP (fP[i]);                                                        \
     }
@@ -404,7 +474,6 @@ void checkFields
 
 
 // Friend operator function : s OP FUNC(f), allocates storage for s
-
 #define TFOR_ALL_S_OP_FUNC_F(typeS, s, OP, FUNC, typeF, f)                     \
                                                                                \
     /* Field access */                                                         \
@@ -416,6 +485,20 @@ void checkFields
         (s) OP FUNC(fP[i]);                                                    \
     }
 
+
+#define TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(typeS, s, OP, FUNC, typeF, f)     \
+                                                                               \
+    /* Field access */                                                         \
+    List_CONST_ACCESS(typeF, f, fP);                                           \
+    label loop_len = (f).size();                                               \
+    typeS sum = 0.0;                                                           \
+    /* Loop: s OP FUNC(f) */                                                   \
+    _Pragma("omp target teams distribute parallel for reduction(+:sum) map(tofrom:sum) if(target:loop_len > 20000)") \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        sum OP FUNC(fP[i]);                                                    \
+    }                                                                          \
+    (s) OP sum;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

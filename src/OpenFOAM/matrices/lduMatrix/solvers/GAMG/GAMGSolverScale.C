@@ -156,13 +156,18 @@ void Foam::GAMGSolver::scale
 
       delete[] results;
     #else
+    solveScalar scalingFactorNum = 0.0, scalingFactorDenom = 0.0;
+   
 
     #pragma omp target teams distribute parallel for reduction(+:scalingFactorNum, scalingFactorDenom) map(tofrom:scalingFactorNum,scalingFactorDenom) if(target:nCells>200)
     for (label i=0; i<nCells; i++)
     {
-        scalingFactor[0] += fieldPtr[i]*sourcePtr[i];
-        scalingFactor[1] += fieldPtr[i]*AcfPtr[i];
+        scalingFactorNum += fieldPtr[i]*sourcePtr[i];
+        scalingFactorDenom += fieldPtr[i]*AcfPtr[i];
     }
+    scalingFactor[0] = scalingFactorNum;
+    scalingFactor[1] = scalingFactorDenom;
+
     #endif
 
     A.mesh().reduce(scalingFactor, sumOp<solveScalar>());

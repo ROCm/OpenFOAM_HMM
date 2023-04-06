@@ -28,11 +28,21 @@ License
 
 #include "gaussGrad.H"
 #include "extrapolatedCalculatedFvPatchField.H"
-
+#include "AtomicAccumulator.H"
+#include "macros.H"
 
 #ifdef USE_ROCTX
 #include <roctx.h>
 #endif
+
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif 
+#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,15 +99,20 @@ Foam::fv::gaussGrad<Type>::gradf
     Field<GradType>& igGrad = gGrad;
     const Field<Type>& issf = ssf;
 
-    forAll(owner, facei)
+    
+    //forAll(owner, facei)
+    #pragma omp target teams distribute parallel for if(target:owner.size()>10000 )
+    for (label facei = 0; facei <  owner.size(); ++facei) 
     {
         const GradType Sfssf = Sf[facei]*issf[facei];
-
-        igGrad[owner[facei]] += Sfssf;
-        igGrad[neighbour[facei]] -= Sfssf;
+        atomicAccumulator(igGrad[owner[facei]]) += Sfssf;
+        atomicAccumulator(igGrad[neighbour[facei]]) -= Sfssf;
     }
 
-    forAll(mesh.boundary(), patchi)
+    label   mesh_boundary_size =  mesh.boundary().size();
+    //forAll(mesh.boundary(), patchi)
+    //#pragma omp target teams distribute 
+    for (label patchi=0; patchi < mesh_boundary_size; ++patchi)
     {
         const labelUList& pFaceCells =
             mesh.boundary()[patchi].faceCells();
@@ -106,9 +121,12 @@ Foam::fv::gaussGrad<Type>::gradf
 
         const fvsPatchField<Type>& pssf = ssf.boundaryField()[patchi];
 
-        forAll(mesh.boundary()[patchi], facei)
+        //forAll(mesh.boundary()[patchi], facei)
+        label mesh_boundary_patch_size = mesh.boundary()[patchi].size();
+         #pragma omp target teams distribute parallel for if (target:mesh_boundary_patch_size>10000)
+        for (label facei = 0; facei < mesh_boundary_patch_size; ++facei) 
         {
-            igGrad[pFaceCells[facei]] += pSf[facei]*pssf[facei];
+            atomicAccumulator(igGrad[pFaceCells[facei]]) += pSf[facei]*pssf[facei];
         }
     }
 

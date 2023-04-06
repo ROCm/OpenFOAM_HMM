@@ -63,6 +63,15 @@ Description
 #define STRING_QUOTE(input) STRINGIFY(input)
 
 
+//- Conditional #pragma omp <X>, expands to nothing when OpenMP is not enabled
+#ifdef USE_OMP
+#define OMP(X) _Pragma(STRING_QUOTE(omp X))
+#else
+#define OMP(X)
+#endif
+
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

@@ -48,13 +48,13 @@ inline constexpr Foam::complex::complex(const scalar r) noexcept
     im(0)
 {}
 
-
+//LG4 #pragma omp declare target
 inline constexpr Foam::complex::complex(const scalar r, const scalar i) noexcept
 :
     re(r),
     im(i)
 {}
-
+//LG4 #pragma omp end declare target 
 
 inline Foam::complex::complex(const std::complex<float>& c)
 :
@@ -308,6 +308,7 @@ inline complex operator+(const scalar s, const complex& c)
 {
     return complex(c.re + s, c.im);
 }
+
 
 
 inline complex operator-(const complex& c1, const complex& c2)

@@ -1,4 +1,4 @@
 c++DBUG     =
 
-c++OPT      = -O3  -std=c++17  -I ${ROCM4FOAM}/roctracer/include/ -DUSE_ROCTX  -DUSE_OMP  -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx90a:xnack+  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__
+c++OPT      = -g -Ofast  -std=c++17  -I ${ROCM4FOAM}/roctracer/include/ -DUSE_ROCTX  -DUSE_OMP  -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx90a:xnack+ -fopenmp-version=51  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__
 LINKLIBSO  += ${ROCM4FOAM}/lib/libroctx64.so
