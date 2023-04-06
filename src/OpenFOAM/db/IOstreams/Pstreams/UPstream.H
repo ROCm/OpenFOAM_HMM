@@ -523,6 +523,38 @@ public:
         //  A no-op if parRun() == false, or the list is empty.
         static void waitRequests(UList<UPstream::Request>& requests);
 
+        //- Wait until any request (from position onwards) has finished.
+        //- Corresponds to MPI_Waitany()
+        //  A no-op and returns false if parRun() == false,
+        //  if the position is out-of-range [0 to nRequests()],
+        //  or the internal list of requests is empty.
+        //
+        //  \returns true if any pending request completed.
+        //  \returns false if all requests have already been handled.
+        //
+        //  \param pos starting position within the internal list of requests
+        static bool waitAnyRequest(const label pos);
+
+        //- Wait until some requests (from position onwards) have finished.
+        //- Corresponds to MPI_Waitsome()
+        //  A no-op and returns false if parRun() == false,
+        //  if the position is out-of-range [0 to nRequests],
+        //  or the internal list of requests is empty.
+        //
+        //  \returns true if some pending requests completed.
+        //  \returns false if all requests have already been handled
+        //
+        //  \param pos starting position within the internal list of requests
+        //  \param[out] indices the completed request indices relative to the
+        //      starting position. The is an optional parameter, which can be
+        //      used to recover the indices or simply to avoid reallocations
+        //      when calling within a loop.
+        static bool waitSomeRequests
+        (
+            const label pos,
+            DynamicList<int>* indices = nullptr
+        );
+
         //- Wait until any request has finished and return its index.
         //- Corresponds to MPI_Waitany()
         //  Returns -1 if parRun() == false, or the list is empty,
@@ -532,7 +564,7 @@ public:
         //- Wait until request i has finished.
         //- Corresponds to MPI_Wait()
         //  A no-op if parRun() == false,
-        //  there are no pending requests,
+        //  if there are no pending requests,
         //  or if the index is out-of-range (0 to nRequests)
         static void waitRequest(const label i);
 
@@ -544,7 +576,7 @@ public:
         //- Non-blocking comms: has request i finished?
         //- Corresponds to MPI_Test()
         //  A no-op and returns true if parRun() == false,
-        //  there are no pending requests,
+        //  if there are no pending requests,
         //  or if the index is out-of-range (0 to nRequests)
         static bool finishedRequest(const label i);
 
@@ -558,6 +590,22 @@ public:
         //- Corresponds to MPI_Testall()
         //  A no-op and returns true if parRun() == false or list is empty
         static bool finishedRequests(UList<UPstream::Request>& requests);
+
+        //- Non-blocking comms: have both requests finished?
+        //- Corresponds to pair of MPI_Test()
+        //  A no-op and returns true if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the indices are out-of-range (0 to nRequests)
+        //  Each finished request parameter is set to -1 (ie, done).
+        static bool finishedRequestPair(label& req1, label& req2);
+
+        //- Non-blocking comms: wait for both requests to finish.
+        //- Corresponds to pair of MPI_Wait()
+        //  A no-op if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the indices are out-of-range (0 to nRequests)
+        //  Each finished request parameter is set to -1 (ie, done).
+        static void waitRequestPair(label& req1, label& req2);
 
 
     // General

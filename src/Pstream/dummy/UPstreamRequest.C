@@ -56,6 +56,21 @@ void Foam::UPstream::resetRequests(const label n) {}
 void Foam::UPstream::waitRequests(const label pos) {}
 void Foam::UPstream::waitRequests(UList<UPstream::Request>&) {}
 
+bool Foam::UPstream::waitAnyRequest(const label pos)
+{
+    return false;
+}
+
+bool Foam::UPstream::waitSomeRequests
+(
+    const label pos,
+    DynamicList<int>* indices
+)
+{
+    if (indices) indices->clear();
+    return false;
+}
+
 Foam::label Foam::UPstream::waitAnyRequest(UList<UPstream::Request>&)
 {
     return -1;
@@ -66,9 +81,25 @@ void Foam::UPstream::waitRequest(UPstream::Request&) {}
 
 bool Foam::UPstream::finishedRequest(const label i) { return true; }
 bool Foam::UPstream::finishedRequest(UPstream::Request&) { return true; }
+
 bool Foam::UPstream::finishedRequests(UList<UPstream::Request>&)
 {
     return true;
+}
+
+
+bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
+{
+    req1 = -1;
+    req2 = -1;
+    return true;
+}
+
+
+void Foam::UPstream::waitRequestPair(label& req1, label& req2)
+{
+    req1 = -1;
+    req2 = -1;
 }
 
 
