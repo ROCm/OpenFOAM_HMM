@@ -14,9 +14,26 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-writeViewFactorMatrix     true;
-writePatchViewFactors     false;
-// dumpRays    true;
+
+writeViewFactorMatrix       true;
+writePatchViewFactors       false;
+
+// Write rays as lines to .obj file
+//dumpRays                    true;
+
+
+// Switch on debug for faceAgglomerate
+//debug                       1;
+writeFacesAgglomeration     true;
+patchAgglomeration
+{
+    // Do all of the view-factor patches
+    viewFactorWall
+    {
+        nFacesInCoarsestLevel   10;
+        featureAngle            45;
+    }
+}
 
 maxDynListLength          200000;
 
