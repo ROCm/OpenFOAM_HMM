@@ -73,12 +73,6 @@ extern DynamicList<MPI_Group> MPIGroups_;
 extern DynamicList<MPI_Request> outstandingRequests_;
 extern DynamicList<label> freedRequests_;
 
-//- Max outstanding message tag operations.
-extern int nTags_;
-
-//- Free'd message tags
-extern DynamicList<int> freedTags_;
-
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 

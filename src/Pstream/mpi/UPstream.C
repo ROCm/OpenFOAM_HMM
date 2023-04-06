@@ -713,42 +713,6 @@ void Foam::UPstream::freePstreamCommunicator(const label index)
 }
 
 
-int Foam::UPstream::allocateTag(const char* const msg)
-{
-    int tag;
-    if (PstreamGlobals::freedTags_.size())
-    {
-        tag = PstreamGlobals::freedTags_.back();
-        PstreamGlobals::freedTags_.pop_back();
-    }
-    else
-    {
-        tag = ++PstreamGlobals::nTags_;
-    }
-
-    if (debug)
-    {
-        Pout<< "UPstream::allocateTag";
-        if (msg) Pout<< ' ' << msg;
-        Pout<< " : tag:" << tag << endl;
-    }
-
-    return tag;
-}
-
-
-void Foam::UPstream::freeTag(const int tag, const char* const msg)
-{
-    if (debug)
-    {
-        Pout<< "UPstream::freeTag ";
-        if (msg) Pout<< ' ' << msg;
-        Pout<< " : tag:" << tag << endl;
-    }
-    PstreamGlobals::freedTags_.push_back(tag);
-}
-
-
 void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
 {
     // No-op for non-parallel

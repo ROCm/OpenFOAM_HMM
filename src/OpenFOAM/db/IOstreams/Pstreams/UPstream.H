@@ -548,9 +548,6 @@ public:
             //  A no-op and returns true if parRun() == false or list is empty
             static bool finishedRequests(UList<UPstream::Request>& requests);
 
-            static int allocateTag(const char* const msg = nullptr);
-            static void freeTag(const int tag, const char* const msg = nullptr);
-
 
         //- Set as parallel run on/off.
         //  \return the previous value

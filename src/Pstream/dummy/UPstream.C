@@ -87,13 +87,6 @@ void Foam::UPstream::freePstreamCommunicator(const label)
 {}
 
 
-int Foam::UPstream::allocateTag(const char* const msg) { return 0; }
-
-
-void Foam::UPstream::freeTag(const int tag, const char* const msg)
-{}
-
-
 void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
 {}
 
