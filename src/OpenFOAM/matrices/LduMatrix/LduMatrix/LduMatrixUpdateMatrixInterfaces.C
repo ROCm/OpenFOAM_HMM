@@ -60,7 +60,6 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                     commsType
                 );
             }
@@ -89,7 +88,6 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                     UPstream::commsTypes::blocking
                 );
             }
@@ -141,7 +139,6 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                     commsType
                 );
             }
@@ -168,7 +165,6 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                         interfacei,
                         psiif,
                         interfaceCoeffs[interfacei],
-                      //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                         commsType
                     );
                 }
@@ -182,7 +178,6 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                         interfacei,
                         psiif,
                         interfaceCoeffs[interfacei],
-                      //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                         commsType
                     );
                 }
@@ -208,8 +203,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
-                    Pstream::commsTypes::blocking
+                    UPstream::commsTypes::blocking
                 );
             }
         }

@@ -30,36 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-template<class Type, class LUType>
-class Amultiplier
-:
-    public LduInterfaceField<Type>::Amultiplier
-{
-    const Field<LUType>& A_;
-
-public:
-
-    Amultiplier(const Field<LUType>& A)
-    :
-        A_(A)
-    {}
-
-    virtual ~Amultiplier() = default;
-
-    virtual void addAmul(Field<Type>& Apsi, const Field<Type>& psi) const
-    {
-        Apsi += A_*psi;
-    }
-};
-
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class DType, class LUType>
 void Foam::LduMatrix<Type, DType, LUType>::Amul
 (
