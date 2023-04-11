@@ -9,7 +9,8 @@ runApplication decomposePar
 
 restore0Dir -processor
 
-runParallel $(getApplication)
+# Test polling interfaces
+runParallel $(getApplication) -opt-switch nPollProcInterfaces=-1
 
 runApplication reconstructPar
 

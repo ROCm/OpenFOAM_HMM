@@ -115,11 +115,46 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
 {
     const UPstream::commsTypes commsType = UPstream::defaultCommsType;
 
-    // Block until sends/receives have finished
-    if (commsType == UPstream::commsTypes::nonBlocking)
+    if
+    (
+        commsType == UPstream::commsTypes::nonBlocking
+     && UPstream::nPollProcInterfaces
+    )
     {
-        UPstream::waitRequests(startRequest);
+        // Wait for some interface requests to become available and
+        // consume them. No guarantee that the finished requests actually
+        // correspond to any particular interface, but it is reasonably
+        // probable that some interfaces will be able to start consumption
+        // without waiting for all requests.
+
+        DynamicList<int> indices;  // (work array)
+        while
+        (
+            UPstream::nPollProcInterfaces < 0
+         && UPstream::waitSomeRequests(startRequest, &indices)
+        )
+        {
+            forAll(interfaces_, interfacei)
+            {
+                auto* intf = interfaces_.get(interfacei);
+
+                if (intf && !intf->updatedMatrix() && intf->ready())
+                {
+                    intf->updateInterfaceMatrix
+                    (
+                        result,
+                        add,
+                        lduMesh_.lduAddr(),
+                        interfacei,
+                        psiif,
+                        interfaceCoeffs[interfacei],
+                        commsType
+                    );
+                }
+            }
+        }
     }
+
 
     if
     (
@@ -127,11 +162,23 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
      || commsType == UPstream::commsTypes::nonBlocking
     )
     {
+        // Wait until sends/receives have finished.
+        // - effectively a no-op (without waiting) if already completed.
+        if (commsType == UPstream::commsTypes::nonBlocking)
+        {
+            UPstream::waitRequests(startRequest);
+        }
+
+        // Check/no-check for updatedMatrix() ?
+        const bool noCheck = (commsType == UPstream::commsTypes::blocking);
+
         forAll(interfaces_, interfacei)
         {
-            if (interfaces_.set(interfacei))
+            auto* intf = interfaces_.get(interfacei);
+
+            if (intf && (noCheck || !intf->updatedMatrix()))
             {
-                interfaces_[interfacei].updateInterfaceMatrix
+                intf->updateInterfaceMatrix
                 (
                     result,
                     add,
