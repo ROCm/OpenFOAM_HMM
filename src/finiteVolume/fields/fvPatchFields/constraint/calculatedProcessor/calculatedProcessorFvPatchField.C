@@ -76,13 +76,7 @@ Foam::calculatedProcessorFvPatchField<Type>::calculatedProcessorFvPatchField
 template<class Type>
 bool Foam::calculatedProcessorFvPatchField<Type>::ready() const
 {
-    if (!UPstream::finishedRequest(this->sendRequest_)) return false;
-    this->sendRequest_ = -1;
-
-    if (!UPstream::finishedRequest(this->recvRequest_)) return false;
-    this->recvRequest_ = -1;
-
-    return true;
+    return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
 }
 
 
@@ -109,7 +103,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         if (!is_contiguous<Type>::value)
         {
@@ -164,12 +158,13 @@ void Foam::calculatedProcessorFvPatchField<Type>::evaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        // Treat send as finished when recv is done
-        UPstream::waitRequest(recvRequest_);
-        recvRequest_ = -1;
-        sendRequest_ = -1;
+        // Require receive data. Update the send request state.
+        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
+
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
 }
 
@@ -278,13 +273,15 @@ void Foam::calculatedProcessorFvPatchField<Type>::updateInterfaceMatrix
         return;
     }
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        // Treat send as finished when recv is done
-        UPstream::waitRequest(recvRequest_);
-        recvRequest_ = -1;
-        sendRequest_ = -1;
+        // Require receive data. Update the send request state.
+        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
+
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
+
 
     // Consume straight from receive buffer. Note use of our own
     // helper to avoid using fvPatch addressing

@@ -60,13 +60,7 @@ Foam::lduCalculatedProcessorField<Type>::lduCalculatedProcessorField
 template<class Type>
 bool Foam::lduCalculatedProcessorField<Type>::ready() const
 {
-    if (!UPstream::finishedRequest(this->sendRequest_)) return false;
-    this->sendRequest_ = -1;
-
-    if (!UPstream::finishedRequest(this->recvRequest_)) return false;
-    this->recvRequest_ = -1;
-
-    return true;
+    return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
 }
 
 
@@ -173,10 +167,12 @@ void Foam::lduCalculatedProcessorField<Type>::updateInterfaceMatrix
         return;
     }
 
-    // Treat send as finished when recv is done
-    UPstream::waitRequest(recvRequest_);
-    recvRequest_ = -1;
-    sendRequest_ = -1;
+    // Require receive data. Update the send request state.
+    // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
+
+    UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+    if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
+
 
     // Consume straight from receive buffer. Note use of our own
     // helper to avoid using fvPatch addressing

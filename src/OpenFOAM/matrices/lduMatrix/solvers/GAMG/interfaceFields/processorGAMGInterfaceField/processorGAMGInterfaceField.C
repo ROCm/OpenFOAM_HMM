@@ -171,10 +171,11 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     {
         // Fast path: consume straight from receive buffer
 
-        // Treat send as finished when recv is done
-        UPstream::waitRequest(recvRequest_);
-        recvRequest_ = -1;
-        sendRequest_ = -1;
+        // Require receive data. Update the send request state.
+        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
+
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
     else
     {

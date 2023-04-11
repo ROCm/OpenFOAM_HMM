@@ -176,13 +176,7 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
 template<class Type>
 bool Foam::processorFaPatchField<Type>::ready() const
 {
-    if (!UPstream::finishedRequest(sendRequest_)) return false;
-    sendRequest_ = -1;
-
-    if (!UPstream::finishedRequest(recvRequest_)) return false;
-    recvRequest_ = -1;
-
-    return true;
+    return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
 }
 
 
@@ -207,7 +201,7 @@ void Foam::processorFaPatchField<Type>::initEvaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         this->patchInternalField(sendBuf_);
 
@@ -259,16 +253,17 @@ void Foam::processorFaPatchField<Type>::evaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         if (commsType == UPstream::commsTypes::nonBlocking)
         {
             // Fast path. Received into *this
 
-            // Treat send as finished when recv is done
-            UPstream::waitRequest(recvRequest_);
-            recvRequest_ = -1;
-            sendRequest_ = -1;
+            // Require receive data. Update the send request state.
+            // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
+
+            UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+            if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
         }
         else
         {
@@ -373,10 +368,11 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     {
         // Fast path: consume straight from receive buffer
 
-        // Treat send as finished when recv is done
-        UPstream::waitRequest(recvRequest_);
-        recvRequest_ = -1;
-        sendRequest_ = -1;
+        // Require receive data. Update the send request state.
+        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
+
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
     else
     {
@@ -479,10 +475,11 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     {
         // Fast path: consume straight from receive buffer
 
-        // Treat send as finished when recv is done
-        UPstream::waitRequest(recvRequest_);
-        recvRequest_ = -1;
-        sendRequest_ = -1;
+        // Require receive data. Update the send request state.
+        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
+
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
     else
     {
