@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -683,7 +683,8 @@ int main(int argc, char *argv[])
             IOobject::AUTO_WRITE
         ),
         s,
-        dimensionedScalar("scale", dimLength, 1.0)
+        scalar(1),
+        dimLength
     );
 
 
@@ -715,7 +716,8 @@ int main(int argc, char *argv[])
         ),
         s,
         dimLength,
-        distance*scale*pointNormals
+        // - calculate with primitive fields (#2758)
+        (distance*scale.field()*pointNormals)
     );
 
 
@@ -826,7 +828,9 @@ int main(int argc, char *argv[])
 
 
         // From scale update the pointDisplacement
-        pointDisplacement *= distance*scale/mag(pointDisplacement);
+        // - calculate with primitive fields (#2758)
+        pointDisplacement.normalise();
+        pointDisplacement.field() *= distance*scale.field();
 
 
         // Do some smoothing (Lloyds algorithm)
