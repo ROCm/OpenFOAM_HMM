@@ -460,7 +460,7 @@ void Foam::wallBoundedParticle::writeFields(const TrackCloudType& c)
 {
     particle::writeFields(c);
 
-    label np = c.size();
+    const label np = c.size();
 
     IOField<point> localPosition
     (

@@ -199,8 +199,8 @@ Foam::IOobject Foam::Cloud<ParticleType>::fieldIOobject
         time().timeName(),
         *this,
         rOpt,
-        IOobject::NO_WRITE,
-        IOobject::NO_REGISTER
+        IOobjectOption::NO_WRITE,
+        IOobjectOption::NO_REGISTER
     );
 }
 

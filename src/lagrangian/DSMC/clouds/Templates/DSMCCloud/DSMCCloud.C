@@ -615,33 +615,27 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
     rndGen_(Pstream::myProcNo()),
     boundaryT_
     (
-        volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "boundaryT",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh_
-        )
+            "boundaryT",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
     ),
     boundaryU_
     (
-        volVectorField
+        IOobject
         (
-            IOobject
-            (
-                "boundaryU",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh_
-        )
+            "boundaryU",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
     ),
     binaryCollisionModel_
     (

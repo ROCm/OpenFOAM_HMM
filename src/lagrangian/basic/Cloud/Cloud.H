@@ -222,7 +222,7 @@ public:
             IOobject fieldIOobject
             (
                 const word& fieldName,
-                IOobjectOption::readOption rOpt
+                IOobjectOption::readOption rOpt = IOobjectOption::NO_READ
             ) const;
 
             //- Check lagrangian data field

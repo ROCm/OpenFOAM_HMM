@@ -336,7 +336,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readObjects
 {
     ParcelType::readObjects(c, obr);
 
-    const label np = c.size();
+    // const label np = c.size();
     const bool readOnProc = c.size();
 
     // The composition fractions
