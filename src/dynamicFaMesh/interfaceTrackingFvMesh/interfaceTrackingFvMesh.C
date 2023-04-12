@@ -144,7 +144,7 @@ void Foam::interfaceTrackingFvMesh::makeUs() const
     wordList patchFieldTypes
     (
         aMesh().boundary().size(),
-        zeroGradientFaPatchVectorField::typeName
+        faPatchFieldBase::zeroGradientType()
     );
 
     forAll(aMesh().boundary(), patchI)
@@ -883,7 +883,7 @@ void Foam::interfaceTrackingFvMesh::updateSurfactantConcentration()
                 ),
                 aMesh(),
                 dimensionedScalar(dimMoles/dimVolume, Zero),
-                zeroGradientFaPatchScalarField::typeName
+                faPatchFieldBase::zeroGradientType()
             );
 
             Cb.ref().field() =

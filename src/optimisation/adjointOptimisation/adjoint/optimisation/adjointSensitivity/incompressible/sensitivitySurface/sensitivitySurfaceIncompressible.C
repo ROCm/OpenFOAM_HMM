@@ -320,7 +320,7 @@ void sensitivitySurface::smoothSensitivities()
         ),
         aMesh,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFaPatchField<scalar>::typeName
+        faPatchFieldBase::zeroGradientType()
     );
 
     // Copy sensitivities to area field

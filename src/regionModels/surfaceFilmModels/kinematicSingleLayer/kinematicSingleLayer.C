@@ -468,7 +468,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimDensity, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     mu_
     (
@@ -482,7 +482,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimPressure*dimTime, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     sigma_
     (
@@ -496,7 +496,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimMass/sqr(dimTime), Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     delta_
@@ -523,7 +523,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     U_
     (
@@ -548,7 +548,7 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::NO_WRITE
         ),
         U_,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     Uw_
     (
@@ -561,7 +561,7 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::NO_WRITE
         ),
         U_,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     deltaRho_
     (
@@ -575,7 +575,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(delta_.dimensions()*rho_.dimensions(), Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     phi_
@@ -604,7 +604,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimMass, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     cloudMassTrans_
     (
@@ -618,7 +618,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimMass, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     cloudDiameterTrans_
     (
@@ -632,7 +632,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar("minus1", dimLength, -1.0),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     USp_

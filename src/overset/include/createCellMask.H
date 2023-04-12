@@ -46,8 +46,9 @@ volScalarField cellMask
         IOobject::NO_WRITE
     ),
     mesh,
-    dimensionedScalar("one", dimless, 1.0),
-    zeroGradientFvPatchScalarField::typeName
+    scalar(1),
+    dimless,
+    fvPatchFieldBase::zeroGradientType()
 );
 
 surfaceScalarField faceMask

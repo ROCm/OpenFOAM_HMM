@@ -96,7 +96,7 @@ Foam::functionObjects::blendingFactor::blendingFactor
         ),
         mesh_,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     store(resultName_, indicatorPtr);

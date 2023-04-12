@@ -71,7 +71,7 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::init()
                 ),
                 this->mesh_,
                 dimensionedScalar(dimMass/dimTime/dimVolume, Zero),
-                zeroGradientFvPatchScalarField::typeName
+                fvPatchFieldBase::zeroGradientType()
             )
         );
 
@@ -209,7 +209,7 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::correct()
                     ),
                     this->mesh_,
                     dimensionedScalar(dimMass/dimTime/dimVolume, Zero),
-                    zeroGradientFvPatchScalarField::typeName
+                    fvPatchFieldBase::zeroGradientType()
                 )
             );
 
@@ -410,7 +410,7 @@ diffusionMulticomponent<ReactionThermo, ThermoType>::Qdot() const
             ),
             this->mesh(),
             dimensionedScalar(dimEnergy/dimTime/dimVolume, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         )
     );
 

@@ -1736,7 +1736,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
         ),
         mesh_,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     )
 {
     // Protect local fields from interpolation

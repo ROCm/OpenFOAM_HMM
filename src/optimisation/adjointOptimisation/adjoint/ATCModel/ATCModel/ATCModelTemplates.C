@@ -50,8 +50,9 @@ void Foam::ATCModel::smoothFieldBasedOnCells
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("limiter", dimless, 1.0),
-        zeroGradientFvPatchField<scalar>::typeName
+        scalar(1),
+        dimless,
+        fvPatchFieldBase::zeroGradientType()
     );
 
     computeLimiter(limiter, cells, nSmooth_);

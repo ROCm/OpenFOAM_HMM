@@ -77,7 +77,7 @@ leastSquaresFaGrad<Type>::grad
             ),
             mesh,
             dimensioned<GradType>(vsf.dimensions()/dimLength, Zero),
-            zeroGradientFaPatchField<GradType>::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
     GeometricField<GradType, faPatchField, areaMesh>& lsGrad = tlsGrad.ref();

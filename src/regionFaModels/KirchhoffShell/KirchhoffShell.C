@@ -297,7 +297,7 @@ const tmp<areaScalarField> KirchhoffShell::rho() const
             ),
             regionMesh(),
             dimensionedScalar("rho", dimDensity, solid().rho()),
-            zeroGradientFaPatchScalarField::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
 }

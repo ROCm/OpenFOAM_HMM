@@ -192,7 +192,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
         ),
         mesh,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     curTimeIndex_(-1),
     deltaT_(cells_.size(), 0)

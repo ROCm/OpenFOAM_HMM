@@ -656,7 +656,7 @@ bool Foam::oversetFvMeshBase::writeObject
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         forAll(volTypes.internalField(), cellI)
@@ -680,7 +680,7 @@ bool Foam::oversetFvMeshBase::writeObject
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         const cellCellStencilObject& overlap = Stencil::New(mesh_);
@@ -719,8 +719,9 @@ bool Foam::oversetFvMeshBase::writeObject
                 IOobject::NO_REGISTER
             ),
             mesh_,
-            dimensionedScalar("minOne", dimless, scalar(-1)),
-            zeroGradientFvPatchScalarField::typeName
+            scalar(-1),
+            dimless,
+            fvPatchFieldBase::zeroGradientType()
         );
 
         forAll(cellStencil, cellI)

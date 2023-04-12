@@ -56,7 +56,7 @@ Foam::PackingModels::Implicit<CloudType>::Implicit
         ),
         this->owner().mesh(),
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     phiCorrect_(nullptr),
     uCorrect_(nullptr),
@@ -150,7 +150,7 @@ void Foam::PackingModels::Implicit<CloudType>::cacheFields(const bool store)
             ),
             mesh,
             dimensionedScalar(dimDensity, Zero),
-            zeroGradientFvPatchField<scalar>::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         rho.primitiveFieldRef() = max(rhoAverage.primitiveField(), rhoMin_);
         rho.correctBoundaryConditions();
@@ -171,7 +171,7 @@ void Foam::PackingModels::Implicit<CloudType>::cacheFields(const bool store)
             ),
             mesh,
             dimensionedScalar(dimPressure, Zero),
-            zeroGradientFvPatchField<scalar>::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         tauPrime.primitiveFieldRef() =
@@ -256,7 +256,7 @@ void Foam::PackingModels::Implicit<CloudType>::cacheFields(const bool store)
                 ),
                 mesh,
                 dimensionedVector(dimVelocity, Zero),
-                fixedValueFvPatchField<vector>::typeName
+                fvPatchFieldBase::zeroGradientType()
             );
             U.primitiveFieldRef() = uAverage.primitiveField();
             U.correctBoundaryConditions();

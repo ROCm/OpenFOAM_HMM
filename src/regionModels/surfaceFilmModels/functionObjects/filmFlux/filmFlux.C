@@ -129,7 +129,7 @@ bool Foam::functionObjects::filmFlux::execute()
         ),
         filmMesh,
         dimensionedScalar(dimLength, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     auto& heightc = height.ref();

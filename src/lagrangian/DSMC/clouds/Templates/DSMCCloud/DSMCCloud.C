@@ -717,7 +717,7 @@ Foam::DSMCCloud<ParcelType>::DSMCCloud
         ),
         mesh_,
         dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     collisionSelectionRemainder_
     (

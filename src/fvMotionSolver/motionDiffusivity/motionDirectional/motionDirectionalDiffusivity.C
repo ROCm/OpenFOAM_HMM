@@ -87,7 +87,8 @@ void Foam::motionDirectionalDiffusivity::correct()
             diffusivityVector_.y()*vector::one
           + (diffusivityVector_.x() - diffusivityVector_.y())*cellMotionU
            /(mag(cellMotionU) + dimensionedScalar("small", dimVelocity, SMALL)),
-            zeroGradientFvPatchVectorField::typeName
+
+            fvPatchFieldBase::zeroGradientType()
         );
         D.correctBoundaryConditions();
 

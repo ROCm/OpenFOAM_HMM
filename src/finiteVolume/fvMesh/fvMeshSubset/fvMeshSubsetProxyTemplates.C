@@ -51,7 +51,7 @@ Foam::fvMeshSubsetProxy::zeroGradientField
         io,
         df.mesh(),
         dimensioned<Type>(df.dimensions(), Zero),
-        zeroGradientFvPatchField<Type>::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
     tfield.ref().primitiveFieldRef() = df;
     tfield.ref().oriented() = df.oriented();

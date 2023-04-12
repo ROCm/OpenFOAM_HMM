@@ -62,7 +62,7 @@ edgeIntegrate
             ),
             mesh,
             dimensioned<Type>(ssf.dimensions()/dimArea, Zero),
-            zeroGradientFaPatchField<Type>::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
     GeometricField<Type, faPatchField, areaMesh>& vf = tvf.ref();
@@ -134,7 +134,7 @@ edgeSum
             ),
             mesh,
             dimensioned<Type>(ssf.dimensions(), Zero),
-            zeroGradientFaPatchField<Type>::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
     GeometricField<Type, faPatchField, areaMesh>& vf = tvf.ref();

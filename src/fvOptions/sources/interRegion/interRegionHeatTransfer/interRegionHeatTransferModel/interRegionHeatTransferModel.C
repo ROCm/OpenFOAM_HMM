@@ -139,7 +139,7 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
         ),
         mesh,
         dimensionedScalar(dimEnergy/dimTime/dimTemperature/dimVolume, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     TName_(coeffs_.getOrDefault<word>("T", "T")),
     TNbrName_(coeffs_.getOrDefault<word>("TNbr", "T"))

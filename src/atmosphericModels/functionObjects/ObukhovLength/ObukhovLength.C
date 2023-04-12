@@ -76,7 +76,7 @@ bool Foam::functionObjects::ObukhovLength::calcOL()
             ),
             mesh_,
             dimLength,
-            zeroGradientFvPatchField<scalar>::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         result1->store();
@@ -94,7 +94,7 @@ bool Foam::functionObjects::ObukhovLength::calcOL()
             ),
             mesh_,
             dimVelocity,
-            zeroGradientFvPatchField<scalar>::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         result2->store();

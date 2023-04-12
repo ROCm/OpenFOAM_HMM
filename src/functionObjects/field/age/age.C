@@ -63,7 +63,7 @@ Foam::wordList Foam::functionObjects::age::patchTypes() const
     {
         if (isA<wallFvPatch>(mesh_.boundary()[patchi]))
         {
-            result[patchi] = zeroGradientFvPatchField<scalar>::typeName;
+            result[patchi] = fvPatchFieldBase::zeroGradientType();
         }
     }
 

@@ -534,7 +534,7 @@ Foam::cellCellStencils::cellVolumeWeight::cellVolumeWeight
         ),
         mesh_,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     allowInterpolatedDonors_
     (

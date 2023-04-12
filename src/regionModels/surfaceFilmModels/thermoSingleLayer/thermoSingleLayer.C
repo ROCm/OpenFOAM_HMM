@@ -331,7 +331,7 @@ thermoSingleLayer::thermoSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimEnergy/dimMass/dimTemperature, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     kappa_
     (
@@ -345,7 +345,7 @@ thermoSingleLayer::thermoSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimEnergy/dimTime/dimLength/dimTemperature, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     T_
@@ -371,7 +371,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::NO_WRITE
         ),
         T_,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     Tw_
     (
@@ -384,7 +384,7 @@ thermoSingleLayer::thermoSingleLayer
             IOobject::NO_WRITE
         ),
         T_,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     hs_
     (
@@ -413,7 +413,7 @@ thermoSingleLayer::thermoSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimEnergy, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     deltaWet_(coeffs_.get<scalar>("deltaWet")),

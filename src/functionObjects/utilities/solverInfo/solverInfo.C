@@ -217,7 +217,7 @@ bool Foam::functionObjects::solverInfo::write()
                 ),
                 mesh_,
                 dimensionedScalar(dimless, Zero),
-                zeroGradientFvPatchField<scalar>::typeName
+                fvPatchFieldBase::zeroGradientType()
             );
 
             residual.primitiveFieldRef() = *residualPtr;

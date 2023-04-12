@@ -3576,7 +3576,7 @@ void Foam::meshRefinement::zonify
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         forAll(cellToZone, cellI)

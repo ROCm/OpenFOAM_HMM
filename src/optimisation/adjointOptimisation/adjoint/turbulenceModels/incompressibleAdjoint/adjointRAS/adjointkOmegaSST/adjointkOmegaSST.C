@@ -2293,7 +2293,7 @@ tmp<volTensorField> adjointkOmegaSST::FISensitivityTerm()
             ),
             mesh_,
             dimensionedTensor(sqr(dimLength)/pow3(dimTime), Zero),
-            zeroGradientFvPatchTensorField::typeName
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     volTensorField& FISens = tFISens.ref();

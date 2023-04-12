@@ -71,7 +71,7 @@ Foam::functionObjects::stabilityBlendingFactor::indicator()
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         mesh_.objectRegistry::store(fldPtr);
@@ -332,7 +332,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         auto& magGradCC = tmagGradCC.ref();
 
@@ -351,7 +351,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 ),
                 mesh_,
                 dimensionedScalar(dimLength, Zero),
-                zeroGradientFvPatchScalarField::typeName
+                fvPatchFieldBase::zeroGradientType()
             );
             cci = mesh_.C().component(i);
             cci.correctBoundaryConditions();
@@ -405,7 +405,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         auto& Co = CoPtr.ref();

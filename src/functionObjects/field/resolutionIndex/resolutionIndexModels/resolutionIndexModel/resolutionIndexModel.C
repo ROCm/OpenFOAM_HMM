@@ -58,7 +58,7 @@ Foam::tmp<Foam::volScalarField> Foam::resolutionIndexModel::V() const
         ),
         mesh_,
         dimVolume,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     tV.ref().primitiveFieldRef() = mesh_.V();
@@ -104,7 +104,7 @@ bool Foam::resolutionIndexModel::read(const dictionary& dict)
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         mesh_.objectRegistry::store(indexPtr);

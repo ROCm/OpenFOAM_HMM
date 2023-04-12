@@ -96,7 +96,7 @@ int Foam::functionObjects::zeroGradient::apply
             ),
             mesh_,
             dimensioned<Type>(input.dimensions(), Zero),
-            zeroGradientFvPatchField<Type>::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         store(outputName, tzeroGrad);

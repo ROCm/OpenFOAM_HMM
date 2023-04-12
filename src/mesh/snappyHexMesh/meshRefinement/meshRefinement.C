@@ -2406,27 +2406,27 @@ Foam::label Foam::meshRefinement::appendPatch
     addPatchFields<volScalarField>
     (
         mesh,
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volVectorField>
     (
         mesh,
-        calculatedFvPatchField<vector>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volSphericalTensorField>
     (
         mesh,
-        calculatedFvPatchField<sphericalTensor>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volSymmTensorField>
     (
         mesh,
-        calculatedFvPatchField<symmTensor>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volTensorField>
     (
         mesh,
-        calculatedFvPatchField<tensor>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 
     // Surface fields
@@ -2434,27 +2434,27 @@ Foam::label Foam::meshRefinement::appendPatch
     addPatchFields<surfaceScalarField>
     (
         mesh,
-        calculatedFvPatchField<scalar>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceVectorField>
     (
         mesh,
-        calculatedFvPatchField<vector>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceSphericalTensorField>
     (
         mesh,
-        calculatedFvPatchField<sphericalTensor>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceSymmTensorField>
     (
         mesh,
-        calculatedFvPatchField<symmTensor>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceTensorField>
     (
         mesh,
-        calculatedFvPatchField<tensor>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     return patchi;
 }
@@ -2574,7 +2574,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
 //            mesh_,
 //            ppPtr(),
 //            dictionary(),       // optional field values
-//            calculatedFvPatchField<scalar>::typeName,
+//            fvPatchFieldBase::calculatedType(),
 //            true
 //        );
 
@@ -3595,7 +3595,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         const labelList& cellLevel = meshCutter_.cellLevel();

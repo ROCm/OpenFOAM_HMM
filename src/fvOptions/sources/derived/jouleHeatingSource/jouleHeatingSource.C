@@ -68,7 +68,7 @@ Foam::fv::jouleHeatingSource::transformSigma
         ),
         mesh_,
         dimensionedSymmTensor(sigmaLocal.dimensions(), Zero),
-        zeroGradientFvPatchField<symmTensor>::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
     auto& sigma = tsigma.ref();
 

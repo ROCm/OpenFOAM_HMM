@@ -100,7 +100,7 @@ bool Foam::functionObjects::CourantNo::calc()
                 ),
                 mesh_,
                 dimensionedScalar(dimless, Zero),
-                zeroGradientFvPatchScalarField::typeName
+                fvPatchFieldBase::zeroGradientType()
             );
             tCo.ref().ref() = Coi();
             tCo.ref().correctBoundaryConditions();

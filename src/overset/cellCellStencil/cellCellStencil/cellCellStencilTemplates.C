@@ -171,7 +171,7 @@ Foam::cellCellStencil::createField
         ),
         mesh,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
     volScalarField& fld = tfld.ref();
 

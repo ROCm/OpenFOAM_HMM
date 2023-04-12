@@ -55,7 +55,7 @@ wordList adjointEikonalSolver::patchTypes() const
 
     for (const label patchi : wallPatchIDs_)
     {
-        daTypes[patchi] = zeroGradientFvPatchScalarField::typeName;
+        daTypes[patchi] = fvPatchFieldBase::zeroGradientType();
     }
 
     return daTypes;
