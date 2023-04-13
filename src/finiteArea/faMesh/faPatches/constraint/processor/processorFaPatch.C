@@ -235,7 +235,7 @@ void Foam::processorFaPatch::calcGeometry(PstreamBuffers& pBufs)
             edgeCentres(),
             neighbEdgeCentres_,
             edgeNormals(),
-            neighbEdgeLengths_/mag(neighbEdgeLengths_)
+            neighbEdgeNormals()
         );
     }
 }
@@ -364,6 +364,14 @@ void Foam::processorFaPatch::updateMesh(PstreamBuffers& pBufs)
 }
 
 
+Foam::tmp<Foam::vectorField> Foam::processorFaPatch::neighbEdgeNormals() const
+{
+    auto tresult = tmp<vectorField>::New(neighbEdgeLengths_);
+    tresult.ref().normalise();
+    return tresult;
+}
+
+
 const Foam::labelList& Foam::processorFaPatch::neighbPoints() const
 {
     if (!neighbPointsPtr_)
@@ -394,14 +402,8 @@ void Foam::processorFaPatch::makeWeights(scalarField& w) const
         // The face normals point in the opposite direction on the other side
         scalarField neighbEdgeCentresCn
         (
-            (
-                neighbEdgeLengths()
-               /(mag(neighbEdgeLengths()) + VSMALL)
-            )
-          & (
-              neighbEdgeCentres()
-            - neighbEdgeFaceCentres()
-            )
+            neighbEdgeNormals()
+          & (neighbEdgeCentres() - neighbEdgeFaceCentres())
         );
 
         w = neighbEdgeCentresCn/

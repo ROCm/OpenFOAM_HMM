@@ -493,11 +493,15 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
     vectorField edgePN(edgeCentres() - edgeFaceCentres());
 
     // Do not allow any mag(val) < SMALL
+    // sqrt(1/3) = 0.5773502691896257, but slightly rounded down
+    const vector minVector(vector::uniform(0.57735*SMALL));
+    const scalar minLenSqr(SMALL*SMALL);
+
     for (vector& e : edgePN)
     {
-        if (e.magSqr() < ROOTSMALL)
+        if (e.magSqr() < minLenSqr)
         {
-            e = vector::uniform(SMALL);
+            e = minVector;
         }
     }
 

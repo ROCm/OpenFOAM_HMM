@@ -191,7 +191,7 @@ public:
         //- Return true if running parallel
         virtual bool coupled() const
         {
-            return Pstream::parRun();
+            return UPstream::parRun();
         }
 
         //- Does this side own the patch ?
@@ -222,19 +222,22 @@ public:
 
 
         //- Return processor-neighbour patch edge centres
-        const vectorField& neighbEdgeCentres() const
+        const vectorField& neighbEdgeCentres() const noexcept
         {
             return neighbEdgeCentres_;
         }
 
         //- Return processor-neighbour patch edge lengths
-        const vectorField& neighbEdgeLengths() const
+        const vectorField& neighbEdgeLengths() const noexcept
         {
             return neighbEdgeLengths_;
         }
 
+        //- Return processor-neighbour patch edge unit normals
+        tmp<vectorField> neighbEdgeNormals() const;
+
         //- Return processor-neighbour patch neighbour face centres
-        const vectorField& neighbEdgeFaceCentres() const
+        const vectorField& neighbEdgeFaceCentres() const noexcept
         {
             return neighbEdgeFaceCentres_;
         }

@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorPolyPatch_H
-#define processorPolyPatch_H
+#ifndef Foam_processorPolyPatch_H
+#define Foam_processorPolyPatch_H
 
 #include "coupledPolyPatch.H"
 #include "polyBoundaryMesh.H"
@@ -60,7 +60,7 @@ class processorPolyPatch
 :
     public coupledPolyPatch
 {
-    // Private data
+    // Private Data
 
         int myProcNo_;
         int neighbProcNo_;
@@ -255,17 +255,17 @@ public:
         //- Return true only if this is a parallel run
         virtual bool coupled() const
         {
-            return Pstream::parRun();
+            return UPstream::parRun();
         }
 
         //- Return processor number
-        int myProcNo() const
+        int myProcNo() const noexcept
         {
             return myProcNo_;
         }
 
         //- Return neighbour processor number
-        int neighbProcNo() const
+        int neighbProcNo() const noexcept
         {
             return neighbProcNo_;
         }
@@ -291,19 +291,19 @@ public:
         );
 
         //- Return processor-neighbour patch face centres
-        const vectorField& neighbFaceCentres() const
+        const vectorField& neighbFaceCentres() const noexcept
         {
             return neighbFaceCentres_;
         }
 
         //- Return processor-neighbour patch face areas
-        const vectorField& neighbFaceAreas() const
+        const vectorField& neighbFaceAreas() const noexcept
         {
             return neighbFaceAreas_;
         }
 
         //- Return processor-neighbour patch neighbour cell centres
-        const vectorField& neighbFaceCellCentres() const
+        const vectorField& neighbFaceCellCentres() const noexcept
         {
             return neighbFaceCellCentres_;
         }
@@ -317,7 +317,7 @@ public:
         //- Return message tag to use for communication
         virtual int tag() const
         {
-            return Pstream::msgType();
+            return UPstream::msgType();
         }
 
         //- Return communicator used for communication

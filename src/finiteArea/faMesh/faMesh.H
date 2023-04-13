@@ -817,7 +817,7 @@ public:
         bool hasAreaCentres() const noexcept { return bool(faceCentresPtr_); }
 
         //- Has edge centres: edgeCentres()
-        bool hasAdgeCentres() const noexcept { return bool(edgeCentresPtr_); }
+        bool hasEdgeCentres() const noexcept { return bool(edgeCentresPtr_); }
 
         //- Has edge length vectors: Le()
         bool hasLe() const noexcept { return bool(LePtr_); }
@@ -896,6 +896,9 @@ public:
 
             //- Return edge length magnitudes
             const edgeScalarField& magLe() const;
+
+            //- Return normalised edge length vectors
+            tmp<edgeVectorField> unitLe() const;
 
             //- Return face centres as areaVectorField
             const areaVectorField& areaCentres() const;

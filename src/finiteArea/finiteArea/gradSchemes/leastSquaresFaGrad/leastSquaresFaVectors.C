@@ -108,6 +108,9 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
     // Set up temporary storage for the dd tensor (before inversion)
     symmTensorField dd(mesh().nFaces(), Zero);
 
+    // No contribution when mag(val) < SMALL
+    const scalar minLenSqr(SMALL*SMALL);
+
     forAll(owner, facei)
     {
         const label own = owner[facei];
@@ -117,7 +120,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
         // No contribution when mag(val) < SMALL
         const scalar magSqrDist = d.magSqr();
-        if (magSqrDist > ROOTSMALL)
+        if (magSqrDist >= minLenSqr)
         {
             const symmTensor wdd(sqr(d)/magSqrDist);
             dd[own] += wdd;
@@ -140,7 +143,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
             // No contribution when mag(val) < SMALL
             const scalar magSqrDist = d.magSqr();
-            if (magSqrDist > ROOTSMALL)
+            if (magSqrDist >= minLenSqr)
             {
                 dd[edgeFaces[patchFacei]] += sqr(d)/magSqrDist;
             }
@@ -162,7 +165,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
         // No contribution when mag(val) < SMALL
         const scalar magSqrDist = d.magSqr();
-        if (magSqrDist > ROOTSMALL)
+        if (magSqrDist >= minLenSqr)
         {
             lsP[facei] = (invDd[own] & d)/magSqrDist;
             lsN[facei] = -(invDd[nei] & d)/magSqrDist;
@@ -189,7 +192,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
             // No contribution when mag(val) < SMALL
             const scalar magSqrDist = d.magSqr();
-            if (magSqrDist > ROOTSMALL)
+            if (magSqrDist >= minLenSqr)
             {
                 patchLsP[patchFacei] =
                     (invDd[edgeFaces[patchFacei]] & d)/magSqrDist;

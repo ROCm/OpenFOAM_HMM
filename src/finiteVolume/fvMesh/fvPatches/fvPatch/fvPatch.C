@@ -129,12 +129,6 @@ Foam::tmp<Foam::vectorField> Foam::fvPatch::Cn() const
 }
 
 
-Foam::tmp<Foam::vectorField> Foam::fvPatch::nf() const
-{
-    return Sf()/magSf();
-}
-
-
 const Foam::vectorField& Foam::fvPatch::Sf() const
 {
     return boundaryMesh().mesh().Sf().boundaryField()[index()];
@@ -144,6 +138,18 @@ const Foam::vectorField& Foam::fvPatch::Sf() const
 const Foam::scalarField& Foam::fvPatch::magSf() const
 {
     return boundaryMesh().mesh().magSf().boundaryField()[index()];
+}
+
+
+Foam::tmp<Foam::vectorField> Foam::fvPatch::unitSf() const
+{
+    return Sf()/magSf();
+}
+
+
+Foam::tmp<Foam::vectorField> Foam::fvPatch::nf() const
+{
+    return Sf()/magSf();
 }
 
 

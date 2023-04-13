@@ -326,6 +326,30 @@ const Foam::surfaceScalarField& Foam::fvMesh::magSf() const
 }
 
 
+Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::unitSf() const
+{
+    auto tunitVectors = tmp<surfaceVectorField>::New
+    (
+        IOobject
+        (
+            "unit(Sf)",
+            pointsInstance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
+        ),
+        *this,
+        dimless,
+        (this->Sf() / this->magSf())
+    );
+
+    tunitVectors.ref().oriented() = this->Sf().oriented();
+    return tunitVectors;
+}
+
+
 const Foam::volVectorField& Foam::fvMesh::C() const
 {
     if (!CPtr_)

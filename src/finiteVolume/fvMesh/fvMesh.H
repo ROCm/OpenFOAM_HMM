@@ -451,6 +451,9 @@ public:
             //- Return cell face area magnitudes
             const surfaceScalarField& magSf() const;
 
+            //- Return cell face unit normals
+            tmp<surfaceVectorField> unitSf() const;
+
             //- Return cell face motion fluxes
             const surfaceScalarField& phi() const;
 

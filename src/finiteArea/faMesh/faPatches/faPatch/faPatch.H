@@ -387,13 +387,13 @@ public:
             //- Return edge centres
             const vectorField& edgeCentres() const;
 
-            //- Return edge length vectors
+            //- Return edge length vectors, like the faMesh::Le() method
             const vectorField& edgeLengths() const;
 
-            //- Return edge length magnitudes
+            //- Return edge length magnitudes, like the faMesh::magLe() method
             const scalarField& magEdgeLengths() const;
 
-            //- Return edge normals
+            //- Return edge unit normals, like the faMesh::unitLe() method
             tmp<vectorField> edgeNormals() const;
 
             //- Return neighbour face centres

@@ -249,13 +249,18 @@ public:
             //- Return neighbour cell centres
             tmp<vectorField> Cn() const;
 
-            //- Return face area vectors
+            //- Return face area vectors, like the fvMesh::Sf() method
             const vectorField& Sf() const;
 
-            //- Return face area magnitudes
+            //- Return face area magnitudes, like the fvMesh::magSf() method
             const scalarField& magSf() const;
 
-            //- Return face normals
+            //- Return face unit normals, like the fvMesh::unitSf() method.
+            //- Same as nf().
+            tmp<vectorField> unitSf() const;
+
+            //- Return face unit normals, like the fvMesh::unitSf() method
+            //- Same as unitSf().
             tmp<vectorField> nf() const;
 
             //- Return cell-centre to face-centre vector

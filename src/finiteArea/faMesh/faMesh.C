@@ -353,7 +353,7 @@ Foam::faMesh::faMesh
             "faceLabels",
             time().findInstance(meshDir(), "faceLabels"),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -372,7 +372,7 @@ Foam::faMesh::faMesh
                 faceLabels_.instance()
             ),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
@@ -425,7 +425,7 @@ Foam::faMesh::faMesh
                 "S0",
                 time().timeName(),
                 faMesh::meshSubDir,
-                mesh(),
+                faMesh::thisDb(),
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
@@ -464,7 +464,7 @@ Foam::faMesh::faMesh
             "faceLabels",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -477,7 +477,7 @@ Foam::faMesh::faMesh
             "faBoundary",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -545,7 +545,7 @@ Foam::faMesh::faMesh
             "faceLabels",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -558,7 +558,7 @@ Foam::faMesh::faMesh
             "faBoundary",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -672,7 +672,7 @@ Foam::faMesh::faMesh
                 "S0",
                 time().timeName(),
                 faMesh::meshSubDir,
-                mesh(),
+                faMesh::thisDb(),
                 IOobject::MUST_READ,
                 IOobject::AUTO_WRITE
             ),
@@ -857,7 +857,7 @@ Foam::faMesh::S00() const
             (
                 "S00",
                 time().timeName(),
-                mesh(),
+                faMesh::thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -985,7 +985,7 @@ bool Foam::faMesh::movePoints()
                 (
                     "S0",
                     time().timeName(),
-                    mesh(),
+                    faMesh::thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
                     IOobject::NO_REGISTER

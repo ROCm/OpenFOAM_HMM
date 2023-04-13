@@ -333,6 +333,32 @@ static inline vector calcLeVector
 } // End namespace Foam
 
 
+namespace Foam
+{
+
+// Impose a minimum (edge) vector length
+// - disallow any mag(vec) < SMALL
+static inline void imposeMinVectorLength(vectorField& fld)
+{
+    // If it is small, no orientation information reasonably possible
+    // so use a vector(1,1,1) * sqrt(1/3)*min-length
+
+    // sqrt(1/3) = 0.5773502691896257, but slightly rounded down
+    const vector minVector(vector::uniform(0.57735*SMALL));
+    const scalar minLenSqr(SMALL*SMALL);
+
+    for (vector& v : fld)
+    {
+        if (v.magSqr() < minLenSqr)
+        {
+            v = minVector;
+        }
+    }
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::vectorField> Foam::faMesh::calcRawEdgeNormals(int order) const
@@ -628,13 +654,9 @@ Foam::tmp<Foam::vectorField> Foam::faMesh::calcRawEdgeNormals(int order) const
 
         edgeNormals[edgei].removeCollinear(edgeLine.unitVec());
         edgeNormals[edgei].normalise();
-
-        // Do not allow any mag(val) < SMALL
-        if (edgeNormals[edgei].magSqr() < ROOTSMALL)
-        {
-            edgeNormals[edgei] = vector::uniform(SMALL);
-        }
     }
+
+    imposeMinVectorLength(edgeNormals);
 
     return tedgeNormals;
 }
@@ -659,8 +681,11 @@ void Foam::faMesh::calcLe() const
             (
                 "Le",
                 mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
+                faMesh::meshSubDir,
+                faMesh::thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimLength
@@ -691,12 +716,6 @@ void Foam::faMesh::calcLe() const
                     edges_[edgei].line(localPoints),
                     edgeNormals[edgei]
                 );
-
-                // Do not allow any mag(val) < SMALL
-                if (fld[edgei].magSqr() < ROOTSMALL)
-                {
-                    fld[edgei] = vector::uniform(SMALL);
-                }
             }
         }
 
@@ -720,15 +739,23 @@ void Foam::faMesh::calcLe() const
                     bndEdgeNormals[patchEdgei]
                 );
 
-                // Do not allow any mag(val) < SMALL
-                if (pfld[patchEdgei].magSqr() < ROOTSMALL)
-                {
-                    pfld[patchEdgei] = vector::uniform(SMALL);
-                }
-
                 ++edgei;
             }
         }
+    }
+
+
+    // Impose a minimum (edge) vector length
+
+    // Internal (edge vector)
+    {
+        imposeMinVectorLength(Le.primitiveFieldRef());
+    }
+
+    // Boundary (edge vector)
+    for (vectorField& pfld : Le.boundaryFieldRef())
+    {
+        imposeMinVectorLength(pfld);
     }
 }
 
@@ -752,8 +779,11 @@ void Foam::faMesh::calcMagLe() const
             (
                 "magLe",
                 mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
+                faMesh::meshSubDir,
+                faMesh::thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimLength
@@ -825,8 +855,11 @@ void Foam::faMesh::calcFaceCentres() const
             (
                 "centres",
                 mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
+                faMesh::meshSubDir,
+                faMesh::thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimLength
@@ -904,8 +937,11 @@ void Foam::faMesh::calcEdgeCentres() const
             (
                 "edgeCentres",
                 mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
+                faMesh::meshSubDir,
+                faMesh::thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimLength
@@ -965,9 +1001,10 @@ void Foam::faMesh::calcS() const
         (
             "S",
             time().timeName(),
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         ),
         *this,
         dimArea
@@ -1037,8 +1074,11 @@ void Foam::faMesh::calcFaceAreaNormals() const
             (
                 "faceAreaNormals",
                 mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
+                faMesh::meshSubDir,
+                faMesh::thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimless
@@ -1073,14 +1113,7 @@ void Foam::faMesh::calcFaceAreaNormals() const
         // Make unit normals
         fld.normalise();
 
-        for (auto& f : fld)
-        {
-            // Do not allow any mag(val) < SMALL
-            if (f.magSqr() < ROOTSMALL)
-            {
-                f = vector::uniform(SMALL);
-            }
-        }
+        imposeMinVectorLength(fld);
     }
 
 
@@ -1122,8 +1155,11 @@ void Foam::faMesh::calcEdgeAreaNormals() const
             (
                 "edgeAreaNormals",
                 mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
+                faMesh::meshSubDir,
+                faMesh::thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimless
@@ -1194,13 +1230,9 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 
             fld[edgei].removeCollinear(edgeLine.unitVec());
             fld[edgei].normalise();
-
-            // Do not allow any mag(val) < SMALL
-            if (fld[edgei].magSqr() < ROOTSMALL)
-            {
-                fld[edgei] = vector::uniform(SMALL);
-            }
         }
+
+        imposeMinVectorLength(fld);
     }
 
     // Boundary
@@ -1226,13 +1258,9 @@ void Foam::faMesh::calcEdgeAreaNormals() const
 
                 pfld[patchEdgei].removeCollinear(edgeLine.unitVec());
                 pfld[patchEdgei].normalise();
-
-                // Do not allow any mag(val) < SMALL
-                if (pfld[patchEdgei].magSqr() < ROOTSMALL)
-                {
-                    pfld[patchEdgei] = vector::uniform(SMALL);
-                }
             }
+
+            imposeMinVectorLength(pfld);
         }
     }
 }
@@ -1257,8 +1285,11 @@ void Foam::faMesh::calcFaceCurvatures() const
             (
                 "faceCurvatures",
                 mesh().pointsInstance(),
-                meshSubDir,
-                mesh()
+                faMesh::meshSubDir,
+                faMesh::thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimless/dimLength
@@ -2291,8 +2322,11 @@ Foam::tmp<Foam::edgeScalarField> Foam::faMesh::edgeLengthCorrection() const
         (
             "edgeLengthCorrection",
             mesh().pointsInstance(),
-            meshSubDir,
-            mesh()
+            faMesh::meshSubDir,
+            faMesh::thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         ),
         *this,
         dimless
@@ -2347,6 +2381,33 @@ Foam::tmp<Foam::edgeScalarField> Foam::faMesh::edgeLengthCorrection() const
     }
 
     return tcorrection;
+}
+
+
+Foam::tmp<Foam::edgeVectorField> Foam::faMesh::unitLe() const
+{
+    auto tunitVectors = tmp<edgeVectorField>::New
+    (
+        IOobject
+        (
+            "unit(Le)",
+            mesh().pointsInstance(),
+            faMesh::meshSubDir,
+            faMesh::thisDb(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
+        ),
+        *this,
+        dimless,
+        (this->Le() / this->magLe())
+    );
+
+    // The above is not quite correct when a min-length limiter
+    // has been imposed on both Le() and magLe() fields
+
+    // tunitVectors.ref().oriented() = this->Le().oriented();
+    return tunitVectors;
 }
 
 
