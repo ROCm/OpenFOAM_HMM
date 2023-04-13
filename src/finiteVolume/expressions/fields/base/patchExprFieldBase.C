@@ -82,7 +82,7 @@ void Foam::expressions::patchExprFieldBase::readExpressions
                 // but not for 0/1 (handled as shortcuts later)
                 if (wantPointData && fracExpr_ != "0" && fracExpr_ != "1")
                 {
-                    fracExpr_ = "toPoint(" + fracExpr_ + ")";
+                    fracExpr_ = "point(" + fracExpr_ + ")";
                 }
             }
         }
