@@ -109,13 +109,42 @@ inline Cmpt Foam::SymmTensor2D<Cmpt>::det() const
 
 
 template<class Cmpt>
-inline Foam::SymmTensor2D<Cmpt> Foam::SymmTensor2D<Cmpt>::cof() const
+inline Foam::SymmTensor2D<Cmpt> Foam::SymmTensor2D<Cmpt>::adjunct() const
 {
+    // symmetric: cof() == adjunct()
     return SymmTensor2D<Cmpt>
     (
-        yy(), -yx(),
+        yy(), -xy(),
                xx()
     );
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor2D<Cmpt> Foam::SymmTensor2D<Cmpt>::cof() const
+{
+    // symmetric: cof() == adjunct()
+    return this->adjunct();
+}
+
+
+// Invert without much error handling
+template<class Cmpt>
+inline Foam::SymmTensor2D<Cmpt> Foam::SymmTensor2D<Cmpt>::inv() const
+{
+    const Cmpt detval = this->det();
+
+    #ifdef FULLDEBUG
+    if (mag(detval) < SMALL)
+    {
+        FatalErrorInFunction
+            << "SymmTensor2D not properly invertible, determinant:"
+            << detval << " tensor:" << *this << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    return this->adjunct()/detval;
 }
 
 
@@ -220,7 +249,7 @@ inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st, const Cmpt detval)
     }
     #endif
 
-    return st.cof().T()/detval;
+    return st.adjunct()/detval;
 }
 
 
@@ -228,15 +257,7 @@ inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st, const Cmpt detval)
 template<class Cmpt>
 inline SymmTensor2D<Cmpt> inv(const SymmTensor2D<Cmpt>& st)
 {
-    return inv(st, st.det());
-}
-
-
-// The inverse of this SymmTensor2D
-template<class Cmpt>
-inline SymmTensor2D<Cmpt> SymmTensor2D<Cmpt>::inv() const
-{
-    return Foam::inv(*this, this->det());
+    return st.inv();
 }
 
 

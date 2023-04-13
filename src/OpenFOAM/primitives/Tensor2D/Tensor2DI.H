@@ -318,13 +318,20 @@ inline Cmpt Foam::Tensor2D<Cmpt>::det() const
 
 
 template<class Cmpt>
-inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::cof() const
+inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::adjunct() const
 {
     return Tensor2D<Cmpt>
     (
-        yy(), -yx(),
-       -xy(),  xx()
+        yy(), -xy(),
+       -yx(),  xx()
     );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::cof() const
+{
+    return this->adjunct().T();
 }
 
 
@@ -356,6 +363,26 @@ Foam::Tensor2D<Cmpt>::schur(const Tensor2D<Cmpt>& t2) const
         t1.xx()*t2.xx(), t1.xy()*t2.xy(),
         t1.yx()*t2.yx(), t1.yy()*t2.yy()
     );
+}
+
+
+// Invert without much error handling
+template<class Cmpt>
+inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::inv() const
+{
+    const Cmpt detval = this->det();
+
+    #ifdef FULLDEBUG
+    if (mag(detval) < SMALL)
+    {
+        FatalErrorInFunction
+            << "SymmTensor2D not properly invertible, determinant:"
+            << detval << " tensor:" << *this << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    return this->adjunct()/detval;
 }
 
 
@@ -463,7 +490,7 @@ inline Cmpt det(const Tensor2D<Cmpt>& t)
 }
 
 
-//- Return the cofactor Tensor2D of a Tensor2D
+//- Return the cofactor of a Tensor2D
 template<class Cmpt>
 inline Tensor2D<Cmpt> cof(const Tensor2D<Cmpt>& t)
 {
@@ -485,7 +512,7 @@ inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t, const Cmpt detval)
     }
     #endif
 
-    return t.cof().T()/detval;
+    return t.adjunct()/detval;
 }
 
 
@@ -493,15 +520,7 @@ inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t, const Cmpt detval)
 template<class Cmpt>
 inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t)
 {
-    return inv(t, t.det());
-}
-
-
-// Return the inverse of this Tensor2D
-template<class Cmpt>
-inline Tensor2D<Cmpt> Tensor2D<Cmpt>::inv() const
-{
-    return Foam::inv(*this, this->det());
+    return t.inv();
 }
 
 

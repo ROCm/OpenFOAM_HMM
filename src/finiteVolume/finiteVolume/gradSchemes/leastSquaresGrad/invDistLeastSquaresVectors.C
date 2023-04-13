@@ -104,14 +104,17 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         const label nei = neighbour[facei];
 
         const vector d(C[nei] - C[own]);
-        const symmTensor wdd(sqr(d)/magSqr(d));
-        dd[own] += wdd;
-        dd[nei] += wdd;
+        const scalar magSqrDist = d.magSqr();
+
+        if (magSqrDist > ROOTVSMALL)
+        {
+            const symmTensor wdd(sqr(d)/magSqrDist);
+            dd[own] += wdd;
+            dd[nei] += wdd;
+        }
     }
 
-
-    surfaceVectorField::Boundary& blsP =
-        pVectors_.boundaryField();
+    auto& blsP = pVectors_.boundaryField();
 
     forAll(blsP, patchi)
     {
@@ -126,13 +129,17 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         forAll(pd, patchFacei)
         {
             const vector& d = pd[patchFacei];
+            const scalar magSqrDist = d.magSqr();
 
-            dd[faceCells[patchFacei]] += sqr(d)/magSqr(d);
+            if (magSqrDist > ROOTVSMALL)
+            {
+                dd[faceCells[patchFacei]] += sqr(d)/magSqrDist;
+            }
         }
     }
 
 
-    // Invert the dd tensor
+    // Invert the dd tensors - including failsafe checks
     const symmTensorField invDd(inv(dd));
 
 
@@ -143,9 +150,18 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         const label nei = neighbour[facei];
 
         const vector d(C[nei] - C[own]);
+        const scalar magSqrDist = d.magSqr();
 
-        pVectors_[facei] = (invDd[own] & d)/magSqr(d);
-        nVectors_[facei] = -(invDd[nei] & d)/magSqr(d);
+        if (magSqrDist > ROOTVSMALL)
+        {
+            pVectors_[facei] = (invDd[own] & d)/magSqrDist;
+            nVectors_[facei] = -(invDd[nei] & d)/magSqrDist;
+        }
+        else
+        {
+            pVectors_[facei] = Zero;
+            nVectors_[facei] = Zero;
+        }
     }
 
     forAll(blsP, patchi)
@@ -161,8 +177,17 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
         forAll(pd, patchFacei)
         {
             const vector& d = pd[patchFacei];
+            const scalar magSqrDist = d.magSqr();
 
-            patchLsP[patchFacei] = (invDd[faceCells[patchFacei]] & d)/magSqr(d);
+            if (magSqrDist > ROOTVSMALL)
+            {
+                patchLsP[patchFacei] =
+                    (invDd[faceCells[patchFacei]] & d)/magSqrDist;
+            }
+            else
+            {
+                patchLsP[patchFacei] = Zero;
+            }
         }
     }
 

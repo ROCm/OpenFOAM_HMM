@@ -212,7 +212,10 @@ public:
         //- The determinate
         inline Cmpt det() const;
 
-        //- Return cofactor matrix
+        //- Return adjunct matrix (transpose of cofactor matrix)
+        inline Tensor2D<Cmpt> adjunct() const;
+
+        //- Return cofactor matrix (transpose of adjunct matrix)
         inline Tensor2D<Cmpt> cof() const;
 
         //- Return inverse

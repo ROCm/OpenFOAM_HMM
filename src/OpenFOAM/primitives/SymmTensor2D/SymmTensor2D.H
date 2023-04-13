@@ -152,7 +152,10 @@ public:
         //- The determinate
         inline Cmpt det() const;
 
-        //- Return cofactor matrix
+        //- Return adjunct matrix (transpose of cofactor matrix)
+        inline SymmTensor2D<Cmpt> adjunct() const;
+
+        //- Return cofactor matrix (transpose of adjunct matrix)
         inline SymmTensor2D<Cmpt> cof() const;
 
         //- Return inverse

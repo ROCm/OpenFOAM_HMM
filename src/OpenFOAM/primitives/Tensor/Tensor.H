@@ -287,15 +287,20 @@ public:
         //- The 2D determinant by excluding given direction
         inline Cmpt det2D(const direction excludeCmpt) const;
 
-        //- Return cofactor matrix
+        //- Return adjunct matrix (transpose of cofactor matrix)
+        inline Tensor<Cmpt> adjunct() const;
+
+        //- Return cofactor matrix (transpose of adjunct matrix)
         inline Tensor<Cmpt> cof() const;
 
-        //- Return 2D cofactor matrix by excluding given direction
-        inline Tensor<Cmpt> cof2D(const direction excludeCmpt) const;
+        //- Return 2D adjunct matrix by excluding given direction
+        inline Tensor<Cmpt> adjunct2D(const direction excludeCmpt) const;
 
-        //- Return inverse, with optional (ad hoc) failsafe handling
-        //- of 2D tensors
-        inline Tensor<Cmpt> inv(const bool failsafe=false) const;
+        //- Return inverse
+        inline Tensor<Cmpt> inv() const;
+
+        //- Return inverse, with (ad hoc) failsafe handling of 2D tensors
+        inline Tensor<Cmpt> safeInv() const;
 
         //- Return inverse of 2D tensor (by excluding given direction)
         inline Tensor<Cmpt> inv2D(const direction excludeCmpt) const;

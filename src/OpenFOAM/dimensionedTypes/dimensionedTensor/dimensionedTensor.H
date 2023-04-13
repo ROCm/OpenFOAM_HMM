@@ -51,8 +51,7 @@ namespace Foam
 
 typedef dimensioned<tensor> dimensionedTensor;
 
-
-// global functions
+// Global Functions
 
 dimensionedScalar tr(const dimensionedTensor&);
 dimensionedTensor dev(const dimensionedTensor&);
@@ -68,7 +67,7 @@ dimensionedVector eigenValues(const dimensionedSymmTensor&);
 dimensionedTensor eigenVectors(const dimensionedSymmTensor&);
 
 
-// global operators
+// Global Operators
 
 //- Hodge Dual operator (tensor -> vector)
 dimensionedVector operator*(const dimensionedTensor&);

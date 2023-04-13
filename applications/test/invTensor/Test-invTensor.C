@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,60 +23,74 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::dimensionedSymmTensor
+Application
+    Test-invTensor
 
 Description
-    Dimensioned tensor obtained from generic dimensioned type.
-
-SourceFiles
-    dimensionedSymmTensor.C
+    Tests for regular and corner cases of tensor inversion.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_dimensionedSymmTensor_H
-#define Foam_dimensionedSymmTensor_H
-
-#include "dimensionedVector.H"
+#include "tensor.H"
 #include "symmTensor.H"
+#include "transform.H"
+#include "unitConversion.H"
+#include "Random.H"
+#include "scalar.H"
+#include "complex.H"
+#include "sigFpe.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class TensorType>
+void test_invert(const TensorType& tt)
 {
+    Info<< pTraits<TensorType>::typeName << nl
+        << "ten : " << tt << nl;
+
+    // Non-failsafe. try/catch does not work here
+    if (tt.det() < ROOTVSMALL)
+    {
+        Info<< "inv : " << "nan/inf" << nl;
+    }
+    else
+    {
+        Info<< "inv : " << tt.inv() << nl;
+    }
+
+    // Failsafe
+    Info<< "inv : " << tt.safeInv() << nl;
+
+    Info<< nl;
+}
+
+
+// * * * * * * * * * * * * * * * Main Program  * * * * * * * * * * * * * * * //
+
+int main(int argc, char *argv[])
+{
+    // Run with FOAM_SIGFPE=true to ensure we see divide by zero
+    Foam::sigFpe::set(true);
+
+    {
+        symmTensor st(1e-3, 0, 0, 1e-3, 0, 1e-6);
+        test_invert(st);
+    }
+
+    {
+        symmTensor st(1e-3, 0, 0, 1e-3, 0, 1e-30);
+        test_invert(st);
+    }
+
+    {
+        symmTensor st(1e-3, 0, 0, 1e-3, 0, 0);
+        test_invert(st);
+    }
+
+    return 0;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef dimensioned<symmTensor> dimensionedSymmTensor;
-
-
-// Global Functions
-
-dimensionedSymmTensor sqr(const dimensionedVector&);
-dimensionedSymmTensor innerSqr(const dimensionedSymmTensor&);
-
-dimensionedScalar tr(const dimensionedSymmTensor&);
-dimensionedSymmTensor symm(const dimensionedSymmTensor&);
-dimensionedSymmTensor twoSymm(const dimensionedSymmTensor&);
-dimensionedSymmTensor dev(const dimensionedSymmTensor&);
-dimensionedSymmTensor dev2(const dimensionedSymmTensor&);
-dimensionedScalar det(const dimensionedSymmTensor&);
-dimensionedSymmTensor cof(const dimensionedSymmTensor&);
-dimensionedSymmTensor inv(const dimensionedSymmTensor&);
-
-
-// Global Operators
-
-//- Hodge Dual operator (tensor -> vector)
-dimensionedVector operator*(const dimensionedSymmTensor&);
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
-
-// ************************************************************************* //

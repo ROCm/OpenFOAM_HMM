@@ -51,55 +51,10 @@ UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
 UNARY_FUNCTION(symmTensor, symmTensor, cof)
 
-void inv(Field<symmTensor>& result, const UList<symmTensor>& tf1)
+void inv(Field<symmTensor>& result, const UList<symmTensor>& f1)
 {
-    if (result.empty() || tf1.empty())
-    {
-        return;
-    }
-
-    // Attempting to identify 2-D cases
-    const scalar minThreshold = SMALL * magSqr(tf1[0]);
-
-    const bool small_xx = (magSqr(tf1[0].xx()) < minThreshold);
-    const bool small_yy = (magSqr(tf1[0].yy()) < minThreshold);
-    const bool small_zz = (magSqr(tf1[0].zz()) < minThreshold);
-
-    if (small_xx || small_yy || small_zz)
-    {
-        const vector adjust
-        (
-            (small_xx ? 1 : 0),
-            (small_yy ? 1 : 0),
-            (small_zz ? 1 : 0)
-        );
-
-        // Cannot use TFOR_ALL_F_OP_FUNC_F (additional operations)
-
-        const label loopLen = (result).size();
-
-        /* pragmas... */
-        for (label i = 0; i < loopLen; ++i)
-        {
-            symmTensor work(tf1[i]);
-            work.addDiag(adjust);
-
-            result[i] = Foam::inv(work);
-            result[i].subtractDiag(adjust);
-        }
-    }
-    else
-    {
-        // Same as TFOR_ALL_F_OP_FUNC_F
-
-        const label loopLen = (result).size();
-
-        /* pragmas... */
-        for (label i = 0; i < loopLen; ++i)
-        {
-            result[i] = Foam::inv(tf1[i]);
-        }
-    }
+    // With 'failsafe' invert
+    TFOR_ALL_F_OP_F_FUNC(symmTensor, result, =, symmTensor, f1, safeInv)
 }
 
 tmp<symmTensorField> inv(const UList<symmTensor>& tf)

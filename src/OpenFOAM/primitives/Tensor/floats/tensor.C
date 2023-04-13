@@ -304,9 +304,9 @@ Foam::Tensor<Foam::complex> Foam::eigenVectors(const tensor& T)
 
 Foam::tensor Foam::pinv(const tensor& t)
 {
-    const scalar dt = det(t);
+    const scalar detval = t.det();
 
-    if (dt < ROOTVSMALL)
+    if (detval < ROOTVSMALL)
     {
         // Fall back to pseudo inverse
         scalarRectangularMatrix mat(3, 3);
@@ -325,7 +325,7 @@ Foam::tensor Foam::pinv(const tensor& t)
         );
     }
 
-    return inv(t, dt);
+    return Foam::inv(t, detval);
 }
 
 

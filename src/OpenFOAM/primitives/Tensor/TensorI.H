@@ -468,27 +468,26 @@ inline Cmpt Foam::Tensor<Cmpt>::det2D(const direction excludeCmpt) const
 
 
 template<class Cmpt>
-inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::cof() const
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::adjunct() const
 {
     return Tensor<Cmpt>
     (
-        yy()*zz() - zy()*yz(),
-        zx()*yz() - yx()*zz(),
-        yx()*zy() - yy()*zx(),
-
-        xz()*zy() - xy()*zz(),
-        xx()*zz() - xz()*zx(),
-        xy()*zx() - xx()*zy(),
-
-        xy()*yz() - xz()*yy(),
-        yx()*xz() - xx()*yz(),
-        xx()*yy() - yx()*xy()
+        yy()*zz() - zy()*yz(), xz()*zy() - xy()*zz(), xy()*yz() - xz()*yy(),
+        zx()*yz() - yx()*zz(), xx()*zz() - xz()*zx(), yx()*xz() - xx()*yz(),
+        yx()*zy() - yy()*zx(), xy()*zx() - xx()*zy(), xx()*yy() - yx()*xy()
     );
 }
 
 
 template<class Cmpt>
-inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::cof2D
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::cof() const
+{
+    return this->adjunct().T();
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::adjunct2D
 (
     const direction excludeCmpt
 ) const
@@ -500,8 +499,8 @@ inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::cof2D
             return Tensor<Cmpt>
             (
                 Zero,  Zero,  Zero,
-                Zero,  zz(), -zy(),
-                Zero, -yz(),  yy()
+                Zero,  zz(), -yz(),
+                Zero, -zy(),  yy()
             );
         }
 
@@ -509,9 +508,9 @@ inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::cof2D
         {
             return Tensor<Cmpt>
             (
-                zz(), Zero, -zx(),
+                zz(), Zero, -xz(),
                 Zero, Zero,  Zero,
-               -xz(), Zero,  xx()
+               -zx(), Zero,  xx()
             );
         }
     }
@@ -519,8 +518,8 @@ inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::cof2D
     // Fall-through: Eliminate z
     return Tensor<Cmpt>
     (
-        yy(), -yx(), Zero,
-       -xy(),  xx(), Zero,
+        yy(), -xy(), Zero,
+       -yx(),  xx(), Zero,
         Zero,  Zero, Zero
     );
 }
@@ -534,7 +533,7 @@ inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::inv2D
 {
     const Cmpt detval = this->det2D(excludeCmpt);
 
-    return this->cof2D(excludeCmpt).T()/detval;
+    return this->adjunct2D(excludeCmpt)/detval;
 }
 
 
@@ -573,6 +572,84 @@ Foam::Tensor<Cmpt>::schur(const Tensor<Cmpt>& t2) const
         t1.yx()*t2.yx(), t1.yy()*t2.yy(), t1.yz()*t2.yz(),
         t1.zx()*t2.zx(), t1.zy()*t2.zy(), t1.zz()*t2.zz()
     );
+}
+
+
+// Invert without much error handling
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::inv() const
+{
+    const Cmpt detval = this->det();
+
+    #ifdef FULLDEBUG
+    if (mag(detval) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Tensor not properly invertible, determinant:"
+            << detval << " tensor:" << *this << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    return this->adjunct()/detval;
+}
+
+
+// Invert with some error handling
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::safeInv() const
+{
+    {
+        // Attempt to identify and handle 2-D cases
+        // - use diagSqr instead of magSqr for fewer operations
+
+        const scalar magSqr_xx = Foam::magSqr(xx());
+        const scalar magSqr_yy = Foam::magSqr(yy());
+        const scalar magSqr_zz = Foam::magSqr(zz());
+
+        // SMALL: 1e-15 (double), 1e-6 (float), but 1e-6 may be adequate
+
+        const scalar threshold = SMALL * (magSqr_xx + magSqr_yy + magSqr_zz);
+
+        const bool small_xx = (magSqr_xx < threshold);
+        const bool small_yy = (magSqr_yy < threshold);
+        const bool small_zz = (magSqr_zz < threshold);
+
+        if (small_xx || small_yy || small_zz)
+        {
+            Tensor<Cmpt> work(*this);
+
+            if (small_xx) { work.xx() += pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() += pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() += pTraits<Cmpt>::one; }
+
+            const Cmpt detval = work.det();
+
+            if (mag(detval) < ROOTVSMALL)
+            {
+                // Appears to be nearly zero - leave untouched?
+                return Tensor<Cmpt>(Zero);
+            }
+
+            work = work.adjunct()/detval;
+
+            if (small_xx) { work.xx() -= pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() -= pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() -= pTraits<Cmpt>::one; }
+
+            return work;
+        }
+    }
+
+    const Cmpt detval = this->det();
+
+    if (mag(detval) < ROOTVSMALL)
+    {
+        // Appears to be nearly zero - leave untouched?
+        return Tensor<Cmpt>(Zero);
+    }
+
+    return this->adjunct()/detval;
 }
 
 
@@ -750,7 +827,7 @@ inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t, const Cmpt detval)
     }
     #endif
 
-    return t.cof().T()/detval;
+    return t.adjunct()/detval;
 }
 
 
@@ -758,63 +835,7 @@ inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t, const Cmpt detval)
 template<class Cmpt>
 inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t)
 {
-    return inv(t, t.det());
-}
-
-
-template<class Cmpt>
-inline Tensor<Cmpt> Tensor<Cmpt>::inv(const bool failsafe) const
-{
-    const Cmpt detval = this->det();
-
-    if (failsafe)
-    {
-        // Attempt to identify and handle 2-D cases
-        // - use diagSqr instead of magSqr for fewer operations
-
-        const scalar magSqr_xx = Foam::magSqr(xx());
-        const scalar magSqr_yy = Foam::magSqr(yy());
-        const scalar magSqr_zz = Foam::magSqr(zz());
-
-        const scalar threshold = SMALL * (magSqr_xx + magSqr_yy + magSqr_zz);
-
-        const bool small_xx = (magSqr_xx < threshold);
-        const bool small_yy = (magSqr_yy < threshold);
-        const bool small_zz = (magSqr_zz < threshold);
-
-        if (small_xx || small_yy || small_zz)
-        {
-            Tensor<Cmpt> work(*this);
-
-            if (small_xx) { work.xx() += pTraits<Cmpt>::one; }
-            if (small_yy) { work.yy() += pTraits<Cmpt>::one; }
-            if (small_zz) { work.zz() += pTraits<Cmpt>::one; }
-
-            work = Foam::inv(work, work.det());
-
-            if (small_xx) { work.xx() -= pTraits<Cmpt>::one; }
-            if (small_yy) { work.yy() -= pTraits<Cmpt>::one; }
-            if (small_zz) { work.zz() -= pTraits<Cmpt>::one; }
-
-            return work;
-        }
-        else if (mag(detval) < VSMALL)
-        {
-            // Really appears to be zero - leave untouched?
-            return Tensor<Cmpt>(Zero);
-        }
-    }
-    #ifdef FULLDEBUG
-    else if (mag(detval) < VSMALL)
-    {
-        FatalErrorInFunction
-            << "Tensor not properly invertible, determinant:"
-            << detval << " tensor:" << *this << nl
-            << abort(FatalError);
-    }
-    #endif
-
-    return this->cof().T()/detval;
+    return t.inv();
 }
 
 

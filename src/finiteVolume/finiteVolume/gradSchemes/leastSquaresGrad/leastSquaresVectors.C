@@ -151,7 +151,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
     }
 
 
-    // Invert the dd tensor
+    // Invert the dd tensors - including failsafe checks
     const symmTensorField invDd(inv(dd));
 
 
