@@ -2714,13 +2714,14 @@ void Foam::globalMeshData::updateMesh()
 
     // *** Temporary hack to avoid problems with overlapping communication
     // *** between these reductions and the calculation of deltaCoeffs
-    //const label comm = UPstream::worldComm + 1;
-    const label comm = UPstream::allocateCommunicator
+
+    UPstream::communicator dupComm
     (
         UPstream::worldComm,
-        identity(UPstream::nProcs(UPstream::worldComm)),
-        true
+        identity(UPstream::nProcs(UPstream::worldComm))
     );
+
+    const label comm = dupComm.comm();
     const label oldWarnComm = UPstream::commWarn(comm);
 
 
@@ -2760,8 +2761,8 @@ void Foam::globalMeshData::updateMesh()
     );
 
     // Restore communicator settings
-    UPstream::freeCommunicator(comm);
     UPstream::commWarn(oldWarnComm);
+    dupComm.reset();
 
     if (debug)
     {

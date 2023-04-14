@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,21 +33,21 @@ License
 Foam::UPstream::commsStruct::commsStruct
 (
     const label above,
-    const labelUList& below,
-    const labelUList& allBelow,
-    const labelUList& allNotBelow
+    labelList&& below,
+    labelList&& allBelow,
+    labelList&& allNotBelow
 )
 :
     above_(above),
-    below_(below),
-    allBelow_(allBelow),
-    allNotBelow_(allNotBelow)
+    below_(std::move(below)),
+    allBelow_(std::move(allBelow)),
+    allNotBelow_(std::move(allNotBelow))
 {}
 
 
 Foam::UPstream::commsStruct::commsStruct
 (
-    const label nProcs,
+    const label numProcs,
     const label myProcID,
     const label above,
     const labelUList& below,
@@ -57,38 +57,240 @@ Foam::UPstream::commsStruct::commsStruct
     above_(above),
     below_(below),
     allBelow_(allBelow),
-    allNotBelow_(nProcs - allBelow.size() - 1)
+    allNotBelow_(numProcs - allBelow.size() - 1)
 {
-    boolList inBelow(nProcs, false);
+    List<bool> isNotBelow(numProcs, true);
 
-    forAll(allBelow, belowI)
+    // Exclude self
+    isNotBelow[myProcID] = false;
+
+    // Exclude allBelow
+    for (const label proci : allBelow)
     {
-        inBelow[allBelow[belowI]] = true;
+        isNotBelow[proci] = false;
     }
 
-    label notI = 0;
-    forAll(inBelow, proci)
+    // Compacting to obtain allNotBelow_
+    label nNotBelow = 0;
+    forAll(isNotBelow, proci)
     {
-        if ((proci != myProcID) && !inBelow[proci])
+        if (isNotBelow[proci])
         {
-            allNotBelow_[notI++] = proci;
+            allNotBelow_[nNotBelow++] = proci;
         }
     }
-    if (notI != allNotBelow_.size())
+
+    if (nNotBelow != allNotBelow_.size())
     {
-        FatalErrorInFunction << "problem!" << Foam::abort(FatalError);
+        FatalErrorInFunction
+            << "Problem: " << nNotBelow << " != " << allNotBelow_.size() << nl
+            << Foam::abort(FatalError);
+    }
+}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+// This outputs as depth-first, but graphviz sorts that for us
+void Foam::UPstream::commsStruct::printGraph
+(
+    Ostream& os,
+    const UList<UPstream::commsStruct>& comms,
+    const label proci
+)
+{
+    // if (proci >= comms.size()) return;  // Extreme safety!
+
+    const auto& below = comms[proci].below();
+
+    if (proci == 0)
+    {
+        os << nl << "// communication graph:" << nl;
+        os.beginBlock("graph");
+
+        if (below.empty())
+        {
+            // A graph with a single-node (eg, self-comm)
+            os << indent << proci << nl;
+        }
+    }
+
+    int pos = 0;
+
+    for (const label nbrProci : below)
+    {
+        if (pos)
+        {
+            os << "  ";
+        }
+        else
+        {
+            os << indent;
+        }
+        os << proci << " -- " << nbrProci;
+
+        if (++pos >= 4)  // Max 4 items per line
+        {
+            pos = 0;
+            os << nl;
+        }
+    }
+
+    if (pos)
+    {
+        os << nl;
+    }
+
+    for (const label nbrProci : below)
+    {
+        // if (proci == nbrProci) continue;  // Extreme safety!
+        printGraph(os, comms, nbrProci);
+    }
+
+    if (proci == 0)
+    {
+        os.endBlock();
+
+        os << "// end graph" << nl;
     }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::UPstream::commsStruct::clear()
+Foam::label Foam::UPstream::commsStruct::nProcs() const
+{
+    return (1 + allBelow_.size() + allNotBelow_.size());
+}
+
+
+void Foam::UPstream::commsStruct::reset()
 {
     above_ = -1;
     below_.clear();
     allBelow_.clear();
     allNotBelow_.clear();
+}
+
+
+void Foam::UPstream::commsStruct::reset
+(
+    const label procID,
+    const label numProcs
+)
+{
+    reset();
+
+    label above(-1);
+    DynamicList<label> below;
+    DynamicList<label> allBelow;
+
+    if (numProcs < UPstream::nProcsSimpleSum)
+    {
+        // Linear schedule
+
+        if (procID == 0)
+        {
+            below = identity(numProcs-1, 1);
+            allBelow = below;
+        }
+        else
+        {
+            above = 0;
+        }
+    }
+    else
+    {
+        // Use tree like schedule. For 8 procs:
+        // (level 0)
+        //      0 receives from 1
+        //      2 receives from 3
+        //      4 receives from 5
+        //      6 receives from 7
+        // (level 1)
+        //      0 receives from 2
+        //      4 receives from 6
+        // (level 2)
+        //      0 receives from 4
+        //
+        // The sends/receives for all levels are collected per processor
+        // (one send per processor; multiple receives possible) creating
+        // a table:
+        //
+        // So per processor:
+        // proc     receives from   sends to
+        // ----     -------------   --------
+        //  0       1,2,4           -
+        //  1       -               0
+        //  2       3               0
+        //  3       -               2
+        //  4       5               0
+        //  5       -               4
+        //  6       7               4
+        //  7       -               6
+
+        label mod = 0;
+
+        for (label step = 1; step < numProcs; step = mod)
+        {
+            mod = step * 2;
+
+            if (procID % mod)
+            {
+                above = procID - (procID % mod);
+                break;
+            }
+            else
+            {
+                for
+                (
+                    label j = procID + step;
+                    j < numProcs && j < procID + mod;
+                    j += step
+                )
+                {
+                    below.push_back(j);
+                }
+                for
+                (
+                    label j = procID + step;
+                    j < numProcs && j < procID + mod;
+                    j++
+                )
+                {
+                    allBelow.push_back(j);
+                }
+            }
+        }
+    }
+
+    *this = UPstream::commsStruct(numProcs, procID, above, below, allBelow);
+}
+
+
+// * * * * * * * * * * * * * * * Specializations * * * * * * * * * * * * * * //
+
+template<>
+Foam::UPstream::commsStruct&
+Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID)
+{
+    auto& val = this->v_[procID];   // or this->data()[procID]
+
+    if (val.nProcs() != size())
+    {
+        // Create/update
+        val.reset(procID, size());
+    }
+
+    return val;
+}
+
+
+template<>
+const Foam::UPstream::commsStruct&
+Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID) const
+{
+    return const_cast<UList<UPstream::commsStruct>&>(*this).operator[](procID);
 }
 
 
@@ -100,8 +302,8 @@ bool Foam::UPstream::commsStruct::operator==(const commsStruct& comm) const
     (
         (above_ == comm.above())
      && (below_ == comm.below())
-     && (allBelow_ == allBelow())
-     && (allNotBelow_ == allNotBelow())
+     // && (allBelow_ == comm.allBelow())
+     // && (allNotBelow_ == comm.allNotBelow())
     );
 }
 
@@ -116,10 +318,10 @@ bool Foam::UPstream::commsStruct::operator!=(const commsStruct& comm) const
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const UPstream::commsStruct& comm)
 {
-    os  << comm.above_ << token::SPACE
-        << comm.below_ << token::SPACE
-        << comm.allBelow_ << token::SPACE
-        << comm.allNotBelow_;
+    os  << comm.above() << nl << token::SPACE << token::SPACE;
+    comm.below().writeList(os) << nl << token::SPACE << token::SPACE;
+    comm.allBelow().writeList(os) << nl << token::SPACE << token::SPACE;
+    comm.allNotBelow().writeList(os);
 
     os.check(FUNCTION_NAME);
     return os;

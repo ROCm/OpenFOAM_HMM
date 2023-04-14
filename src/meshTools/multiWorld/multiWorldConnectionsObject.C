@@ -157,13 +157,12 @@ Foam::label Foam::multiWorldConnections::createCommunicator(const edge& worlds)
     {
         if (worlds.found(worldIDs[proci]))
         {
-            subRanks.append(proci);
+            subRanks.push_back(proci);
         }
     }
 
     // Allocate new communicator with global world
-    comm =
-        UPstream::allocateCommunicator(UPstream::commGlobal(), subRanks, true);
+    comm = UPstream::allocateCommunicator(UPstream::commGlobal(), subRanks);
 
     if (debug & 2)
     {

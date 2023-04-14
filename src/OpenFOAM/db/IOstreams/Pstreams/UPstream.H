@@ -98,17 +98,18 @@ public:
         {
             // Private Data
 
-                //- The procID of the processor directly above
+                //- The procID of the processor \em directly above
                 label above_;
 
-                //- The procIDs of all processors directly below
+                //- The procIDs of processors \em directly below
                 labelList below_;
 
-                //- procIDs of all processors below (so not just directly below)
+                //- The procIDs of all processors below myProcNo,
+                //- not just directly below
                 labelList allBelow_;
 
-                //- procIDs of all processors not below.
-                //  Inverse set of allBelow_ without myProcNo.
+                //- The procIDs of all processors not below myProcNo
+                //  (inverse of allBelow_ without myProcNo)
                 labelList allNotBelow_;
 
 
@@ -119,19 +120,19 @@ public:
                 //- Default construct with above == -1
                 commsStruct() noexcept : above_(-1) {}
 
-                //- Construct from components
+                //- Move construct from components
                 commsStruct
                 (
                     const label above,
-                    const labelUList& below,
-                    const labelUList& allBelow,
-                    const labelUList& allNotBelow
+                    labelList&& below,
+                    labelList&& allBelow,
+                    labelList&& allNotBelow
                 );
 
-                //- Construct from components; construct allNotBelow_
+                //- Copy construct from below, allBelow components
                 commsStruct
                 (
-                    const label nProcs,
+                    const label numProcs,
                     const label myProcID,
                     const label above,
                     const labelUList& below,
@@ -141,29 +142,31 @@ public:
 
             // Member Functions
 
-                //- Reset to default constructed state
-                void clear();
+                //- Print un-directed graph in graphviz dot format
+                static void printGraph
+                (
+                    Ostream& os,
+                    const UList<UPstream::commsStruct>& comms,
+                    const label proci = 0  // starting node
+                );
 
-                //- The procID of the processor directly above
-                label above() const noexcept
-                {
-                    return above_;
-                }
 
-                //- The procIDs of all processors directly below
-                const labelList& below() const noexcept
-                {
-                    return below_;
-                }
+            // Access
+
+                //- The number of processors addressed by the structure
+                label nProcs() const;
+
+                //- The procID of the processor \em directly above
+                label above() const noexcept { return above_; }
+
+                //- The procIDs of the processors \em directly below
+                const labelList& below() const noexcept { return below_; }
 
                 //- The procIDs of all processors below
                 //- (so not just directly below)
-                const labelList& allBelow() const noexcept
-                {
-                    return allBelow_;
-                }
+                const labelList& allBelow() const noexcept { return allBelow_; }
 
-                //- The procIDs of all processors that are above.
+                //- The procIDs of all processors not below myProcNo.
                 //- The inverse set of allBelow without myProcNo.
                 const labelList& allNotBelow() const noexcept
                 {
@@ -171,13 +174,19 @@ public:
                 }
 
 
-            // Member Operators
+            // Edit
+
+                //- Reset to default constructed state
+                void reset();
+
+                //- Reset with automatic linear/tree selection
+                void reset(const label procID, const label numProcs);
+
+
+            // Member / Friend Operators
 
                 bool operator==(const commsStruct&) const;
                 bool operator!=(const commsStruct&) const;
-
-
-             // Ostream Operator
 
                 friend Ostream& operator<<(Ostream&, const commsStruct&);
         };
@@ -335,6 +344,9 @@ public:
             return (communicator > worldComm && communicator > selfComm);
         }
 
+        //- Debugging: print the communication tree
+        static void printCommTree(const label communicator);
+
 
     // Constructors
 
@@ -391,24 +403,21 @@ public:
             //- Move construct, takes ownership
             communicator(communicator&& c) : comm_(c.comm_) { c.comm_ = -1; }
 
-            //- Allocate a communicator based on given parent
+            //- Allocate communicator for sub-ranks on given parent
             communicator
             (
                 //! The parent communicator
-                const label parent,
+                const label parentComm,
 
-                //! The sub-ranks of parent to use (ignore negative values)
-                const labelUList& subRanks,
-
-                //! Call allocatePstreamCommunicator
-                const bool doPstream = true
+                //! The sub-ranks of parent to use (negative values ignored)
+                const labelUList& subRanks
             )
             :
-                comm_(allocateCommunicator(parent, subRanks, doPstream))
+                comm_(UPstream::allocateCommunicator(parentComm, subRanks))
             {}
 
             //- Free allocated communicator and group
-            ~communicator() { freeCommunicator(comm_); }
+            ~communicator() { UPstream::freeCommunicator(comm_); }
 
             //- True if communicator is non-negative (ie, was allocated)
             bool good() const noexcept { return (comm_ >= 0); }
@@ -417,19 +426,19 @@ public:
             label comm() const noexcept { return comm_; }
 
             //- Free allocated communicator and group
-            void reset() { freeCommunicator(comm_); comm_ = -1; }
+            void reset() { UPstream::freeCommunicator(comm_); comm_ = -1; }
 
             //- Allocate with subRanks of parent communicator
             void reset(label parent, const labelUList& subRanks)
             {
-                freeCommunicator(comm_);
-                comm_ = allocateCommunicator(parent, subRanks);
+                UPstream::freeCommunicator(comm_);
+                comm_ = UPstream::allocateCommunicator(parent, subRanks);
             }
 
             //- Take ownership, free allocated communicator and group.
             void reset(communicator&& c)
             {
-                if (comm_ != c.comm_) freeCommunicator(comm_);
+                if (comm_ != c.comm_) UPstream::freeCommunicator(comm_);
                 comm_ = c.comm_;
                 c.comm_ = -1;
             }
@@ -730,22 +739,17 @@ public:
         }
 
         //- Communication schedule for linear all-to-master (proc 0)
-        static const List<commsStruct>& linearCommunication
+        static const List<commsStruct>&
+        linearCommunication
         (
             const label communicator = worldComm
-        )
-        {
-            return linearCommunication_[communicator];
-        }
+        );
 
         //- Communication schedule for tree all-to-master (proc 0)
         static const List<commsStruct>& treeCommunication
         (
             const label communicator = worldComm
-        )
-        {
-            return treeCommunication_[communicator];
-        }
+        );
 
         //- Communication schedule for linear/tree all-to-master (proc 0).
         //- Chooses based on the value of UPstream::nProcsSimpleSum
@@ -757,8 +761,8 @@ public:
             return
             (
                 nProcs(communicator) < nProcsSimpleSum
-              ? linearCommunication_[communicator]
-              : treeCommunication_[communicator]
+              ? linearCommunication(communicator)
+              : treeCommunication(communicator)
             );
         }
 

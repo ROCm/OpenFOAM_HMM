@@ -149,10 +149,10 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     const lduMesh& mesh
 ) const
 {
-    label singleCellMeshComm = UPstream::allocateCommunicator
+    UPstream::communicator singleCellMeshComm
     (
         mesh.comm(),
-        labelList(1, Zero)   // only processor 0
+        labelList(Foam::one{}, 0)   // only processor 0
     );
 
     scalarField faceWeights;
@@ -160,14 +160,14 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     (
         singleCellMesh
         (
-            singleCellMeshComm,
+            singleCellMeshComm.comm(),
             mesh,
             faceWeights
         )
     );
 
-    tmp<labelField> tfineToCoarse(new labelField(0));
-    labelField& fineToCoarse = tfineToCoarse.ref();
+    auto tfineToCoarse = tmp<labelField>::New();
+    auto& fineToCoarse = tfineToCoarse.ref();
 
     if (singleCellMeshPtr)
     {
@@ -197,7 +197,7 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     }
 
     Pstream::broadcast(fineToCoarse, mesh.comm());
-    UPstream::freeCommunicator(singleCellMeshComm);
+    singleCellMeshComm.reset();
 
     return tfineToCoarse;
 }
@@ -234,10 +234,7 @@ Foam::procFacesGAMGProcAgglomeration::~procFacesGAMGProcAgglomeration()
 {
     forAllReverse(comms_, i)
     {
-        if (comms_[i] != -1)
-        {
-            UPstream::freeCommunicator(comms_[i]);
-        }
+        UPstream::freeCommunicator(comms_[i]);
     }
 }
 

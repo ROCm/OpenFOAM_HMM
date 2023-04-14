@@ -64,6 +64,7 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noCheckProcessorDirectories();
     argList::addBoolOption("verbose", "Set debug level");
+    argList::addBoolOption("print-tree", "Report tree(s) as graph");
     argList::addBoolOption("comm-split", "Test simple comm split");
     argList::addBoolOption("host-comm", "Test DIY host-comm split");
 
@@ -80,6 +81,8 @@ int main(int argc, char *argv[])
     UPstream::debug = nVerbose;
 
     #include "setRootCase.H"
+
+    const bool optPrintTree = args.found("print-tree");
 
     Info<< nl
         << "parallel:" << UPstream::parRun()
@@ -101,6 +104,13 @@ int main(int argc, char *argv[])
 
     labelList subRanks;
     UPstream::communicator newComm;
+
+
+    if (UPstream::parRun() && optPrintTree)
+    {
+        Info<< "comms: " << UPstream::whichCommunication() << endl;
+        UPstream::printCommTree(UPstream::commWorld());
+    }
 
     if (!args.found("comm-split") && !args.found("host-comm"))
     {
@@ -377,12 +387,7 @@ int main(int argc, char *argv[])
 
         // From world to hostMaster
         const label hostMasterComm =
-            UPstream::allocateCommunicator
-            (
-                UPstream::commGlobal(),
-                subRanks,
-                true
-            );
+            UPstream::allocateCommunicator(UPstream::commGlobal(), subRanks);
 
 
         const label myHostId =
@@ -400,12 +405,7 @@ int main(int argc, char *argv[])
 
         // The intra-host ranks
         const label hostComm =
-            UPstream::allocateCommunicator
-            (
-                UPstream::commGlobal(),
-                subRanks,
-                true
-            );
+            UPstream::allocateCommunicator(UPstream::commGlobal(), subRanks);
 
         Pout<< nl << "[manual split]" << nl
             << nl << "Host comm with "
@@ -419,8 +419,8 @@ int main(int argc, char *argv[])
             << " sub-rank:" << UPstream::is_subrank(hostMasterComm)
             << nl;
 
-        UPstream::freeCommunicator(hostMasterComm, true);
-        UPstream::freeCommunicator(hostComm, true);
+        UPstream::freeCommunicator(hostMasterComm);
+        UPstream::freeCommunicator(hostComm);
     }
 
     Info<< "\nEnd\n" << endl;

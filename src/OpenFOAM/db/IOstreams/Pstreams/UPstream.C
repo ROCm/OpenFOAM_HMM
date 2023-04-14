@@ -230,6 +230,10 @@ Foam::label Foam::UPstream::allocateCommunicator
 
     procIds.resize(numSubRanks);
 
+    // Sizing and filling are demand-driven
+    linearCommunication_[index].clear();
+    treeCommunication_[index].clear();
+
     if (doPstream && parRun())
     {
         allocatePstreamCommunicator(parentIndex, index);
@@ -248,13 +252,6 @@ Foam::label Foam::UPstream::allocateCommunicator
         ///     }
         /// }
     }
-
-    // In case communicator allocation adjusted procIDs_
-    numSubRanks = procIDs_[index].size();
-
-    // Size but do not fill structure - this is done on-the-fly
-    linearCommunication_[index] = List<commsStruct>(numSubRanks);
-    treeCommunication_[index] = List<commsStruct>(numSubRanks);
 
     return index;
 }
@@ -349,112 +346,40 @@ Foam::label Foam::UPstream::procNo
 }
 
 
-template<>
-Foam::UPstream::commsStruct&
-Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID)
+const Foam::List<Foam::UPstream::commsStruct>&
+Foam::UPstream::linearCommunication(const label communicator)
 {
-    UPstream::commsStruct& t = v_[procID];
-
-    if (t.allBelow().size() + t.allNotBelow().size() + 1 != size())
+    if (linearCommunication_[communicator].empty())
     {
-        // Not yet allocated
-
-        label above(-1);
-        labelList below;
-        labelList allBelow;
-
-        if (size() < UPstream::nProcsSimpleSum)
-        {
-            // Linear schedule
-
-            if (procID == 0)
-            {
-                below.setSize(size()-1);
-                for (label procI = 1; procI < size(); procI++)
-                {
-                    below[procI-1] = procI;
-                }
-            }
-            else
-            {
-                above = 0;
-            }
-        }
-        else
-        {
-            // Use tree like schedule. For 8 procs:
-            // (level 0)
-            //      0 receives from 1
-            //      2 receives from 3
-            //      4 receives from 5
-            //      6 receives from 7
-            // (level 1)
-            //      0 receives from 2
-            //      4 receives from 6
-            // (level 2)
-            //      0 receives from 4
-            //
-            // The sends/receives for all levels are collected per processor
-            // (one send per processor; multiple receives possible) creating
-            // a table:
-            //
-            // So per processor:
-            // proc     receives from   sends to
-            // ----     -------------   --------
-            //  0       1,2,4           -
-            //  1       -               0
-            //  2       3               0
-            //  3       -               2
-            //  4       5               0
-            //  5       -               4
-            //  6       7               4
-            //  7       -               6
-
-            label mod = 0;
-
-            for (label step = 1; step < size(); step = mod)
-            {
-                mod = step * 2;
-
-                if (procID % mod)
-                {
-                    above = procID - (procID % mod);
-                    break;
-                }
-                else
-                {
-                    for
-                    (
-                        label j = procID + step;
-                        j < size() && j < procID + mod;
-                        j += step
-                    )
-                    {
-                        below.append(j);
-                    }
-                    for
-                    (
-                        label j = procID + step;
-                        j < size() && j < procID + mod;
-                        j++
-                    )
-                    {
-                        allBelow.append(j);
-                    }
-                }
-            }
-        }
-        t = UPstream::commsStruct(size(), procID, above, below, allBelow);
+        linearCommunication_[communicator] =
+            List<commsStruct>(UPstream::nProcs(communicator));
     }
-    return t;
+
+    return linearCommunication_[communicator];
 }
 
 
-template<>
-const Foam::UPstream::commsStruct&
-Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID) const
+const Foam::List<Foam::UPstream::commsStruct>&
+Foam::UPstream::treeCommunication(const label communicator)
 {
-    return const_cast<UList<UPstream::commsStruct>&>(*this).operator[](procID);
+    if (treeCommunication_[communicator].empty())
+    {
+        treeCommunication_[communicator] =
+            List<commsStruct>(UPstream::nProcs(communicator));
+    }
+
+    return treeCommunication_[communicator];
+}
+
+
+void Foam::UPstream::printCommTree(const label communicator)
+{
+    const auto& comms = UPstream::whichCommunication(communicator);
+
+    if (UPstream::master(communicator))
+    {
+        commsStruct::printGraph(Info(), comms);
+    }
 }
 
 

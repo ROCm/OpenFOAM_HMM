@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ void printRecvCount_gatherList
     labelList nMesg;
     labelList nRecv;
 
-    if (UPstream::parRun() && np > 1 && Pstream::master(comm))
+    if (UPstream::parRun() && np > 1 && UPstream::master(comm))
     {
         nMesg.resize(np, Zero);
         nRecv.resize(np, Zero);
@@ -99,7 +99,7 @@ void printSendCount_scatterList
     labelList nMesg;
     labelList nSend;
 
-    if (UPstream::parRun() && np > 1 && Pstream::master(comm))
+    if (UPstream::parRun() && np > 1 && UPstream::master(comm))
     {
         nMesg.resize(np, Zero);
         nSend.resize(np, Zero);
@@ -139,7 +139,7 @@ void printWidths
     labelList maxBelow;
     labelList maxNotBelow;
 
-    if (UPstream::parRun() && np > 1 && Pstream::master(comm))
+    if (UPstream::parRun() && np > 1 && UPstream::master(comm))
     {
         maxBelow.resize(np, Zero);
         maxNotBelow.resize(np, Zero);
@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 
     // Info<< "allComms: " << comms << nl;
 
-    if (Pstream::master())
+    if (UPstream::master())
     {
         OFstream os("treeComm.dot");
 
@@ -204,9 +204,9 @@ int main(int argc, char *argv[])
         printConnection(os, 0, myComm.below());
         // Pout<< flatOutput(myComm.allBelow()) << nl;
 
-        for (const int proci : Pstream::subProcs())
+        for (const int proci : UPstream::subProcs())
         {
-            IPstream fromProc(Pstream::commsTypes::scheduled, proci);
+            IPstream fromProc(UPstream::commsTypes::scheduled, proci);
             labelList below(fromProc);
 
             printConnection(os, proci, below);

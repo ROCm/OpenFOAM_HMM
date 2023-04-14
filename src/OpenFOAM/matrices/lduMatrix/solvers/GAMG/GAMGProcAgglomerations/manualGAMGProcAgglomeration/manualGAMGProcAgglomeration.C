@@ -64,10 +64,7 @@ Foam::manualGAMGProcAgglomeration::
 {
     forAllReverse(comms_, i)
     {
-        if (comms_[i] != -1)
-        {
-            UPstream::freeCommunicator(comms_[i]);
-        }
+        UPstream::freeCommunicator(comms_[i]);
     }
 }
 

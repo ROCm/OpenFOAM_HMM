@@ -335,12 +335,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
         // Allocate new communicator with globalComm as its parent
         const label subComm =
-            UPstream::allocateCommunicator
-            (
-                UPstream::globalComm,  // parent
-                subRanks,
-                true
-            );
+            UPstream::allocateCommunicator(UPstream::globalComm, subRanks);
 
 
         // Override worldComm
