@@ -696,9 +696,10 @@ void Foam::UPstream::freePstreamCommunicator(const label index)
 
 void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
 {
-    // No-op for non-parallel
-    if (!UPstream::parRun())
+    // No-op for non-parallel or not on communicator
+    if (!UPstream::parRun() || !UPstream::is_rank(communicator))
     {
+        PstreamGlobals::reset_request(req);
         return;
     }
 
@@ -753,7 +754,8 @@ Foam::UPstream::probeMessage
 {
     std::pair<int,int> result(-1, 0);
 
-    if (!UPstream::parRun())
+    // No-op for non-parallel or not on communicator
+    if (!UPstream::parRun() || !UPstream::is_rank(communicator))
     {
         return result;
     }

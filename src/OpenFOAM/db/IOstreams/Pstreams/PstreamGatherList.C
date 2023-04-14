@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,13 +51,12 @@ void Foam::Pstream::gatherList
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         if (values.size() != UPstream::nProcs(comm))
         {
             FatalErrorInFunction
-                << "Size of list:" << values.size()
-                << " does not equal the number of processors:"
+                << "Size of list:" << values.size() << " != numProcs:"
                 << UPstream::nProcs(comm)
                 << Foam::abort(FatalError);
         }
@@ -200,7 +199,7 @@ void Foam::Pstream::scatterList
     // between scatterList() and using broadcast(List<T>&) or a regular
     // scatter(List<T>&) is that processor-local data is skipped.
 
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         if (values.size() != UPstream::nProcs(comm))
         {
@@ -349,8 +348,23 @@ void Foam::Pstream::allGatherList
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
+        // TBD
+        // if (std::is_arithmetic<T>::value)   // or is_contiguous ?
+        // {
+        //     if (values.size() != UPstream::nProcs(comm))
+        //     {
+        //         FatalErrorInFunction
+        //             << "Size of list:" << values.size()
+        //             << " != number of processors:"
+        //             << UPstream::nProcs(comm)
+        //             << Foam::abort(FatalError);
+        //     }
+        //     UPstream::mpiAllGather(values.data_bytes(), sizeof(T), comm);
+        //     return;
+        // }
+
         const auto& comms = UPstream::whichCommunication(comm);
 
         Pstream::gatherList(comms, values, tag, comm);

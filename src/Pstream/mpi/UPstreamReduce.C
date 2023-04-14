@@ -247,7 +247,7 @@ void Foam::sumReduce                                                          \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)                     \
+    if (UPstream::is_parallel(comm))                                          \
     {                                                                         \
         Native values[2];                                                     \
         values[0] = static_cast<Native>(count);                               \

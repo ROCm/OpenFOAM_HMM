@@ -142,12 +142,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
 }
 
 
-Foam::label Foam::UPstream::allocateCommunicator
-(
-    const label parentIndex,
-    const labelUList& subRanks,
-    const bool doPstream
-)
+Foam::label Foam::UPstream::getAvailableCommIndex(const label parentIndex)
 {
     label index;
     if (!freeComms_.empty())
@@ -177,16 +172,29 @@ Foam::label Foam::UPstream::allocateCommunicator
         treeCommunication_.emplace_back();
     }
 
+    return index;
+}
+
+
+Foam::label Foam::UPstream::allocateCommunicator
+(
+    const label parentIndex,
+    const labelUList& subRanks,
+    const bool doPstream
+)
+{
+    const label index = getAvailableCommIndex(parentIndex);
+
     if (debug)
     {
-        Pout<< "Communicators : Allocating communicator " << index << endl
-            << "    parent : " << parentIndex << endl
-            << "    procs  : " << subRanks << endl
+        Pout<< "Allocating communicator " << index << nl
+            << "    parent : " << parentIndex << nl
+            << "    procs  : " << subRanks << nl
             << endl;
     }
 
-    // Initialise; overwritten by allocatePstreamCommunicator
-    myProcNo_[index] = 0;
+    // Initially treat as master, overwritten by allocatePstreamCommunicator
+    myProcNo_[index] = UPstream::masterNo();
 
     // The selected sub-ranks.
     // - transcribe from label to int. Treat negative values as 'ignore'
@@ -222,10 +230,6 @@ Foam::label Foam::UPstream::allocateCommunicator
 
     procIds.resize(numSubRanks);
 
-    // Size but do not fill structure - this is done on-the-fly
-    linearCommunication_[index] = List<commsStruct>(numSubRanks);
-    treeCommunication_[index] = List<commsStruct>(numSubRanks);
-
     if (doPstream && parRun())
     {
         allocatePstreamCommunicator(parentIndex, index);
@@ -243,15 +247,14 @@ Foam::label Foam::UPstream::allocateCommunicator
         ///         myProcNo_[index] = -(myProcNo_[parentIndex]+1);
         ///     }
         /// }
-
-        // Did communicator allocation adjust procIDs_ as well?
-        if (numSubRanks != procIDs_[index].size())
-        {
-            numSubRanks = procIDs_[index].size();
-            linearCommunication_[index] = List<commsStruct>(numSubRanks);
-            treeCommunication_[index] = List<commsStruct>(numSubRanks);
-        }
     }
+
+    // In case communicator allocation adjusted procIDs_
+    numSubRanks = procIDs_[index].size();
+
+    // Size but do not fill structure - this is done on-the-fly
+    linearCommunication_[index] = List<commsStruct>(numSubRanks);
+    treeCommunication_[index] = List<commsStruct>(numSubRanks);
 
     return index;
 }

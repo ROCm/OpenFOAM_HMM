@@ -42,7 +42,7 @@ void Foam::PstreamDetail::broadcast0
     const label comm
 )
 {
-    if (!UPstream::parRun())
+    if (!UPstream::is_parallel(comm))
     {
         return;
     }
@@ -73,7 +73,7 @@ void Foam::PstreamDetail::reduce0
     const label comm
 )
 {
-    if (!UPstream::parRun())
+    if (!UPstream::is_parallel(comm))
     {
         return;
     }
@@ -127,12 +127,12 @@ void Foam::PstreamDetail::allReduce
 {
     PstreamGlobals::reset_request(req, requestID);
 
-    if (!UPstream::parRun())
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_parallel(comm))
     {
         return;
     }
-
-    const bool immediate = (req || requestID);
 
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
@@ -238,6 +238,11 @@ void Foam::PstreamDetail::allToAll
 
     const bool immediate = (req || requestID);
 
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+
     const label numProc = UPstream::nProcs(comm);
 
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
@@ -258,7 +263,10 @@ void Foam::PstreamDetail::allToAll
         error::printStack(Pout);
     }
 
-    if (sendData.size() != numProc || recvData.size() != numProc)
+    if
+    (
+        (sendData.size() != numProc || recvData.size() != numProc)
+    )
     {
         FatalErrorInFunction
             << "Have " << numProc << " ranks, but size of sendData:"
@@ -267,7 +275,7 @@ void Foam::PstreamDetail::allToAll
             << Foam::abort(FatalError);
     }
 
-    if (!UPstream::parRun() || numProc < 2)
+    if (!UPstream::is_parallel(comm))
     {
         recvData.deepCopy(sendData);
         return;
@@ -365,6 +373,11 @@ void Foam::PstreamDetail::allToAllv
 
     const bool immediate = (req || requestID);
 
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+
     const label np = UPstream::nProcs(comm);
 
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
@@ -400,7 +413,7 @@ void Foam::PstreamDetail::allToAllv
             << Foam::abort(FatalError);
     }
 
-    if (!UPstream::parRun())
+    if (!UPstream::is_parallel(comm))
     {
         if (recvCounts[0] != sendCounts[0])
         {
@@ -502,6 +515,11 @@ void Foam::PstreamDetail::allToAllConsensus
     const label comm
 )
 {
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
 
@@ -529,7 +547,7 @@ void Foam::PstreamDetail::allToAllConsensus
     const Type zeroValue = pTraits<Type>::zero;
     recvData = zeroValue;
 
-    if (!UPstream::parRun() || numProc < 2)
+    if (!UPstream::is_parallel(comm))
     {
         // deep copy
         recvData.deepCopy(sendData);
@@ -691,6 +709,11 @@ void Foam::PstreamDetail::allToAllConsensus
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
 
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         Pout<< "** non-blocking consensus Alltoall (map):";
@@ -706,7 +729,7 @@ void Foam::PstreamDetail::allToAllConsensus
     const Type zeroValue = pTraits<Type>::zero;
     recvBufs.clear();
 
-    if (!UPstream::parRun() || numProc < 2)
+    if (!UPstream::is_parallel(comm))
     {
         // Do myself
         const auto iter = sendBufs.find(myProci);
@@ -873,15 +896,19 @@ void Foam::PstreamDetail::gather
 {
     PstreamGlobals::reset_request(req, requestID);
 
-    if (!UPstream::parRun())
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
     {
         std::memmove(recvData, sendData, recvCount*sizeof(Type));
         return;
     }
 
-    const bool immediate = (req || requestID);
-
-    const label np = UPstream::nProcs(comm);
+    const label numProc = UPstream::nProcs(comm);
 
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
@@ -893,7 +920,7 @@ void Foam::PstreamDetail::gather
         {
             Pout<< "** MPI_Gather (blocking):";
         }
-        Pout<< " np:" << np
+        Pout<< " numProc:" << numProc
             << " recvCount:" << recvCount
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
@@ -989,15 +1016,19 @@ void Foam::PstreamDetail::scatter
 {
     PstreamGlobals::reset_request(req, requestID);
 
-    if (!UPstream::parRun())
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
     {
         std::memmove(recvData, sendData, recvCount*sizeof(Type));
         return;
     }
 
-    const bool immediate = (req || requestID);
-
-    const label np = UPstream::nProcs(comm);
+    const label numProc = UPstream::nProcs(comm);
 
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
@@ -1009,7 +1040,7 @@ void Foam::PstreamDetail::scatter
         {
             Pout<< "** MPI_Scatter (blocking):";
         }
-        Pout<< " np:" << np
+        Pout<< " numProc:" << numProc
             << " recvCount:" << recvCount
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
@@ -1106,14 +1137,18 @@ void Foam::PstreamDetail::gatherv
 {
     PstreamGlobals::reset_request(req, requestID);
 
-    if (!UPstream::parRun())
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
     {
         // recvCounts[0] may be invalid - use sendCount instead
         std::memmove(recvData, sendData, sendCount*sizeof(Type));
         return;
     }
-
-    const bool immediate = (req || requestID);
 
     const label np = UPstream::nProcs(comm);
 
@@ -1249,13 +1284,17 @@ void Foam::PstreamDetail::scatterv
 {
     PstreamGlobals::reset_request(req, requestID);
 
-    if (!UPstream::parRun())
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
     {
         std::memmove(recvData, sendData, recvCount*sizeof(Type));
         return;
     }
-
-    const bool immediate = (req || requestID);
 
     const label np = UPstream::nProcs(comm);
 
@@ -1383,13 +1422,11 @@ void Foam::PstreamDetail::allGather
 
     const bool immediate = (req || requestID);
 
-    if (!UPstream::parRun() || UPstream::nProcs(comm) < 2)
+    if (!UPstream::is_parallel(comm))
     {
         // Nothing to do - ignore
         return;
     }
-
-    const label numProc = UPstream::nProcs(comm);
 
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
@@ -1401,7 +1438,7 @@ void Foam::PstreamDetail::allGather
         {
             Pout<< "** MPI_Allgather (blocking):";
         }
-        Pout<< " numProc:" << numProc
+        Pout<< " numProc:" << UPstream::nProcs(comm)
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
             << endl;

@@ -52,8 +52,8 @@ void rankInfo(const label comm)
         << "(parent:" << UPstream::parent(comm) << ')'
         << " rank:" << ranki
         << "(sub:" << UPstream::is_subrank(comm)
-        << ") nProcs:" << UPstream::nProcs(comm)
-        << " baseProcNo:" << UPstream::baseProcNo(comm, ranki);
+        << ") nProcs:" << UPstream::nProcs(comm);
+      // << " baseProcNo:" << UPstream::baseProcNo(comm, ranki);
 }
 
 
@@ -82,8 +82,10 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     Info<< nl
+        << "parallel:" << UPstream::parRun()
         << "nProcs = " << UPstream::nProcs()
-        << " with " << UPstream::nComms() << " predefined comm(s)" << nl;
+        << " with " << UPstream::nComms() << " predefined comm(s)."
+        << " proc:" << UPstream::myProcNo() << nl;
 
     Info<< nl;
 

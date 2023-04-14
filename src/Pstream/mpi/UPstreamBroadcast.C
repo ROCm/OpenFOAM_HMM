@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,7 @@ bool Foam::UPstream::broadcast
     const int rootProcNo
 )
 {
-    if (!UPstream::parRun() || UPstream::nProcs(comm) < 2)
+    if (!UPstream::is_parallel(comm))
     {
         // Nothing to do - ignore
         return true;

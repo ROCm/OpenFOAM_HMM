@@ -80,6 +80,18 @@ void exchangeConsensus
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
 
+    // Initial: clear all receive information
+    for (auto& buf : recvBufs)
+    {
+        buf.clear();
+    }
+    recvSizes = Zero;
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;  // Process not in communicator
+    }
+
     // #ifdef FULLDEBUG
     if (sendBufs.size() > numProc)
     {
@@ -95,14 +107,7 @@ void exchangeConsensus
     }
     // #endif
 
-    // Initial: clear all receive information
-    for (auto& buf : recvBufs)
-    {
-        buf.clear();
-    }
-    recvSizes = Zero;
-
-    if (!UPstream::parRun() || numProc < 2)
+    if (!UPstream::is_parallel(comm))
     {
         // Do myself
         recvBufs[myProci] = sendBufs[myProci];
@@ -252,7 +257,6 @@ void exchangeConsensus
 
     const label startOfRequests = UPstream::nRequests();
     const label myProci = UPstream::myProcNo(comm);
-    const label numProc = UPstream::nProcs(comm);
 
     // Initial: clear out receive 'slots'
     // Preferrable to clear out the map entries instead of the map itself
@@ -264,7 +268,7 @@ void exchangeConsensus
         iter.val().clear();
     }
 
-    if (!UPstream::parRun() || numProc < 2)
+    if (!UPstream::is_parallel(comm))
     {
         // Do myself
         const auto iter = sendBufs.find(myProci);
@@ -293,10 +297,11 @@ void exchangeConsensus
         const auto& sendData = iter.val();
 
         #ifdef FULLDEBUG
-        if (proci >= numProc)
+        if (proci >= UPstream::nProcs(comm))
         {
             FatalErrorInFunction
-                << "Send buffer:" << proci << " >= numProcs:" << numProc
+                << "Send buffer:" << proci << " >= numProcs:"
+                << UPstream::nProcs(comm)
                 << Foam::abort(FatalError);
         }
         #endif

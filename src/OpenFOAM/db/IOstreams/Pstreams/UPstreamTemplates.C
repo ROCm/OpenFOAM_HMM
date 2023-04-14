@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,10 @@ Foam::List<T> Foam::UPstream::listGatherValues
 
     List<T> allValues;
 
-    const label nproc = (UPstream::parRun() ? UPstream::nProcs(comm) : 1);
+    const label nproc =
+    (
+        UPstream::is_parallel(comm) ? UPstream::nProcs(comm) : 1
+    );
 
     if (nproc > 1)
     {
@@ -88,7 +91,10 @@ T Foam::UPstream::listScatterValues
     }
 
 
-    const label nproc = (UPstream::parRun() ? UPstream::nProcs(comm) : 1);
+    const label nproc =
+    (
+        UPstream::is_parallel(comm) ? UPstream::nProcs(comm) : 1
+    );
 
     T localValue;
 
@@ -115,13 +121,13 @@ T Foam::UPstream::listScatterValues
     {
         // non-parallel: return local value
 
-        if (allValues.empty())   // Extra safety
+        if (UPstream::is_rank(comm) && !allValues.empty())
         {
-            localValue = Zero;
+            localValue = allValues[0];
         }
         else
         {
-            localValue = allValues[0];
+            localValue = Zero;
         }
      }
 

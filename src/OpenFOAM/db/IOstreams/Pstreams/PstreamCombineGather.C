@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,7 @@ void Foam::Pstream::combineGather
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -155,7 +155,7 @@ void Foam::Pstream::combineScatter
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(value, comm);
     #else
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -290,7 +290,7 @@ void Foam::Pstream::combineReduce
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         const auto& comms = UPstream::whichCommunication(comm);
 
@@ -312,7 +312,7 @@ void Foam::Pstream::listCombineGather
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -420,7 +420,7 @@ void Foam::Pstream::listCombineScatter
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(values, comm);
     #else
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -540,7 +540,7 @@ void Foam::Pstream::listCombineReduce
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         const auto& comms = UPstream::whichCommunication(comm);
 
@@ -562,7 +562,7 @@ void Foam::Pstream::mapCombineGather
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -645,7 +645,7 @@ void Foam::Pstream::mapCombineScatter
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(values, comm);
     #else
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const UPstream::commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -746,7 +746,7 @@ void Foam::Pstream::mapCombineReduce
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         const auto& comms = UPstream::whichCommunication(comm);
 

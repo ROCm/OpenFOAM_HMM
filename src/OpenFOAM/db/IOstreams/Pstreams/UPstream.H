@@ -90,10 +90,8 @@ public:
 
     // Public Classes
 
-        // Forward Declarations
-
         //- Wrapper for MPI_Request
-        class Request;
+        class Request;  // Forward Declaration
 
         //- Structure for communicating between processors
         class commsStruct
@@ -236,6 +234,9 @@ private:
 
         //- Set data for parallel running
         static void setParRun(const label nProcs, const bool haveThreads);
+
+        //- Initialise entries for new communicator. Return the index
+        static label getAvailableCommIndex(const label parentIndex);
 
         //- Allocate a communicator with index
         static void allocatePstreamCommunicator
@@ -621,46 +622,57 @@ public:
 
         //- Test if this a parallel run
         //  Modify access is deprecated
-        static bool& parRun() noexcept
-        {
-            return parRun_;
-        }
+        static bool& parRun() noexcept { return parRun_; }
 
         //- Have support for threads
-        static bool haveThreads() noexcept
-        {
-            return haveThreads_;
-        }
+        static bool haveThreads() noexcept { return haveThreads_; }
 
-        //- Number of ranks in parallel run (for given communicator)
-        //- is 1 for serial run
+        //- Relative rank for the master process - is always 0.
+        static constexpr int masterNo() noexcept { return 0; }
+
+        //- Number of ranks in parallel run (for given communicator).
+        //- It is 1 for serial run
         static label nProcs(const label communicator = worldComm)
         {
             return procIDs_[communicator].size();
         }
 
-        //- Process index of the master (always 0)
-        static constexpr int masterNo() noexcept
+        //- Rank of this process in the communicator (starting from masterNo()).
+        //- Can be negative if the process is not a rank in the communicator
+        static int myProcNo(const label communicator = worldComm)
         {
-            return 0;
+            return myProcNo_[communicator];
         }
 
-        //- Am I the master rank
+        //- True if process corresponds to the master rank in the communicator
         static bool master(const label communicator = worldComm)
         {
             return myProcNo_[communicator] == masterNo();
         }
 
-        //- Is this process a sub-rank on the communicator
+        //- True if process corresponds to any rank (master or sub-rank)
+        //- in the given communicator
+        static bool is_rank(const label communicator = worldComm)
+        {
+            return myProcNo_[communicator] >= 0;
+        }
+
+        //- True if process corresponds to a sub-rank in the given communicator
         static bool is_subrank(const label communicator = worldComm)
         {
             return myProcNo_[communicator] > masterNo();
         }
 
-        //- Number of this process (starting from masterNo() = 0)
-        static int myProcNo(const label communicator = worldComm)
+        //- True if parallel algorithm or exchange is required.
+        //  This is when parRun() == true, the process corresponds to a rank
+        //  in the communicator and there is more than one rank in the
+        //  communicator
+        static bool is_parallel(const label communicator = worldComm)
         {
-            return myProcNo_[communicator];
+            return
+            (
+                parRun_ && is_rank(communicator) && nProcs(communicator) > 1
+            );
         }
 
         //- The parent communicator
@@ -669,7 +681,7 @@ public:
             return parentComm_(communicator);
         }
 
-        //- Process IDs within a given communicator
+        //- The list of ranks within a given communicator
         static List<int>& procID(const label communicator)
         {
             return procIDs_[communicator];

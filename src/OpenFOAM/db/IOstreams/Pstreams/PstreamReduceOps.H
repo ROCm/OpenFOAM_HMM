@@ -79,7 +79,7 @@ void reduce
     const label comm = UPstream::worldComm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::is_parallel(comm))
     {
         Foam::reduce(UPstream::whichCommunication(comm), value, bop, tag, comm);
     }
@@ -375,7 +375,7 @@ void sumReduce
     const label comm = UPstream::worldComm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::is_parallel(comm))
     {
         Foam::reduce(value, sumOp<T>(), tag, comm);
         Foam::reduce(count, sumOp<label>(), tag, comm);

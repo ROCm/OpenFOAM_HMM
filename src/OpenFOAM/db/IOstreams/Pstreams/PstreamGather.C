@@ -48,7 +48,7 @@ void Foam::Pstream::gather
     const label comm
 )
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];
@@ -130,7 +130,7 @@ void Foam::Pstream::scatter
     #ifndef Foam_Pstream_scatter_nobroadcast
     Pstream::broadcast(value, comm);
     #else
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         // My communication order
         const commsStruct& myComm = comms[UPstream::myProcNo(comm)];

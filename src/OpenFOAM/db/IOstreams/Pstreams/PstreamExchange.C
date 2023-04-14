@@ -469,6 +469,11 @@ void Foam::Pstream::exchange
 {
     static_assert(is_contiguous<Type>::value, "Contiguous data only!");
 
+    if (!UPstream::is_rank(comm))
+    {
+        return;  // Process not in communicator
+    }
+
     const label myProci = UPstream::myProcNo(comm);
     const label numProcs = UPstream::nProcs(comm);
 
@@ -482,7 +487,7 @@ void Foam::Pstream::exchange
 
     recvBufs.resize_nocopy(numProcs);
 
-    if (UPstream::parRun() && numProcs > 1)
+    if (UPstream::is_parallel(comm))
     {
         // Presize all receive buffers
         forAll(recvSizes, proci)
@@ -567,7 +572,7 @@ void Foam::Pstream::exchange
         }
     }
 
-    // Do myself
+    // Do myself. Already checked if in communicator
     recvBufs[myProci] = sendBufs[myProci];
 }
 
@@ -586,7 +591,6 @@ void Foam::Pstream::exchange
     static_assert(is_contiguous<Type>::value, "Contiguous data only!");
 
     const int myProci = UPstream::myProcNo(comm);
-    const label numProcs = UPstream::nProcs(comm);
 
     // Initial: clear out receive 'slots'
     // Preferrable to clear out the map entries instead of the map itself
@@ -598,7 +602,7 @@ void Foam::Pstream::exchange
         iter.val().clear();
     }
 
-    if (UPstream::parRun() && numProcs > 1)
+    if (UPstream::is_parallel(comm))
     {
         // Presize all receive buffers
         forAllIters(recvSizes, iter)
@@ -708,8 +712,8 @@ void Foam::Pstream::exchange
         }
     }
 
-
-    // Do myself
+    // Do myself (if actually in the communicator)
+    if (UPstream::is_rank(comm))
     {
         const auto iter = sendBufs.find(myProci);
 
@@ -746,6 +750,12 @@ void Foam::Pstream::exchangeSizes
     const label comm
 )
 {
+    if (!UPstream::is_rank(comm))
+    {
+        recvSizes.clear();
+        return;  // Process not in communicator
+    }
+
     const label myProci = UPstream::myProcNo(comm);
     const label numProcs = UPstream::nProcs(comm);
 
@@ -817,6 +827,12 @@ void Foam::Pstream::exchangeSizes
     const label comm
 )
 {
+    if (!UPstream::is_rank(comm))
+    {
+        recvSizes.clear();
+        return;  // Process not in communicator
+    }
+
     Pstream::exchangeSizes<Container>
     (
         neighProcs,  // send
@@ -841,6 +857,11 @@ void Foam::Pstream::exchangeSizes
 {
     Map<label> sendSizes(2*sendBufs.size());
     recvSizes.clear();  // Done in allToAllConsensus too, but be explicit here
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;  // Process not in communicator
+    }
 
     forAllConstIters(sendBufs, iter)
     {
@@ -871,6 +892,12 @@ void Foam::Pstream::exchangeSizes
     const label comm
 )
 {
+    if (!UPstream::is_rank(comm))
+    {
+        recvSizes.clear();
+        return;  // Process not in communicator
+    }
+
     const label numProcs = UPstream::nProcs(comm);
 
     if (sendBufs.size() != numProcs)
