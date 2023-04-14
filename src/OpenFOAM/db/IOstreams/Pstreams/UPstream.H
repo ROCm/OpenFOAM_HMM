@@ -900,7 +900,7 @@ public:
         (                                                                     \
             const Native* sendData,                                           \
             int sendCount,                                                    \
-            char* recvData,                                                   \
+            Native* recvData,                                                 \
             int recvCount,                                                    \
             const label communicator = worldComm                              \
         );                                                                    \
@@ -910,10 +910,19 @@ public:
         (                                                                     \
             const Native* sendData,                                           \
             int sendCount,                                                    \
-            char* recvData,                                                   \
+            Native* recvData,                                                 \
             int recvCount,                                                    \
             const label communicator = worldComm                              \
         );                                                                    \
+                                                                              \
+        /*! \brief Gather/scatter identically-sized \c Native data */         \
+        /*! Send data from proc slot, receive into all slots */               \
+        static void mpiAllGather                                              \
+        (                                                                     \
+            Native* allData,                                                  \
+            int count,                                                        \
+            const label communicator = worldComm                              \
+        );
 
         Pstream_CommonRoutines(char);
 

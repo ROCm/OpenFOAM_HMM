@@ -97,7 +97,7 @@ Foam::UPstream::probeMessage
     const UPstream::commsTypes commsType,
     const int fromProcNo,
     const int tag,
-    const label comm
+    const label communicator
 )
 {
     return std::pair<int,int>(-1, 0);

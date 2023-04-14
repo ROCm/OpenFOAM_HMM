@@ -1366,4 +1366,103 @@ void Foam::PstreamDetail::scatterv
 }
 
 
+template<class Type>
+void Foam::PstreamDetail::allGather
+(
+    Type* allData,
+    int count,
+
+    MPI_Datatype datatype,
+    const label comm,
+
+    UPstream::Request* req,
+    label* requestID
+)
+{
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::parRun() || UPstream::nProcs(comm) < 2)
+    {
+        // Nothing to do - ignore
+        return;
+    }
+
+    const label numProc = UPstream::nProcs(comm);
+
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
+    {
+        if (immediate)
+        {
+            Pout<< "** MPI_Iallgather (non-blocking):";
+        }
+        else
+        {
+            Pout<< "** MPI_Allgather (blocking):";
+        }
+        Pout<< " numProc:" << numProc
+            << " with comm:" << comm
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+
+    bool handled(false);
+
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+    // MPI-3 : eg, openmpi-1.7 (2013) and later
+    if (immediate)
+    {
+        profilingPstream::beginTiming();
+
+        handled = true;
+        MPI_Request request;
+
+        if
+        (
+            MPI_Iallgather
+            (
+                MPI_IN_PLACE, count, MPI_BYTE,
+                allData, count, MPI_BYTE,
+                PstreamGlobals::MPICommunicators_[comm],
+               &request
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Iallgather [comm: " << comm << "] failed."
+                << Foam::abort(FatalError);
+        }
+
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
+    }
+#endif
+
+    if (!handled)
+    {
+        profilingPstream::beginTiming();
+
+        if
+        (
+            MPI_Allgather
+            (
+                MPI_IN_PLACE, count, MPI_BYTE,
+                allData, count, MPI_BYTE,
+                PstreamGlobals::MPICommunicators_[comm]
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Allgather [comm: " << comm << "] failed."
+                << Foam::abort(FatalError);
+        }
+
+        // Is actually gather/scatter but we can't split it apart
+        profilingPstream::addGatherTime();
+    }
+}
+
+
 // ************************************************************************* //

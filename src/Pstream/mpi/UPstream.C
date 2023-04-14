@@ -748,7 +748,7 @@ Foam::UPstream::probeMessage
     const UPstream::commsTypes commsType,
     const int fromProcNo,
     const int tag,
-    const label comm
+    const label communicator
 )
 {
     std::pair<int,int> result(-1, 0);
@@ -775,7 +775,7 @@ Foam::UPstream::probeMessage
             (
                 source,
                 tag,
-                PstreamGlobals::MPICommunicators_[comm],
+                PstreamGlobals::MPICommunicators_[communicator],
                 &status
             )
         )
@@ -799,7 +799,7 @@ Foam::UPstream::probeMessage
             (
                 source,
                 tag,
-                PstreamGlobals::MPICommunicators_[comm],
+                PstreamGlobals::MPICommunicators_[communicator],
                 &flag,
                 &status
             )

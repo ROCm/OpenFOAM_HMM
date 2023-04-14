@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ License
 
 #undef  Pstream_CommonRoutines
 #define Pstream_CommonRoutines(Native)                                        \
+                                                                              \
 void Foam::UPstream::mpiGather                                                \
 (                                                                             \
     const Native* sendData,                                                   \
@@ -57,7 +58,16 @@ void Foam::UPstream::mpiScatter                                               \
 )                                                                             \
 {                                                                             \
     std::memmove(recvData, sendData, recvCount*sizeof(Native));               \
-}
+}                                                                             \
+                                                                              \
+                                                                              \
+void Foam::UPstream::mpiAllGather                                             \
+(                                                                             \
+    Native* allData,                                                          \
+    int count,                                                                \
+    const label comm                                                          \
+)                                                                             \
+{}
 
 Pstream_CommonRoutines(char);
 

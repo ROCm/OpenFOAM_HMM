@@ -230,6 +230,20 @@ void scatterv
 );
 
 
+// MPI_Allgather or MPI_Iallgather
+template<class Type>
+void allGather
+(
+    Type* allData,                      // The send/recv data
+    int count,                          // The send/recv count per element
+
+    MPI_Datatype datatype,              // The send/recv data type
+    const label comm,                   // Communicator
+    UPstream::Request* req = nullptr,   // Non-null for non-blocking
+    label* requestID = nullptr          // (alternative to UPstream::Request)
+);
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace PstreamDetail
