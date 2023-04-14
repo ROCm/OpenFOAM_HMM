@@ -451,12 +451,9 @@ void Foam::UPstream::shutdown(int errNo)
     }
 
     // Clean mpi communicators
-    forAll(myProcNo_, communicator)
+    forAllReverse(myProcNo_, communicator)
     {
-        if (myProcNo_[communicator] >= 0)
-        {
-            freePstreamCommunicator(communicator);
-        }
+        freeCommunicatorComponents(communicator);
     }
 
     if (!flag)
@@ -497,7 +494,7 @@ void Foam::UPstream::abort()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::UPstream::allocatePstreamCommunicator
+void Foam::UPstream::allocateCommunicatorComponents
 (
     const label parentIndex,
     const label index
@@ -534,7 +531,7 @@ void Foam::UPstream::allocatePstreamCommunicator
 
         // TBD: MPI_Comm_dup(MPI_COMM_WORLD, ...);
         // with pendingMPIFree_[index] = true
-        // Note: freePstreamCommunicator may need an update
+        // Note: freeCommunicatorComponents() may need an update
 
         MPI_Comm_rank
         (
@@ -661,13 +658,12 @@ void Foam::UPstream::allocatePstreamCommunicator
 }
 
 
-void Foam::UPstream::freePstreamCommunicator(const label index)
+void Foam::UPstream::freeCommunicatorComponents(const label index)
 {
     // Skip placeholders and pre-defined (not allocated) communicators
-
     if (UPstream::debug)
     {
-        Pout<< "freePstreamCommunicator: " << index
+        Pout<< "freeCommunicatorComponents: " << index
             << " from " << PstreamGlobals::MPICommunicators_.size() << endl;
     }
 

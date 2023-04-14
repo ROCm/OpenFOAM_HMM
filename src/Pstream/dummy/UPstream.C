@@ -75,7 +75,7 @@ void Foam::UPstream::abort()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::UPstream::allocatePstreamCommunicator
+void Foam::UPstream::allocateCommunicatorComponents
 (
     const label,
     const label
@@ -83,7 +83,7 @@ void Foam::UPstream::allocatePstreamCommunicator
 {}
 
 
-void Foam::UPstream::freePstreamCommunicator(const label)
+void Foam::UPstream::freeCommunicatorComponents(const label)
 {}
 
 

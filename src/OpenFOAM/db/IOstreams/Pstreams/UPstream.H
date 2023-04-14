@@ -217,6 +217,12 @@ private:
         //- Per processor the world index (into allWorlds_)
         static labelList worldIDs_;
 
+        //- Intra-host communicator
+        static label intraHostComm_;
+
+        //- Inter-host communicator (between host leaders)
+        static label interHostComm_;
+
 
     // Communicator specific data
 
@@ -247,8 +253,8 @@ private:
         //- Initialise entries for new communicator. Return the index
         static label getAvailableCommIndex(const label parentIndex);
 
-        //- Allocate a communicator with index
-        static void allocatePstreamCommunicator
+        //- Allocate MPI components of communicator with given index
+        static void allocateCommunicatorComponents
         (
             const label parentIndex,
             const label index
@@ -256,7 +262,11 @@ private:
 
         //- Free MPI components of communicator.
         //  Does not touch the first two communicators (SELF, WORLD)
-        static void freePstreamCommunicator(const label index);
+        static void freeCommunicatorComponents(const label index);
+
+        //- Allocate inter-host, intra-host communicators
+        //- with worldComm as parent
+        static bool allocateHostCommunicatorPairs();
 
 
 public:
@@ -348,6 +358,21 @@ public:
         static void printCommTree(const label communicator);
 
 
+    // Host Communicators
+
+        //- Demand-driven: Intra-host communicator (respects any local worlds)
+        static label commIntraHost();
+
+        //- Demand-driven: Inter-host communicator (respects any local worlds)
+        static label commInterHost();
+
+        //- Test for presence of any intra or inter host communicators
+        static bool hasHostComms();
+
+        //- Remove any existing intra and inter host communicators
+        static void clearHostComms();
+
+
     // Constructors
 
         //- Construct for given communication type
@@ -368,8 +393,8 @@ public:
             //! The sub-ranks of parent to use (ignore negative values)
             const labelUList& subRanks,
 
-            //! Call allocatePstreamCommunicator
-            const bool doPstream = true
+            //! Call allocateCommunicatorComponents()
+            const bool withComponents = true
         );
 
         //- Free a previously allocated communicator.
@@ -377,11 +402,20 @@ public:
         static void freeCommunicator
         (
             const label communicator,
-            const bool doPstream = true
+            const bool withComponents = true
         );
 
-        //- Free all communicators
-        static void freeCommunicators(const bool doPstream);
+        //- Allocate an inter-host communicator
+        static label allocateInterHostCommunicator
+        (
+            const label parentCommunicator = worldComm
+        );
+
+        //- Allocate an intra-host communicator
+        static label allocateIntraHostCommunicator
+        (
+            const label parentCommunicator = worldComm
+        );
 
 
         //- Wrapper class for allocating/freeing communicators

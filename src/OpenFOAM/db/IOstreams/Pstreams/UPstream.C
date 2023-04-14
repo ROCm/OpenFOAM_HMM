@@ -33,6 +33,8 @@ Note
 #include "debug.H"
 #include "registerSwitch.H"
 #include "dictionary.H"
+#include "SHA1.H"
+#include "OSspecific.H"  // for hostName()
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -54,6 +56,85 @@ Foam::UPstream::commsTypeNames
 });
 
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Determine host grouping.
+// Uses SHA1 of hostname instead of MPI_Comm_split or MPI_Comm_split_type
+// for two reasons:
+// - Comm_split returns an MPI_COMM_NULL on non-participating process
+//   which does not easily fit into the OpenFOAM framework
+//
+// - use the SHA1 of hostname allows a single MPI_Gather, determination of
+//   the inter-host vs intra-host (on the master) followed by a single
+//   broadcast of integers.
+//
+// Returns: the unique host indices with the leading hosts encoded
+// with negative values
+static List<int> getHostGroupIds(const label parentCommunicator)
+{
+    const label numProcs = UPstream::nProcs(parentCommunicator);
+
+    List<SHA1Digest> digests;
+    if (UPstream::master(parentCommunicator))
+    {
+        digests.resize(numProcs);
+    }
+
+    // Could also add lowercase etc, but since hostName()
+    // will be consistent within the same node, there is no need.
+    SHA1Digest myDigest(SHA1(hostName()).digest());
+
+    // The fixed-length digest allows use of MPI_Gather
+    // and avoids Pstream::gatherList() during setup...
+
+    UPstream::mpiGather
+    (
+        reinterpret_cast<const char*>(myDigest.cdata_bytes()),
+        SHA1Digest::max_size(),     // Num send per proc
+        digests.data_bytes(),       // Recv
+        SHA1Digest::max_size(),     // Num recv per proc
+        parentCommunicator
+    );
+
+    List<int> hostIDs(numProcs);
+
+    // Compact numbering of hosts.
+    if (UPstream::master(parentCommunicator))
+    {
+        DynamicList<SHA1Digest> uniqDigests;
+
+        forAll(digests, proci)
+        {
+            const SHA1Digest& dig = digests[proci];
+
+            hostIDs[proci] = uniqDigests.find(dig);
+
+            if (hostIDs[proci] < 0)
+            {
+                // First appearance of host. Encode as leader
+                hostIDs[proci] = -(uniqDigests.size() + 1);
+                uniqDigests.push_back(dig);
+            }
+        }
+    }
+
+    UPstream::broadcast
+    (
+        hostIDs.data_bytes(),
+        hostIDs.size_bytes(),
+        parentCommunicator,
+        UPstream::masterNo()
+    );
+
+    return hostIDs;
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
@@ -62,6 +143,11 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
     haveThreads_ = haveThreads;
 
     label comm = -1;
+    labelList singleProc(Foam::one{}, 0);
+
+    // Redo communicators that were created during static initialisation.
+    // When parRun == true, redo with MPI components
+    // When parRun == false, just redo in case of future changes
 
     if (!parRun_)
     {
@@ -73,7 +159,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         freeCommunicator(UPstream::globalComm);
 
         // 0: worldComm
-        comm = allocateCommunicator(-1, Foam::labelList(Foam::one{}, 0), false);
+        comm = allocateCommunicator(-1, singleProc, false);
         if (comm != UPstream::globalComm)
         {
             // Failed sanity check
@@ -84,7 +170,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         }
 
         // 1: selfComm
-        comm = allocateCommunicator(-2, Foam::labelList(Foam::one{}, 0), false);
+        comm = allocateCommunicator(-2, singleProc, false);
         if (comm != UPstream::selfComm)
         {
             // Failed sanity check
@@ -100,7 +186,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
     else
     {
         // Redo communicators that were created during static initialisation
-        // but this time with Pstream components
+        // but this time with MPI components
 
         // Using (world, self) ordering
         freeCommunicator(UPstream::selfComm);
@@ -117,11 +203,8 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
                 << Foam::exit(FatalError);
         }
 
-        Pout.prefix() = '[' +  Foam::name(myProcNo(comm)) + "] ";
-        Perr.prefix() = Pout.prefix();
-
         // 1: selfComm
-        comm = allocateCommunicator(-2, Foam::labelList(Foam::one{}, 0), true);
+        comm = allocateCommunicator(-2, singleProc, true);
         if (comm != UPstream::selfComm)
         {
             // Failed sanity check
@@ -130,6 +213,9 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
                 << "  UPstream::selfComm:" << UPstream::selfComm
                 << Foam::exit(FatalError);
         }
+
+        Pout.prefix() = '[' +  Foam::name(myProcNo(globalComm)) + "] ";
+        Perr.prefix() = Pout.prefix();
     }
 
     if (debug)
@@ -180,7 +266,7 @@ Foam::label Foam::UPstream::allocateCommunicator
 (
     const label parentIndex,
     const labelUList& subRanks,
-    const bool doPstream
+    const bool withComponents
 )
 {
     const label index = getAvailableCommIndex(parentIndex);
@@ -193,7 +279,8 @@ Foam::label Foam::UPstream::allocateCommunicator
             << endl;
     }
 
-    // Initially treat as master, overwritten by allocatePstreamCommunicator
+    // Initially treat as master,
+    // overwritten by allocateCommunicatorComponents
     myProcNo_[index] = UPstream::masterNo();
 
     // The selected sub-ranks.
@@ -234,9 +321,9 @@ Foam::label Foam::UPstream::allocateCommunicator
     linearCommunication_[index].clear();
     treeCommunication_[index].clear();
 
-    if (doPstream && parRun())
+    if (withComponents && parRun())
     {
-        allocatePstreamCommunicator(parentIndex, index);
+        allocateCommunicatorComponents(parentIndex, index);
 
         // Could 'remember' locations of uninvolved ranks
         /// if (myProcNo_[index] < 0 && parentIndex >= 0)
@@ -257,10 +344,174 @@ Foam::label Foam::UPstream::allocateCommunicator
 }
 
 
+Foam::label Foam::UPstream::allocateInterHostCommunicator
+(
+    const label parentCommunicator
+)
+{
+    List<int> hostIDs = getHostGroupIds(parentCommunicator);
+
+    DynamicList<label> subRanks(hostIDs.size());
+
+    // From master to host-leader. Ranks between hosts.
+    forAll(hostIDs, proci)
+    {
+        // Is host leader?
+        if (hostIDs[proci] < 0)
+        {
+            subRanks.push_back(proci);
+        }
+    }
+
+    return allocateCommunicator(parentCommunicator, subRanks);
+}
+
+
+Foam::label Foam::UPstream::allocateIntraHostCommunicator
+(
+    const label parentCommunicator
+)
+{
+    List<int> hostIDs = getHostGroupIds(parentCommunicator);
+
+    DynamicList<label> subRanks(hostIDs.size());
+
+    // Intra-host ranks. Ranks within a host
+    int myHostId = hostIDs[UPstream::myProcNo(parentCommunicator)];
+    if (myHostId < 0) myHostId = -(myHostId + 1);  // Flip to generic id
+
+    forAll(hostIDs, proci)
+    {
+        int id = hostIDs[proci];
+        if (id < 0) id = -(id + 1);  // Flip to generic id
+
+        if (id == myHostId)
+        {
+            subRanks.push_back(proci);
+        }
+    }
+
+    return allocateCommunicator(parentCommunicator, subRanks);
+}
+
+
+bool Foam::UPstream::allocateHostCommunicatorPairs()
+{
+    // Use the world communicator (not global communicator)
+    const label parentCommunicator = worldComm;
+
+    // Skip if non-parallel
+    if (!parRun())
+    {
+        return false;
+    }
+
+    if (interHostComm_ >= 0 || intraHostComm_ >= 0)
+    {
+        // Failed sanity check
+        FatalErrorInFunction
+            << "Host communicator(s) already created!" << endl
+            << Foam::exit(FatalError);
+        return false;
+    }
+
+    interHostComm_ = getAvailableCommIndex(parentCommunicator);
+    intraHostComm_ = getAvailableCommIndex(parentCommunicator);
+
+    // Sorted order, purely cosmetic
+    if (intraHostComm_ < interHostComm_)
+    {
+        std::swap(intraHostComm_, interHostComm_);
+    }
+
+    // Overwritten later
+    myProcNo_[intraHostComm_] = UPstream::masterNo();
+    myProcNo_[interHostComm_] = UPstream::masterNo();
+
+    if (debug)
+    {
+        Pout<< "Allocating host communicators "
+            << interHostComm_ << ", " << intraHostComm_ << nl
+            << "    parent : " << parentCommunicator << nl
+            << endl;
+    }
+
+    List<int> hostIDs = getHostGroupIds(parentCommunicator);
+
+    DynamicList<int> subRanks(hostIDs.size());
+
+    // From master to host-leader. Ranks between hosts.
+    {
+        subRanks.clear();
+        forAll(hostIDs, proci)
+        {
+            // Is host leader?
+            if (hostIDs[proci] < 0)
+            {
+                subRanks.push_back(proci);
+
+                // Flip to generic host id
+                hostIDs[proci] = -(hostIDs[proci] + 1);
+            }
+        }
+
+        const label index = interHostComm_;
+
+        // Direct copy (subRanks is also int)
+        procIDs_[index] = subRanks;
+
+        // Implicitly: withComponents = true
+        if (parRun())  // Already checked...
+        {
+            allocateCommunicatorComponents(parentCommunicator, index);
+        }
+
+        // Sizing and filling are demand-driven
+        linearCommunication_[index].clear();
+        treeCommunication_[index].clear();
+    }
+
+    // Intra-host ranks. Ranks within a host
+    {
+        int myHostId = hostIDs[UPstream::myProcNo(parentCommunicator)];
+        if (myHostId < 0) myHostId = -(myHostId + 1);  // Flip to generic id
+
+        subRanks.clear();
+        forAll(hostIDs, proci)
+        {
+            int id = hostIDs[proci];
+            if (id < 0) id = -(id + 1);  // Flip to generic id
+
+            if (id == myHostId)
+            {
+                subRanks.push_back(proci);
+            }
+        }
+
+        const label index = intraHostComm_;
+
+        // Direct copy (subRanks is also int)
+        procIDs_[index] = subRanks;
+
+        // Implicitly: withComponents = true
+        if (parRun())  // Already checked...
+        {
+            allocateCommunicatorComponents(parentCommunicator, index);
+        }
+
+        // Sizing and filling are demand-driven
+        linearCommunication_[index].clear();
+        treeCommunication_[index].clear();
+    }
+
+    return true;
+}
+
+
 void Foam::UPstream::freeCommunicator
 (
     const label communicator,
-    const bool doPstream
+    const bool withComponents
 )
 {
     // Filter out any placeholders
@@ -268,6 +519,10 @@ void Foam::UPstream::freeCommunicator
     {
         return;
     }
+
+    // Update demand-driven communicators
+    if (interHostComm_ == communicator) interHostComm_ = -1;
+    if (intraHostComm_ == communicator) intraHostComm_ = -1;
 
     if (debug)
     {
@@ -277,9 +532,9 @@ void Foam::UPstream::freeCommunicator
             << endl;
     }
 
-    if (doPstream && parRun())
+    if (withComponents && parRun())
     {
-        freePstreamCommunicator(communicator);
+        freeCommunicatorComponents(communicator);
     }
 
     myProcNo_[communicator] = -1;
@@ -290,18 +545,6 @@ void Foam::UPstream::freeCommunicator
 
     // LIFO push
     freeComms_.push_back(communicator);
-}
-
-
-void Foam::UPstream::freeCommunicators(const bool doPstream)
-{
-    forAll(myProcNo_, communicator)
-    {
-        if (myProcNo_[communicator] >= 0)
-        {
-            freeCommunicator(communicator, doPstream);
-        }
-    }
 }
 
 
@@ -383,6 +626,48 @@ void Foam::UPstream::printCommTree(const label communicator)
 }
 
 
+Foam::label Foam::UPstream::commIntraHost()
+{
+    if (!parRun())
+    {
+        return worldComm;  // Don't know anything better to return
+    }
+    if (intraHostComm_ < 0)
+    {
+        allocateHostCommunicatorPairs();
+    }
+    return intraHostComm_;
+}
+
+
+Foam::label Foam::UPstream::commInterHost()
+{
+    if (!parRun())
+    {
+        return worldComm;  // Don't know anything better to return
+    }
+    if (interHostComm_ < 0)
+    {
+        allocateHostCommunicatorPairs();
+    }
+    return interHostComm_;
+}
+
+
+bool Foam::UPstream::hasHostComms()
+{
+    return (intraHostComm_ >= 0 || interHostComm_ >= 0);
+}
+
+
+void Foam::UPstream::clearHostComms()
+{
+    // Always with Pstream
+    freeCommunicator(intraHostComm_, true);
+    freeCommunicator(interHostComm_, true);
+}
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::UPstream::parRun_(false);
@@ -408,6 +693,9 @@ Foam::UPstream::linearCommunication_(16);
 Foam::DynamicList<Foam::List<Foam::UPstream::commsStruct>>
 Foam::UPstream::treeCommunication_(16);
 
+
+Foam::label Foam::UPstream::intraHostComm_(-1);
+Foam::label Foam::UPstream::interHostComm_(-1);
 
 Foam::label Foam::UPstream::worldComm(0);
 Foam::label Foam::UPstream::warnComm(-1);
