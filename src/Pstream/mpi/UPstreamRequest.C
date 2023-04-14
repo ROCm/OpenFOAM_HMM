@@ -69,28 +69,31 @@ void Foam::UPstream::resetRequests(const label n)
 }
 
 
-void Foam::UPstream::waitRequests(const label pos)
+void Foam::UPstream::waitRequests(const label pos, label len)
 {
     // No-op for non-parallel, no pending requests or out-of-range
     if
     (
         !UPstream::parRun()
-     || pos < 0
-     || pos >= PstreamGlobals::outstandingRequests_.size()
-     /// || !len
+     || (pos < 0 || pos >= PstreamGlobals::outstandingRequests_.size())
+     || !len
     )
     {
         return;
     }
 
     label count = (PstreamGlobals::outstandingRequests_.size() - pos);
+    bool trim = true;  // Trim the trailing part of the list
 
-    /// // Treat len < 0 like npos (ie, the rest of the list) but also
-    /// // apply range checking to avoid bad slices
-    /// if (len > 0 && len < count)
-    /// {
-    ///     count = len;
-    /// }
+    // Apply range-checking on slice with (len < 0) behaving like npos
+    // (ie, the rest of the list)
+    if (len >= 0 && len < count)
+    {
+        // A non-trailing slice
+        count = len;
+        trim = false;
+    }
+    // Have count >= 1
 
     auto* waitRequests = (PstreamGlobals::outstandingRequests_.data() + pos);
 
@@ -102,18 +105,34 @@ void Foam::UPstream::waitRequests(const label pos)
 
     profilingPstream::beginTiming();
 
-    // On success: sets each request to MPI_REQUEST_NULL
-    if (MPI_Waitall(count, waitRequests, MPI_STATUSES_IGNORE))
+    if (count == 1)
     {
-        FatalErrorInFunction
-            << "MPI_Waitall returned with error"
-            << Foam::abort(FatalError);
+        // On success: sets request to MPI_REQUEST_NULL
+        if (MPI_Wait(waitRequests, MPI_STATUS_IGNORE))
+        {
+            FatalErrorInFunction
+                << "MPI_Wait returned with error"
+                << Foam::abort(FatalError);
+        }
+    }
+    else if (count > 1)
+    {
+        // On success: sets each request to MPI_REQUEST_NULL
+        if (MPI_Waitall(count, waitRequests, MPI_STATUSES_IGNORE))
+        {
+            FatalErrorInFunction
+                << "MPI_Waitall returned with error"
+                << Foam::abort(FatalError);
+        }
     }
 
     profilingPstream::addWaitTime();
 
     // ie, resetRequests(pos)
-    PstreamGlobals::outstandingRequests_.resize(pos);
+    if (trim)
+    {
+        PstreamGlobals::outstandingRequests_.resize(pos);
+    }
 
     if (UPstream::debug)
     {
@@ -170,15 +189,14 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
 }
 
 
-bool Foam::UPstream::waitAnyRequest(const label pos)
+bool Foam::UPstream::waitAnyRequest(const label pos, label len)
 {
     // No-op for non-parallel, no pending requests or out-of-range
     if
     (
         !UPstream::parRun()
-     || pos < 0
-     || pos >= PstreamGlobals::outstandingRequests_.size()
-     /// || !len
+     || (pos < 0 || pos >= PstreamGlobals::outstandingRequests_.size())
+     || !len
     )
     {
         return false;
@@ -186,13 +204,14 @@ bool Foam::UPstream::waitAnyRequest(const label pos)
 
     label count = (PstreamGlobals::outstandingRequests_.size() - pos);
 
-    /// // Treat len < 0 like npos (ie, the rest of the list) but also
-    /// // apply range checking to avoid bad slices
-    ///
-    /// if (len >= 0 && len < count)
-    /// {
-    ///     count = len;
-    /// }
+    // Apply range-checking on slice with (len < 0) behaving like npos
+    // (ie, the rest of the list)
+    if (len >= 0 && len < count)
+    {
+        // A non-trailing slice
+        count = len;
+    }
+    // Have count >= 1
 
     auto* waitRequests = (PstreamGlobals::outstandingRequests_.data() + pos);
 
@@ -235,9 +254,8 @@ bool Foam::UPstream::waitSomeRequests
     if
     (
         !UPstream::parRun()
-     || pos < 0
-     || pos >= PstreamGlobals::outstandingRequests_.size()
-     /// || !len
+     || (pos < 0 || pos >= PstreamGlobals::outstandingRequests_.size())
+     // || !len
     )
     {
         if (indices)
@@ -249,13 +267,14 @@ bool Foam::UPstream::waitSomeRequests
 
     label count = (PstreamGlobals::outstandingRequests_.size() - pos);
 
-    /// // Treat len < 0 like npos (ie, the rest of the list) but also
-    /// // apply range checking to avoid bad slices
-    ///
-    /// if (len >= 0 && len < count)
-    /// {
-    ///     count = len;
-    /// }
+    // Apply range-checking on slice with (len < 0) behaving like npos
+    // (ie, the rest of the list)
+    // if (len >= 0 && len < count)
+    // {
+    //     // A non-trailing slice
+    //     count = len;
+    // }
+    // Have count >= 1
 
     auto* waitRequests = (PstreamGlobals::outstandingRequests_.data() + pos);
 
@@ -524,6 +543,12 @@ bool Foam::UPstream::finishedRequest(const label i)
         return true;
     }
 
+    if (UPstream::debug)
+    {
+        Pout<< "UPstream::finishedRequest : check request:"
+            << i << endl;
+    }
+
     auto& request = PstreamGlobals::outstandingRequests_[i];
 
     // Fast-path (no-op) for null request
@@ -532,21 +557,9 @@ bool Foam::UPstream::finishedRequest(const label i)
         return true;
     }
 
-    if (UPstream::debug)
-    {
-        Pout<< "UPstream::finishedRequest : checking request:"
-            << i << endl;
-    }
-
     // On success: sets request to MPI_REQUEST_NULL
     int flag = 0;
     MPI_Test(&request, &flag, MPI_STATUS_IGNORE);
-
-    if (UPstream::debug)
-    {
-        Pout<< "UPstream::finishedRequest : finished request:" << i
-            << endl;
-    }
 
     return flag != 0;
 }
@@ -575,6 +588,62 @@ bool Foam::UPstream::finishedRequest(UPstream::Request& req)
     {
         // Success: reset request to MPI_REQUEST_NULL
         req = UPstream::Request(MPI_REQUEST_NULL);
+    }
+
+    return flag != 0;
+}
+
+
+bool Foam::UPstream::finishedRequests(const label pos, label len)
+{
+    // No-op for non-parallel, or out-of-range (eg, placeholder indices)
+    if
+    (
+        !UPstream::parRun()
+     || (pos < 0 || pos >= PstreamGlobals::outstandingRequests_.size())
+     || !len
+    )
+    {
+        return true;
+    }
+
+    label count = (PstreamGlobals::outstandingRequests_.size() - pos);
+
+    // Apply range-checking on slice with (len < 0) behaving like npos
+    // (ie, the rest of the list)
+    if (len >= 0 && len < count)
+    {
+        // A non-trailing slice
+        count = len;
+    }
+    // Have count >= 1
+
+    if (UPstream::debug)
+    {
+        Pout<< "UPstream::finishedRequests : check " << count
+            << " requests starting at " << pos << endl;
+    }
+
+    auto* waitRequests = (PstreamGlobals::outstandingRequests_.data() + pos);
+
+    int flag = 1;
+
+    if (count == 1)
+    {
+        // Fast-path (no-op) for single null request
+        if (MPI_REQUEST_NULL == *waitRequests)
+        {
+            return true;
+        }
+
+        // On success: sets request to MPI_REQUEST_NULL
+        MPI_Test(waitRequests, &flag, MPI_STATUS_IGNORE);
+    }
+    else if (count > 1)
+    {
+        // On success: sets each request to MPI_REQUEST_NULL
+        // On failure: no request is modified
+        MPI_Testall(count, waitRequests, &flag, MPI_STATUSES_IGNORE);
     }
 
     return flag != 0;
@@ -721,12 +790,12 @@ bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
 
         if (req1 >= 0)
         {
-            PstreamGlobals:: outstandingRequests_[req1] = waitRequests[0];
+            PstreamGlobals::outstandingRequests_[req1] = waitRequests[0];
         }
 
         if (req2 >= 0)
         {
-            PstreamGlobals:: outstandingRequests_[req2] = waitRequests[1];
+            PstreamGlobals::outstandingRequests_[req2] = waitRequests[1];
         }
 
         // Flag indices as 'done'
@@ -744,7 +813,7 @@ bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
         {
             if (req1 >= 0)
             {
-                PstreamGlobals:: outstandingRequests_[req1] = waitRequests[0];
+                PstreamGlobals::outstandingRequests_[req1] = waitRequests[0];
                 req1 = -1;
             }
         }
@@ -752,7 +821,7 @@ bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
         {
             if (req2 >= 0)
             {
-                PstreamGlobals:: outstandingRequests_[req2] = waitRequests[1];
+                PstreamGlobals::outstandingRequests_[req2] = waitRequests[1];
                 req2 = -1;
             }
         }
@@ -775,7 +844,7 @@ void Foam::UPstream::waitRequestPair(label& req1, label& req2)
     int count = 0;
     MPI_Request waitRequests[2];
 
-    // No-op for non-parallel, or out-of-range (eg, placeholder indices)
+    // No-op for out-of-range (eg, placeholder indices)
     if (req1 >= 0 && req1 < PstreamGlobals::outstandingRequests_.size())
     {
         waitRequests[0] = PstreamGlobals::outstandingRequests_[req1];
@@ -787,7 +856,7 @@ void Foam::UPstream::waitRequestPair(label& req1, label& req2)
         req1 = -1;  // Flag as 'done'
     }
 
-    // No-op for non-parallel, or out-of-range (eg, placeholder indices)
+    // No-op for out-of-range (eg, placeholder indices)
     if (req2 >= 0 && req2 < PstreamGlobals::outstandingRequests_.size())
     {
         waitRequests[1] = PstreamGlobals::outstandingRequests_[req2];

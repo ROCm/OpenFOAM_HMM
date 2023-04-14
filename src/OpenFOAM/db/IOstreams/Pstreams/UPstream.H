@@ -559,8 +559,13 @@ public:
         //  if the position is out-of-range [0 to nRequests()],
         //  or the internal list of requests is empty.
         //
+        //  If checking a trailing portion of the list, it will also trim
+        //  the list of outstanding requests as a side-effect.
+        //  This is a feature (not a bug) to conveniently manange the list.
+        //
         //  \param pos starting position within the internal list of requests
-        static void waitRequests(const label pos);
+        //  \param len length of slice to check (negative = until the end)
+        static void waitRequests(const label pos, label len = -1);
 
         //- Wait until all requests have finished.
         //- Corresponds to MPI_Waitall()
@@ -577,7 +582,8 @@ public:
         //  \returns false if all requests have already been handled.
         //
         //  \param pos starting position within the internal list of requests
-        static bool waitAnyRequest(const label pos);
+        //  \param len length of slice to check (negative = until the end)
+        static bool waitAnyRequest(const label pos, label len = -1);
 
         //- Wait until some requests (from position onwards) have finished.
         //- Corresponds to MPI_Waitsome()
@@ -629,6 +635,18 @@ public:
         //  A no-op and returns true if parRun() == false
         //  or for a null-request
         static bool finishedRequest(UPstream::Request& req);
+
+        //- Non-blocking comms: have all requests (from position onwards)
+        //- finished?
+        //- Corresponds to MPI_Testall()
+        //  A no-op and returns true if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        //  or the addressed range is empty etc.
+        //
+        //  \param pos starting position within the internal list of requests
+        //  \param len length of slice to check (negative = until the end)
+        static bool finishedRequests(const label pos, label len = -1);
 
         //- Non-blocking comms: have all requests finished?
         //- Corresponds to MPI_Testall()
