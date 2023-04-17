@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2021,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -313,6 +313,12 @@ Foam::label Foam::scotchDecomp::decomposeSerial
     );
 
     List<SCOTCH_Num> procWeights;
+
+    // Do optional tree-like/multi-level decomposition by specifying
+    // domains/weights
+    List<SCOTCH_Num> domains;
+    List<scalar> dWeights;
+
     if
     (
         coeffsDict_.readIfPresent("processorWeights", procWeights)
@@ -335,6 +341,71 @@ Foam::label Foam::scotchDecomp::decomposeSerial
         (
             SCOTCH_archCmpltw(&archdat, nDomains_, procWeights.cdata()),
             "SCOTCH_archCmpltw"
+        );
+    }
+    else if
+    (
+        coeffsDict_.readIfPresent("domains", domains, keyType::LITERAL)
+     && coeffsDict_.readIfPresent("domainWeights", dWeights, keyType::LITERAL)
+    )
+    {
+        // multi-level
+
+        label nTotal = 1;
+        for (const label n : domains)
+        {
+            nTotal *= n;
+        }
+
+        if (nTotal < nDomains())
+        {
+            const label sz = domains.size();
+            domains.setSize(sz+1);
+            dWeights.setSize(sz+1);
+            for (label i = sz-1; i >= 0; i--)
+            {
+                domains[i+1] = domains[i];
+                dWeights[i+1] = dWeights[i];
+            }
+
+            if (nDomains() % nTotal)
+            {
+                FatalErrorInFunction
+                    << "Top level decomposition specifies " << nDomains()
+                    << " domains which is not equal to the product of"
+                    << " all sub domains " << nTotal
+                    << exit(FatalError);
+            }
+
+            domains[0] = nDomains() / nTotal;
+            dWeights[0] = scalar(1);
+        }
+
+
+        // Note: min, not gMin since routine runs on master only.
+        const scalar minWeights = min(dWeights);
+
+        // Convert to integers.
+        List<SCOTCH_Num> weights(dWeights.size());
+
+        forAll(weights, i)
+        {
+            weights[i] = static_cast<SCOTCH_Num>
+            (
+                (dWeights[i]/minWeights - 1) + 1
+            );
+        }
+
+        check
+        (
+            SCOTCH_archTleaf
+            (
+                &archdat,
+                SCOTCH_Num(domains.size()),
+                domains.cdata(),
+                weights.cdata()
+            ),
+            "SCOTCH_archTleaf"
         );
     }
     else
