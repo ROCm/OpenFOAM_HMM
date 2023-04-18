@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2020 OpenCFD Ltd.
+#     Copyright (C) 2020-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -19,7 +19,7 @@
 #
 # Example
 #     bin/tools/vscode-settings > .vscode/settings.json
-#     etc/openfoam -spdp -int64 bin/tools/vscode-settings
+#     openfoam -spdp -int64 bin/tools/vscode-settings
 #
 # Environment
 #     WM_PROJECT_DIR, WM_PROJECT_USER_DIR, WM_OPTIONS
@@ -43,7 +43,7 @@ Emit some settings for Visual Studio Code + OpenFOAM
 
 For example,
     bin/tools/vscode-settings > .vscode/settings.json
-    etc/openfoam -spdp -int64 bin/tools/vscode-settings
+    openfoam -spdp -int64 bin/tools/vscode-settings
 
 USAGE
     exit 0  # clean exit
@@ -79,6 +79,10 @@ echo "project: ${WM_PROJECT_DIR:?OpenFOAM environment not set?}" 1>&2
 echo "options: ${WM_OPTIONS:?not set}" 1>&2
 if [ -x "$session" ]
 then
+    echo "session: $session" 1>&2
+elif [ -x "$projectDir"/openfoam ]
+then
+    session="$projectDir"/openfoam
     echo "session: $session" 1>&2
 else
     echo "No session: $session" 1>&2
