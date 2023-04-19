@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,10 @@ template<class Type> class UniformDimensionedField;
 // Typedefs
 
 typedef
+    UniformDimensionedField<label>
+    uniformDimensionedLabelField;
+
+typedef
     UniformDimensionedField<scalar>
     uniformDimensionedScalarField;
 
@@ -71,6 +75,11 @@ typedef
 
 // Global file status
 
+template<>
+inline bool typeGlobal<uniformDimensionedLabelField>()
+{
+    return true;
+}
 template<>
 inline bool typeGlobal<uniformDimensionedScalarField>()
 {

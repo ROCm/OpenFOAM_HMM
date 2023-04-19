@@ -271,11 +271,7 @@ void Foam::hexRef8Data::sync(const IOobject& io)
             rio.readOpt(IOobject::NO_READ);
             level0EdgePtr_.reset
             (
-                new uniformDimensionedScalarField
-                (
-                    rio,
-                    dimensionedScalar(rio.name(), dimLength, masterLen)
-                )
+                new uniformDimensionedScalarField(rio, dimLength, masterLen)
             );
         }
     }

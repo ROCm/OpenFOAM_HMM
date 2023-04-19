@@ -221,7 +221,7 @@ forAll(fluidRegions, i)
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE
             ),
-            dimensionedScalar("hRef", dimLength, Zero)
+            dimensionedScalar(word::null, dimLength, Zero)
         )
     );
 

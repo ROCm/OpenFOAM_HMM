@@ -5,9 +5,9 @@
         (
             "pRef",
             runTime.constant(),
-            mesh,
+            mesh.thisDb(),
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
-        dimensionedScalar(dimPressure, Zero)
+        dimensionedScalar(word::null, dimPressure, Zero)
     );

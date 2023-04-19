@@ -79,11 +79,22 @@ public:
 
         //- Construct from components. Either reads or uses supplied value.
         //  The name of the IOobject defines the name of the field.
+        //  Parameter ordering as per dimensioned\<Type\>
         UniformDimensionedField
         (
             const IOobject& io,
             const dimensionSet& dims,
             const Type& val
+        );
+
+        //- Construct from components. Either reads or uses supplied value.
+        //  The name of the IOobject defines the name of the field.
+        //  Parameter ordering as per DimensionedField\<Type\>
+        UniformDimensionedField
+        (
+            const IOobject& io,
+            const Type& val,
+            const dimensionSet& dims
         );
 
         //- Construct as copy
@@ -99,17 +110,16 @@ public:
 
     // Member Functions
 
-        //- Name function provided to resolve the ambiguity between the
-        //- name functions in regIOobject and dimensioned<Type>
+        //- Use name from dimensioned\<Type\>, not from regIOobject
         virtual const word& name() const
         {
             return dimensioned<Type>::name();
         }
 
-        //- ReadData function required for regIOobject read operation
+        //- The readData method required for regIOobject read operation
         virtual bool readData(Istream&);
 
-        //- WriteData function required for regIOobject write operation
+        //- The writeData method required for regIOobject write operation
         bool writeData(Ostream&) const;
 
         //- Is object global
@@ -128,10 +138,10 @@ public:
 
     // Member Operators
 
-        //- Assign name, dimensions and value.
+        //- Assign name, dimensions and value of the dimensioned\<Type\>
         void operator=(const UniformDimensionedField<Type>& rhs);
 
-        //- Assign name, dimensions and value.
+        //- Assign name, dimensions and value to the dimensioned\<Type\>
         void operator=(const dimensioned<Type>& rhs);
 
         //- Return value
