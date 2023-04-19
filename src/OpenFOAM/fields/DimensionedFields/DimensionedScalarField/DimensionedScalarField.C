@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,223 +103,265 @@ BINARY_TYPE_OPERATOR_SF(scalar, scalar, scalar, /, '|', divide)
 template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
-    const DimensionedField<scalar, GeoMesh>& dsf1,
-    const DimensionedField<scalar, GeoMesh>& dsf2
+    const DimensionedField<scalar, GeoMesh>& f1,
+    const DimensionedField<scalar, GeoMesh>& f2
 )
 {
-    if (!dsf1.dimensions().dimensionless())
+    if
+    (
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Base field is not dimensionless: " << dsf1.dimensions()
-            << exit(FatalError);
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
     }
 
-    if (!dsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << dsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    auto tres =
+    auto tresult =
         tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
-                "pow(" + dsf1.name() + ',' + dsf2.name() + ')',
-                dsf1.instance(),
-                dsf1.db()
+                "pow(" + f1.name() + ',' + f2.name() + ')',
+                f1.instance(),
+                f1.db()
             ),
-            dsf1.mesh(),
+            f1.mesh(),
             dimless
         );
 
-    pow(tres.ref().field(), dsf1.field(), dsf2.field());
+    pow(tresult.ref().field(), f1.field(), f2.field());
 
-    return tres;
+    return tresult;
 }
 
 
 template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
-    const tmp<DimensionedField<scalar, GeoMesh>>& tdsf1,
-    const DimensionedField<scalar, GeoMesh>& dsf2
+    const tmp<DimensionedField<scalar, GeoMesh>>& tf1,
+    const DimensionedField<scalar, GeoMesh>& f2
 )
 {
-    const DimensionedField<scalar, GeoMesh>& dsf1 = tdsf1();
+    const auto& f1 = tf1();
 
-    if (!dsf1.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Base field is not dimensionless: " << dsf1.dimensions()
-            << exit(FatalError);
-    }
-
-    if (!dsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << dsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<DimensionedField<scalar, GeoMesh>> tres = New
+    if
     (
-        tdsf1,
-        "pow(" + dsf1.name() + ',' + dsf2.name() + ')',
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
+    {
+        FatalErrorInFunction
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
+    }
+
+    tmp<DimensionedField<scalar, GeoMesh>> tresult = New
+    (
+        tf1,
+        "pow(" + f1.name() + ',' + f2.name() + ')',
         dimless
     );
 
-    pow(tres.ref().field(), dsf1.field(), dsf2.field());
+    pow(tresult.ref().field(), f1.field(), f2.field());
 
-    tdsf1.clear();
+    tf1.clear();
 
-    return tres;
+    return tresult;
 }
 
 
 template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
-    const DimensionedField<scalar, GeoMesh>& dsf1,
-    const tmp<DimensionedField<scalar, GeoMesh>>& tdsf2
+    const DimensionedField<scalar, GeoMesh>& f1,
+    const tmp<DimensionedField<scalar, GeoMesh>>& tf2
 )
 {
-    const DimensionedField<scalar, GeoMesh>& dsf2 = tdsf2();
+    const auto& f2 = tf2();
 
-    if (!dsf1.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Base field is not dimensionless: " << dsf1.dimensions()
-            << exit(FatalError);
-    }
-
-    if (!dsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << dsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<DimensionedField<scalar, GeoMesh>> tres = New
+    if
     (
-        tdsf2,
-        "pow(" + dsf1.name() + ',' + dsf2.name() + ')',
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
+    {
+        FatalErrorInFunction
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
+    }
+
+    tmp<DimensionedField<scalar, GeoMesh>> tresult = New
+    (
+        tf2,
+        "pow(" + f1.name() + ',' + f2.name() + ')',
         dimless
     );
 
-    pow(tres.ref().field(), dsf1.field(), dsf2.field());
+    pow(tresult.ref().field(), f1.field(), f2.field());
 
-    tdsf2.clear();
+    tf2.clear();
 
-    return tres;
+    return tresult;
 }
 
 
 template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
-    const tmp<DimensionedField<scalar, GeoMesh>>& tdsf1,
-    const tmp<DimensionedField<scalar, GeoMesh>>& tdsf2
+    const tmp<DimensionedField<scalar, GeoMesh>>& tf1,
+    const tmp<DimensionedField<scalar, GeoMesh>>& tf2
 )
 {
-    const DimensionedField<scalar, GeoMesh>& dsf1 = tdsf1();
-    const DimensionedField<scalar, GeoMesh>& dsf2 = tdsf2();
+    const auto& f1 = tf1();
+    const auto& f2 = tf2();
 
-    if (!dsf1.dimensions().dimensionless())
+    if
+    (
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Base field is not dimensionless: " << dsf1.dimensions()
-            << exit(FatalError);
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
     }
 
-    if (!dsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << dsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    auto tres =
+    auto tresult =
         reuseTmpTmpDimensionedField<scalar, scalar, scalar, scalar, GeoMesh>::
         New
         (
-            tdsf1,
-            tdsf2,
-            "pow(" + dsf1.name() + ',' + dsf2.name() + ')',
+            tf1,
+            tf2,
+            "pow(" + f1.name() + ',' + f2.name() + ')',
             dimless
         );
 
-    pow(tres.ref().field(), dsf1.field(), dsf2.field());
+    pow(tresult.ref().field(), f1.field(), f2.field());
 
-    tdsf1.clear();
-    tdsf2.clear();
+    tf1.clear();
+    tf2.clear();
 
-    return tres;
+    return tresult;
 }
 
 
 template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
-    const DimensionedField<scalar, GeoMesh>& dsf,
+    const DimensionedField<scalar, GeoMesh>& f1,
     const dimensionedScalar& ds
 )
 {
-    if (!ds.dimensions().dimensionless())
+    if
+    (
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Exponent is not dimensionless: " << ds.dimensions()
+            << "pow() expects dimensionless parameters, but found" << nl
+            << "    Exponent dimensions: " << ds.dimensions() << nl
             << exit(FatalError);
     }
 
-    auto tres =
+    auto tresult =
         tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
-                "pow(" + dsf.name() + ',' + ds.name() + ')',
-                dsf.instance(),
-                dsf.db()
+                "pow(" + f1.name() + ',' + ds.name() + ')',
+                f1.instance(),
+                f1.db()
             ),
-            dsf.mesh(),
-            pow(dsf.dimensions(), ds)
+            f1.mesh(),
+            pow(f1.dimensions(), ds)
         );
 
-    pow(tres.ref().field(), dsf.field(), ds.value());
+    pow(tresult.ref().field(), f1.field(), ds.value());
 
-    return tres;
+    return tresult;
 }
 
 
 template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
-    const tmp<DimensionedField<scalar, GeoMesh>>& tdsf,
+    const tmp<DimensionedField<scalar, GeoMesh>>& tf1,
     const dimensionedScalar& ds
 )
 {
-    if (!ds.dimensions().dimensionless())
+    const auto& f1 = tf1();
+
+    if
+    (
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Exponent is not dimensionless: " << ds.dimensions()
+            << "pow() expects dimensionless parameters, but found" << nl
+            << "    Exponent dimensions: " << ds.dimensions() << nl
             << exit(FatalError);
     }
 
-    const DimensionedField<scalar, GeoMesh>& dsf = tdsf();
-
-    tmp<DimensionedField<scalar, GeoMesh>> tres = New
+    tmp<DimensionedField<scalar, GeoMesh>> tresult = New
     (
-        tdsf,
-        "pow(" + dsf.name() + ',' + ds.name() + ')',
-        pow(dsf.dimensions(), ds)
+        tf1,
+        "pow(" + f1.name() + ',' + ds.name() + ')',
+        pow(f1.dimensions(), ds)
     );
 
-    pow(tres.ref().field(), dsf.field(), ds.value());
+    pow(tresult.ref().field(), f1.field(), ds.value());
 
-    tdsf.clear();
+    tf1.clear();
 
-    return tres;
+    return tresult;
 }
 
 
@@ -349,39 +391,47 @@ template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
     const dimensionedScalar& ds,
-    const DimensionedField<scalar, GeoMesh>& dsf
+    const DimensionedField<scalar, GeoMesh>& f2
 )
 {
-    if (!ds.dimensions().dimensionless())
+    if
+    (
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Base scalar is not dimensionless: " << ds.dimensions()
-            << exit(FatalError);
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!ds.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base scalar dimensions: " << ds.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
     }
 
-    if (!dsf.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << dsf.dimensions()
-            << exit(FatalError);
-    }
-
-    auto tres =
+    auto tresult =
         tmp<DimensionedField<scalar, GeoMesh>>::New
         (
             IOobject
             (
-                "pow(" + ds.name() + ',' + dsf.name() + ')',
-                dsf.instance(),
-                dsf.db()
+                "pow(" + ds.name() + ',' + f2.name() + ')',
+                f2.instance(),
+                f2.db()
             ),
-            dsf.mesh(),
+            f2.mesh(),
             dimless
         );
 
-    pow(tres.ref().field(), ds.value(), dsf.field());
+    pow(tresult.ref().field(), ds.value(), f2.field());
 
-    return tres;
+    return tresult;
 }
 
 
@@ -389,37 +439,46 @@ template<class GeoMesh>
 tmp<DimensionedField<scalar, GeoMesh>> pow
 (
     const dimensionedScalar& ds,
-    const tmp<DimensionedField<scalar, GeoMesh>>& tdsf
+    const tmp<DimensionedField<scalar, GeoMesh>>& tf2
 )
 {
-    const DimensionedField<scalar, GeoMesh>& dsf = tdsf();
+    const auto& f2 = tf2();
 
-    if (!ds.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Base scalar is not dimensionless: " << ds.dimensions()
-            << exit(FatalError);
-    }
-
-    if (!dsf.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << dsf.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<DimensionedField<scalar, GeoMesh>> tres = New
+    if
     (
-        tdsf,
-        "pow(" + ds.name() + ',' + dsf.name() + ')',
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
+    {
+        FatalErrorInFunction
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!ds.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base scalar dimensions: " << ds.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+
+        FatalError << exit(FatalError);
+    }
+
+    tmp<DimensionedField<scalar, GeoMesh>> tresult = New
+    (
+        tf2,
+        "pow(" + ds.name() + ',' + f2.name() + ')',
         dimless
     );
 
-    pow(tres.ref().field(), ds.value(), dsf.field());
+    pow(tresult.ref().field(), ds.value(), f2.field());
 
-    tdsf.clear();
+    tf2.clear();
 
-    return tres;
+    return tresult;
 }
 
 template<class GeoMesh>
@@ -738,10 +797,10 @@ tmp<DimensionedField<scalar, GeoMesh>> func                                    \
     const DimensionedField<scalar, GeoMesh>& dsf                               \
 )                                                                              \
 {                                                                              \
-    if (!dsf.dimensions().dimensionless())                                     \
+    if (dimensionSet::checking() && !dsf.dimensions().dimensionless())         \
     {                                                                          \
         FatalErrorInFunction                                                   \
-            << "dsf not dimensionless"                                         \
+            << "Field is not dimensionless: " << dsf.dimensions() << nl        \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \
@@ -771,12 +830,12 @@ tmp<DimensionedField<scalar, GeoMesh>> func                                    \
     const tmp<DimensionedField<scalar, GeoMesh>>& tdsf                         \
 )                                                                              \
 {                                                                              \
-    const DimensionedField<scalar, GeoMesh>& dsf = tdsf();                     \
+    const auto& dsf = tdsf();                                                  \
                                                                                \
-    if (!dsf.dimensions().dimensionless())                                     \
+    if (dimensionSet::checking() && !dsf.dimensions().dimensionless())         \
     {                                                                          \
         FatalErrorInFunction                                                   \
-            << " : dsf not dimensionless"                                      \
+            << "Field is not dimensionless: " << dsf.dimensions() << nl        \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \

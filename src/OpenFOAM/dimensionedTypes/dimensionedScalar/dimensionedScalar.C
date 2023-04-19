@@ -243,10 +243,10 @@ dimensionedScalar negPart(const dimensionedScalar& ds)
 #define transFunc(func)                                                        \
 dimensionedScalar func(const dimensionedScalar& ds)                            \
 {                                                                              \
-    if (!ds.dimensions().dimensionless())                                      \
+    if (dimensionSet::checking() && !ds.dimensions().dimensionless())          \
     {                                                                          \
         FatalErrorInFunction                                                   \
-            << "ds not dimensionless"                                          \
+            << "scalar is not dimensionless: " << ds.dimensions() << nl        \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \
@@ -287,10 +287,10 @@ transFunc(y1)
 #define transFunc(func)                                                        \
 dimensionedScalar func(const int n, const dimensionedScalar& ds)               \
 {                                                                              \
-    if (!ds.dimensions().dimensionless())                                      \
+    if (dimensionSet::checking() && !ds.dimensions().dimensionless())          \
     {                                                                          \
         FatalErrorInFunction                                                   \
-            << "ds not dimensionless"                                          \
+            << "scalar is not dimensionless: " << ds.dimensions() << nl        \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \

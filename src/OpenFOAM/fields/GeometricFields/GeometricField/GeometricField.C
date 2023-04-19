@@ -35,14 +35,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define checkField(gf1, gf2, op)                                               \
-if ((gf1).mesh() != (gf2).mesh())                                              \
-{                                                                              \
-    FatalErrorInFunction                                                       \
-        << "different mesh for fields "                                        \
-        << (gf1).name() << " and " << (gf2).name()                             \
-        << " during operation " <<  op                                         \
-        << abort(FatalError);                                                  \
+// Check that both fields use the same mesh
+#undef  checkField
+#define checkField(fld1, fld2, op)                                  \
+if (&(fld1).mesh() != &(fld2).mesh())                               \
+{                                                                   \
+    FatalErrorInFunction                                            \
+        << "Different mesh for fields "                             \
+        << (fld1).name() << " and " << (fld2).name()                \
+        << " during operation " << op                               \
+        << abort(FatalError);                                       \
 }
 
 

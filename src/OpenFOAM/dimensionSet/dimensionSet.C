@@ -336,39 +336,17 @@ Foam::dimensionSet Foam::pow(const dimensionSet& ds, const scalar p)
 Foam::dimensionSet Foam::pow
 (
     const dimensionSet& ds,
-    const dimensionedScalar& dS
+    const dimensionedScalar& p
 )
 {
-    if (dimensionSet::checking() && !dS.dimensions().dimensionless())
+    if (dimensionSet::checking() && !p.dimensions().dimensionless())
     {
         FatalErrorInFunction
             << "Exponent of pow is not dimensionless" << endl
             << abort(FatalError);
     }
 
-    return pow(ds, dS.value());
-}
-
-
-Foam::dimensionSet Foam::pow
-(
-    const dimensionedScalar& dS,
-    const dimensionSet& ds
-)
-{
-    if
-    (
-        dimensionSet::checking()
-     && !dS.dimensions().dimensionless()
-     && !ds.dimensionless()
-    )
-    {
-        FatalErrorInFunction
-            << "Argument or exponent of pow not dimensionless" << endl
-            << abort(FatalError);
-    }
-
-    return ds;
+    return pow(ds, p.value());
 }
 
 
@@ -484,6 +462,8 @@ Foam::dimensionSet Foam::inv(const dimensionSet& ds)
 {
     return dimensionSet
     (
+        // Avoid signed zero values by subtracting from zero (with rounding)
+        // instead of using a simple '-value'
         0.0-ds[dimensionSet::MASS],
         0.0-ds[dimensionSet::LENGTH],
         0.0-ds[dimensionSet::TIME],

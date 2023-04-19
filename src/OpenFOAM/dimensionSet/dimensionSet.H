@@ -364,8 +364,7 @@ dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2);
 
 
 dimensionSet pow(const dimensionSet& ds, const scalar p);
-dimensionSet pow(const dimensionSet& ds, const dimensionedScalar& dS);
-dimensionSet pow(const dimensionedScalar& dS, const dimensionSet& ds);
+dimensionSet pow(const dimensionSet& ds, const dimensionedScalar& p);
 
 dimensionSet sqr(const dimensionSet& ds);
 dimensionSet pow2(const dimensionSet& ds);
