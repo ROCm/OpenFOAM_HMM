@@ -431,6 +431,7 @@ $(lduMatrix)/solvers/smoothSolver/smoothSolver.C
 $(lduMatrix)/solvers/PCG/PCG.C
 $(lduMatrix)/solvers/PBiCG/PBiCG.C
 $(lduMatrix)/solvers/PBiCGStab/PBiCGStab.C
+$(lduMatrix)/solvers/FPCG/FPCG.C
 $(lduMatrix)/solvers/PPCG/PPCG.C
 $(lduMatrix)/solvers/PPCR/PPCR.C
 
