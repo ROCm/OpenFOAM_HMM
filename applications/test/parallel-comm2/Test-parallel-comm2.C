@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     Info<< nl
         << "parallel:" << UPstream::parRun()
-        << "nProcs = " << UPstream::nProcs()
+        << " nProcs = " << UPstream::nProcs()
         << " with " << UPstream::nComms() << " predefined comm(s)."
         << " proc:" << UPstream::myProcNo() << nl;
 
@@ -103,11 +103,14 @@ int main(int argc, char *argv[])
     {
         Info<< nl;
 
-        //- Process IDs within a given communicator
-        Info<< "procIDs: "
-            << flatOutput(UPstream::procID(UPstream::commWorld())) << endl;
-
-        rankInfo(UPstream::commWorld());
+        // Process IDs within a given communicator
+        for (label comm = 0; comm < UPstream::nComms(); ++comm)
+        {
+            Info<< "comm=" << comm
+                << " procIDs: " << flatOutput(UPstream::procID(comm)) << endl;
+            rankInfo(comm);
+            Pout<< nl;
+        }
         Pout<< endl;
     }
 

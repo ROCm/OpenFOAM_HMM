@@ -299,7 +299,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         Pstream::gatherList(worlds, UPstream::msgType(), UPstream::globalComm);
 
         // Compact
-        if (Pstream::master(UPstream::globalComm))
+        if (UPstream::master(UPstream::globalComm))
         {
             DynamicList<word> worldNames(numprocs);
             worldIDs_.resize_nocopy(numprocs);

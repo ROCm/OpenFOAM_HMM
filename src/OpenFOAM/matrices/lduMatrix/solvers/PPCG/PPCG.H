@@ -69,7 +69,7 @@ class PPCG
     // Private Member Functions
 
         //- Non-blocking version of sum(a*b), sum(a*c), sum(mag(sumMag))
-        void gSumMagProd
+        static void gSumMagProd
         (
             FixedList<solveScalar, 3>& globalSum,
             const solveScalarField& a,
@@ -78,7 +78,7 @@ class PPCG
             const solveScalarField& sumMag,
             UPstream::Request& request,
             const label comm
-        ) const;
+        );
 
         //- No copy construct
         PPCG(const PPCG&) = delete;

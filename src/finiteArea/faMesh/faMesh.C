@@ -306,7 +306,7 @@ bool Foam::faMesh::init(const bool doInit)
     }
 
     // Create global mesh data
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         (void)globalData();
     }
@@ -378,7 +378,7 @@ Foam::faMesh::faMesh
         ),
         *this
     ),
-    comm_(Pstream::worldComm),
+    comm_(UPstream::worldComm),
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
@@ -484,7 +484,7 @@ Foam::faMesh::faMesh
         *this,
         label(0)
     ),
-    comm_(Pstream::worldComm),
+    comm_(UPstream::worldComm),
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
@@ -565,7 +565,7 @@ Foam::faMesh::faMesh
         *this,
         label(0)
     ),
-    comm_(Pstream::worldComm),
+    comm_(UPstream::worldComm),
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),

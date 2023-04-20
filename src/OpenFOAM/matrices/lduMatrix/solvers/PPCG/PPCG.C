@@ -51,7 +51,7 @@ void Foam::PPCG::gSumMagProd
     const solveScalarField& sumMag,
     UPstream::Request& request,
     const label comm
-) const
+)
 {
     const label nCells = a.size();
 
@@ -63,14 +63,14 @@ void Foam::PPCG::gSumMagProd
         globalSum[2] += mag(sumMag[cell]);
     }
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         Foam::reduce
         (
             globalSum.data(),
             globalSum.size(),
             sumOp<solveScalar>(),
-            Pstream::msgType(),
+            UPstream::msgType(),  // (ignored): direct MPI call
             comm,
             request
         );

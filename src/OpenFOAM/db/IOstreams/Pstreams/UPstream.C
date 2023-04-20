@@ -165,7 +165,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  UPstream::globalComm:" << UPstream::globalComm
+                << "  expected globalComm:" << UPstream::globalComm
                 << Foam::exit(FatalError);
         }
 
@@ -176,7 +176,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  UPstream::selfComm:" << UPstream::selfComm
+                << "  expected selfComm:" << UPstream::selfComm
                 << Foam::exit(FatalError);
         }
 
@@ -199,18 +199,20 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  UPstream::globalComm:" << UPstream::globalComm
+                << "  expected globalComm:" << UPstream::globalComm
                 << Foam::exit(FatalError);
         }
 
         // 1: selfComm
+        // - Processor number wrt world communicator
+        singleProc.front() = myProcNo(UPstream::globalComm);
         comm = allocateCommunicator(-2, singleProc, true);
         if (comm != UPstream::selfComm)
         {
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  UPstream::selfComm:" << UPstream::selfComm
+                << "  expected selfComm:" << UPstream::selfComm
                 << Foam::exit(FatalError);
         }
 

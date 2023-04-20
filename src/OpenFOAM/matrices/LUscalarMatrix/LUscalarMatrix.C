@@ -44,14 +44,14 @@ namespace Foam
 
 Foam::LUscalarMatrix::LUscalarMatrix()
 :
-    comm_(Pstream::worldComm)
+    comm_(UPstream::worldComm)
 {}
 
 
 Foam::LUscalarMatrix::LUscalarMatrix(const scalarSquareMatrix& matrix)
 :
     scalarSquareMatrix(matrix),
-    comm_(Pstream::worldComm),
+    comm_(UPstream::worldComm),
     pivotIndices_(m())
 {
     LUDecompose(*this, pivotIndices_);
@@ -67,9 +67,9 @@ Foam::LUscalarMatrix::LUscalarMatrix
 :
     comm_(ldum.mesh().comm())
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        PtrList<procLduMatrix> lduMatrices(Pstream::nProcs(comm_));
+        PtrList<procLduMatrix> lduMatrices(UPstream::nProcs(comm_));
 
         label lduMatrixi = 0;
 
@@ -84,9 +84,9 @@ Foam::LUscalarMatrix::LUscalarMatrix
             )
         );
 
-        if (Pstream::master(comm_))
+        if (UPstream::master(comm_))
         {
-            for (const int proci : Pstream::subProcs(comm_))
+            for (const int proci : UPstream::subProcs(comm_))
             {
                 lduMatrices.set
                 (
@@ -95,10 +95,10 @@ Foam::LUscalarMatrix::LUscalarMatrix
                     (
                         IPstream
                         (
-                            Pstream::commsTypes::scheduled,
+                            UPstream::commsTypes::scheduled,
                             proci,
                             0,          // bufSize
-                            Pstream::msgType(),
+                            UPstream::msgType(),
                             comm_
                         )()
                     )
@@ -109,10 +109,10 @@ Foam::LUscalarMatrix::LUscalarMatrix
         {
             OPstream toMaster
             (
-                Pstream::commsTypes::scheduled,
-                Pstream::masterNo(),
+                UPstream::commsTypes::scheduled,
+                UPstream::masterNo(),
                 0,              // bufSize
-                Pstream::msgType(),
+                UPstream::msgType(),
                 comm_
             );
             procLduMatrix cldum
@@ -125,7 +125,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
 
         }
 
-        if (Pstream::master(comm_))
+        if (UPstream::master(comm_))
         {
             label nCells = 0;
             forAll(lduMatrices, i)
@@ -146,7 +146,7 @@ Foam::LUscalarMatrix::LUscalarMatrix
         convert(ldum, interfaceCoeffs, interfaces);
     }
 
-    if (Pstream::master(comm_))
+    if (UPstream::master(comm_))
     {
         if (debug)
         {
