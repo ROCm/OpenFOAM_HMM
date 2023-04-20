@@ -7,6 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2016-2021,2023 OpenCFD Ltd.
+    Copyright (C) 2023 Huawei (Yu Ankun)
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,16 +223,16 @@ void Foam::GAMGSolver::Vcycle
                     )
                 );
 
-                solveScalarField::subField ACf
-                (
-                    scratch1,
-                    coarseCorrFields[leveli].size()
-                );
-
                 // Scale coarse-grid correction field
                 // but not on the coarsest level because it evaluates to 1
                 if (scaleCorrection_ && leveli < coarsestLevel - 1)
                 {
+                    solveScalarField::subField ACf
+                    (
+                        scratch1,
+                        coarseCorrFields[leveli].size()
+                    );
+
                     scale
                     (
                         coarseCorrFields[leveli],
@@ -248,19 +249,16 @@ void Foam::GAMGSolver::Vcycle
                 }
 
                 // Correct the residual with the new solution
-                matrixLevels_[leveli].Amul
+                // residual can be used by fusing Amul with b-Amul
+                matrixLevels_[leveli].residual
                 (
-                    const_cast<solveScalarField&>
-                    (
-                        ACf.operator const solveScalarField&()
-                    ),
+                    coarseSources[leveli],
                     coarseCorrFields[leveli],
+                    coarseSources[leveli],
                     interfaceLevelsBouCoeffs_[leveli],
                     interfaceLevels_[leveli],
                     cmpt
                 );
-
-                coarseSources[leveli] -= ACf;
             }
 
             // Residual is equal to source
@@ -336,14 +334,14 @@ void Foam::GAMGSolver::Vcycle
             // Create A.psi for this coarse level as a sub-field of Apsi
             solveScalarField::subField ACf
             (
-               scratch1,
+                scratch1,
                 coarseCorrFields[leveli].size()
             );
             solveScalarField& ACfRef =
-                const_cast
-                <
-                    solveScalarField&
-                >(ACf.operator const solveScalarField&());
+                const_cast<solveScalarField&>
+                (
+                    ACf.operator const solveScalarField&()
+                );
 
             if (interpolateCorrection_) //&& leveli < coarsestLevel - 2)
             {
