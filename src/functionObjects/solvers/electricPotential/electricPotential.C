@@ -209,8 +209,17 @@ Foam::functionObjects::electricPotential::electricPotential
             IOobject::scopedName(typeName, "V")
         )
     ),
+    Ename_
+    (
+        dict.getOrDefault<word>
+        (
+            "E",
+            IOobject::scopedName(typeName, "E")
+        )
+    ),
     nCorr_(1),
-    writeDerivedFields_(false)
+    writeDerivedFields_(false),
+    electricField_(false)
 {
     read(dict);
 
@@ -218,6 +227,28 @@ Foam::functionObjects::electricPotential::electricPotential
     // look it up
     volScalarField& eV = getOrReadField(Vname_);
     eV.correctBoundaryConditions();
+
+    if (electricField_)
+    {
+        auto* ptr = getObjectPtr<volVectorField>(Ename_);
+
+        if (!ptr)
+        {
+            ptr = new volVectorField
+            (
+                IOobject
+                (
+                    Ename_,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                -fvc::grad(eV)
+            );
+            mesh_.objectRegistry::store(ptr);
+        }
+    }
 }
 
 
@@ -236,6 +267,7 @@ bool Foam::functionObjects::electricPotential::read(const dictionary& dict)
     dict.readIfPresent("epsilonr", epsilonr_);
     dict.readIfPresent("nCorr", nCorr_);
     dict.readIfPresent("writeDerivedFields", writeDerivedFields_);
+    dict.readIfPresent("electricField", electricField_);
 
     // If flow is multiphase
     if (!phasesDict_.empty())
@@ -334,6 +366,12 @@ bool Foam::functionObjects::electricPotential::execute()
         eVEqn.solve();
     }
 
+    if (electricField_)
+    {
+        auto& E = lookupObjectRef<volVectorField>(Ename_);
+        E == -fvc::grad(eV);
+    }
+
     Log << endl;
 
     return true;
@@ -348,29 +386,17 @@ bool Foam::functionObjects::electricPotential::write()
 
     volScalarField& eV = getOrReadField(Vname_);
 
-    if (writeDerivedFields_)
+    if (electricField_)
     {
-        // Write the electric field
-        const volVectorField E
-        (
-            IOobject
-            (
-                IOobject::scopedName(typeName, "E"),
-                mesh_.time().timeName(),
-                mesh_.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                IOobject::NO_REGISTER
-            ),
-            -fvc::grad(eV),
-            fvPatchFieldBase::calculatedType()
-        );
+        const auto& E = lookupObject<volVectorField>(Ename_);
 
         Log << tab << E.name() << endl;
 
         E.write();
+    }
 
-
+    if (writeDerivedFields_)
+    {
         // Write the current density field
         tmp<volScalarField> tsigma = this->sigma();
 
@@ -408,7 +434,7 @@ bool Foam::functionObjects::electricPotential::write()
                 IOobject::NO_WRITE,
                 IOobject::NO_REGISTER
             ),
-            fvc::div(tepsilonm*E),
+            fvc::div(tepsilonm*(-fvc::grad(eV))),
             fvPatchFieldBase::calculatedType()
         );
 

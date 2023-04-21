@@ -121,6 +121,8 @@ Usage
         nCorr                 <int>;
         writeDerivedFields    <bool>;
         V                     <word>;
+        electricField         <bool>;
+        E                     <word>;
 
         // Inherited entries
         ...
@@ -137,6 +139,8 @@ Usage
       nCorr     | Number of corrector iterations      | int  | no   | 1
       writeDerivedFields | Flag to write extra fields | bool | no   | false
       V    | Name of electric potential field | word | no | electricPotential:V
+      electricField | Flag to calculate electric field  | bool | no | false
+      E    | Name of electric field           | word | no | electricPotential:E
     \endtable
 
     The inherited entries are elaborated in:
@@ -145,7 +149,6 @@ Usage
     Fields written out when the \c writeDerivedFields entry is \c true:
     \table
       Operand         | Type             | Location
-      Electric field  | volVectorField   | \<time\>/electricPotential:E
       Current density | volVectorField   | \<time\>/electricPotential:J
       Charge density  | volScalarField   | \<time\>/electricPotential:rho
     \endtable
@@ -202,12 +205,18 @@ class electricPotential
         //- Name of electric potential field
         word Vname_;
 
+        //- Name of electric field
+        word Ename_;
+
         //- Number of corrector iterations
         int nCorr_;
 
         //- Flag to write derived fields of
         //- electric field, current density and free-charge density
         bool writeDerivedFields_;
+
+        //- Flag to calculate electric field
+        bool electricField_;
 
 
     // Private Member Functions
