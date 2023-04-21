@@ -835,7 +835,7 @@ void Foam::refinementSurfaces::setMinLevelFields(const shellSurfaces& shells)
 
             // In case of triangulated surfaces only cache value if triangle
             // centre and vertices are in same shell
-            const auto* tsPtr = isA<const triSurface>(geom);
+            const auto* tsPtr = isA<triSurface>(geom);
 
             if (tsPtr)
             {
@@ -936,11 +936,11 @@ void Foam::refinementSurfaces::setCurvatureMinLevelFields
         if (maxCurvLevel[surfI] <= 0)
         {
             continue;
-        } 
+        }
 
         const searchableSurface& geom = allGeometry_[surfaces_[surfI]];
 
-        const auto* tsPtr = isA<const triSurface>(geom);
+        const auto* tsPtr = isA<triSurface>(geom);
 
         // Cache the refinement level (max of surface level and shell level)
         // on a per-element basis. Only makes sense if there are lots of

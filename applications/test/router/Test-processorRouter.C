@@ -66,8 +66,8 @@ labelList procNeighbours(const polyMesh& mesh)
 
     forAll(mesh.boundaryMesh(), patchi)
     {
-        const processorPolyPatch* procPatch =
-            isA<const processorPolyPatch>(mesh.boundaryMesh()[patchi]);
+        const auto* procPatch =
+            isA<processorPolyPatch>(mesh.boundaryMesh()[patchi]);
 
         if (procPatch)
         {
