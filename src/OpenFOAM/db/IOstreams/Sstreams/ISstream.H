@@ -222,10 +222,14 @@ public:
             //- Read a double
             virtual Istream& read(double& val);
 
-            //- Read binary block
-            virtual Istream& read(char* buf, std::streamsize count);
+            //- Read binary block (with any possible block delimiters).
+            //- Reading into a null pointer behaves like a forward seek of
+            //- count characters.
+            virtual Istream& read(char* data, std::streamsize count);
 
-            //- Low-level raw binary read
+            //- Low-level raw binary read (without possible block delimiters).
+            //- Reading into a null pointer behaves like a forward seek of
+            //- count characters.
             virtual Istream& readRaw(char* data, std::streamsize count);
 
             //- Start of low-level raw binary read

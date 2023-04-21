@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1018,19 +1018,41 @@ Foam::Istream& Foam::ISstream::read(double& val)
 }
 
 
-Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
+Foam::Istream& Foam::ISstream::read(char* data, std::streamsize count)
 {
     beginRawRead();
-    readRaw(buf, count);
+    readRaw(data, count);
     endRawRead();
 
     return *this;
 }
 
 
-Foam::Istream& Foam::ISstream::readRaw(char* buf, std::streamsize count)
+Foam::Istream& Foam::ISstream::readRaw(char* data, std::streamsize count)
 {
-    is_.read(buf, count);
+    if (count)
+    {
+        if (data)
+        {
+            is_.read(data, count);
+        }
+        else
+        {
+            // Forward seek
+            is_.seekg(is_.tellg() + count);
+
+            // Not sure if this is needed (as per rewind)
+            // some documentation indicates that ifstream needs
+            // seekg with values from a tellg
+            //
+            // stdStream().rdbuf()->pubseekpos
+            // (
+            //     count,
+            //     std::ios_base::seekdir::cur,
+            //     std::ios_base::in
+            // );
+        }
+    }
     syncState();
     return *this;
 }

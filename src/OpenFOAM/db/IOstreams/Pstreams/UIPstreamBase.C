@@ -106,12 +106,15 @@ inline void Foam::UIPstreamBase::readFromBuffer
     const size_t count
 )
 {
-    const char* const __restrict__ buf = &recvBuf_[recvBufPos_];
-    char* const __restrict__ output = reinterpret_cast<char*>(data);
-
-    for (size_t i = 0; i < count; ++i)
+    if (data)
     {
-        output[i] = buf[i];
+        const char* const __restrict__ buf = &recvBuf_[recvBufPos_];
+        char* const __restrict__ output = reinterpret_cast<char*>(data);
+
+        for (size_t i = 0; i < count; ++i)
+        {
+            output[i] = buf[i];
+        }
     }
 
     recvBufPos_ += count;

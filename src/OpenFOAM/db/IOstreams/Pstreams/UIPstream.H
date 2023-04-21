@@ -75,6 +75,7 @@ class UIPstreamBase
 
         //- Read count bytes of data from the receive buffer.
         //  Prior data alignment is done by prepareBuffer
+        //  Reading into a null pointer behaves like a forward seek
         inline void readFromBuffer(void* data, const size_t count);
 
         //- Read string length and string content
@@ -181,9 +182,13 @@ public:
             Istream& read(double& val);
 
             //- Read binary block with 8-byte alignment.
+            //- Reading into a null pointer behaves like a forward seek of
+            //- count characters.
             Istream& read(char* data, std::streamsize count);
 
-            //- Low-level raw binary read
+            //- Low-level raw binary read.
+            //- Reading into a null pointer behaves like a forward seek of
+            //- count characters.
             Istream& readRaw(char* data, std::streamsize count);
 
             //- Start of low-level raw binary read
