@@ -54,7 +54,7 @@ Description
     Extension to porous media flows:
     \verbatim
         Missios, K., Jacobsen, N. G., Moeller, K., & Roenby, J.
-        Using the isoAdvector Geometric VOF Method for Interfacial Flows 
+        Using the isoAdvector Geometric VOF Method for Interfacial Flows
         Through Porous Media. MARINE 2021.
     \endverbatim
 

@@ -57,7 +57,7 @@ Description
         -combineZones '((zoneA "zoneB.*")(none otherZone))
     This can be combined with e.g. 'cellZones' or 'cellZonesOnly'. The
     addZones option supplies the destination region name as first element in
-    the list. The combineZones option synthesises the region name e.g. 
+    the list. The combineZones option synthesises the region name e.g.
         zoneA_zoneB0_zoneB1
 
     - cellZonesOnly does not do a walk and uses the cellZones only. Use
@@ -1830,7 +1830,7 @@ int main(int argc, char *argv[])
             {
                 label ownCluster = clusterID[mesh.faceOwner()[facei]];
                 label neiCluster = clusterID[mesh.faceNeighbour()[facei]];
-                
+
                 if (ownCluster != neiCluster)
                 {
                     blockedFace[facei] = true;

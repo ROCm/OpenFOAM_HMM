@@ -20,7 +20,7 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    innerWall 
+    innerWall
     {
         type            noSlip;
     }

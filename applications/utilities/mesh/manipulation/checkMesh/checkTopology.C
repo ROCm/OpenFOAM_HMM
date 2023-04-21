@@ -113,7 +113,7 @@ void Foam::checkPatch
             labelList()             // null value
         );
 
-        
+
         label labelTyp = TopoType::MANIFOLD;
         forAll(meshEdges, edgei)
         {

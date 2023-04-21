@@ -35,7 +35,7 @@ solvers
         tolerance        1e-9;
         relTol           0.01;
     };
-    "U|Ua|nuTilda|nuaTilda|yWall|da|k|ka|omega|wa" 
+    "U|Ua|nuTilda|nuaTilda|yWall|da|k|ka|omega|wa"
     {
         solver           PBiCGStab;
         preconditioner   DILU;

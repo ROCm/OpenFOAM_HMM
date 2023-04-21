@@ -20,7 +20,7 @@ runParallel $(getApplication)
 foamDictionary -entry solvers.p.processorAgglomerator -set 'masterCoarsest' system/fvSolution
 runParallel -s masterCoarsest $(getApplication)
 
-#- Run with processorAgglomerator - multiple masters 
+#- Run with processorAgglomerator - multiple masters
 foamDictionary -entry solvers.p.nMasters -set '2' system/fvSolution
 runParallel -s masterCoarsest2 $(getApplication)
 

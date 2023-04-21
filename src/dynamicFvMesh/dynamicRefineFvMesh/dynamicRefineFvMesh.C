@@ -216,7 +216,7 @@ void Foam::dynamicRefineFvMesh::mapFields(const mapPolyMesh& mpm)
             const label oldCelli = cellMap[celli];
             if (oldCelli >= 0 && reverseCellMap[oldCelli] >= 0)
             {
-                // Found master cell. 
+                // Found master cell.
                 nSubCells[oldCelli]++;
             }
         }

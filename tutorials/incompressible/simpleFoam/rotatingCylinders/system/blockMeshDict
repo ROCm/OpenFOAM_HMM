@@ -25,7 +25,7 @@ geom
     ntheta      40;
 
     g           10;
-    
+
     mr0         #eval{ - $r0 };
     mr1         #eval{ - $r1 };
     invG        #eval{ 1./$g };

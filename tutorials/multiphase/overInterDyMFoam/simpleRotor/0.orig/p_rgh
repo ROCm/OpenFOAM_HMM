@@ -31,7 +31,7 @@ boundaryField
     {
         type            overset;
         value           uniform 0;
-        fluxCorrection	false;
+        fluxCorrection  false;
     }
 
     top

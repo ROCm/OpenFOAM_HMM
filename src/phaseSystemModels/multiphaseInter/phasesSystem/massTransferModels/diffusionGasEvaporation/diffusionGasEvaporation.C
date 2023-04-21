@@ -185,7 +185,7 @@ Foam::meltingEvaporationModels::diffusionGasEvaporation<Thermo, OtherThermo>
         )
     );
 
-	const volScalarField Ygm(max(from*YvSat + to*Yv, Zero));
+    const volScalarField Ygm(max(from*YvSat + to*Yv, Zero));
 
     const multiphaseInterSystem& fluid = this->fluid();
 
