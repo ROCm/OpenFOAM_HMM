@@ -32,10 +32,6 @@ Description
     Can also be used for general handling of read/no-read/read-if-present
     logic outside of an IOobject.
 
-Note
-    In the future may include an Enumeration defining register preferences
-    (NO_REGISTER, REGISTER)
-
 See also
     Foam::IOobject
 
@@ -71,6 +67,11 @@ public:
             MUST_READ = 0x1,
 
             //! Reading required, file watched for runTime modification
+            //! [identical to MUST_READ_IF_MODIFIED]
+            READ_MODIFIED = 0x3,
+
+            //! Reading required, file watched for runTime modification
+            //! [identical to READ_MODIFIED]
             MUST_READ_IF_MODIFIED = 0x3,
 
             //! Reading is optional [identical to READ_IF_PRESENT]
@@ -260,25 +261,25 @@ public:
 
     // Checks
 
-        //- True if not (NO_READ)
+        //- True if any reading may be required (ie, != NO_READ)
         static bool isAnyRead(readOption opt) noexcept
         {
             return (opt != readOption::NO_READ);
         }
 
-        //- True if not (NO_READ)
+        //- True if any reading may be required(ie, != NO_READ)
         bool isAnyRead() const noexcept
         {
             return (readOpt_ != readOption::NO_READ);
         }
 
-        //- True if (MUST_READ | MUST_READ_IF_MODIFIED) bits are set
+        //- True if (MUST_READ | READ_MODIFIED) bits are set
         static bool isReadRequired(readOption opt) noexcept
         {
             return (opt & readOption::MUST_READ);
         }
 
-        //- True if (MUST_READ | MUST_READ_IF_MODIFIED) bits are set
+        //- True if (MUST_READ | READ_MODIFIED) bits are set
         bool isReadRequired() const noexcept
         {
             return (readOpt_ & readOption::MUST_READ);
