@@ -118,9 +118,9 @@ Usage
             }
 
         // Optional entries
-        nCorr                 <label>;
+        nCorr                 <int>;
         writeDerivedFields    <bool>;
-        fieldName             <word>;
+        V                     <word>;
 
         // Inherited entries
         ...
@@ -134,9 +134,9 @@ Usage
       libs      | Library name: solverFunctionObjects | word | yes  | -
       sigma     | Isotropic electrical conductivity of phase | scalar | yes | -
       epsilonr  | Isotropic relative permittivity of phase   | scalar | no  | -
-      nCorr     | Number of corrector iterations     | label | no   | 1
+      nCorr     | Number of corrector iterations      | int  | no   | 1
       writeDerivedFields | Flag to write extra fields | bool | no   | false
-      fieldName | Name of operand field   | word | no | electricPotential:V
+      V    | Name of electric potential field | word | no | electricPotential:V
     \endtable
 
     The inherited entries are elaborated in:
@@ -199,11 +199,11 @@ class electricPotential
         //- Isotropic relative permittivity of a single phase
         dimensionedScalar epsilonr_;
 
-        //- Name of the operand field
-        word fieldName_;
+        //- Name of electric potential field
+        word Vname_;
 
         //- Number of corrector iterations
-        label nCorr_;
+        int nCorr_;
 
         //- Flag to write derived fields of
         //- electric field, current density and free-charge density
