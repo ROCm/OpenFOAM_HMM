@@ -57,7 +57,7 @@
                     ),
                     solidRegions[i],
                     dimensionedSymmTensor(tkappaByCp().dimensions(), Zero),
-                    zeroGradientFvPatchSymmTensorField::typeName
+                    fvPatchFieldBase::zeroGradientType()
                 )
             );
 

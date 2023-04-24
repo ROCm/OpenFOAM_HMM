@@ -41,7 +41,6 @@ Description
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
 #include "Random.H"
-#include "zeroGradientFvPatchFields.H"
 #include "calculatedPointPatchFields.H"
 #include "pointConstraints.H"
 #include "fvCFD.H"
@@ -99,7 +98,7 @@ int main(int argc, char *argv[])
         ),
         mesh,
         dimensionedScalar("one", dimless, 1.0),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
     Info<< "Writing one field "
         << one.name() << " in " << runTime.timeName() << endl;
@@ -137,8 +136,7 @@ int main(int argc, char *argv[])
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("one", dimless, 1.0),
-        calculatedFvsPatchScalarField::typeName
+        dimensionedScalar("one", dimless, 1.0)
     );
     Info<< "Writing surface one field "
         << surfaceOne.name() << " in " << runTime.timeName() << endl;
@@ -157,8 +155,7 @@ int main(int argc, char *argv[])
             IOobject::AUTO_WRITE
         ),
         pointMesh::New(mesh),
-        dimensionedScalar("one", dimless, 1.0),
-        calculatedPointPatchScalarField::typeName
+        dimensionedScalar("one", dimless, 1.0)
     );
     pointX.primitiveFieldRef() = mesh.points().component(0);
     pointX.correctBoundaryConditions();

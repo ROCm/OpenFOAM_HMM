@@ -86,7 +86,7 @@ tmp<volVectorField> laminar::Us() const
             ),
             filmModel_.regionMesh(),
             dimensionedVector(dimVelocity, Zero),
-            extrapolatedCalculatedFvPatchVectorField::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 

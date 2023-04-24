@@ -110,7 +110,7 @@ createZeroBoundaryPtr
         (
             mesh.boundary(),
             mesh.V()*pTraits<Type>::zero,  // Dummy internal field,
-            wordList(bm.size(), calculatedFvPatchField<Type>::typeName),
+            wordList(bm.size(), fvPatchFieldBase::calculatedType()),
             actualPatchTypes
         )
     );

@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
             ),
             mesh,
             dimensionedVector(cloudSU.dimensions()/dimVolume, Zero),
-            zeroGradientFvPatchVectorField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         cloudVolSUSu.primitiveFieldRef() = -cloudSU.source()/mesh.V();

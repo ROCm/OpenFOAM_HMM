@@ -48,7 +48,7 @@ Foam::wordList Foam::relativeVelocityModel::UdmPatchFieldTypes() const
     wordList UdmTypes
     (
         U.boundaryField().size(),
-        calculatedFvPatchScalarField::typeName
+        fvPatchFieldBase::calculatedType()
     );
 
     forAll(U.boundaryField(), i)

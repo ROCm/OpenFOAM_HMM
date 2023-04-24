@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 #include "domainDecomposition.H"
 #include "foamVtkInternalMeshWriter.H"
 #include "volFields.H"
-#include "zeroGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -52,8 +51,8 @@ void Foam::domainDecomposition::writeVolField
             IOobject::NO_REGISTER
         ),
         this->mesh(),
-        dimensionedScalar("cellDist", dimless, -1),
-        zeroGradientFvPatchScalarField::typeName
+        dimensionedScalar(word::null, dimless, -1),
+        fvPatchFieldBase::zeroGradientType()
     );
 
     forAll(procIds, celli)

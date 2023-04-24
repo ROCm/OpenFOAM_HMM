@@ -634,7 +634,7 @@ Foam::meshToMesh::mapSrcToTgt
                 tgtPatchi,
                 fvPatchField<Type>::New
                 (
-                    calculatedFvPatchField<Type>::typeName,
+                    fvPatchFieldBase::calculatedType(),
                     tgtMesh.boundary()[tgtPatchi],
                     DimensionedField<Type, volMesh>::null()
                 )
@@ -865,7 +865,7 @@ Foam::meshToMesh::mapTgtToSrc
                 srcPatchi,
                 fvPatchField<Type>::New
                 (
-                    calculatedFvPatchField<Type>::typeName,
+                    fvPatchFieldBase::calculatedType(),
                     srcMesh.boundary()[srcPatchi],
                     DimensionedField<Type, volMesh>::null()
                 )

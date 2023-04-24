@@ -101,7 +101,7 @@ surfaceIntegrate
             ),
             mesh,
             dimensioned<Type>(ssf.dimensions()/dimVol, Zero),
-            extrapolatedCalculatedFvPatchField<Type>::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
     GeometricField<Type, fvPatchField, volMesh>& vf = tvf.ref();
@@ -152,7 +152,7 @@ surfaceSum
             ),
             mesh,
             dimensioned<Type>(ssf.dimensions(), Zero),
-            extrapolatedCalculatedFvPatchField<Type>::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
     GeometricField<Type, fvPatchField, volMesh>& vf = tvf.ref();

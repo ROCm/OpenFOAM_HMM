@@ -100,7 +100,7 @@ label addPatch
             mesh,
             pp,
             dictionary(),   // do not set specialised patchFields
-            calculatedFvPatchField<scalar>::typeName,
+            fvPatchFieldBase::calculatedType(),
             true            // parallel sync'ed addition
         );
     }

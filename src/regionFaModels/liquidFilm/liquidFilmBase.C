@@ -188,8 +188,7 @@ liquidFilmBase::liquidFilmBase
             primaryMesh()
         ),
         primaryMesh(),
-        dimensionedScalar(dimMass, Zero),
-        calculatedFvPatchField<scalar>::typeName
+        dimensionedScalar(dimMass, Zero)
     ),
 
     momentumSource_
@@ -201,8 +200,7 @@ liquidFilmBase::liquidFilmBase
             primaryMesh()
         ),
         primaryMesh(),
-        dimensionedVector(dimPressure, Zero),
-        calculatedFvPatchField<vector>::typeName
+        dimensionedVector(dimPressure, Zero)
     ),
 
     pnSource_
@@ -214,8 +212,7 @@ liquidFilmBase::liquidFilmBase
             primaryMesh()
         ),
         primaryMesh(),
-        dimensionedScalar(dimPressure, Zero),
-        calculatedFvPatchField<scalar>::typeName
+        dimensionedScalar(dimPressure, Zero)
     ),
 
     energySource_
@@ -227,8 +224,7 @@ liquidFilmBase::liquidFilmBase
             primaryMesh()
         ),
         primaryMesh(),
-        dimensionedScalar(dimEnergy, Zero),
-        calculatedFvPatchField<scalar>::typeName
+        dimensionedScalar(dimEnergy, Zero)
     ),
 
     addedMassTotal_(0),

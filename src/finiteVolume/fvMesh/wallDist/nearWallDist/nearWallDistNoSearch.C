@@ -82,7 +82,7 @@ Foam::nearWallDistNoSearch::nearWallDistNoSearch(const Foam::fvMesh& mesh)
     (
         mesh.boundary(),
         mesh.V(),           // Dummy internal field
-        calculatedFvPatchScalarField::typeName
+        fvPatchFieldBase::calculatedType()
     ),
     mesh_(mesh)
 {

@@ -105,7 +105,7 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
         ddtIOobject,
         mesh(),
         dimensionedScalar(dt.dimensions()/dimTime, Zero),
-        calculatedFaPatchScalarField::typeName
+        faPatchFieldBase::calculatedType()
     );
 }
 

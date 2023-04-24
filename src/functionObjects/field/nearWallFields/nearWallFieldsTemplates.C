@@ -75,7 +75,7 @@ void Foam::functionObjects::nearWallFields::createFields
                         io,
                         fld,
                         patchSet_.toc(),
-                        calculatedFvPatchField<Type>::typeName
+                        fvPatchFieldBase::calculatedType()
                     )
                 );
 

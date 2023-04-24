@@ -96,7 +96,7 @@ tmp<VolumeField<Type>> makeZeroGradientField
             df.mesh(),
             df.dimensions(),
             std::move(df.field()),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         tfield.ref().oriented() = df.oriented();
@@ -130,7 +130,7 @@ tmp<VolumeField<Type>> makeZeroGradientField
             df.mesh(),
             df.dimensions(),
             std::move(df.primitiveFieldRef(false)),  // No update accessTime
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         tfield.ref().oriented() = df.oriented();

@@ -99,7 +99,7 @@ Foam::eddyViscosity<BasicTurbulenceModel>::R() const
                 ->found(patchFieldTypes[i])
         )
         {
-            patchFieldTypes[i] = calculatedFvPatchField<symmTensor>::typeName;
+            patchFieldTypes[i] = fvPatchFieldBase::calculatedType();
         }
     }
 

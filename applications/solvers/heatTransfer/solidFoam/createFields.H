@@ -34,7 +34,7 @@ if (!thermo.isotropic())
             ),
             mesh,
             dimensionedSymmTensor(tkappaByCp().dimensions(), Zero),
-            zeroGradientFvPatchSymmTensorField::typeName
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     volSymmTensorField& aniAlpha = *taniAlpha;

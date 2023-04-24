@@ -77,7 +77,7 @@ bool Foam::functionObjects::writeCellCentres::write()
     (
         IOobject
         (
-            "C",
+            mesh_.C().name(),
             time_.timeName(),
             mesh_,
             IOobject::NO_READ,
@@ -85,11 +85,11 @@ bool Foam::functionObjects::writeCellCentres::write()
             IOobject::NO_REGISTER
         ),
         mesh_.C(),
-        calculatedFvPatchScalarField::typeName
+        fvPatchFieldBase::calculatedType()
     );
 
     Log << type() << " " << name() << " write:" << nl
-        << "    writing cell-volumes field " << C.name()
+        << "    writing cell-centres field " << C.name()
         << " to " << time_.timeName() << endl;
 
     C.write();

@@ -275,7 +275,7 @@ tmp<volScalarField> constantFilmThermo::rho() const
             ),
             film().regionMesh(),
             dimensionedScalar(dimDensity, Zero),
-            extrapolatedCalculatedFvPatchScalarField::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 

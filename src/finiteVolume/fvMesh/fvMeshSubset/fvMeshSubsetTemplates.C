@@ -78,7 +78,7 @@ Foam::fvMeshSubset::interpolate
                 patchi,
                 fvPatchField<Type>::New
                 (
-                    calculatedFvPatchField<Type>::typeName,
+                    fvPatchFieldBase::calculatedType(),
                     sMesh.boundary()[patchi],
                     DimensionedField<Type, volMesh>::null()
                 )
@@ -259,7 +259,7 @@ Foam::fvMeshSubset::interpolate
                 patchi,
                 fvsPatchField<Type>::New
                 (
-                    calculatedFvsPatchField<Type>::typeName,
+                    fvsPatchFieldBase::calculatedType(),
                     sMesh.boundary()[patchi],
                     DimensionedField<Type, surfaceMesh>::null()
                 )
@@ -446,7 +446,7 @@ Foam::fvMeshSubset::interpolate
                 patchi,
                 pointPatchField<Type>::New
                 (
-                    calculatedPointPatchField<Type>::typeName,
+                    pointPatchFieldBase::calculatedType(),
                     sMesh.boundary()[patchi],
                     DimensionedField<Type, pointMesh>::null()
                 )

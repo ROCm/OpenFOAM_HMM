@@ -69,7 +69,7 @@ tmp<volScalarField> reconstructMag(const surfaceScalarField& ssf)
             ),
             mesh,
             dimensionedScalar(ssf.dimensions()/dimArea, Zero),
-            extrapolatedCalculatedFvPatchScalarField::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
     scalarField& rf = treconField.ref();

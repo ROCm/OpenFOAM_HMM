@@ -85,7 +85,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::phi(const volVectorField& U) const
         wordList phiTypes
         (
             U.boundaryField().size(),
-            calculatedFvPatchScalarField::typeName
+            fvsPatchFieldBase::calculatedType()
         );
 
         forAll(U.boundaryField(), i)

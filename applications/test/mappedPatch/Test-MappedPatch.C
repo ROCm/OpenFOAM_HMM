@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     wordList patchFieldTypes
     (
         mesh.boundaryMesh().size(),
-        calculatedFvPatchVectorField::typeName
+        fvPatchFieldBase::calculatedType()
     );
 
     forAll(mesh.boundaryMesh(), patchi)

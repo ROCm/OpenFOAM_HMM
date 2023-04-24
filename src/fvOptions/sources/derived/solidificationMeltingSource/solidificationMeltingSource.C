@@ -95,7 +95,7 @@ Foam::fv::solidificationMeltingSource::Cp() const
                         dimEnergy/dimMass/dimTemperature,
                         CpRef
                     ),
-                    extrapolatedCalculatedFvPatchScalarField::typeName
+                    fvPatchFieldBase::extrapolatedCalculatedType()
                 );
             }
             else

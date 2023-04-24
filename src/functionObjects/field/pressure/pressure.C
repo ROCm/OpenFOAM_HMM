@@ -143,7 +143,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
                 IOobject::NO_REGISTER
             ),
             p,
-            fvPatchField<scalar>::calculatedType()
+            fvPatchFieldBase::calculatedType()
         );
     }
 

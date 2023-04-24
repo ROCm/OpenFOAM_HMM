@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,6 @@ Usage
 #include "faceCoupleInfo.H"
 #include "fvMeshAdder.H"
 #include "polyTopoChange.H"
-#include "zeroGradientFvPatchFields.H"
 #include "topoSet.H"
 #include "regionProperties.H"
 #include "fvMeshTools.H"
@@ -421,8 +420,8 @@ void writeDistribution
                 IOobject::NO_REGISTER
             ),
             masterMesh,
-            dimensionedScalar("cellDist", dimless, -1),
-            zeroGradientFvPatchScalarField::typeName
+            dimensionedScalar(word::null, dimless, -1),
+            fvPatchFieldBase::zeroGradientType()
         );
 
         forAll(cellDecomposition, celli)

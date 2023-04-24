@@ -76,25 +76,14 @@ tmp<volScalarField> createScalarField
     const labelUList& elems
 )
 {
-    tmp<volScalarField> tfld
+    auto tfld = volScalarField::New
     (
-        new volScalarField
-        (
-            IOobject
-            (
-                name,
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                IOobject::NO_REGISTER
-            ),
-            mesh,
-            dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
-        )
+        name,
+        mesh,
+        dimensionedScalar(dimless, Zero),
+        fvPatchFieldBase::zeroGradientType()
     );
-    volScalarField& fld = tfld.ref();
+    auto& fld = tfld.ref();
 
     forAll(fld, celli)
     {

@@ -484,8 +484,8 @@ Foam::StandardChemistryModel<ReactionThermo, ThermoType>::tc() const
                 IOobject::NO_REGISTER
             ),
             this->mesh(),
-            dimensionedScalar("small", dimTime, SMALL),
-            extrapolatedCalculatedFvPatchScalarField::typeName
+            dimensionedScalar(word::null, dimTime, SMALL),
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 

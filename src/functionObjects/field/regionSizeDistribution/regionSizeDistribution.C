@@ -121,7 +121,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
             IOobject::NO_READ
         ),
         alpha,
-        fvPatchField<scalar>::calculatedType()
+        fvPatchFieldBase::calculatedType()
     );
 
     volScalarField backgroundAlpha
@@ -134,7 +134,7 @@ void Foam::functionObjects::regionSizeDistribution::writeAlphaFields
             IOobject::NO_READ
         ),
         alpha,
-        fvPatchField<scalar>::calculatedType()
+        fvPatchFieldBase::calculatedType()
     );
 
 

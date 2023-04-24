@@ -74,7 +74,7 @@ localEulerDdtScheme<Type>::fvcDdt
         ddtIOobject,
         mesh(),
         dimensioned<Type>(dt.dimensions()/dimTime, Zero),
-        calculatedFvPatchField<Type>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 }
 

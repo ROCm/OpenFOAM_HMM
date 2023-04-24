@@ -114,7 +114,6 @@ Description
 #include "ReadFields.H"
 #include "mappedWallPolyPatch.H"
 #include "fvMeshTools.H"
-#include "zeroGradientFvPatchFields.H"
 #include "processorMeshes.H"
 
 using namespace Foam;
@@ -1055,7 +1054,7 @@ labelList addRegionPatches
             mesh,
             patch1,
             dictionary(),   //optional per field value
-            calculatedFvPatchField<scalar>::typeName,
+            fvPatchFieldBase::calculatedType(),
             true            //validBoundary
         );
 
@@ -1076,7 +1075,7 @@ labelList addRegionPatches
             mesh,
             patch2,
             dictionary(),   //optional per field value
-            calculatedFvPatchField<scalar>::typeName,
+            fvPatchFieldBase::calculatedType(),
             true            //validBoundary
         );
 
@@ -1433,7 +1432,7 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         forAll(cellRegion, celli)
         {

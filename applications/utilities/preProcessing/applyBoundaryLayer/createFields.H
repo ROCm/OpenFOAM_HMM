@@ -52,7 +52,7 @@ volScalarField y
     ),
     mesh,
     dimensionedScalar(dimLength, Zero),
-    zeroGradientFvPatchScalarField::typeName
+    fvPatchFieldBase::zeroGradientType()
 );
 y.primitiveFieldRef() = wallDist::New(mesh).y().primitiveField();
 y.correctBoundaryConditions();
@@ -88,7 +88,7 @@ volScalarField mask
     ),
     mesh,
     dimensionedScalar(dimless, Zero),
-    zeroGradientFvPatchScalarField::typeName
+    fvPatchFieldBase::zeroGradientType()
 );
 
 

@@ -221,8 +221,7 @@ Foam::multiphaseInterSystem::multiphaseInterSystem
             mesh_
         ),
         mesh_,
-        dimensionedScalar(dimViscosity*dimDensity, Zero),
-        calculatedFvPatchScalarField::typeName
+        dimensionedScalar(dimViscosity*dimDensity, Zero)
     ),
     phaseNames_(get<wordList>("phases")),
     phi_

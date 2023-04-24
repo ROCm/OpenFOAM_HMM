@@ -218,8 +218,7 @@ liquidFilmModel::liquidFilmModel
             IOobject::NO_WRITE
         ),
         primaryMesh(),
-        dimensionedScalar(dimMass, Zero),
-        calculatedFvPatchField<scalar>::typeName
+        dimensionedScalar(dimMass, Zero)
     ),
 
     cloudDiameterTrans_
@@ -233,8 +232,7 @@ liquidFilmModel::liquidFilmModel
             IOobject::NO_WRITE
         ),
         primaryMesh(),
-        dimensionedScalar(dimLength, Zero),
-        calculatedFvPatchField<scalar>::typeName
+        dimensionedScalar(dimLength, Zero)
     ),
 
     turbulence_(filmTurbulenceModel::New(*this, dict)),

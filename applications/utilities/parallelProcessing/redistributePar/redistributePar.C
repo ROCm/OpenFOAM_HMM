@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,6 @@ Usage
 #include "globalIndex.H"
 #include "loadOrCreateMesh.H"
 #include "processorFvPatchField.H"
-#include "zeroGradientFvPatchFields.H"
 #include "topoSet.H"
 #include "regionProperties.H"
 
@@ -418,8 +417,8 @@ void writeDecomposition
             IOobject::NO_REGISTER
         ),
         mesh,
-        dimensionedScalar(name, dimless, -1),
-        zeroGradientFvPatchScalarField::typeName
+        dimensionedScalar(word::null, dimless, -1),
+        fvPatchFieldBase::zeroGradientType()
     );
 
     forAll(procCells, celli)

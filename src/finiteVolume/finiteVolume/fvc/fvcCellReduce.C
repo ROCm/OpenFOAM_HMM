@@ -60,7 +60,7 @@ Foam::fvc::cellReduce
             ),
             mesh,
             dimensioned<Type>("initialValue", ssf.dimensions(), nullValue),
-            extrapolatedCalculatedFvPatchField<Type>::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 

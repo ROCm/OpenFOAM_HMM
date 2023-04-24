@@ -122,7 +122,7 @@ backwardFaDdtScheme<Type>::facDdt
         ddtIOobject,
         mesh(),
         dimensioned<Type>(dt.dimensions()/dimTime, Zero),
-        calculatedFaPatchField<Type>::typeName
+        faPatchFieldBase::calculatedType()
     );
 }
 

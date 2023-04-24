@@ -78,7 +78,7 @@ reconstruct
             ),
             mesh,
             dimensioned<GradType>(ssf.dimensions()/dimArea, Zero),
-            extrapolatedCalculatedFvPatchField<GradType>::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 

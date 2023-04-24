@@ -76,7 +76,7 @@
                 mesh
             ),
             fluid.dragCoeff(phase, dragCoeffs())/phase.rho(),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         dragCoeffi.correctBoundaryConditions();
 

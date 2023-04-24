@@ -185,7 +185,7 @@ int main(int argc, char *argv[])
         ),
         mesh,
         dimensioned<symmTensor>(dimless, symmTensor::one),
-        zeroGradientFvPatchSymmTensorField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     volTensorField tensf
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
         ),
         mesh,
         dimensioned<tensor>(dimless, tensor(1,2,3,4,5,6,7,8,9)),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     SolverPerformance<symmTensor> sP =

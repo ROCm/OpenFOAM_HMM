@@ -41,7 +41,6 @@ Description
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
 #include "fvCFD.H"
-#include "zeroGradientFvPatchFields.H"
 #include "Random.H"
 
 using namespace Foam;
@@ -93,7 +92,7 @@ int main(int argc, char *argv[])
         ),
         mesh,
         dimensionedScalar("one", dimless, 1.0),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
     Info<< "Writing one field "
         << one.name() << " in " << runTime.timeName() << endl;
@@ -131,8 +130,7 @@ int main(int argc, char *argv[])
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("one", dimless, 1.0),
-        calculatedFvsPatchScalarField::typeName
+        dimensionedScalar("one", dimless, 1.0)
     );
     Info<< "Writing surface one field "
         << surfaceOne.name() << " in " << runTime.timeName() << endl;

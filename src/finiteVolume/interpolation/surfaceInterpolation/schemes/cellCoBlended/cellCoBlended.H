@@ -235,7 +235,7 @@ public:
                 ),
                 mesh,
                 dimensionedScalar(dimless, Zero),
-                extrapolatedCalculatedFvPatchScalarField::typeName
+                fvPatchFieldBase::extrapolatedCalculatedType()
             );
 
             scalarField sumPhi

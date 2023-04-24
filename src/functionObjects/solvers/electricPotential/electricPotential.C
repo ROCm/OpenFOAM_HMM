@@ -28,7 +28,6 @@ License
 #include "electricPotential.H"
 #include "fvc.H"
 #include "fvm.H"
-#include "calculatedFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -95,7 +94,7 @@ Foam::functionObjects::electricPotential::sigma() const
         (
             sigmaIO,
             tsigma,
-            calculatedFvPatchField<scalar>::typeName
+            fvPatchFieldBase::calculatedType()
         );
     }
 
@@ -104,7 +103,7 @@ Foam::functionObjects::electricPotential::sigma() const
         sigmaIO,
         mesh_,
         sigma_,
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 }
 
@@ -142,7 +141,7 @@ Foam::functionObjects::electricPotential::epsilonm() const
         (
             epsilonrIO,
             epsilon0*tepsilonr,
-            calculatedFvPatchField<scalar>::typeName
+            fvPatchFieldBase::calculatedType()
         );
     }
 
@@ -151,7 +150,7 @@ Foam::functionObjects::electricPotential::epsilonm() const
         epsilonrIO,
         mesh_,
         epsilon0*epsilonr_,
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 }
 
@@ -359,7 +358,7 @@ bool Foam::functionObjects::electricPotential::write()
                 IOobject::NO_REGISTER
             ),
             -fvc::grad(eV),
-            calculatedFvPatchField<vector>::typeName
+            fvPatchFieldBase::calculatedType()
         );
 
         Log << tab << E.name() << endl;
@@ -382,7 +381,7 @@ bool Foam::functionObjects::electricPotential::write()
                 IOobject::NO_REGISTER
             ),
             -tsigma*fvc::grad(eV),
-            calculatedFvPatchField<vector>::typeName
+            fvPatchFieldBase::calculatedType()
         );
 
         Log << tab << eJ().name() << endl;
@@ -405,7 +404,7 @@ bool Foam::functionObjects::electricPotential::write()
                 IOobject::NO_REGISTER
             ),
             fvc::div(tepsilonm*E),
-            calculatedFvPatchField<scalar>::typeName
+            fvPatchFieldBase::calculatedType()
         );
 
         Log << tab << erho().name() << endl;

@@ -66,7 +66,7 @@ Foam::fv::gaussGrad<Type>::gradf
             ),
             mesh,
             dimensioned<GradType>(ssf.dimensions()/dimLength, Zero),
-            extrapolatedCalculatedFvPatchField<GradType>::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
     GradFieldType& gGrad = tgGrad.ref();

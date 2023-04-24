@@ -154,7 +154,7 @@ Foam::phaseModel::phaseModel
         wordList phiTypes
         (
             U_.boundaryField().size(),
-            calculatedFvPatchScalarField::typeName
+            fvsPatchFieldBase::calculatedType()
         );
 
         forAll(U_.boundaryField(), i)
