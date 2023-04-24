@@ -30,6 +30,7 @@ License
 #include "globalMeshData.H"
 #include "indirectPrimitivePatch.H"
 #include "edgeHashes.H"
+#include "syncTools.H"
 #include "foamVtkLineWriter.H"
 #include "foamVtkIndPatchWriter.H"
 
@@ -88,7 +89,6 @@ Foam::faMesh::getBoundaryEdgeConnections() const
     // Map edges (mesh numbering) back to a boundary index
     EdgeMap<label> edgeToBoundaryIndex(2*nBoundaryEdges);
 
-    label nBadEdges(0);
     labelHashSet badEdges(2*nBoundaryEdges);
 
     {
@@ -102,7 +102,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
 
             void clear()
             {
-                Foam::edge::clear();
+                Foam::edge::clear();  // ie, (-1, -1)
                 patchEdgei_ = -1;
                 meshFacei_ = -1;
             }
@@ -113,7 +113,6 @@ Foam::faMesh::getBoundaryEdgeConnections() const
         DebugInFunction
             << "Determining required boundary edge connections, "
             << "resolving locally attached boundary edges." << endl;
-
 
         // Pass 1:
         // - setup lookup (edge -> bnd index)
@@ -148,7 +147,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             {
                 auto& tuple = bndEdgeConnections[bndEdgei].first();
 
-                tuple.procNo(Pstream::myProcNo());
+                tuple.procNo(UPstream::myProcNo());
                 tuple.faPatchi(patchId);  // Tag as finiteArea patch
                 tuple.patchEdgei(patchEdgei);
                 tuple.meshFacei(meshFacei);
@@ -165,7 +164,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             }
         }
 
-        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
+        if (returnReduceOr(badEdges.size()))
         {
             edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
 
@@ -186,9 +185,15 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             writer.beginCellData();
             writer.writeProcIDs();
 
+            InfoInFunction
+                << "(debug) wrote " << writer.output().name() << nl;
+
+            writer.close();  // Flush writer before raising FatalError
+
             FatalErrorInFunction
                 << "Boundary edges not singly connected: "
-                << nBadEdges << '/' << nBoundaryEdges << nl;
+                << returnReduce(badEdges.size(), sumOp<label>()) << '/'
+                << nBoundaryEdges << nl;
 
             printPatchEdges
             (
@@ -196,9 +201,6 @@ Foam::faMesh::getBoundaryEdgeConnections() const
                 patch(),
                 badEdges.sortedToc()
             );
-
-            InfoInFunction
-                << "(debug) wrote " << writer.output().name() << nl;
 
             FatalError << abort(FatalError);
         }
@@ -263,10 +265,12 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             }
         }
 
-        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
+        if (returnReduceOr(badEdges.size()))
         {
             FatalErrorInFunction
-                << "Had " << nBadEdges
+                << "Had "
+                << returnReduce(badEdges.size(), sumOp<label>()) << '/'
+                << nBoundaryEdges
                 << " boundary edges with missing or multiple edge connections"
                 << abort(FatalError);
         }
@@ -275,22 +279,36 @@ Foam::faMesh::getBoundaryEdgeConnections() const
         badEdges.clear();
         for (label bndEdgei = 0; bndEdgei < nBoundaryEdges; ++bndEdgei)
         {
+            // Primary bookkeeping
+            auto& tuple = bndEdgeConnections[bndEdgei].second();
+
+            // Local bookkeeping
             const auto& pairing = patchPairings[bndEdgei];
             const label nbrPatchi = pairing.second();
             const label nbrPatchEdgei = pairing.patchEdgei_;
             const label nbrMeshFacei = pairing.meshFacei_;
 
-            if (nbrMeshFacei >= 0)
+            if (nbrMeshFacei >= 0)  // Additional safety
             {
-                // Add into primary bookkeeping
-                auto& tuple = bndEdgeConnections[bndEdgei].second();
-
-                tuple.procNo(Pstream::myProcNo());
-                tuple.patchi(nbrPatchi);
-                tuple.patchEdgei(nbrPatchEdgei);
-                tuple.meshFacei(nbrMeshFacei);
+                if (nbrPatchi >= 0)
+                {
+                    // Local connection
+                    tuple.procNo(UPstream::myProcNo());
+                    tuple.patchi(nbrPatchi);
+                    tuple.patchEdgei(nbrPatchEdgei);
+                    tuple.meshFacei(nbrMeshFacei);
+                }
+                else
+                {
+                    // No local connection.
+                    // Is likely to be a processor connection
+                    tuple.procNo(UPstream::myProcNo());
+                    tuple.patchi(-1);
+                    tuple.patchEdgei(-1);
+                    tuple.meshFacei(-1);
+                }
             }
-            else if (!Pstream::parRun())
+            else if (!UPstream::parRun())
             {
                 badEdges.insert(nInternalEdges + bndEdgei);
             }
@@ -301,12 +319,11 @@ Foam::faMesh::getBoundaryEdgeConnections() const
     // ~~~~~~
     // Serial - can return already
     // ~~~~~~
-    if (!Pstream::parRun())
+    if (!UPstream::parRun())
     {
         // Verbose report of missing edges - in serial
 
-        nBadEdges = badEdges.size();
-        if (nBadEdges)
+        if (returnReduceOr(badEdges.size()))
         {
             edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
 
@@ -327,9 +344,15 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             writer.beginCellData();
             writer.writeProcIDs();
 
+            InfoInFunction
+                << "(debug) wrote " << writer.output().name() << nl;
+
+            writer.close();  // Flush writer before raising FatalError
+
             FatalErrorInFunction
                 << "Boundary edges with missing/invalid neighbours: "
-                << nBadEdges << '/' << nBoundaryEdges << nl;
+                << returnReduce(badEdges.size(), sumOp<label>()) << '/'
+                << nBoundaryEdges << nl;
 
             printPatchEdges
             (
@@ -337,9 +360,6 @@ Foam::faMesh::getBoundaryEdgeConnections() const
                 patch(),
                 badEdges.sortedToc()
             );
-
-            InfoInFunction
-                << "(debug) wrote " << writer.output().name() << nl;
 
             FatalError << abort(FatalError);
         }
@@ -430,7 +450,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
                 auto& gathered = gatheredConnections[cppEdgei];
                 gathered.setCapacity(2);
                 gathered.resize(1);
-                auto& tuple = gathered.last();
+                auto& tuple = gathered.back();
 
                 tuple = bndEdgeConnections[bndEdgei].first();
             }
@@ -487,9 +507,9 @@ Foam::faMesh::getBoundaryEdgeConnections() const
                 auto& gathered = gatheredConnections[cppEdgei];
                 gathered.setCapacity(2);
                 gathered.resize(1);
-                auto& tuple = gathered.last();
+                auto& tuple = gathered.back();
 
-                tuple.procNo(Pstream::myProcNo());
+                tuple.procNo(UPstream::myProcNo());
                 tuple.patchi(patchi);
                 tuple.patchEdgei(patchEdgei);
                 tuple.meshFacei(meshFacei);
@@ -502,10 +522,11 @@ Foam::faMesh::getBoundaryEdgeConnections() const
         }
     }
 
-    if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
+    if (returnReduceOr(badEdges.size()))
     {
         FatalErrorInFunction
-            << "Had " << nBadEdges << " coupled boundary edges"
+            << "Had " << returnReduce(badEdges.size(), sumOp<label>())
+            << " coupled boundary edges"
             << " with missing or multiple edge connections"
             << abort(FatalError);
     }
@@ -623,7 +644,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
     }
 
     // Verbose report of missing edges
-    if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
+    if (returnReduceOr(badEdges.size()))
     {
         edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
 
@@ -644,9 +665,15 @@ Foam::faMesh::getBoundaryEdgeConnections() const
         writer.beginCellData();
         writer.writeProcIDs();
 
+        InfoInFunction
+            << "(debug) wrote " << writer.output().name() << nl;
+
+        writer.close();  // Flush writer before raising FatalError
+
         FatalErrorInFunction
             << "Boundary edges with missing/invalid neighbours: "
-            << nBadEdges << '/' << nBoundaryEdges << nl;
+            << returnReduce(badEdges.size(), sumOp<label>()) << '/'
+            << nBoundaryEdges << nl;
 
         printPatchEdges
         (
@@ -654,9 +681,6 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             patch(),
             badEdges.sortedToc()
         );
-
-        InfoInFunction
-            << "(debug) wrote " << writer.output().name() << nl;
 
         FatalError << abort(FatalError);
     }
@@ -723,7 +747,7 @@ void Foam::faMesh::setBoundaryConnections
         }
     }
 
-    label nInvalid = 0;
+    label nInvalid(0);
     for (const auto& connection : bndConnect)
     {
         if (connection.first() < 0 || connection.second() < 0)
@@ -732,15 +756,49 @@ void Foam::faMesh::setBoundaryConnections
         }
     }
 
-    if (Pstream::parRun())
+    if (returnReduceOr(nInvalid))
     {
-        reduce(nInvalid, sumOp<label>());
-    }
+        labelHashSet badEdges(2*nInvalid);
 
-    if (nInvalid)
-    {
+        forAll(bndConnect, bndEdgei)
+        {
+            if
+            (
+                bndConnect[bndEdgei].first() < 0
+             || bndConnect[bndEdgei].second() < 0
+            )
+            {
+                badEdges.insert(nInternalEdges + bndEdgei);
+            }
+        }
+
+        edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
+
+        vtk::lineWriter writer
+        (
+            patch().localPoints(),
+            dumpEdges,
+            fileName
+            (
+                mesh().time().globalPath()
+              / ("faMesh-construct.invalidMatches")
+            )
+        );
+
+        writer.writeGeometry();
+
+        // CellData
+        writer.beginCellData();
+        writer.writeProcIDs();
+
+        InfoInFunction
+            << "(debug) wrote " << writer.output().name() << nl;
+
+        writer.close();  // Flush writer before raising FatalError
+
         FatalErrorInFunction
-            << "Did not properly match " << nInvalid
+            << "Did not properly match "
+            << returnReduce(nInvalid, sumOp<label>())
             << " boundary edges" << nl
             << abort(FatalError);
     }
@@ -759,7 +817,7 @@ Foam::labelList Foam::faMesh::boundaryProcs() const
 {
     const auto& connections = this->boundaryConnections();
 
-    labelHashSet procsUsed(2*Pstream::nProcs());
+    labelHashSet procsUsed(2*UPstream::nProcs());
 
     for (const labelPair& tuple : connections)
     {
@@ -767,7 +825,7 @@ Foam::labelList Foam::faMesh::boundaryProcs() const
     }
 
     procsUsed.erase(-1);  // placeholder value
-    procsUsed.erase(Pstream::myProcNo());
+    procsUsed.erase(UPstream::myProcNo());
 
     return procsUsed.sortedToc();
 }
@@ -777,14 +835,14 @@ Foam::List<Foam::labelPair> Foam::faMesh::boundaryProcSizes() const
 {
     const auto& connections = this->boundaryConnections();
 
-    Map<label> procCount(2*Pstream::nProcs());
+    Map<label> procCount(2*UPstream::nProcs());
 
     for (const labelPair& tuple : connections)
     {
         ++procCount(tuple.first());
     }
     procCount.erase(-1);  // placeholder value
-    procCount.erase(Pstream::myProcNo());
+    procCount.erase(UPstream::myProcNo());
 
     // Flatten as list
     List<labelPair> output(procCount.size());

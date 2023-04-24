@@ -120,9 +120,7 @@ Foam::faPatchList Foam::faMesh::createPatchList
         const dictionary& patchDict = dEntry.dict();
 
         // Add entry
-        faPatchDefs.append(faPatchData());
-
-        auto& patchDef = faPatchDefs.last();
+        auto& patchDef = faPatchDefs.emplace_back();
         patchDef.name_ = dEntry.keyword();
         patchDef.type_ = patchDict.get<word>("type");
 
@@ -156,9 +154,7 @@ Foam::faPatchList Foam::faMesh::createPatchList
     // Additional empty placeholder patch?
     if (!emptyPatchName.empty())
     {
-        faPatchDefs.append(faPatchData());
-
-        auto& patchDef = faPatchDefs.last();
+        auto& patchDef = faPatchDefs.emplace_back();
         patchDef.name_ = emptyPatchName;
         patchDef.type_ = "empty";
     }
@@ -168,9 +164,7 @@ Foam::faPatchList Foam::faMesh::createPatchList
     // Placeholder for any undefined edges
     const label undefPatchIndex = faPatchDefs.size();
     {
-        faPatchDefs.append(faPatchData());
-
-        auto& patchDef = faPatchDefs.last();
+        auto& patchDef = faPatchDefs.emplace_back();
         patchDef.name_ = "undefined";
         patchDef.type_ = "patch";
 
@@ -207,7 +201,6 @@ Foam::faPatchList Foam::faMesh::createPatchList
     Map<labelHashSet> procConnections;
     labelHashSet patchDefsUsed;
 
-    label nBadEdges(0);
     labelHashSet badEdges(2*bndEdgeConnections.size());
 
     forAll(bndEdgeConnections, connecti)
@@ -218,17 +211,26 @@ Foam::faPatchList Foam::faMesh::createPatchList
 
         edge patchPair;
 
-        if (a.is_finiteArea())
+        if (!a.valid() || !b.valid())
+        {
+            // Skip checking pairs where either is not valid
+            continue;
+        }
+        else if (a.is_finiteArea())
         {
             if (b.is_finiteArea())
             {
-                // A processor-processor connection
+                // Expecting an inter-processor connection
+
                 if (a.procNo() == b.procNo())
                 {
+                    // An intra-processor connection (should not be possible)
                     FatalErrorInFunction
                         << "Processor-processor addressing error:" << nl
                         << "Both connections have the same processor: "
                         << a.procNo() << nl
+                        << "Connecting patches "
+                        << a.realPatchi() << " and " << b.realPatchi() << nl
                         << abort(FatalError);
                 }
                 else if (a.is_localProc())
@@ -323,22 +325,38 @@ Foam::faPatchList Foam::faMesh::createPatchList
                         << "(patch:" << a.realPatchi()
                         << " face:" << a.meshFacei()
                         << ") and (patch:" << b.realPatchi()
-                        << " face:" << b.meshFacei() << ") connects: "
-                        << pbm[a.realPatchi()].name() << " to "
-                        << pbm[b.realPatchi()].name() << nl;
+                        << " face:" << b.meshFacei() << ")  patch:"
+                        <<
+                        (
+                            a.realPatchi() >= 0
+                          ? pbm[a.realPatchi()].name()
+                          : word::null
+                        )
+                        << " and patch:"
+                        <<
+                        (
+                            b.realPatchi() >= 0
+                          ? pbm[b.realPatchi()].name()
+                          : word::null
+                        )
+                        << nl;
                 }
             }
         }
 
-        if ((nBadEdges = returnReduce(badEdges.size(), sumOp<label>())) != 0)
+        if (returnReduceOr(badEdges.size()))
         {
             // Report directly as Info, not InfoInFunction
             // since it can also be an expected result when
             // nWarnUndefinedPatch == 0
-            Info<< "Had " << nBadEdges << '/'
+            Info<< nl
+                << "Had "
+                << returnReduce(badEdges.size(), sumOp<label>()) << '/'
                 << returnReduce(patch().nBoundaryEdges(), sumOp<label>())
                 << " undefined edge connections, added to defaultPatch: "
-                << faPatchDefs[undefPatchIndex].name_ << nl;
+                << faPatchDefs[undefPatchIndex].name_ << nl << nl
+                << "==> Could indicate a non-manifold patch geometry" << nl
+                << nl;
 
             if (nWarnUndefinedPatch)
             {
@@ -378,10 +396,9 @@ Foam::faPatchList Foam::faMesh::createPatchList
             procToDefLookup.insert(otherProci, patchDefi);
 
             // Add entry
-            faPatchDefs.append(faPatchData());
-            auto& patchDef = faPatchDefs.last();
+            auto& patchDef = faPatchDefs.emplace_back();
 
-            patchDef.assign_coupled(Pstream::myProcNo(), otherProci);
+            patchDef.assign_coupled(UPstream::myProcNo(), otherProci);
         }
     }
 
