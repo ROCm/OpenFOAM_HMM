@@ -112,9 +112,11 @@ Foam::word Foam::cellCellStencil::baseName(const word& name)
 
 const Foam::labelIOList& Foam::cellCellStencil::zoneID(const fvMesh& mesh)
 {
-    if (!mesh.foundObject<labelIOList>("zoneID"))
+    labelIOList* zoneIDPtr = mesh.getObjectPtr<labelIOList>("zoneID");
+
+    if (!zoneIDPtr)
     {
-        labelIOList* zoneIDPtr = new labelIOList
+        zoneIDPtr = new labelIOList
         (
             IOobject
             (
@@ -123,11 +125,15 @@ const Foam::labelIOList& Foam::cellCellStencil::zoneID(const fvMesh& mesh)
                 polyMesh::meshSubDir,
                 mesh,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh.nCells()
         );
-        labelIOList& zoneID = *zoneIDPtr;
+
+        zoneIDPtr->store();
+
+        auto& zoneID = *zoneIDPtr;
 
         volScalarField volZoneID
         (
@@ -146,10 +152,9 @@ const Foam::labelIOList& Foam::cellCellStencil::zoneID(const fvMesh& mesh)
         {
             zoneID[celli] = label(volZoneID[celli]);
         }
-
-        zoneIDPtr->store();
     }
-    return mesh.lookupObject<labelIOList>("zoneID");
+
+    return *zoneIDPtr;
 }
 
 

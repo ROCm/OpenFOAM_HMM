@@ -47,7 +47,7 @@ bool Foam::functionObjects::columnAverage::columnAverageField
 
         const word resultName(averageName(fieldName));
 
-        fieldType* resPtr = obr_.getObjectPtr<fieldType>(resultName);
+        auto* resPtr = obr_.getObjectPtr<fieldType>(resultName);
 
         if (!resPtr)
         {
@@ -59,7 +59,8 @@ bool Foam::functionObjects::columnAverage::columnAverageField
                     fld.mesh().time().timeName(),
                     fld.mesh(),
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 ),
                 fld
             );

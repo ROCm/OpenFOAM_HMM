@@ -101,7 +101,8 @@ Foam::volVectorField& Foam::functionObjects::forces::force()
                 time_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedVector(dimForce, Zero)
@@ -128,7 +129,8 @@ Foam::volVectorField& Foam::functionObjects::forces::moment()
                 time_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedVector(dimForce*dimLength, Zero)

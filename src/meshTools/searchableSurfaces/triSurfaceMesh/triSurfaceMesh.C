@@ -1158,7 +1158,8 @@ void Foam::triSurfaceMesh::setField(const labelList& values)
                 meshSubDir,                         // local
                 *this,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             *this,
             dimless,

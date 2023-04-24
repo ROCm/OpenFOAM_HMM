@@ -103,7 +103,7 @@ Foam::codedBase::codeDict
     const word& dictName
 )
 {
-    IOdictionary* dictptr = obr.getObjectPtr<IOdictionary>(dictName);
+    auto* dictptr = obr.getObjectPtr<IOdictionary>(dictName);
 
     if (!dictptr)
     {
@@ -114,7 +114,7 @@ Foam::codedBase::codeDict
                 dictName,
                 obr.time().system(),
                 obr,
-                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::READ_MODIFIED,
                 IOobject::NO_WRITE,
                 IOobject::REGISTER
             )

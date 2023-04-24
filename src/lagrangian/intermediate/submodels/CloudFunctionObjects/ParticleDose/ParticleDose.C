@@ -64,24 +64,26 @@ void Foam::ParticleDose<CloudType>::postEvolve
 {
     auto& c = this->owner();
 
-    if (!c.template foundObject<IOField<scalar>>("D"))
+    auto* DPtr = c.template getObjectPtr<IOField<scalar>>("D");
+
+    if (!DPtr)
     {
-        auto* DPtr =
-            new IOField<scalar>
+        DPtr = new IOField<scalar>
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "D",
-                    c.time().timeName(),
-                    c,
-                    IOobject::NO_READ
-                )
-            );
+                "D",
+                c.time().timeName(),
+                c,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            )
+        );
 
         DPtr->store();
     }
-
-    auto& D = c.template lookupObjectRef<IOField<scalar>>("D");
+    auto& D = *DPtr;
 
     D.resize(c.size(), Zero);
 

@@ -101,7 +101,8 @@ bool Foam::functionObjects::filmFlux::execute()
                 time_.timeName(),
                 filmMesh,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             filmMesh,
             dimensionedScalar(dimMass/dimTime, Zero)

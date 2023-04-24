@@ -83,24 +83,20 @@ void Foam::polyMeshFilter::copySets
     {
         const SetType& set = *iter();
 
-        SetType* origSet =
+        auto* setPtr =
             newMesh.objectRegistry::getObjectPtr<SetType>(set.name());
 
-        if (origSet)
+        if (setPtr)
         {
-            (*origSet) = set;
-            (*origSet).sync(newMesh);
+            (*setPtr) = set;
         }
         else
         {
-            SetType* newSet
-            (
-                new SetType(newMesh, set.name(), set, set.writeOpt())
-            );
-
-            newSet->store();
-            newSet->sync(newMesh);
+            setPtr = new SetType(newMesh, set.name(), set, set.writeOpt());
+            setPtr->store();
         }
+
+        setPtr->sync(newMesh);
     }
 }
 

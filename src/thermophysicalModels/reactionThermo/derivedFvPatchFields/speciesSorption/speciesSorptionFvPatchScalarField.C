@@ -121,9 +121,10 @@ Foam::speciesSorptionFvPatchScalarField::field
             (
                 fieldName,
                 mesh.time().timeName(),
-                mesh,
+                mesh.thisDb(),
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             mesh,
             dimensionedScalar(dim, Zero)

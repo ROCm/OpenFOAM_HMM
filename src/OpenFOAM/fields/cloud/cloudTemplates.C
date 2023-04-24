@@ -37,20 +37,18 @@ Foam::IOField<Type>& Foam::cloud::createIOField
     objectRegistry& obr
 )
 {
-    IOField<Type>* fieldPtr
+    IOField<Type>* fieldPtr = new IOField<Type>
     (
-        new IOField<Type>
+        IOobject
         (
-            IOobject
-            (
-                fieldName,
-                obr.time().timeName(),
-                obr,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            nParticle
-        )
+            fieldName,
+            obr.time().timeName(),
+            obr,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE,
+            IOobject::REGISTER
+        ),
+        nParticle
     );
 
     fieldPtr->store();

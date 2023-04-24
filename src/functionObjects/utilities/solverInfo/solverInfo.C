@@ -102,7 +102,8 @@ void Foam::functionObjects::solverInfo::createResidualField
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 ),
                 Field<scalar>(mesh_.nCells(), Zero)
             );

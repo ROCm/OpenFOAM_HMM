@@ -80,7 +80,10 @@ bool Foam::functionObjects::ObukhovLength::calcOL()
         );
 
         result1->store();
+    }
 
+    if (!result2)
+    {
         result2 = new volScalarField
         (
             IOobject

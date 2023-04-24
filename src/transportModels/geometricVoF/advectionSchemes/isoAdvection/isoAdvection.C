@@ -156,10 +156,10 @@ Foam::isoAdvection::isoAdvection
 
     if (porosityEnabled_)
     {
-        if (mesh_.foundObject<volScalarField>("porosity"))
-        {
-            porosityPtr_ = mesh_.getObjectPtr<volScalarField>("porosity");
+        porosityPtr_ = mesh_.getObjectPtr<volScalarField>("porosity");
 
+        if (porosityPtr_)
+        {
             if
             (
                 gMin(porosityPtr_->primitiveField()) <= 0

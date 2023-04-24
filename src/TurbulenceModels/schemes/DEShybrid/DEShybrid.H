@@ -297,13 +297,14 @@ class DEShybrid
             const word factorName(IOobject::scopedName(typeName, "Factor"));
             const fvMesh& mesh = this->mesh();
 
-            const IOobject factorIO
+            IOobject factorIO
             (
                 factorName,
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             );
 
             if (blendedSchemeBaseName::debug)
@@ -335,7 +336,9 @@ class DEShybrid
             }
             else
             {
-                const volScalarField factor
+                factorIO.registerObject(IOobjectOption::NO_REGISTER);
+
+                volScalarField factor
                 (
                     factorIO,
                     max(sigmaMax_*tanh(pow(A, CH1_)), sigmaMin_)

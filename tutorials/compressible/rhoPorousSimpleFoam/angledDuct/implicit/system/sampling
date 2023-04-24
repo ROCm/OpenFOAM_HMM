@@ -25,8 +25,7 @@ cellZoneID
         // but is fairly low overhead anyhow
         volScalarField* getZoneField(const fvMesh& mesh)
         {
-            volScalarField* volZonePtr =
-                mesh.getObjectPtr<volScalarField>(fieldName);
+            auto* volZonePtr = mesh.getObjectPtr<volScalarField>(fieldName);
 
             const cellZoneMesh& zones = mesh.cellZones();
 
@@ -34,16 +33,22 @@ cellZoneID
             {
                 if (!volZonePtr)
                 {
-                    volZonePtr = &regIOobject::store
+                    volZonePtr = new volScalarField
                     (
-                        volScalarField::New
+                        IOobject
                         (
                             fieldName,
-                            mesh,
-                            dimless,
-                            fvPatchScalarField::zeroGradientType()
-                        )
+                            mesh.time().timeName(),
+                            mesh.thisDb(),
+                            IOobject::NO_READ,
+                            IOobject::AUTO_WRITE,
+                            IOobject::REGISTER
+                        ),
+                        mesh,
+                        dimless,
+                        fvPatchFieldBase::zeroGradientType()
                     );
+                    regIOobject::store(volZonePtr);
 
                     Info<< "Creating " << fieldName
                         << " field for postProcessing" << nl;

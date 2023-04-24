@@ -108,7 +108,8 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero)

@@ -49,21 +49,21 @@ void Foam::functionObjects::turbulenceFields::processField
     }
     else
     {
-        obr_.store
+        fldPtr = new FieldType
         (
-            new FieldType
+            IOobject
             (
-                IOobject
-                (
-                    localName,
-                    obr_.time().timeName(),
-                    obr_,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
-                ),
-                tvalue
-            )
+                localName,
+                obr_.time().timeName(),
+                obr_,
+                IOobject::LAZY_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            ),
+            tvalue
         );
+
+        obr_.store(fldPtr);
     }
 }
 

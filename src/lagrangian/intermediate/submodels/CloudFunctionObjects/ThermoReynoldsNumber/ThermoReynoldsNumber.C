@@ -62,25 +62,28 @@ void Foam::ThermoReynoldsNumber<CloudType>::postEvolve
 {
     auto& c = this->owner();
 
-    if (!c.template foundObject<IOField<scalar>>("Re"))
+    auto* RePtr = c.template getObjectPtr<IOField<scalar>>("Re");
+
+    if (!RePtr)
     {
-        auto* RePtr =
-            new IOField<scalar>
+        RePtr = new IOField<scalar>
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "Re",
-                    c.time().timeName(),
-                    c,
-                    IOobject::NO_READ
-                )
-            );
+                "Re",
+                c.time().timeName(),
+                c,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            )
+        );
 
         RePtr->store();
     }
+    auto& Re = *RePtr;
 
-    auto& Re = c.template lookupObjectRef<IOField<scalar>>("Re");
-    Re.setSize(c.size());
+    Re.resize(c.size());
 
     typename parcelType::trackingData& nctd =
         const_cast<typename parcelType::trackingData&>(td);

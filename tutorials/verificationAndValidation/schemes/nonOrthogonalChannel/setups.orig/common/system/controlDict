@@ -114,7 +114,8 @@ functions
                         mesh().time().timeName(),
                         mesh(),
                         IOobject::NO_READ,
-                        IOobject::AUTO_WRITE
+                        IOobject::AUTO_WRITE,
+                        IOobject::REGISTER
                     ),
                     mesh(),
                     sqr(dimLength)/pow3(dimTime)

@@ -302,8 +302,9 @@ Foam::label Foam::parLagrangianDistributor::readFields
                 objectName,
                 cloud.time().timeName(),
                 cloud,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE
+                IOobject::LAZY_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             label(0)
         );

@@ -111,7 +111,8 @@ bool Foam::functionObjects::readFields::execute()
             mesh_.time().timeName(),
             mesh_,
             IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         );
 
         const bool ok =

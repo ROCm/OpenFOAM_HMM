@@ -129,28 +129,28 @@ bool Foam::functionObjects::mapFields::mapFieldType() const
 
         const VolFieldType& field = lookupObject<VolFieldType>(fieldName);
 
-        if (!mapRegion.foundObject<VolFieldType>(fieldName))
+        auto* mapFieldPtr = mapRegion.getObjectPtr<VolFieldType>(fieldName);
+
+        if (!mapFieldPtr)
         {
-            VolFieldType* tmappedField =
-                new VolFieldType
+            mapFieldPtr = new VolFieldType
+            (
+                IOobject
                 (
-                    IOobject
-                    (
-                        fieldName,
-                        time_.timeName(),
-                        mapRegion,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
+                    fieldName,
+                    time_.timeName(),
                     mapRegion,
-                    dimensioned<Type>(field.dimensions(), Zero)
-                );
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
+                ),
+                mapRegion,
+                dimensioned<Type>(field.dimensions(), Zero)
+            );
 
-            tmappedField->store();
+            mapFieldPtr->store();
         }
-
-        VolFieldType& mappedField =
-            mapRegion.template lookupObjectRef<VolFieldType>(fieldName);
+        auto& mappedField = *mapFieldPtr;
 
         mappedField = interpPtr_->mapTgtToSrc(field);
 
