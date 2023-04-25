@@ -379,6 +379,23 @@ public:
                 const bool emptyOnly = false
             ) const = 0;
 
+            //- Read dir/file (recursively if necessary) on master of the
+            //- communicator, send and write contents to all 'writeOnProc'
+            //- processors with local file name
+            //  \param comm the communicator for broadcasting
+            //  \param writeOnProc write on the processor
+            //  \param src the source file/directory
+            //  \param dst the target file/directory.
+            //      If empty, treat as being identical to the src.
+            virtual bool broadcastCopy
+            (
+                const label comm,
+                const bool writeOnProc,
+                const fileName& src,
+                const fileName& dst
+                // always recreates links
+            ) const;
+
 
         // (reg)IOobject functionality
 
