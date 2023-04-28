@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ License
 #include "volFields.H"
 #include "mappedPatchBase.H"
 #include "basicThermo.H"
+#include "IOField.H"
 #include "mappedPatchFieldBase.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,6 +41,82 @@ namespace Foam
 {
 namespace compressible
 {
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+volScalarField&
+turbulentTemperatureRadCoupledMixedFvPatchScalarField::getOrCreateField
+(
+    const word& fieldName
+) const
+{
+    const fvMesh& mesh = patch().boundaryMesh().mesh();
+
+    auto* ptr = mesh.getObjectPtr<volScalarField>(fieldName);
+
+    if (!ptr)
+    {
+        ptr = new volScalarField
+        (
+            IOobject
+            (
+                fieldName,
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar(dimless, Zero)
+        );
+        mesh.objectRegistry::store(ptr);
+    }
+
+    return *ptr;
+}
+
+
+void turbulentTemperatureRadCoupledMixedFvPatchScalarField::storeHTCFields
+(
+    const word& prefix,
+    const scalarField& shtc,
+    const scalarField& shtcPatch
+)
+const
+{
+    volScalarField& htc =
+        getOrCreateField(IOobject::scopedName(prefix, "htc"));
+    htc.boundaryFieldRef()[patch().index()] = shtc;
+
+    volScalarField& htcPatch =
+        getOrCreateField(IOobject::scopedName(prefix, "htcPatch"));
+    htcPatch.boundaryFieldRef()[patch().index()] = shtcPatch;
+}
+
+
+void turbulentTemperatureRadCoupledMixedFvPatchScalarField::writeFileHeader
+(
+    Ostream& os
+)
+{
+    writeCommented(os, "Time");
+    writeTabbed(os, "Q_[W]");
+    writeTabbed(os, "q_[W/m^2]");
+    writeTabbed(os, "HTCavg_[W/m^2/K]");
+    writeTabbed(os, "patchHTCavg_[W/m^2/K]");
+    writeTabbed(os, "TpMin_[K]");
+    writeTabbed(os, "TpMax_[K]");
+    writeTabbed(os, "TpAvg_[K]");
+    writeTabbed(os, "TpNbrMin_[K]");
+    writeTabbed(os, "TpNbrMax_[K]");
+    writeTabbed(os, "TpNbrAvg_[K]");
+
+    os  << endl;
+
+    writtenHeader_ = true;
+    updateHeader_ = false;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,10 +134,21 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         mappedPatchFieldBase<scalar>::mapper(p, iF),
         *this
     ),
+    functionObjects::writeFile
+    (
+        db(),
+        "turbulentTemperatureRadCoupledMixed",
+        "undefined",
+        false
+    ),
     TnbrName_("undefined-Tnbr"),
     qrNbrName_("undefined-qrNbr"),
     qrName_("undefined-qr"),
-    thermalInertia_(false)
+    logInterval_(-1),
+    executionIndex_(0),
+    thermalInertia_(false),
+    verbose_(false),
+    prefix_(word::null)
 {
     this->refValue() = Zero;
     this->refGrad() = Zero;
@@ -86,6 +174,7 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         *this,
         psf
     ),
+    functionObjects::writeFile(psf),
     TnbrName_(psf.TnbrName_),
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
@@ -93,7 +182,11 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     thicknessLayer_(psf.thicknessLayer_.clone(p.patch())),
     kappaLayers_(psf.kappaLayers_),
     kappaLayer_(psf.kappaLayer_.clone(p.patch())),
-    thermalInertia_(psf.thermalInertia_)
+    logInterval_(psf.logInterval_),
+    executionIndex_(psf.executionIndex_),
+    thermalInertia_(psf.thermalInertia_),
+    verbose_(psf.verbose_),
+    prefix_(psf.prefix_)
 {}
 
 
@@ -113,10 +206,21 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         *this,
         dict
     ),
+    functionObjects::writeFile
+    (
+        db(),
+        "turbulentTemperatureRadCoupledMixed",
+        patch().name(),
+        false
+    ),
     TnbrName_(dict.getOrDefault<word>("Tnbr", "T")),
     qrNbrName_(dict.getOrDefault<word>("qrNbr", "none")),
     qrName_(dict.getOrDefault<word>("qr", "none")),
-    thermalInertia_(dict.getOrDefault<Switch>("thermalInertia", false))
+    logInterval_(dict.getOrDefault<scalar>("logInterval", -1)),
+    executionIndex_(0),
+    thermalInertia_(dict.getOrDefault<Switch>("thermalInertia", false)),
+    verbose_(dict.getOrDefault<bool>("verbose", false)),
+    prefix_(dict.getOrDefault<word>("prefix", "multiWorld"))
 {
     if (!isA<mappedPatchBase>(this->patch().patch()))
     {
@@ -218,6 +322,8 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     {
         source() = 0.0;
     }
+
+    writeFile::read(dict);
 }
 
 
@@ -236,6 +342,7 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         *this,
         psf
     ),
+    functionObjects::writeFile(psf),
     TnbrName_(psf.TnbrName_),
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
@@ -243,7 +350,11 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     thicknessLayer_(psf.thicknessLayer_.clone(patch().patch())),
     kappaLayers_(psf.kappaLayers_),
     kappaLayer_(psf.kappaLayer_.clone(patch().patch())),
-    thermalInertia_(psf.thermalInertia_)
+    logInterval_(psf.logInterval_),
+    executionIndex_(psf.executionIndex_),
+    thermalInertia_(psf.thermalInertia_),
+    verbose_(psf.verbose_),
+    prefix_(psf.prefix_)
 {}
 
 
@@ -261,6 +372,7 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
         *this,
         psf
     ),
+    functionObjects::writeFile(psf),
     TnbrName_(psf.TnbrName_),
     qrNbrName_(psf.qrNbrName_),
     qrName_(psf.qrName_),
@@ -268,7 +380,11 @@ turbulentTemperatureRadCoupledMixedFvPatchScalarField
     thicknessLayer_(psf.thicknessLayer_.clone(patch().patch())),
     kappaLayers_(psf.kappaLayers_),
     kappaLayer_(psf.kappaLayer_.clone(patch().patch())),
-    thermalInertia_(psf.thermalInertia_)
+    logInterval_(psf.logInterval_),
+    executionIndex_(psf.executionIndex_),
+    thermalInertia_(psf.thermalInertia_),
+    verbose_(psf.verbose_),
+    prefix_(psf.prefix_)
 {}
 
 
@@ -358,6 +474,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
 
     scalarField TcNbr;
+    scalarField TpNbr;  // only if verbose_
     scalarField KDeltaNbr;
 
     if (mpp.sameWorld())
@@ -375,6 +492,10 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
         // Swap to obtain full local values of neighbour K*delta
         TcNbr = nbrField.patchInternalField();
+        if (verbose_)
+        {
+            TpNbr = nbrField;
+        }
         KDeltaNbr = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
     }
     else
@@ -382,9 +503,17 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         // Different world so use my region,patch. Distribution below will
         // do the reordering.
         TcNbr = patchInternalField();
+        if (verbose_)
+        {
+            TpNbr = Tp;
+        }
         KDeltaNbr = KDelta;
     }
     distribute(this->internalField().name() + "_value", TcNbr);
+    if (verbose_)
+    {
+        distribute(this->internalField().name() + "_patchValue", TpNbr);
+    }
     distribute(this->internalField().name() + "_weights", KDeltaNbr);
 
     scalarField KDeltaC(this->size(), GREAT);
@@ -545,22 +674,111 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
     mixedFvPatchScalarField::updateCoeffs();
 
-    if (debug)
-    {
-        scalar Q = gSum(kappaTp*patch().magSf()*snGrad());
 
-        Info<< patch().boundaryMesh().mesh().name() << ':'
+    if (verbose_)
+    {
+        // Calculate heat-transfer rate and heat flux
+        const scalar Q = gSum(kappaTp*patch().magSf()*snGrad());
+        const scalar magSf = gSum(patch().magSf());
+        const scalar q = Q/max(magSf, SMALL);
+
+
+        // Calculate heat-transfer coeff based on the first definition
+        // [W/m^2] = [W/m/K K * 1/m]
+        const scalarField qField
+        (
+            kappaTp*snGrad()
+        );
+        const scalarField deltaT(TcNbr - Tc);
+        scalarField htc(deltaT.size(), Zero);
+
+        forAll(deltaT, i)
+        {
+            if (mag(deltaT[i]) > SMALL)
+            {
+                htc[i] = qField[i]/deltaT[i];
+            }
+        }
+        const scalar aveHtc = gSum(htc*patch().magSf())/max(magSf, SMALL);
+
+
+        // Calculate heat-transfer coeff based on the second definition
+        const scalarField deltaTPatch(TpNbr - Tp);
+        scalarField htcPatch(deltaTPatch.size(), Zero);
+
+        forAll(deltaTPatch, i)
+        {
+            if (mag(deltaTPatch[i]) > SMALL)
+            {
+                htcPatch[i] = qField[i]/deltaTPatch[i];
+            }
+        }
+        const scalar aveHtcPatch =
+            gSum(htcPatch*patch().magSf())/max(magSf, SMALL);
+
+        // Calculate various averages of temperature
+        const scalarMinMax TpMinMax = gMinMax(Tp);
+        const scalar TpAvg = gAverage(Tp);
+        const scalarMinMax TpNbrMinMax = gMinMax(TpNbr);
+        const scalar TpNbrAvg = gAverage(TpNbr);
+
+
+        Info<< nl
+            << patch().boundaryMesh().mesh().name() << ':'
             << patch().name() << ':'
             << this->internalField().name() << " <- "
             << mpp.sampleRegion() << ':'
             << mpp.samplePatch() << ':'
-            << this->internalField().name() << " :"
-            << " heat transfer rate:" << Q
-            << " walltemperature "
-            << " min:" << gMin(Tp)
-            << " max:" << gMax(Tp)
-            << " avg:" << gAverage(Tp)
-            << endl;
+            << this->internalField().name() << " :" << nl
+            << " Heat transfer rate [W]:" << Q << nl
+            << " Area [m^2]:" << magSf << nl
+            << " Heat flux [W/m^2]:" << q << nl
+            << " Area-averaged heat-transfer coefficient [W/m^2/K]:"
+            << aveHtc << nl
+            << " Area-averaged patch heat-transfer coefficient [W/m^2/K]:"
+            << aveHtcPatch << nl
+            << " Wall temperature [K]"
+            << " min:" << TpMinMax.min()
+            << " max:" << TpMinMax.max()
+            << " avg:" << TpAvg << nl
+            << " Neighbour wall temperature [K]"
+            << " min:" << TpNbrMinMax.min()
+            << " max:" << TpNbrMinMax.max()
+            << " avg:" << TpNbrAvg
+            << nl << endl;
+
+
+        // Handle data for file output
+        if (canResetFile())
+        {
+            resetFile(patch().name());
+        }
+
+        if (canWriteHeader())
+        {
+            writeFileHeader(file());
+        }
+
+        if (canWriteToFile() && writeFile())
+        {
+            file()
+                << db().time().timeOutputValue() << token::TAB
+                << Q << token::TAB
+                << q << token::TAB
+                << aveHtc << token::TAB
+                << aveHtcPatch << token::TAB
+                << TpMinMax.min() << token::TAB
+                << TpMinMax.max() << token::TAB
+                << TpAvg << token::TAB
+                << TpNbrMinMax.min() << token::TAB
+                << TpNbrMinMax.max() << token::TAB
+                << TpNbrAvg << token::TAB
+                << endl;
+        }
+
+
+        // Store htc fields as patch fields of a volScalarField
+        storeHTCFields(prefix_, htc, htcPatch);
     }
 
     // Restore tag
@@ -713,6 +931,39 @@ deltaH() const
 }
 
 
+bool turbulentTemperatureRadCoupledMixedFvPatchScalarField::writeFile()
+{
+    if (!verbose_ || (logInterval_ <= 0))
+    {
+        return false;
+    }
+
+    const auto& time = patch().boundaryMesh().mesh().time();
+
+    const scalar t = time.timeOutputValue();
+    const scalar ts = time.startTime().value();
+    const scalar deltaT = time.deltaTValue();
+
+    const label executionIndex = label
+    (
+        (
+            (t - ts)
+          + 0.5*deltaT
+        )
+        /logInterval_
+    );
+
+    bool write = false;
+    if (executionIndex > executionIndex_)
+    {
+        executionIndex_ = executionIndex;
+        write = true;
+    }
+
+    return write;
+}
+
+
 void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
 (
     Ostream& os
@@ -720,17 +971,17 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
 {
     mixedFvPatchField<scalar>::write(os);
 
-    //os.writeEntry("Tnbr", TnbrName_);
     os.writeEntryIfDifferent<word>("Tnbr", "T", TnbrName_);
-
-    //os.writeEntry("qrNbr", qrNbrName_);
     os.writeEntryIfDifferent<word>("qrNbr", "none", qrNbrName_);
-    //os.writeEntry("qr", qrName_);
     os.writeEntryIfDifferent<word>("qr", "none", qrName_);
+    os.writeEntry<scalar>("logInterval", logInterval_);
+
     if (thermalInertia_)
     {
         os.writeEntry("thermalInertia", thermalInertia_);
     }
+    os.writeEntryIfDifferent<bool>("verbose", false, verbose_);
+    os.writeEntryIfDifferent<word>("prefix", "multiWorld", prefix_);
 
     if (thicknessLayer_)
     {
@@ -742,6 +993,12 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::write
         thicknessLayers_.writeEntry("thicknessLayers", os);
         kappaLayers_.writeEntry("kappaLayers", os);
     }
+
+    // Write writeFile entries
+    os.writeEntry<label>("writePrecision", writePrecision_);
+    os.writeEntry<bool>("updateHeader", updateHeader_);
+    os.writeEntry<bool>("writeToFile", writeToFile_);
+    os.writeEntry<bool>("useUserTime", useUserTime_);
 
     temperatureCoupledBase::write(os);
     mappedPatchFieldBase<scalar>::write(os);
