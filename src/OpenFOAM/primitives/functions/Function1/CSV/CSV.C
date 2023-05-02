@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,37 +64,26 @@ Foam::labelList Foam::Function1Types::CSV<Type>::getComponentColumns
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<>
-Foam::label Foam::Function1Types::CSV<Foam::label>::readValue
-(
-    const List<string>& strings
-) const
-{
-    return readLabel(strings[componentColumns_[0]]);
-}
-
-
-template<>
-Foam::scalar Foam::Function1Types::CSV<Foam::scalar>::readValue
-(
-    const List<string>& strings
-) const
-{
-    return readScalar(strings[componentColumns_[0]]);
-}
-
-
 template<class Type>
 Type Foam::Function1Types::CSV<Type>::readValue
 (
-    const List<string>& strings
+    const UList<string>& strings
 ) const
 {
     Type result;
 
-    for (label i = 0; i < pTraits<Type>::nComponents; ++i)
+    if (std::is_integral<Type>::value)
     {
-        result[i] = readScalar(strings[componentColumns_[i]]);
+        // nComponents == 1
+        setComponent(result, 0) = readLabel(strings[componentColumns_[0]]);
+    }
+    else
+    {
+        for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+        {
+            setComponent(result, cmpt) =
+                readScalar(strings[componentColumns_[cmpt]]);
+        }
     }
 
     return result;
@@ -124,7 +113,7 @@ void Foam::Function1Types::CSV<Type>::read()
     // Skip header
     for (label i = 0; i < nHeaderLine_; ++i)
     {
-        is.getLine(line);
+        is.getLine(nullptr);
         ++lineNo;
     }
 
@@ -169,12 +158,12 @@ void Foam::Function1Types::CSV<Type>::read()
 
             if (nPos == std::string::npos)
             {
-                strings.append(line.substr(pos));
+                strings.push_back(line.substr(pos));
                 pos = nPos;
             }
             else
             {
-                strings.append(line.substr(pos, nPos - pos));
+                strings.push_back(line.substr(pos, nPos - pos));
                 pos = nPos + 1;
             }
         }
@@ -196,7 +185,7 @@ void Foam::Function1Types::CSV<Type>::read()
         scalar x = readScalar(strings[refColumn_]);
         Type value = readValue(strings);
 
-        values.append(Tuple2<scalar,Type>(x, value));
+        values.emplace_back(x, value);
     }
 
     this->table_.transfer(values);
