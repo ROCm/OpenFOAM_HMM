@@ -15,6 +15,7 @@ multiRegion/multiRegion.C
 removeRegisteredObject/removeRegisteredObject.C
 
 parProfiling/parProfiling.C
+parProfiling/parProfilingSolver.C
 
 solverInfo/solverInfo.C
 timeInfo/timeInfo.C

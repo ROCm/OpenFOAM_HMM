@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,10 +39,11 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 (
+    const word& solverName,
     const word& fieldName,
     const lduMatrix& matrix,
     const FieldField<Field, scalar>& interfaceBouCoeffs,
@@ -51,8 +52,6 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     const dictionary& solverControls
 )
 {
-    const word name(solverControls.get<word>("solver"));
-
     if (matrix.diagonal())
     {
         return autoPtr<lduMatrix::solver>
@@ -70,7 +69,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.symmetric())
     {
-        auto* ctorPtr = symMatrixConstructorTable(name);
+        auto* ctorPtr = symMatrixConstructorTable(solverName);
 
         if (!ctorPtr)
         {
@@ -78,7 +77,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
             (
                 solverControls,
                 "symmetric matrix solver",
-                name,
+                solverName,
                 *symMatrixConstructorTablePtr_
             ) << exit(FatalIOError);
         }
@@ -98,7 +97,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.asymmetric())
     {
-        auto* ctorPtr = asymMatrixConstructorTable(name);
+        auto* ctorPtr = asymMatrixConstructorTable(solverName);
 
         if (!ctorPtr)
         {
@@ -106,7 +105,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
             (
                 solverControls,
                 "asymmetric matrix solver",
-                name,
+                solverName,
                 *asymMatrixConstructorTablePtr_
             ) << exit(FatalIOError);
         }
@@ -131,6 +130,29 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
         << exit(FatalIOError);
 
     return nullptr;
+}
+
+
+Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
+(
+    const word& fieldName,
+    const lduMatrix& matrix,
+    const FieldField<Field, scalar>& interfaceBouCoeffs,
+    const FieldField<Field, scalar>& interfaceIntCoeffs,
+    const lduInterfaceFieldPtrsList& interfaces,
+    const dictionary& solverControls
+)
+{
+    return New
+    (
+        solverControls.get<word>("solver"),
+        fieldName,
+        matrix,
+        interfaceBouCoeffs,
+        interfaceIntCoeffs,
+        interfaces,
+        solverControls
+    );
 }
 
 

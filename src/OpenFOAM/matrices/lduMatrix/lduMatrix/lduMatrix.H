@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -229,7 +229,19 @@ public:
 
         // Selectors
 
-            //- Return a new solver
+            //- Return a new solver of given type
+            static autoPtr<solver> New
+            (
+                const word& solverName,
+                const word& fieldName,
+                const lduMatrix& matrix,
+                const FieldField<Field, scalar>& interfaceBouCoeffs,
+                const FieldField<Field, scalar>& interfaceIntCoeffs,
+                const lduInterfaceFieldPtrsList& interfaces,
+                const dictionary& solverControls
+            );
+
+            //- Return a new solver given dictionary
             static autoPtr<solver> New
             (
                 const word& fieldName,
