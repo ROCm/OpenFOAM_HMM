@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,7 @@ void Foam::fv::buoyancyTurbSource::buoyancyTurbSourceOmega
     const auto& gamma =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":gamma")
+            IOobject::scopedName(turbPtr->type(), "gamma")
         );
 
     // (Heuristic approximation to BMA:Eq. 6)

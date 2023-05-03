@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
     Copyright (C) 2022 Upstream CFD GmbH
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,15 +131,6 @@ class kOmegaSSTBase
 :
     public BasicEddyViscosityModel
 {
-    // Private Member Functions
-
-        //- No copy construct
-        kOmegaSSTBase(const kOmegaSSTBase&) = delete;
-
-        //- No copy assignment
-        void operator=(const kOmegaSSTBase&) = delete;
-
-
 protected:
 
     // Protected Data
@@ -239,7 +230,7 @@ protected:
         {
             return tmp<volScalarField::Internal>::New
             (
-                this->type() + ":beta",
+                IOobject::scopedName(this->type(), "beta"),
                 blend(F1, beta1_, beta2_)
             );
         }
@@ -251,7 +242,7 @@ protected:
         {
             return tmp<volScalarField::Internal>::New
             (
-                this->type() + ":gamma",
+                IOobject::scopedName(this->type(), "gamma"),
                 blend(F1, gamma1_, gamma2_)
             );
         }
@@ -311,6 +302,15 @@ public:
     typedef typename BasicEddyViscosityModel::alphaField alphaField;
     typedef typename BasicEddyViscosityModel::rhoField rhoField;
     typedef typename BasicEddyViscosityModel::transportModel transportModel;
+
+
+    // Generated Methods
+
+        //- No copy construct
+        kOmegaSSTBase(const kOmegaSSTBase&) = delete;
+
+        //- No copy assignment
+        void operator=(const kOmegaSSTBase&) = delete;
 
 
     // Constructors

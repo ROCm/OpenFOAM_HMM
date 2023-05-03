@@ -72,7 +72,7 @@ Foam::diameterModels::driftModels::phaseChange::phaseChange
             (
                 IOobject
                 (
-                    IOobject::groupName(type() + ":W", pair.name()),
+                    IOobject::scopedName(type(), IOobject::groupName("W", pair.name())),
                     popBal_.mesh().time().timeName(),
                     popBal_.mesh()
                 ),

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -245,7 +245,7 @@ void kEpsilon<BasicTurbulenceModel>::correct()
     tmp<volTensorField> tgradU = fvc::grad(U);
     const volScalarField::Internal GbyNu
     (
-        this->type() + ":GbyNu",
+        IOobject::scopedName(this->type(), "GbyNu"),
         tgradU().v() && dev(twoSymm(tgradU().v()))
     );
     const volScalarField::Internal G(this->GName(), nut()*GbyNu);

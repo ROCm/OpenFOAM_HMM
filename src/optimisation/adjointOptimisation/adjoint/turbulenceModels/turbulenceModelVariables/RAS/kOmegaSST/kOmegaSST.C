@@ -113,9 +113,11 @@ tmp<volScalarField::Internal> kOmegaSST::computeG()
     tmp<volTensorField> tgradU = fvc::grad(U);
     volScalarField::Internal GbyNu0
     (
-        this->type() + ":GbyNu",
+        IOobject::scopedName(this->type(), "GbyNu"),
         (tgradU() && dev(twoSymm(tgradU())))
     );
+
+    // NB: leave tmp registered (for correctBoundaryConditions)
     auto tG =
         tmp<volScalarField::Internal>::New
         (

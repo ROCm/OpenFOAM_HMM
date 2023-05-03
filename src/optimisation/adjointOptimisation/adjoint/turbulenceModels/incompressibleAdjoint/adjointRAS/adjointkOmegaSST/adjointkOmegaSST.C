@@ -1066,7 +1066,7 @@ void adjointkOmegaSST::updatePrimalRelatedFields()
         (
             IOobject
             (
-                type() + ":G",
+                IOobject::scopedName(type(), "G"),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,

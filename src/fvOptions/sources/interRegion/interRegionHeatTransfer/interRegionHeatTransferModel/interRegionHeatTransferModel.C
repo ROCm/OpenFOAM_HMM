@@ -131,7 +131,7 @@ Foam::fv::interRegionHeatTransferModel::interRegionHeatTransferModel
     (
         IOobject
         (
-            type() + ":htc",
+            IOobject::scopedName(type(), "htc"),
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
@@ -169,19 +169,11 @@ void Foam::fv::interRegionHeatTransferModel::addSup
 
     const auto& T = mesh_.lookupObject<volScalarField>(TName_);
 
-    auto tTmapped = tmp<volScalarField>::New
+    auto tTmapped = volScalarField::New
     (
-        IOobject
-        (
-            type() + ":Tmapped",
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
+        IOobject::scopedName(type(), "Tmapped"),
         T
     );
-
     auto& Tmapped = tTmapped.ref();
 
     const auto& nbrMesh = mesh_.time().lookupObject<fvMesh>(nbrRegionName_);
