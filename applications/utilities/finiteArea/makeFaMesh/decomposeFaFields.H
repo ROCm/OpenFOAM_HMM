@@ -16,10 +16,10 @@ Description
 \*---------------------------------------------------------------------------*/
 
 // Embed do-while to support early termination
-if (doDecompose && Pstream::parRun())
+if (doDecompose && UPstream::parRun())
 do
 {
-    faMeshReconstructor reconstructor(aMesh, IOobjectOption::READ_IF_PRESENT);
+    faMeshReconstructor reconstructor(aMesh, IOobjectOption::LAZY_READ);
 
     if (!reconstructor.good())
     {
@@ -61,16 +61,16 @@ do
         auto oldHandler = fileHandler(fileOperation::NewUncollated());
         fileHandler().distributed(true);
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
-            haveMeshOnProc.set(Pstream::myProcNo());
+            haveMeshOnProc.set(UPstream::myProcNo());
             subsetter.reset(new faMeshSubset(serialMesh));
 
-            const bool oldParRun = Pstream::parRun(false);
+            const bool oldParRun = UPstream::parRun(false);
 
             objects = IOobjectList(serialMesh.time(), runTime.timeName());
 
-            Pstream::parRun(oldParRun);
+            UPstream::parRun(oldParRun);
         }
 
         // Restore old settings

@@ -163,6 +163,11 @@ void Foam::faMesh::initPatch() const
             mesh().points()
         )
     );
+    // Could set some basic primitive data here...
+    // nEdges_ = patchPtr_->nEdges();
+    // nInternalEdges_ = patchPtr_->nInternalEdges();
+    // nFaces_ = patchPtr_->size();
+    // nPoints_ = patchPtr_->nPoints();
     bndConnectPtr_.reset(nullptr);
     haloMapPtr_.reset(nullptr);
     haloFaceCentresPtr_.reset(nullptr);
@@ -512,7 +517,13 @@ Foam::faMesh::faMesh
     haloMapPtr_(nullptr),
     haloFaceCentresPtr_(nullptr),
     haloFaceNormalsPtr_(nullptr)
-{}
+{
+    // Not yet much for primitive mesh data possible...
+    nPoints_ = 0;
+    nEdges_ = 0;
+    nInternalEdges_ = 0;
+    nFaces_ = faceLabels_.size();
+}
 
 
 Foam::faMesh::faMesh
@@ -593,7 +604,13 @@ Foam::faMesh::faMesh
     haloMapPtr_(nullptr),
     haloFaceCentresPtr_(nullptr),
     haloFaceNormalsPtr_(nullptr)
-{}
+{
+    // Not yet much for primitive mesh data possible...
+    nPoints_ = 0;
+    nEdges_ = 0;
+    nInternalEdges_ = 0;
+    nFaces_ = faceLabels_.size();
+}
 
 
 Foam::faMesh::faMesh(const polyPatch& pp, const bool doInit)

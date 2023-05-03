@@ -21,12 +21,12 @@ Description
 
     word outputName("finiteArea-edges.obj");
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         outputName = word
         (
             "finiteArea-edges-proc"
-          + Foam::name(Pstream::myProcNo())
+          + Foam::name(UPstream::myProcNo())
           + ".obj"
         );
     }

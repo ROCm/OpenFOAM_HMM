@@ -445,9 +445,9 @@ Foam::faMesh::getBoundaryEdgeConnections() const
                 // A boundary finiteEdge edge (known from this side)
 
                 auto& gathered = gatheredConnections[cppEdgei];
-                gathered.setCapacity(2);
-                gathered.resize(1);
-                auto& tuple = gathered.back();
+                gathered.setCapacity_nocopy(2);
+                gathered.resize_nocopy(1);
+                auto& tuple = gathered.front();
 
                 tuple = bndEdgeConnections[bndEdgei].first();
             }
@@ -502,9 +502,9 @@ Foam::faMesh::getBoundaryEdgeConnections() const
                 const label meshFacei = patchFacei + pp.start();
 
                 auto& gathered = gatheredConnections[cppEdgei];
-                gathered.setCapacity(2);
-                gathered.resize(1);
-                auto& tuple = gathered.back();
+                gathered.setCapacity_nocopy(2);
+                gathered.resize_nocopy(1);
+                auto& tuple = gathered.front();
 
                 tuple.procNo(UPstream::myProcNo());
                 tuple.patchi(patchi);
@@ -545,6 +545,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
         << "Collating sync information" << endl;
 
     // Pick out gathered connections and add into primary bookkeeping
+    badEdges.clear();
     for (label cppEdgei = 0; cppEdgei < nCoupledEdges; ++cppEdgei)
     {
         const auto& gathered = gatheredConnections[cppEdgei];
@@ -552,24 +553,60 @@ Foam::faMesh::getBoundaryEdgeConnections() const
         const label bndEdgei =
             edgeToBoundaryIndex.lookup(cpp.meshEdge(cppEdgei), -1);
 
-        if
-        (
-            // A boundary finiteEdge edge (known from this side)
-            bndEdgei != -1
-
-            // Gathered a one-to-one connection
-         && gathered.size() == 2
-        )
+        if (bndEdgei != -1)
         {
-            const auto& a = gathered[0];
-            const auto& b = gathered[1];
-
-            // Copy second side of connection
+            // A boundary finiteEdge edge (known from this side)
             auto& connection = bndEdgeConnections[bndEdgei];
 
-            connection.second() = (connection.first() == b) ? a : b;
+            if (gathered.size() == 2)
+            {
+                // Copy second side of connection
+                const auto& a = gathered[0];
+                const auto& b = gathered[1];
+
+                connection.second() = (connection.first() == b) ? a : b;
+            }
+            else if (gathered.size() > 2)
+            {
+                // Multiply connected!! - this needs to be addressed
+                badEdges.insert(cppEdgei);
+            }
         }
     }
+
+    if (returnReduceOr(badEdges.size()))
+    {
+        WarningInFunction
+            << nl << "Multiply connected edges detected" << endl;
+
+        // Print out edges as point pairs
+        // These are globally synchronised - so only output on master
+        constexpr label maxOutput = 10;
+
+        label nOutput = 0;
+
+        for (const label cppEdgei : badEdges.sortedToc())
+        {
+            const edge e(cpp.meshEdge(cppEdgei));
+
+            const auto& gathered = gatheredConnections[cppEdgei];
+
+            Info<< "connection: ";
+            gathered.writeList(Info) << nl;
+
+            Info<<"    edge  : "
+                << cpp.points()[e.first()] << ' '
+                << cpp.points()[e.second()] << nl;
+
+            ++nOutput;
+            if (maxOutput > 0 && nOutput >= maxOutput)
+            {
+                Info<< " ... suppressing further output" << nl;
+                break;
+            }
+        }
+    }
+
 
     // Check missing/invalid
     badEdges.clear();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,9 @@ Original Authors
 #include "faMeshReconstructor.H"
 #include "faMeshSubset.H"
 #include "PtrListOps.H"
+#include "foamVtkLineWriter.H"
 #include "foamVtkIndPatchWriter.H"
+#include "syncTools.H"
 #include "OBJstream.H"
 
 using namespace Foam;
@@ -128,6 +130,8 @@ int main(int argc, char *argv[])
         meshDefDict.add("emptyPatch", patchName, true);
     }
 
+    // Preliminary checks
+    #include "checkPatchTopology.H"
 
     // Create
     faMesh aMesh(mesh, meshDefDict);
