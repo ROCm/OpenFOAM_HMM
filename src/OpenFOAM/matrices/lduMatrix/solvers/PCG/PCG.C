@@ -210,7 +210,6 @@ Foam::solverPerformance Foam::PCG::scalarSolve
 }
 
 
-
 Foam::solverPerformance Foam::PCG::solve
 (
     scalarField& psi_s,
