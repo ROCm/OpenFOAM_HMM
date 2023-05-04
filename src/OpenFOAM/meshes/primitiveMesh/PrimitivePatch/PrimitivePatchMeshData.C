@@ -90,7 +90,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcMeshData() const
         {
             if (markedPoints.insert(pointi, meshPoints.size()))
             {
-                meshPoints.append(pointi);
+                meshPoints.push_back(pointi);
             }
         }
     }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,7 @@ void Foam::syncTools::combine
 
     if (iter.good())
     {
-        cop(*iter, val);
+        cop(iter.val(), val);
     }
     else
     {
@@ -70,7 +70,7 @@ void Foam::syncTools::combine
 
     if (iter.good())
     {
-        cop(*iter, val);
+        cop(iter.val(), val);
     }
     else
     {
@@ -118,17 +118,17 @@ void Foam::syncTools::syncPointMap
                     sharedPointValues,
                     cop,
                     sharedPtAddr[i],    // index
-                    *fnd                // value
+                    fnd.val()           // value
                 );
             }
         }
     }
 
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         DynamicList<label> neighbProcs;
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Send
         for (const polyPatch& pp : patches)
@@ -140,7 +140,7 @@ void Foam::syncTools::syncPointMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                neighbProcs.append(nbrProci);
+                neighbProcs.push_back(nbrProci);
 
                 // Get data per patchPoint in neighbouring point numbers.
 
@@ -157,7 +157,7 @@ void Foam::syncTools::syncPointMap
 
                     if (iter.good())
                     {
-                        patchInfo.insert(nbrPts[i], *iter);
+                        patchInfo.insert(nbrPts[i], iter.val());
                     }
                 }
 
@@ -300,14 +300,14 @@ void Foam::syncTools::syncPointMap
 
         // Reduce on master.
 
-        if (Pstream::parRun())
+        if (UPstream::parRun())
         {
-            if (Pstream::master())
+            if (UPstream::master())
             {
                 // Receive the edges using shared points from other procs
-                for (const int proci : Pstream::subProcs())
+                for (const int proci : UPstream::subProcs())
                 {
-                    IPstream fromProc(Pstream::commsTypes::scheduled, proci);
+                    IPstream fromProc(UPstream::commsTypes::scheduled, proci);
                     Map<T> nbrValues(fromProc);
 
                     // Merge neighbouring values with my values
@@ -328,8 +328,8 @@ void Foam::syncTools::syncPointMap
                 // Send to master
                 OPstream toMaster
                 (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
+                    UPstream::commsTypes::scheduled,
+                    UPstream::masterNo()
                 );
                 toMaster << sharedPointValues;
             }
@@ -355,7 +355,7 @@ void Foam::syncTools::syncPointMap
 
             if (sharedFnd.good())
             {
-                pointValues.set(*iter, *sharedFnd);
+                pointValues.set(iter.val(), sharedFnd.val());
             }
         }
     }
@@ -381,10 +381,10 @@ void Foam::syncTools::syncEdgeMap
     // Swap proc patch info
     // ~~~~~~~~~~~~~~~~~~~~
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         DynamicList<label> neighbProcs;
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Send
         for (const polyPatch& pp : patches)
@@ -396,7 +396,7 @@ void Foam::syncTools::syncEdgeMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                neighbProcs.append(nbrProci);
+                neighbProcs.push_back(nbrProci);
 
                 // Get data per patch edge in neighbouring edge.
 
@@ -408,14 +408,14 @@ void Foam::syncTools::syncEdgeMap
 
                 for (const edge& e : edges)
                 {
-                    const edge meshEdge(meshPts[e[0]], meshPts[e[1]]);
+                    const edge meshEdge(meshPts, e);
 
                     const auto iter = edgeValues.cfind(meshEdge);
 
                     if (iter.good())
                     {
-                        const edge nbrEdge(nbrPts[e[0]], nbrPts[e[1]]);
-                        patchInfo.insert(nbrEdge, *iter);
+                        const edge nbrEdge(nbrPts, e);
+                        patchInfo.insert(nbrEdge, iter.val());
                     }
                 }
 
@@ -515,7 +515,7 @@ void Foam::syncTools::syncEdgeMap
 
                     if (iter.good())
                     {
-                        half0Values.insert(edgei, *iter);
+                        half0Values.insert(edgei, iter.val());
                     }
                 }
                 {
@@ -526,7 +526,7 @@ void Foam::syncTools::syncEdgeMap
 
                     if (iter.good())
                     {
-                        half1Values.insert(edgei, *iter);
+                        half1Values.insert(edgei, iter.val());
                     }
                 }
             }
@@ -653,14 +653,14 @@ void Foam::syncTools::syncEdgeMap
     //  shared edge).
     // Reduce this on the master.
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        if (Pstream::master())
+        if (UPstream::master())
         {
             // Receive the edges using shared points from other procs
-            for (const int proci : Pstream::subProcs())
+            for (const int proci : UPstream::subProcs())
             {
-                IPstream fromProc(Pstream::commsTypes::scheduled, proci);
+                IPstream fromProc(UPstream::commsTypes::scheduled, proci);
                 EdgeMap<T> nbrValues(fromProc);
 
                 // Merge neighbouring values with my values
@@ -682,8 +682,8 @@ void Foam::syncTools::syncEdgeMap
             {
                 OPstream toMaster
                 (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
+                    UPstream::commsTypes::scheduled,
+                    UPstream::masterNo()
                 );
                 toMaster << sharedEdgeValues;
             }
@@ -772,7 +772,7 @@ void Foam::syncTools::syncPointList
 
         if (iter.good())
         {
-            cppFld[*iter] = pointValues[i];
+            cppFld[iter.val()] = pointValues[i];
         }
     }
 
@@ -793,7 +793,7 @@ void Foam::syncTools::syncPointList
 
         if (iter.good())
         {
-            pointValues[i] = cppFld[*iter];
+            pointValues[i] = cppFld[iter.val()];
         }
     }
 }
@@ -1028,7 +1028,7 @@ void Foam::syncTools::syncBoundaryFaceList
         if
         (
             is_contiguous<T>::value
-         && Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+         && UPstream::defaultCommsType == UPstream::commsTypes::nonBlocking
         )
         {
             const label startRequest = UPstream::nRequests();
@@ -1054,7 +1054,7 @@ void Foam::syncTools::syncBoundaryFaceList
 
                     UIPstream::read
                     (
-                        Pstream::commsTypes::nonBlocking,
+                        UPstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
                         fld.data_bytes(),
                         fld.size_bytes()
@@ -1080,7 +1080,7 @@ void Foam::syncTools::syncBoundaryFaceList
 
                     UOPstream::write
                     (
-                        Pstream::commsTypes::nonBlocking,
+                        UPstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
                         fld.cdata_bytes(),
                         fld.size_bytes()
@@ -1126,7 +1126,7 @@ void Foam::syncTools::syncBoundaryFaceList
         else
         {
             DynamicList<label> neighbProcs;
-            PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+            PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
             // Send
             for (const polyPatch& pp : patches)
@@ -1138,7 +1138,7 @@ void Foam::syncTools::syncBoundaryFaceList
                     const auto& procPatch = *ppp;
                     const label nbrProci = procPatch.neighbProcNo();
 
-                    neighbProcs.append(nbrProci);
+                    neighbProcs.push_back(nbrProci);
 
                     const SubList<T> fld
                     (
@@ -1289,7 +1289,7 @@ void Foam::syncTools::syncFaceList
 
                 UIPstream::read
                 (
-                    Pstream::commsTypes::nonBlocking,
+                    UPstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
                     recvInfo.data_bytes(),
                     recvInfo.size_bytes()
@@ -1324,7 +1324,7 @@ void Foam::syncTools::syncFaceList
 
                 UOPstream::write
                 (
-                    Pstream::commsTypes::nonBlocking,
+                    UPstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
                     sendInfo.cdata_bytes(),
                     sendInfo.size_bytes()
@@ -1333,7 +1333,7 @@ void Foam::syncTools::syncFaceList
         }
 
         // Wait for all comms to finish
-        Pstream::waitRequests(startRequest);
+        UPstream::waitRequests(startRequest);
 
         // Combine with existing data
         for (const polyPatch& pp : patches)

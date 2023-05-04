@@ -82,7 +82,7 @@ Foam::PrimitivePatch<FaceList, PointField>::calcPointFaces() const
     {
         for (const label pointi : locFcs[facei])
         {
-            pointFcs[pointi].append(facei);
+            pointFcs[pointi].push_back(facei);
         }
     }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ Description
 
 #include "PrimitivePatch.H"
 #include "Map.H"
-#include "ListOps.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -40,60 +40,54 @@ void
 Foam::PrimitivePatch<FaceList, PointField>::visitPointRegion
 (
     const label pointi,
-    const labelList& pFaces,
+    const labelUList& pFaces,
     const label startFacei,
-    const label startEdgeI,
-    boolList& pFacesHad
+    const label startEdgei,
+    UList<bool>& pFacesVisited
 ) const
 {
-    label index = pFaces.find(startFacei);
+    const label index = pFaces.find(startFacei);
 
-    if (!pFacesHad[index])
+    if (index >= 0 && !pFacesVisited[index])
     {
-        // Mark face as been visited.
-        pFacesHad[index] = true;
+        // Mark face as visited
+        pFacesVisited[index] = true;
 
         // Step to next edge on face which is still using pointi
-        const labelList& fEdges = faceEdges()[startFacei];
+        label nextEdgei = -1;
 
-        label nextEdgeI = -1;
-
-        forAll(fEdges, i)
+        for (const label faceEdgei : faceEdges()[startFacei])
         {
-            label edgeI = fEdges[i];
+            const edge& e = edges()[faceEdgei];
 
-            const edge& e = edges()[edgeI];
-
-            if (edgeI != startEdgeI && (e[0] == pointi || e[1] == pointi))
+            if (faceEdgei != startEdgei && e.contains(pointi))
             {
-                nextEdgeI = edgeI;
-
+                nextEdgei = faceEdgei;
                 break;
             }
         }
 
-        if (nextEdgeI == -1)
+        if (nextEdgei == -1)
         {
             FatalErrorInFunction
-                << "Problem: cannot find edge out of " << fEdges
+                << "Problem: cannot find edge out of "
+                << faceEdges()[startFacei]
                 << "on face " << startFacei << " that uses point " << pointi
-                << " and is not edge " << startEdgeI << abort(FatalError);
+                << " and is not edge " << startEdgei << abort(FatalError);
         }
 
         // Walk to next face(s) across edge.
-        const labelList& eFaces = edgeFaces()[nextEdgeI];
-
-        forAll(eFaces, i)
+        for (const label edgeFacei : edgeFaces()[nextEdgei])
         {
-            if (eFaces[i] != startFacei)
+            if (edgeFacei != startFacei)
             {
                 visitPointRegion
                 (
                     pointi,
                     pFaces,
-                    eFaces[i],
-                    nextEdgeI,
-                    pFacesHad
+                    edgeFacei,
+                    nextEdgei,
+                    pFacesVisited
                 );
             }
         }
@@ -105,33 +99,56 @@ Foam::PrimitivePatch<FaceList, PointField>::visitPointRegion
 
 template<class FaceList, class PointField>
 typename Foam::PrimitivePatch<FaceList, PointField>::surfaceTopo
-Foam::PrimitivePatch<FaceList, PointField>::surfaceType() const
+Foam::PrimitivePatch<FaceList, PointField>::surfaceType
+(
+    labelHashSet* badEdgesPtr
+) const
 {
-    DebugInFunction << "Calculating patch topology" << nl;
+    if (badEdgesPtr)
+    {
+        badEdgesPtr->clear();
+    }
+
+    bool foundError = false;
+
+    surfaceTopo pType = surfaceTopo::MANIFOLD;
 
     const labelListList& edgeFcs = edgeFaces();
 
-    surfaceTopo pType = MANIFOLD;
-
-    forAll(edgeFcs, edgeI)
+    forAll(edgeFcs, edgei)
     {
-        label nNbrs = edgeFcs[edgeI].size();
+        const label nNbrs = edgeFcs[edgei].size();
 
         if (nNbrs < 1 || nNbrs > 2)
         {
-            pType = ILLEGAL;
+            // Surface is illegal
+            foundError = true;
 
-            // Can exit now. Surface is illegal.
-            return pType;
+            if (badEdgesPtr)
+            {
+                // Record and continue
+                if (nNbrs > 2)
+                {
+                    badEdgesPtr->insert(edgei);
+                }
+            }
+            else
+            {
+                // Early exit when not recording bad edges
+                break;
+            }
         }
         else if (nNbrs == 1)
         {
             // Surface might be open or illegal so keep looping.
-            pType = OPEN;
+            pType = surfaceTopo::OPEN;
         }
     }
 
-    DebugInFunction << "Calculated patch topology" << nl;
+    if (foundError)
+    {
+        return surfaceTopo::ILLEGAL;
+    }
 
     return pType;
 }
@@ -142,45 +159,40 @@ bool
 Foam::PrimitivePatch<FaceList, PointField>::checkTopology
 (
     const bool report,
-    labelHashSet* setPtr
+    labelHashSet* pointSetPtr
 ) const
 {
-    DebugInFunction << "Checking patch topology" << nl;
-
     // Check edgeFaces
+
+    bool foundError = false;
 
     const labelListList& edgeFcs = edgeFaces();
 
-    bool illegalTopo = false;
-
-    forAll(edgeFcs, edgeI)
+    forAll(edgeFcs, edgei)
     {
-        label nNbrs = edgeFcs[edgeI].size();
+        const label nNbrs = edgeFcs[edgei].size();
 
         if (nNbrs < 1 || nNbrs > 2)
         {
-            illegalTopo = true;
+            foundError = true;
 
             if (report)
             {
-                Info<< "Edge " << edgeI << " with vertices:" << edges()[edgeI]
-                    << " has " << nNbrs << " face neighbours"
-                    << endl;
+                Info<< "Edge " << edgei << " with vertices:" << edges()[edgei]
+                    << " has " << nNbrs << " face neighbours" << endl;
             }
 
-            if (setPtr)
+            if (pointSetPtr)
             {
-                const edge& e = edges()[edgeI];
+                const edge& e = edges()[edgei];
 
-                setPtr->insert(meshPoints()[e.start()]);
-                setPtr->insert(meshPoints()[e.end()]);
+                pointSetPtr->insert(meshPoints()[e.first()]);
+                pointSetPtr->insert(meshPoints()[e.second()]);
             }
         }
     }
 
-    DebugInFunction << "Checked patch topology" << nl;
-
-    return illegalTopo;
+    return foundError;
 }
 
 
@@ -189,7 +201,7 @@ bool
 Foam::PrimitivePatch<FaceList, PointField>::checkPointManifold
 (
     const bool report,
-    labelHashSet* setPtr
+    labelHashSet* pointSetPtr
 ) const
 {
     const labelListList& pf = pointFaces();
@@ -199,47 +211,48 @@ Foam::PrimitivePatch<FaceList, PointField>::checkPointManifold
 
     bool foundError = false;
 
+    // Visited faces (as indices into pFaces)
+    DynamicList<bool> pFacesVisited;
+
     forAll(pf, pointi)
     {
         const labelList& pFaces = pf[pointi];
 
-        // Visited faces (as indices into pFaces)
-        boolList pFacesHad(pFaces.size(), false);
+        pFacesVisited.resize_nocopy(pFaces.size());
+        pFacesVisited = false;
 
         // Starting edge
         const labelList& pEdges = pe[pointi];
-        label startEdgeI = pEdges[0];
+        const label startEdgei = pEdges[0];
 
-        const labelList& eFaces = ef[startEdgeI];
+        const labelList& eFaces = ef[startEdgei];
 
-        forAll(eFaces, i)
+        for (const label edgeFacei : eFaces)
         {
             // Visit all faces using pointi, starting from eFaces[i] and
-            // startEdgeI. Mark off all faces visited in pFacesHad.
+            // startEdgei. Mark off all faces visited in pFacesVisited.
             this->visitPointRegion
             (
                 pointi,
                 pFaces,
-                eFaces[i],  // starting face for walk
-                startEdgeI, // starting edge for walk
-                pFacesHad
+                edgeFacei,  // starting face for walk
+                startEdgei, // starting edge for walk
+                pFacesVisited
             );
         }
 
         // After this all faces using pointi should have been visited and
-        // marked off in pFacesHad.
+        // marked off in pFacesVisited.
 
-        label unset = pFacesHad.find(false);
-
-        if (unset != -1)
+        if (pFacesVisited.contains(false))
         {
             foundError = true;
 
-            label meshPointi = mp[pointi];
+            const label meshPointi = mp[pointi];
 
-            if (setPtr)
+            if (pointSetPtr)
             {
-                setPtr->insert(meshPointi);
+                pointSetPtr->insert(meshPointi);
             }
 
             if (report)
@@ -251,18 +264,18 @@ Foam::PrimitivePatch<FaceList, PointField>::checkPointManifold
                     << " is multiply connected at this point" << nl
                     << "Connected (patch) faces:" << nl;
 
-                forAll(pFacesHad, i)
+                forAll(pFacesVisited, i)
                 {
-                    if (pFacesHad[i])
+                    if (pFacesVisited[i])
                     {
                         Info<< "    " << pFaces[i] << endl;
                     }
                 }
 
                 Info<< nl << "Unconnected (patch) faces:" << nl;
-                forAll(pFacesHad, i)
+                forAll(pFacesVisited, i)
                 {
-                    if (!pFacesHad[i])
+                    if (!pFacesVisited[i])
                     {
                         Info<< "    " << pFaces[i] << endl;
                     }

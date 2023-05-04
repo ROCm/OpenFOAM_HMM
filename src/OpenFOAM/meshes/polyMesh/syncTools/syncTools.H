@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef syncTools_H
-#define syncTools_H
+#ifndef Foam_syncTools_H
+#define Foam_syncTools_H
 
 #include "Pstream.H"
 #include "edgeHashes.H"
@@ -170,7 +170,7 @@ public:
                 UList<T>& faceValues,
                 const CombineOp& cop,
                 const TransformOp& top,
-                const bool parRun = Pstream::parRun()
+                const bool parRun = UPstream::parRun()
             );
 
 
@@ -609,7 +609,7 @@ public:
                 const bool isBoundaryOnly,
                 PackedList<Width>& faceValues,
                 const CombineOp& cop,
-                const bool parRun = Pstream::parRun()
+                const bool parRun = UPstream::parRun()
             );
 
             //- Synchronize mesh face values from PackedList/bitSet
@@ -619,7 +619,7 @@ public:
                 const polyMesh& mesh,
                 PackedList<Width>& faceValues,
                 const CombineOp& cop,
-                const bool parRun = Pstream::parRun()
+                const bool parRun = UPstream::parRun()
             );
 
             //- Synchronize boundary face values from PackedList/bitSet
@@ -629,7 +629,7 @@ public:
                 const polyMesh& mesh,
                 PackedList<Width>& faceValues,
                 const CombineOp& cop,
-                const bool parRun = Pstream::parRun()
+                const bool parRun = UPstream::parRun()
             );
 
             //- Swap coupled face values. Uses eqOp
