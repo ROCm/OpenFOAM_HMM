@@ -40,9 +40,9 @@ SourceFiles
 #define Foam_lduInterfaceField_H
 
 #include "lduInterface.H"
+#include "lduAddressing.H"
 #include "primitiveFieldsFwd.H"
 #include "Pstream.H"
-#include "lduAddressing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,42 +100,43 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Return the interface
+        const lduInterface& interface() const noexcept
+        {
+            return interface_;
+        }
 
-            //- Return the interface
-            const lduInterface& interface() const noexcept
-            {
-                return interface_;
-            }
+        //- Return the interface type
+        virtual const word& interfaceFieldType() const
+        {
+            return type();
+        }
 
-            //- Return the interface type
-            virtual const word& interfaceFieldType() const
-            {
-                return type();
-            }
+
+    // Coupled Interface
+
+        //- Are all (receive) data available?
+        virtual bool ready() const
+        {
+            return true;
+        }
+
+        //- Whether matrix has been updated
+        bool updatedMatrix() const noexcept
+        {
+            return updatedMatrix_;
+        }
+
+        //- Set matrix as update-to-date, return the previous value
+        bool updatedMatrix(bool flag) const noexcept
+        {
+            bool old(updatedMatrix_);
+            updatedMatrix_ = flag;
+            return old;
+        }
 
 
         // Coupled interface matrix update
-
-            //- Whether matrix has been updated
-            bool updatedMatrix() const noexcept
-            {
-                return updatedMatrix_;
-            }
-
-            //- Set matrix as update-to-date, return the previous value
-            bool updatedMatrix(bool flag) const noexcept
-            {
-                bool old(updatedMatrix_);
-                updatedMatrix_ = flag;
-                return old;
-            }
-
-            //- Is all data available
-            virtual bool ready() const
-            {
-                return true;
-            }
 
             //- Initialise neighbour matrix update.
             //- Add/subtract coupled contributions to matrix

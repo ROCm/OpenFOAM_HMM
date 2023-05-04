@@ -96,6 +96,12 @@ class processorFvPatchField
             mutable solveScalarField scalarRecvBuf_;
 
 
+    // Private Member Functions
+
+        //- Receive and send requests have both completed
+        virtual bool all_ready() const;
+
+
 public:
 
     //- Runtime type information
@@ -174,34 +180,34 @@ public:
 
     // Member Functions
 
-        // Access
+    // Coupling
 
-            //- Return true if running parallel
-            virtual bool coupled() const
-            {
-                return Pstream::parRun();
-            }
+        //- The patch field is coupled if running in parallel
+        virtual bool coupled() const { return UPstream::parRun(); }
 
-            //- Return neighbour field given internal field
-            virtual tmp<Field<Type>> patchNeighbourField() const;
+        //- Are all (receive) data available?
+        virtual bool ready() const;
+
+        //- Return neighbour field given internal field
+        virtual tmp<Field<Type>> patchNeighbourField() const;
 
 
-        // Evaluation functions
+    // Evaluation
 
-            //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const Pstream::commsTypes commsType);
+        //- Initialise the evaluation of the patch field
+        virtual void initEvaluate(const Pstream::commsTypes commsType);
 
-            //- Evaluate the patch field
-            virtual void evaluate(const Pstream::commsTypes commsType);
+        //- Evaluate the patch field
+        virtual void evaluate(const Pstream::commsTypes commsType);
 
-            //- Return patch-normal gradient
-            virtual tmp<Field<Type>> snGrad
-            (
-                const scalarField& deltaCoeffs
-            ) const;
+        //- Return patch-normal gradient
+        virtual tmp<Field<Type>> snGrad
+        (
+            const scalarField& deltaCoeffs
+        ) const;
 
-            //- Is all data available
-            virtual bool ready() const;
+
+        // Coupled interface functionality
 
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate
@@ -254,43 +260,43 @@ public:
             ) const;
 
 
-        //- Processor coupled interface functions
+    // Processor coupled interface functions
 
-            //- Return communicator used for comms
-            virtual label comm() const
-            {
-                return procPatch_.comm();
-            }
+        //- Return communicator used for communication
+        virtual label comm() const
+        {
+            return procPatch_.comm();
+        }
 
-            //- Return processor number
-            virtual int myProcNo() const
-            {
-                return procPatch_.myProcNo();
-            }
+        //- Return processor number
+        virtual int myProcNo() const
+        {
+            return procPatch_.myProcNo();
+        }
 
-            //- Return neighbour processor number
-            virtual int neighbProcNo() const
-            {
-                return procPatch_.neighbProcNo();
-            }
+        //- Return neighbour processor number
+        virtual int neighbProcNo() const
+        {
+            return procPatch_.neighbProcNo();
+        }
 
-            //- Does the patch field perform the transformation
-            virtual bool doTransform() const
-            {
-                return (pTraits<Type>::rank && !procPatch_.parallel());
-            }
+        //- Does the patch field perform the transformation
+        virtual bool doTransform() const
+        {
+            return (pTraits<Type>::rank && !procPatch_.parallel());
+        }
 
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
-            {
-                return procPatch_.forwardT();
-            }
+        //- Return face transformation tensor
+        virtual const tensorField& forwardT() const
+        {
+            return procPatch_.forwardT();
+        }
 
-            //- Return rank of component for transform
-            virtual int rank() const
-            {
-                return pTraits<Type>::rank;
-            }
+        //- Return rank of component for transform
+        virtual int rank() const
+        {
+            return pTraits<Type>::rank;
+        }
 };
 
 

@@ -136,4 +136,5 @@ Foam::lduPrimitiveProcessorInterface::internalFieldTransfer
     return processorLduInterface::receive<label>(commsType, faceCells_.size());
 }
 
+
 // ************************************************************************* //

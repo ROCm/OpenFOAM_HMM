@@ -74,9 +74,22 @@ Foam::calculatedProcessorFvPatchField<Type>::calculatedProcessorFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::calculatedProcessorFvPatchField<Type>::ready() const
+bool Foam::calculatedProcessorFvPatchField<Type>::all_ready() const
 {
     return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
+}
+
+
+template<class Type>
+bool Foam::calculatedProcessorFvPatchField<Type>::ready() const
+{
+    const bool ok = UPstream::finishedRequest(recvRequest_);
+    if (ok)
+    {
+        recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
+    }
+    return ok;
 }
 
 
@@ -87,10 +100,10 @@ Foam::calculatedProcessorFvPatchField<Type>::patchNeighbourField() const
     if (!this->ready())
     {
         FatalErrorInFunction
-            << "On patch of size " << procInterface_.faceCells().size()
+            << "Outstanding request on patch of size "
+            << procInterface_.faceCells().size()
             << " between proc " << procInterface_.myProcNo()
             << " and " << procInterface_.neighbProcNo()
-            << " outstanding request."
             << abort(FatalError);
     }
     return *this;
@@ -160,9 +173,8 @@ void Foam::calculatedProcessorFvPatchField<Type>::evaluate
 {
     if (UPstream::parRun())
     {
-        // Require receive data. Update the send request state.
-        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
-
+        // Require receive data.
+        // Only update the send request state.
         UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
         if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
@@ -182,11 +194,11 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-    if (!this->ready())
+    if (!this->all_ready())
     {
         FatalErrorInFunction
-            << "On patch " //<< interface_.name()
-            << " outstanding request."
+            << "Outstanding request(s) on interface "
+            //<< interface_.name()
             << abort(FatalError);
     }
 
@@ -275,9 +287,8 @@ void Foam::calculatedProcessorFvPatchField<Type>::updateInterfaceMatrix
 
     if (UPstream::parRun())
     {
-        // Require receive data. Update the send request state.
-        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
-
+        // Require receive data.
+        // Only update the send request state.
         UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
         if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }

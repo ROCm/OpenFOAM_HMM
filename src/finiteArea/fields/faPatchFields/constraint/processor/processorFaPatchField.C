@@ -84,10 +84,10 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
             << " in file " << this->internalField().objectPath()
             << exit(FatalError);
     }
-    if (debug && !ptf.ready())
+    if (debug && !ptf.all_ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name() << " outstanding request."
+            << "Outstanding request(s) on patch " << procPatch_.name()
             << abort(FatalError);
     }
 }
@@ -141,10 +141,10 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
     scalarSendBuf_(std::move(ptf.scalarSendBuf_)),
     scalarRecvBuf_(std::move(ptf.scalarRecvBuf_))
 {
-    if (debug && !ptf.ready())
+    if (debug && !ptf.all_ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name() << " outstanding request."
+            << "Outstanding request(s) on patch " << procPatch_.name()
             << abort(FatalError);
     }
 }
@@ -162,10 +162,10 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
     sendRequest_(-1),
     recvRequest_(-1)
 {
-    if (debug && !ptf.ready())
+    if (debug && !ptf.all_ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name() << " outstanding request."
+            << "Outstanding request(s) on patch " << procPatch_.name()
             << abort(FatalError);
     }
 }
@@ -174,9 +174,22 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::processorFaPatchField<Type>::ready() const
+bool Foam::processorFaPatchField<Type>::all_ready() const
 {
     return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
+}
+
+
+template<class Type>
+bool Foam::processorFaPatchField<Type>::ready() const
+{
+    const bool ok = UPstream::finishedRequest(recvRequest_);
+    if (ok)
+    {
+        recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
+    }
+    return ok;
 }
 
 
@@ -187,8 +200,7 @@ Foam::processorFaPatchField<Type>::patchNeighbourField() const
     if (debug && !this->ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name()
-            << " outstanding request."
+            << "Outstanding request on patch " << procPatch_.name()
             << abort(FatalError);
     }
     return *this;
@@ -259,9 +271,8 @@ void Foam::processorFaPatchField<Type>::evaluate
         {
             // Fast path. Received into *this
 
-            // Require receive data. Update the send request state.
-            // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
-
+            // Require receive data.
+            // Only update the send request state.
             UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
             if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
         }
@@ -303,11 +314,10 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
     if (commsType == UPstream::commsTypes::nonBlocking)
     {
         // Fast path.
-        if (debug && !this->ready())
+        if (debug && !this->all_ready())
         {
             FatalErrorInFunction
-                << "On patch " << procPatch_.name()
-                << " outstanding request."
+                << "Outstanding request(s) on patch " << procPatch_.name()
                 << abort(FatalError);
         }
 
@@ -368,9 +378,8 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     {
         // Fast path: consume straight from receive buffer
 
-        // Require receive data. Update the send request state.
-        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
-
+        // Require receive data.
+        // Only update the send request state.
         UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
         if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
@@ -411,11 +420,10 @@ void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
     if (commsType == UPstream::commsTypes::nonBlocking)
     {
         // Fast path.
-        if (debug && !this->ready())
+        if (debug && !this->all_ready())
         {
             FatalErrorInFunction
-                << "On patch " << procPatch_.name()
-                << " outstanding request."
+                << "Outstanding request(s) on patch " << procPatch_.name()
                 << abort(FatalError);
         }
 
@@ -475,9 +483,8 @@ void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
     {
         // Fast path: consume straight from receive buffer
 
-        // Require receive data. Update the send request state.
-        // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
-
+        // Require receive data.
+        // Only update the send request state.
         UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
         if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }

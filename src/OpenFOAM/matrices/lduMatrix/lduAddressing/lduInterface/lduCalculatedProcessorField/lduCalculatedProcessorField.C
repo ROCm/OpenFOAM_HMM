@@ -58,9 +58,22 @@ Foam::lduCalculatedProcessorField<Type>::lduCalculatedProcessorField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::lduCalculatedProcessorField<Type>::ready() const
+bool Foam::lduCalculatedProcessorField<Type>::all_ready() const
 {
     return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
+}
+
+
+template<class Type>
+bool Foam::lduCalculatedProcessorField<Type>::ready() const
+{
+    const bool ok = UPstream::finishedRequest(recvRequest_);
+    if (ok)
+    {
+        recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
+    }
+    return ok;
 }
 
 
@@ -77,10 +90,11 @@ void Foam::lduCalculatedProcessorField<Type>::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-    if (!this->ready())
+    if (!this->all_ready())
     {
         FatalErrorInFunction
-            << "Outstanding request."
+            << "Outstanding request(s) on interface "
+            //<< procInterface_.name()
             << abort(FatalError);
     }
 
@@ -167,12 +181,12 @@ void Foam::lduCalculatedProcessorField<Type>::updateInterfaceMatrix
         return;
     }
 
-    // Require receive data. Update the send request state.
-    // OR: UPstream::waitRequestPair(recvRequest_, sendRequest_);
-
-    UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
-    if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
-
+    {
+        // Require receive data.
+        // Only update the send request state.
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
+    }
 
     // Consume straight from receive buffer. Note use of our own
     // helper to avoid using fvPatch addressing

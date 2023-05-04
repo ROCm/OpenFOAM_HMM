@@ -103,6 +103,9 @@ protected:
             const solveScalarField& vals
         ) const;
 
+        //- Receive and send requests have both completed
+        virtual bool all_ready() const;
+
 
 public:
 
@@ -112,14 +115,13 @@ public:
 
     // Constructors
 
-        //- Construct from patch and internal field
-        lduCalculatedProcessorField
+        //- Construct from ldu interface
+        explicit lduCalculatedProcessorField
         (
             const lduInterface& interface
-            //const Field<Type>&
         );
 
-        //- Construct as copy
+        //- Copy construct
         lduCalculatedProcessorField
         (
             const lduCalculatedProcessorField<Type>&
@@ -132,48 +134,9 @@ public:
 
     // Member Functions
 
-    // Access
-
-        //- Return communicator used for comms
-        virtual label comm() const
-        {
-            return procInterface_.comm();
-        }
-
-        //- Return processor number
-        virtual int myProcNo() const
-        {
-            return procInterface_.myProcNo();
-        }
-
-        //- Return neighbour processor number
-        virtual int neighbProcNo() const
-        {
-            return procInterface_.myProcNo();
-        }
-
-        //- Is the transform required
-        virtual bool doTransform() const
-        {
-            return false;
-        }
-
-        //- Return face transformation tensor
-        virtual const tensorField& forwardT() const
-        {
-            return procInterface_.forwardT();
-        }
-
-        //- Return rank of component for transform
-        virtual int rank() const
-        {
-            return pTraits<Type>::rank;
-        }
-
-
     // Evaluation
 
-        //- Is all data available
+        //- Are all (receive) data available?
         virtual bool ready() const;
 
         //- Initialise neighbour matrix update
@@ -230,6 +193,45 @@ public:
         ) const
         {
             NotImplemented;
+        }
+
+
+    // Processor coupled interface functions
+
+        //- Return communicator used for communication
+        virtual label comm() const
+        {
+            return procInterface_.comm();
+        }
+
+        //- Return processor number
+        virtual int myProcNo() const
+        {
+            return procInterface_.myProcNo();
+        }
+
+        //- Return neighbour processor number
+        virtual int neighbProcNo() const
+        {
+            return procInterface_.myProcNo();
+        }
+
+        //- Is the transform required
+        virtual bool doTransform() const
+        {
+            return false;
+        }
+
+        //- Return face transformation tensor
+        virtual const tensorField& forwardT() const
+        {
+            return procInterface_.forwardT();
+        }
+
+        //- Return rank of component for transform
+        virtual int rank() const
+        {
+            return pTraits<Type>::rank;
         }
 };
 
