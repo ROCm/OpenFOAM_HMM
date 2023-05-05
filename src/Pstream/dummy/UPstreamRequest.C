@@ -53,6 +53,8 @@ Foam::label Foam::UPstream::nRequests() noexcept { return 0; }
 
 void Foam::UPstream::resetRequests(const label n) {}
 
+void Foam::UPstream::addRequest(UPstream::Request& req) {}
+
 void Foam::UPstream::waitRequests(const label pos, label len) {}
 void Foam::UPstream::waitRequests(UList<UPstream::Request>&) {}
 

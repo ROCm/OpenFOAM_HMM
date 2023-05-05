@@ -69,6 +69,25 @@ void Foam::UPstream::resetRequests(const label n)
 }
 
 
+void Foam::UPstream::addRequest(UPstream::Request& req)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    // Transcribe as a MPI_Request
+    PstreamGlobals::outstandingRequests_.push_back
+    (
+        PstreamDetail::Request::get(req)
+    );
+
+    // Invalidate parameter
+    req = UPstream::Request(MPI_REQUEST_NULL);
+}
+
+
 void Foam::UPstream::waitRequests(const label pos, label len)
 {
     // No-op for non-parallel, no pending requests or out-of-range
@@ -128,9 +147,9 @@ void Foam::UPstream::waitRequests(const label pos, label len)
 
     profilingPstream::addWaitTime();
 
-    // ie, resetRequests(pos)
     if (trim)
     {
+        // Trim the length of outstanding requests
         PstreamGlobals::outstandingRequests_.resize(pos);
     }
 

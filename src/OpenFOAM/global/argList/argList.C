@@ -958,7 +958,7 @@ Foam::argList::argList
                         << " -help-full' for extended usage" << nl
                         << nl;
 
-                    Pstream::exit(1);  // works for serial and parallel
+                    UPstream::exit(1);  // works for serial and parallel
                 }
 
                 commandLine_ += ' ';
@@ -1139,7 +1139,7 @@ void Foam::argList::parse
         foamVersion::printBuildInfo(Info.stdStream(), false);
         FatalError.write(Info, false);
 
-        Pstream::exit(1);  // works for serial and parallel
+        UPstream::exit(1);  // works for serial and parallel
     }
 
     if (initialise)

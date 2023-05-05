@@ -3897,10 +3897,10 @@ Foam::snappyLayerDriver::makeMeshMover
                 << errorMsg.c_str() << nl << nl
                 << "Exiting dry-run" << nl << endl;
 
-            if (Pstream::parRun())
+            if (UPstream::parRun())
             {
                 Perr<< "\nFOAM parallel run exiting\n" << endl;
-                Pstream::exit(0);
+                UPstream::exit(0);
             }
             else
             {

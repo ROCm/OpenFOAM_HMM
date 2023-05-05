@@ -543,7 +543,11 @@ public:
         );
 
 
-    // Requests (non-blocking comms)
+    // Requests (non-blocking comms).
+    // Pending requests are usually handled as an internal (global) list,
+    // since this simplifies the overall tracking and provides a convenient
+    // wrapping to avoid exposing MPI-specific types, but can also handle
+    // with a wrapped UPstream::Request as well.
 
         //- Number of outstanding requests (on the internal list of requests)
         static label nRequests() noexcept;
@@ -552,6 +556,10 @@ public:
         //- expected to be in the range [0 to nRequests()].
         //  A no-op for out-of-range values.
         static void resetRequests(const label n);
+
+        //- Transfer the (wrapped) MPI request to the internal global list.
+        //  A no-op for non-parallel. No special treatment for null requests.
+        static void addRequest(UPstream::Request& req);
 
         //- Wait until all requests (from position onwards) have finished.
         //- Corresponds to MPI_Waitall()

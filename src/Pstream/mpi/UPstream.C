@@ -37,15 +37,16 @@ License
 #include <cstring>
 #include <cstdlib>
 #include <csignal>
+#include <memory>
 #include <numeric>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// The min value and default for MPI buffers length
+// The min value and default for MPI buffer length
 constexpr int minBufLen = 20000000;
 
-// Track if we have attached MPI buffers
-static bool ourBuffers = false;
+// Track size of attached MPI buffer
+static int attachedBufLen = 0;
 
 // Track if we initialized MPI
 static bool ourMpi = false;
@@ -53,18 +54,18 @@ static bool ourMpi = false;
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
+// Attach user-defined send buffer
 static void attachOurBuffers()
 {
-    if (ourBuffers)
+#ifndef SGIMPI
+    if (attachedBufLen)
     {
         return;  // Already attached
     }
-    ourBuffers = true;
 
     // Use UPstream::mpiBufferSize (optimisationSwitch),
     // but allow override with MPI_BUFFER_SIZE env variable (int value)
 
-#ifndef SGIMPI
     int len = 0;
 
     const std::string str(Foam::getEnv("MPI_BUFFER_SIZE"));
@@ -78,14 +79,19 @@ static void attachOurBuffers()
         len = minBufLen;
     }
 
-    if (Foam::UPstream::debug)
-    {
-        Foam::Pout<< "UPstream::init : buffer-size " << len << '\n';
-    }
-
     char* buf = new char[len];
 
-    if (MPI_SUCCESS != MPI_Buffer_attach(buf, len))
+    if (MPI_SUCCESS == MPI_Buffer_attach(buf, len))
+    {
+        // Properly attached
+        attachedBufLen = len;
+
+        if (Foam::UPstream::debug)
+        {
+            Foam::Pout<< "UPstream::init : buffer-size " << len << '\n';
+        }
+    }
+    else
     {
         delete[] buf;
         Foam::Pout<< "UPstream::init : could not attach buffer\n";
@@ -94,26 +100,31 @@ static void attachOurBuffers()
 }
 
 
+// Remove an existing user-defined send buffer
 static void detachOurBuffers()
 {
-    if (!ourBuffers)
+#ifndef SGIMPI
+    if (!attachedBufLen)
     {
         return;  // Nothing to detach
     }
-    ourBuffers = false;
 
     // Some MPI notes suggest that the return code is MPI_SUCCESS when
     // no buffer is attached.
     // Be extra careful and require a non-zero size as well.
 
-#ifndef SGIMPI
-    int len = 0;
     char* buf = nullptr;
+    int len = 0;
 
     if (MPI_SUCCESS == MPI_Buffer_detach(&buf, &len) && len)
     {
+        // This was presumably the buffer that we attached
+        // and not someone else.
         delete[] buf;
     }
+
+    // Nothing attached
+    attachedBufLen = 0;
 #endif
 }
 
@@ -390,41 +401,49 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
 void Foam::UPstream::shutdown(int errNo)
 {
-    if (debug)
-    {
-        Pout<< "UPstream::shutdown\n";
-    }
-
     int flag = 0;
 
     MPI_Initialized(&flag);
     if (!flag)
     {
-        // No MPI initialized - we are done
+        // MPI not initialized - we have nothing to do
         return;
     }
 
     MPI_Finalized(&flag);
     if (flag)
     {
-        // Already finalized elsewhere?
+        // MPI already finalized - we have nothing to do
         if (ourMpi)
         {
             WarningInFunction
                 << "MPI was already finalized (by a connected program?)\n";
         }
-        else if (debug)
+        else if (debug && errNo == 0)
         {
             Pout<< "UPstream::shutdown : was already finalized\n";
         }
+        ourMpi = false;
+        return;
     }
-    else
+
+    if (!ourMpi)
     {
-        detachOurBuffers();
+        WarningInFunction
+            << "Finalizing MPI, but was initialized elsewhere\n";
+    }
+    ourMpi = false;
+
+
+    // Regular cleanup
+    // ---------------
+
+    if (debug)
+    {
+        Pout<< "UPstream::shutdown\n";
     }
 
-
-    // Warn about any outstanding requests
+    // Check for any outstanding requests
     {
         label nOutstanding = 0;
 
@@ -432,49 +451,40 @@ void Foam::UPstream::shutdown(int errNo)
         {
             if (MPI_REQUEST_NULL != request)
             {
+                // TBD: MPI_Cancel(&request); MPI_Request_free(&request);
                 ++nOutstanding;
             }
         }
 
-        PstreamGlobals::outstandingRequests_.clear();
-
         if (nOutstanding)
         {
             WarningInFunction
-                << "There were still " << nOutstanding
-                << " outstanding MPI requests." << nl
-                << "Which means your code exited before doing a "
-                << " UPstream::waitRequests()." << nl
-                << "This should not happen for a normal code exit."
-                << nl;
+                << "Still have " << nOutstanding
+                << " outstanding MPI requests."
+                << " Should not happen for a normal code exit."
+                << endl;
+        }
+
+        PstreamGlobals::outstandingRequests_.clear();
+    }
+
+    // TBD: skip these for errNo != 0 ?
+    {
+        detachOurBuffers();
+
+        forAllReverse(myProcNo_, communicator)
+        {
+            freeCommunicatorComponents(communicator);
         }
     }
 
-    // Clean mpi communicators
-    forAllReverse(myProcNo_, communicator)
+    if (errNo == 0)
     {
-        freeCommunicatorComponents(communicator);
+        MPI_Finalize();
     }
-
-    if (!flag)
+    else
     {
-        // MPI not already finalized
-
-        if (!ourMpi)
-        {
-            WarningInFunction
-                << "Finalizing MPI, but was initialized elsewhere\n";
-        }
-
-        if (errNo == 0)
-        {
-            MPI_Finalize();
-        }
-        else
-        {
-            // Abort only locally or world?
-            MPI_Abort(MPI_COMM_WORLD, errNo);
-        }
+        MPI_Abort(MPI_COMM_WORLD, errNo);
     }
 }
 

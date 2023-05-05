@@ -79,11 +79,11 @@ namespace Foam
             error::printStack(Perr);
             std::abort();
         }
-        else if (Pstream::parRun())
+        else if (UPstream::parRun())
         {
             Perr<< nl << err << nl
                 << "\nFOAM parallel run exiting\n" << endl;
-            Pstream::exit(1);
+            UPstream::exit(1);
         }
         else
         {

@@ -78,7 +78,7 @@ Foam::fileOperations::fileOperationInitialise::fileOperationInitialise
                         << "Error: option '-ioRanks' requires a list of"
                            " IO ranks as argument" << nl << nl;
 
-                    //Pstream::exit(1);  // works for serial and parallel
+                    //UPstream::exit(1);  // works for serial and parallel
                 }
             }
         }

@@ -112,13 +112,20 @@ int main(int argc, char *argv[])
     argList::addBoolOption("iter");
     argList::addBoolOption("swap");
     argList::addBoolOption("default", "reinstate default tests");
+    argList::addBoolOption("no-wait", "test with skipping request waits");
     argList::addNote("runs default tests or specified ones only");
 
     #include "setRootCase.H"
 
+    const bool optNowaiting = args.found("no-wait");
+
     // Run default tests, unless only specific tests are requested
     const bool defaultTests =
-        args.found("default") || args.options().empty();
+    (
+        args.found("default")
+     || args.options().empty()
+     || (optNowaiting && args.options().size())
+    );
 
 
     typedef FixedList<scalar,2> scalar2Type;
@@ -307,26 +314,52 @@ int main(int argc, char *argv[])
     List<FixedList<label, 2>> list6{{0, 1}, {2, 3}};
     Info<< "list6: " << list6 << nl;
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         // Fixed buffer would also work, but want to test using UList
         List<labelPair> buffer;
 
+        DynamicList<UPstream::Request> requests;
+
+        const label numProcs = UPstream::nProcs();
         const label startOfRequests = UPstream::nRequests();
 
-        if (Pstream::master())
+
+        // NOTE: also test a mix of local and global requests...
+        UPstream::Request singleRequest;
+
+        if (UPstream::master())
         {
-            buffer.resize(UPstream::nProcs());
+            // Use local requests here
+            requests.reserve(numProcs);
+
+            buffer.resize(numProcs);
             buffer[0] = labelPair(0, UPstream::myProcNo());
 
-            for (const int proci : Pstream::subProcs())
+            for (const int proci : UPstream::subProcs())
             {
                 UIPstream::read
                 (
-                    UPstream::commsTypes::nonBlocking,
+                    requests.emplace_back(),
                     proci,
                     buffer.slice(proci, 1)
                 );
+            }
+
+            if (requests.size() > 1)
+            {
+                // Or just wait for as a single request...
+                singleRequest = requests.back();
+                requests.pop_back();
+            }
+
+            if (requests.size() > 2)
+            {
+                // Peel off a few from local -> global
+                // the order will not matter (is MPI_Waitall)
+
+                UPstream::addRequest(requests.back()); requests.pop_back();
+                UPstream::addRequest(requests.back()); requests.pop_back();
             }
         }
         else
@@ -336,16 +369,34 @@ int main(int argc, char *argv[])
 
             Perr<< "Sending to master: " << buffer << endl;
 
+            // Capture the request and transfer to the global list
+            // (for testing)
+
             UOPstream::write
             (
-                UPstream::commsTypes::nonBlocking,
+                singleRequest,
                 UPstream::masterNo(),
                 buffer.slice(0, 1)  // OK
                 /// buffer  // Also OK
             );
+
+            // if (singleRequest.good())
+            {
+                UPstream::addRequest(singleRequest);
+            }
         }
 
-        UPstream::waitRequests(startOfRequests);
+        Pout<< "Pending requests [" << numProcs << " procs] global="
+            << (UPstream::nRequests() - startOfRequests)
+            << " local=" << requests.size()
+            << " single=" << singleRequest.good() << nl;
+
+        if (!optNowaiting)
+        {
+            UPstream::waitRequests(startOfRequests);
+        }
+        UPstream::waitRequests(requests);
+        UPstream::waitRequest(singleRequest);
 
         Info<< "Gathered: " << buffer << endl;
     }
