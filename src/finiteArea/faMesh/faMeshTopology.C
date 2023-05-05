@@ -68,6 +68,34 @@ static void printPatchEdges
     }
 }
 
+
+// Write edges in VTK format
+template<class PatchType>
+static void vtkWritePatchEdges
+(
+    const PatchType& p,
+    const labelList& selectEdges,
+    const fileName& outputPath,
+    const word& outputName
+)
+{
+    edgeList dumpEdges(p.edges(), selectEdges);
+
+    vtk::lineWriter writer
+    (
+        p.localPoints(),
+        dumpEdges,
+        outputPath/outputName
+    );
+
+    writer.writeGeometry();
+
+    // CellData
+    writer.beginCellData();
+    writer.writeProcIDs();
+    writer.close();
+}
+
 } // End namespace Foam
 
 
@@ -90,6 +118,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
     EdgeMap<label> edgeToBoundaryIndex(2*nBoundaryEdges);
 
     labelHashSet badEdges(2*nBoundaryEdges);
+    labelHashSet danglingEdges(2*nBoundaryEdges);
 
     {
         // Local collection structure for accounting of patch pairs.
@@ -163,40 +192,30 @@ Foam::faMesh::getBoundaryEdgeConnections() const
 
         if (returnReduceOr(badEdges.size()))
         {
-            edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
+            labelList selectEdges(badEdges.sortedToc());
+            word outputName("faMesh-construct.nonManifoldEdges");
 
-            vtk::lineWriter writer
+            vtkWritePatchEdges
             (
-                patch().localPoints(),
-                dumpEdges,
-                fileName
-                (
-                    mesh().time().globalPath()
-                  / ("faMesh-construct.nonManifoldEdges")
-                )
+                patch(),
+                selectEdges,
+                mesh().time().globalPath(),
+                outputName
             );
 
-            writer.writeGeometry();
-
-            // CellData
-            writer.beginCellData();
-            writer.writeProcIDs();
-
             InfoInFunction
-                << "(debug) wrote " << writer.output().name() << nl;
-
-            writer.close();  // Flush writer before raising FatalError
+                << "(debug) wrote " << outputName << nl;
 
             FatalErrorInFunction
                 << "Boundary edges not singly connected: "
-                << returnReduce(badEdges.size(), sumOp<label>()) << '/'
+                << returnReduce(selectEdges.size(), sumOp<label>()) << '/'
                 << nBoundaryEdges << nl;
 
             printPatchEdges
             (
                 FatalError,
                 patch(),
-                badEdges.sortedToc()
+                selectEdges
             );
 
             FatalError << abort(FatalError);
@@ -322,40 +341,30 @@ Foam::faMesh::getBoundaryEdgeConnections() const
 
         if (returnReduceOr(badEdges.size()))
         {
-            edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
+            labelList selectEdges(badEdges.sortedToc());
+            word outputName("faMesh-construct.invalidEdges");
 
-            vtk::lineWriter writer
+            vtkWritePatchEdges
             (
-                patch().localPoints(),
-                dumpEdges,
-                fileName
-                (
-                    mesh().time().globalPath()
-                  / ("faMesh-construct.invalidEdges")
-                )
+                patch(),
+                selectEdges,
+                mesh().time().globalPath(),
+                outputName
             );
 
-            writer.writeGeometry();
-
-            // CellData
-            writer.beginCellData();
-            writer.writeProcIDs();
-
             InfoInFunction
-                << "(debug) wrote " << writer.output().name() << nl;
-
-            writer.close();  // Flush writer before raising FatalError
+                << "(debug) wrote " << outputName << nl;
 
             FatalErrorInFunction
                 << "Boundary edges with missing/invalid neighbours: "
-                << returnReduce(badEdges.size(), sumOp<label>()) << '/'
+                << returnReduce(selectEdges.size(), sumOp<label>()) << '/'
                 << nBoundaryEdges << nl;
 
             printPatchEdges
             (
                 FatalError,
                 patch(),
-                badEdges.sortedToc()
+                selectEdges
             );
 
             FatalError << abort(FatalError);
@@ -546,9 +555,10 @@ Foam::faMesh::getBoundaryEdgeConnections() const
 
     // Pick out gathered connections and add into primary bookkeeping
     badEdges.clear();
+    danglingEdges.clear();
     for (label cppEdgei = 0; cppEdgei < nCoupledEdges; ++cppEdgei)
     {
-        const auto& gathered = gatheredConnections[cppEdgei];
+        auto& gathered = gatheredConnections[cppEdgei];
 
         const label bndEdgei =
             edgeToBoundaryIndex.lookup(cpp.meshEdge(cppEdgei), -1);
@@ -558,7 +568,12 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             // A boundary finiteEdge edge (known from this side)
             auto& connection = bndEdgeConnections[bndEdgei];
 
-            if (gathered.size() == 2)
+            if (gathered.size() == 1)
+            {
+                // Dangling edge!!
+                danglingEdges.insert(cppEdgei);
+            }
+            else if (gathered.size() == 2)
             {
                 // Copy second side of connection
                 const auto& a = gathered[0];
@@ -568,7 +583,57 @@ Foam::faMesh::getBoundaryEdgeConnections() const
             }
             else if (gathered.size() > 2)
             {
-                // Multiply connected!! - this needs to be addressed
+                // Multiply connected!!
+                // ++nUnresolved;
+
+                // Extra safety (but should already be consistently ordered)
+                Foam::sort(gathered);
+
+                // These connections can arise at the centre of a
+                // "star" connection, or because the patch faces are
+                // actually baffles.
+
+                // We don't necessary have enough information to know how
+                // things should be connected, so connect pair-wise
+                // as the first remedial solution
+
+                const label myProci = UPstream::myProcNo();
+
+                label myIndex = -1;
+                label otherIndex = -1;
+
+                forAll(gathered, sloti)
+                {
+                    if (gathered[sloti].procNo() == myProci)
+                    {
+                        myIndex = sloti;
+                        otherIndex =
+                        (
+                            (sloti % 2)
+                          ? (sloti - 1)     // ie, connect (1 -> 0)
+                          : (sloti + 1)     // ie, connect (0 -> 1)
+                        );
+                        break;
+                    }
+                }
+
+                if
+                (
+                    myIndex >= 0
+                 && otherIndex >= 0
+                 && otherIndex < gathered.size()
+                )
+                {
+                    // Copy second side of connection
+                    const auto& a = gathered[myIndex];
+                    const auto& b = gathered[otherIndex];
+
+                    connection.second() = (connection.first() == b) ? a : b;
+                }
+
+                // Mark as 'bad' even if somehow resolved. If we fail
+                // to make any connection, these will still be
+                // flagged later.
                 badEdges.insert(cppEdgei);
             }
         }
@@ -605,6 +670,53 @@ Foam::faMesh::getBoundaryEdgeConnections() const
                 break;
             }
         }
+    }
+
+    if (returnReduceOr(danglingEdges.size()))
+    {
+        WarningInFunction
+            << nl << "Dangling edges detected" << endl;
+
+        // Print out edges as point pairs
+        // These are globally synchronised - so only output on master
+        constexpr label maxOutput = 10;
+
+        label nOutput = 0;
+
+        for (const label cppEdgei : danglingEdges.sortedToc())
+        {
+            const edge e(cpp.meshEdge(cppEdgei));
+
+            const auto& gathered = gatheredConnections[cppEdgei];
+
+            Info<< "connection: ";
+            gathered.writeList(Info) << nl;
+
+            Info<<"    edge  : "
+                << cpp.points()[e.first()] << ' '
+                << cpp.points()[e.second()] << nl;
+
+            ++nOutput;
+            if (maxOutput > 0 && nOutput >= maxOutput)
+            {
+                Info<< " ... suppressing further output" << nl;
+                break;
+            }
+        }
+
+        labelList selectEdges(danglingEdges.sortedToc());
+        word outputName("faMesh-construct.danglingEdges");
+
+        vtkWritePatchEdges
+        (
+            cpp,
+            selectEdges,
+            mesh().time().globalPath(),
+            outputName
+        );
+
+        InfoInFunction
+            << "(debug) wrote " << outputName << nl;
     }
 
 
@@ -680,43 +792,33 @@ Foam::faMesh::getBoundaryEdgeConnections() const
     // Verbose report of missing edges
     if (returnReduceOr(badEdges.size()))
     {
-        edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
+        labelList selectEdges(badEdges.sortedToc());
+        word outputName("faMesh-construct.invalidEdges");
 
-        vtk::lineWriter writer
+        vtkWritePatchEdges
         (
-            patch().localPoints(),
-            dumpEdges,
-            fileName
-            (
-                mesh().time().globalPath()
-              / ("faMesh-construct.invalidEdges")
-            )
+            patch(),
+            selectEdges,
+            mesh().time().globalPath(),
+            outputName
         );
 
-        writer.writeGeometry();
-
-        // CellData
-        writer.beginCellData();
-        writer.writeProcIDs();
-
         InfoInFunction
-            << "(debug) wrote " << writer.output().name() << nl;
-
-        writer.close();  // Flush writer before raising FatalError
+            << "(debug) wrote " << outputName << nl;
 
         FatalErrorInFunction
             << "Boundary edges with missing/invalid neighbours: "
-            << returnReduce(badEdges.size(), sumOp<label>()) << '/'
+            << returnReduce(selectEdges.size(), sumOp<label>()) << '/'
             << nBoundaryEdges << nl;
 
         printPatchEdges
         (
             FatalError,
             patch(),
-            badEdges.sortedToc()
+            selectEdges
         );
 
-        FatalError << abort(FatalError);
+        // Delay until later... FatalError << abort(FatalError);
     }
 
 
@@ -806,35 +908,26 @@ void Foam::faMesh::setBoundaryConnections
             }
         }
 
-        edgeList dumpEdges(patch().edges(), badEdges.sortedToc());
+        labelList selectEdges(badEdges.sortedToc());
+        word outputName("faMesh-construct.invalidMatches");
 
-        vtk::lineWriter writer
+        vtkWritePatchEdges
         (
-            patch().localPoints(),
-            dumpEdges,
-            fileName
-            (
-                mesh().time().globalPath()
-              / ("faMesh-construct.invalidMatches")
-            )
+            patch(),
+            selectEdges,
+            mesh().time().globalPath(),
+            outputName
         );
 
-        writer.writeGeometry();
-
-        // CellData
-        writer.beginCellData();
-        writer.writeProcIDs();
-
         InfoInFunction
-            << "(debug) wrote " << writer.output().name() << nl;
-
-        writer.close();  // Flush writer before raising FatalError
+            << "(debug) wrote " << outputName << nl;
 
         FatalErrorInFunction
             << "Did not properly match "
             << returnReduce(nInvalid, sumOp<label>())
-            << " boundary edges" << nl
-            << abort(FatalError);
+            << " boundary edges" << nl;
+
+        // Delay until later... FatalError << abort(FatalError);
     }
 }
 
