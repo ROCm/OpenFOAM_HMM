@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,26 +114,62 @@ public:
 
 
     //- Destructor
-    virtual ~gradScheme();
+    virtual ~gradScheme() = default;
 
 
     // Member Functions
 
         //- Return mesh reference
-        const faMesh& mesh() const
-        {
-            return mesh_;
-        }
+        const faMesh& mesh() const { return mesh_; }
+
+        //- Calculate and return the grad of the given field.
+        //  Used by grad either to recalculate the cached gradient when it is
+        //  out of date with respect to the field or when it is not cached.
+        virtual tmp
+        <
+            GeometricField
+            <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
+        > calcGrad
+        (
+            const GeometricField<Type, faPatchField, areaMesh>&,
+            const word& name
+        ) const = 0;
 
         //- Calculate and return the grad of the given field
-        virtual tmp
+        //- which may have been cached
+        tmp
+        <
+            GeometricField
+            <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
+        > grad
+        (
+            const GeometricField<Type, faPatchField, areaMesh>&,
+            const word& name
+        ) const;
+
+        //- Calculate and return the grad of the given field
+        //- with the default name
+        //- which may have been cached
+        tmp
         <
             GeometricField
             <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
         > grad
         (
             const GeometricField<Type, faPatchField, areaMesh>&
-        ) const = 0;
+        ) const;
+
+        //- Calculate and return the grad of the given field
+        //- with the default name
+        //- which may have been cached
+        tmp
+        <
+            GeometricField
+            <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
+        > grad
+        (
+            const tmp<GeometricField<Type, faPatchField, areaMesh>>&
+        ) const;
 };
 
 

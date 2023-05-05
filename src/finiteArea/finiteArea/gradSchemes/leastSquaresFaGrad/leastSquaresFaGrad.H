@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,13 +94,16 @@ public:
 
     // Member Functions
 
+        //- Return the gradient of the given field to the
+        //- gradScheme::grad for optional caching
         virtual tmp
         <
             GeometricField
             <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
-        > grad
+        > calcGrad
         (
-            const GeometricField<Type, faPatchField, areaMesh>&
+            const GeometricField<Type, faPatchField, areaMesh>& vsf,
+            const word& name
         ) const;
 };
 
