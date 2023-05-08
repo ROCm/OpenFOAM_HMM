@@ -131,14 +131,16 @@ int main(int argc, char *argv[])
     for (bool barrier_active = false, done = false; !done; /*nil*/)
     {
         int flag = 0;
+        MPI_Message message;
         MPI_Status status;
 
-        MPI_Iprobe
+        MPI_Improbe
         (
             MPI_ANY_SOURCE,
             tag,
             MPI_COMM_WORLD,
            &flag,
+           &message,
            &status
         );
 
@@ -153,14 +155,12 @@ int main(int argc, char *argv[])
             auto& buf = recvBufs(fromProci);
             buf.resize_nocopy(count);
 
-            MPI_Irecv
+            MPI_Imrecv
             (
                 buf.data_bytes(),
                 buf.size_bytes(),
                 MPI_BYTE,
-                fromProci,
-                tag,
-                MPI_COMM_WORLD,
+               &message,
                &recvRequests.emplace_back()
             );
         }
