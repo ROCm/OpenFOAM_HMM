@@ -101,6 +101,9 @@ static void attachOurBuffers()
 
 
 // Remove an existing user-defined send buffer
+// IMPORTANT:
+//     This operation will block until all messages currently in the
+//     buffer have been transmitted.
 static void detachOurBuffers()
 {
 #ifndef SGIMPI
@@ -435,6 +438,16 @@ void Foam::UPstream::shutdown(int errNo)
     ourMpi = false;
 
 
+    // Abort - stop now, without any final synchonization steps!
+    // -----
+
+    if (errNo != 0)
+    {
+        MPI_Abort(MPI_COMM_WORLD, errNo);
+        return;
+    }
+
+
     // Regular cleanup
     // ---------------
 
@@ -468,7 +481,7 @@ void Foam::UPstream::shutdown(int errNo)
         PstreamGlobals::outstandingRequests_.clear();
     }
 
-    // TBD: skip these for errNo != 0 ?
+
     {
         detachOurBuffers();
 
@@ -478,14 +491,8 @@ void Foam::UPstream::shutdown(int errNo)
         }
     }
 
-    if (errNo == 0)
-    {
-        MPI_Finalize();
-    }
-    else
-    {
-        MPI_Abort(MPI_COMM_WORLD, errNo);
-    }
+
+    MPI_Finalize();
 }
 
 
