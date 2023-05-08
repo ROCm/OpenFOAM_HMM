@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
         "file",
         "Alternative particleTrackDict dictionary"
     );
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
 
     #include "setRootCase.H"
     #include "createTime.H"

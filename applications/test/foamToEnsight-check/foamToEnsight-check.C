@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     // Less frequently used - reduce some clutter
     argList::setAdvanced("decomposeParDict");
 
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
 
     #include "addAllRegionOptions.H"
 

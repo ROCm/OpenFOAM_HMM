@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         "The writer format "
         "(default: vtk or 'setFormat' from dictionary)"
     );
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
 
     #include "setRootCase.H"
     #include "createTime.H"

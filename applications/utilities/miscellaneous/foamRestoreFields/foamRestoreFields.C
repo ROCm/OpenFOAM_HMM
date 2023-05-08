@@ -235,10 +235,7 @@ int main(int argc, char *argv[])
     (
         "Report action without moving/renaming"
     );
-    argList::addVerboseOption
-    (
-        "Additional verbosity"
-    );
+    argList::addVerboseOption();
 
     // Arguments are optional (non-mandatory)
     argList::noMandatoryArgs();

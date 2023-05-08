@@ -308,10 +308,7 @@ int main(int argc, char *argv[])
         "Split surface along non-manifold edges "
         "(default split is fully disconnected)"
     );
-    argList::addVerboseOption
-    (
-        "Additional verbosity"
-    );
+    argList::addVerboseOption();
     argList::addBoolOption
     (
         "blockMesh",

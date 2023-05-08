@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noCheckProcessorDirectories();
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
 
     argList::addArgument("input", "The input surface file");
 

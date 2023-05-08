@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     #include "addAllRegionOptions.H"
 
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
     argList::addOption
     (
         "fields",

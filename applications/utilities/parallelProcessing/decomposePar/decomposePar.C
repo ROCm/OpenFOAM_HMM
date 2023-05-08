@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
         "Test without writing the decomposition. "
         "Changes -cellDist to only write VTK output."
     );
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
     argList::addOption
     (
         "domains",

@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
 
     argList::noParallel();
 
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
     argList::addBoolOption
     (
         "addressing-only",

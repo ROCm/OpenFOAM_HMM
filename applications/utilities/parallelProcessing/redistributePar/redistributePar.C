@@ -1020,7 +1020,7 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     argList::addBoolOption("decompose", "Decompose case");
     argList::addBoolOption("reconstruct", "Reconstruct case");
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
     argList::addDryRunOption
     (
         "Test without writing the decomposition. "
