@@ -71,9 +71,8 @@ Description
 
     label nPatchWriters = 0;
 
-    List<wordList> procPatchNames(Pstream::nProcs());
-
-    procPatchNames[Pstream::myProcNo()].resize(patchIds.size());
+    List<wordList> procPatchNames(UPstream::nProcs());
+    procPatchNames[UPstream::myProcNo()].resize(patchIds.size());
 
     for (const label patchId : patchIds)
     {
@@ -87,13 +86,13 @@ Description
             nearCellValue,
             (
                 vtmOutputBase
-              / subDirNaming(Pstream::myProcNo())
+              / subDirNaming(UPstream::myProcNo())
               / pp.name()
             ),
             false  // This MUST be non-parallel (serial only)
         );
 
-        procPatchNames[Pstream::myProcNo()][nPatchWriters] = pp.name();
+        procPatchNames[UPstream::myProcNo()][nPatchWriters] = pp.name();
 
         writer->writeTimeValue(timeValue);
         writer->writeGeometry();
@@ -111,10 +110,10 @@ Description
         for (vtk::patchWriter& writer : patchWriters)
         {
             // Optionally with patchID, procID, neighID fields
-            // - use Pstream::parRun() not writer.parallel() !!
+            // - use UPstream::parRun() not writer.parallel() !!
             writer.beginCellData
             (
-                (withMeshIds ? 1 + (Pstream::parRun() ? 2 : 0) : 0)
+                (withMeshIds ? 1 + (UPstream::parRun() ? 2 : 0) : 0)
               + nVolFields
             );
 
@@ -158,10 +157,10 @@ Description
 
     const label nProcPatches = returnReduce(nPatchWriters, sumOp<label>());
 
-    if (Pstream::master() && nProcPatches)
+    if (UPstream::master() && nProcPatches)
     {
         Info<< "Wrote " << nProcPatches << " processor boundaries from "
-            << Pstream::nProcs() << " processes" << nl;
+            << UPstream::nProcs() << " processes" << nl;
 
 
         // Collect individual boundaries into a vtm file

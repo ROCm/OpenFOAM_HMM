@@ -103,7 +103,7 @@ Description
               ? vtmOutputBase
               : (vtmOutputBase / "internal")
             ),
-            Pstream::parRun()
+            UPstream::parRun()
         );
 
         // No sub-block for internal
@@ -158,7 +158,7 @@ Description
                 )
               : (vtmOutputBase / "boundary")
             ),
-            Pstream::parRun()
+            UPstream::parRun()
         );
 
         // No sub-block for one-patch
@@ -213,7 +213,7 @@ Description
                     )
                   : (vtmOutputBase / "boundary" / pp.name())
                 ),
-                Pstream::parRun()
+                UPstream::parRun()
             );
 
             if (!nPatchWriters)
@@ -432,7 +432,7 @@ Description
 
     // Collective output
 
-    if (Pstream::master())
+    if (UPstream::master())
     {
         // Naming for vtm, file series etc.
         fileName outputName(vtmOutputBase);

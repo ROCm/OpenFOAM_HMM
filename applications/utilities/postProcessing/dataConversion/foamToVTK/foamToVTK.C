@@ -203,7 +203,7 @@ labelList getSelectedPatches
         {
             continue;
         }
-        else if (Pstream::parRun() && bool(isA<processorPolyPatch>(pp)))
+        else if (UPstream::parRun() && bool(isA<processorPolyPatch>(pp)))
         {
             break; // No processor patches for parallel output
         }
@@ -499,7 +499,7 @@ int main(int argc, char *argv[])
 
     if (args.found("processor-fields"))
     {
-        if (!Pstream::parRun())
+        if (!UPstream::parRun())
         {
             Info<< "Ignoring processor patch writing in serial"
                 << nl << endl;
@@ -689,7 +689,7 @@ int main(int argc, char *argv[])
 
     const fileName outputDir(args.globalPath()/vtkDirName);
 
-    if (Pstream::master())
+    if (UPstream::master())
     {
         // Overwrite or create the VTK/regionName directories.
         // For the default region, this is simply "VTK/"
@@ -832,7 +832,7 @@ int main(int argc, char *argv[])
         }
 
         // Emit multi-region vtm
-        if (Pstream::master() && regionNames.size() > 1)
+        if (UPstream::master() && regionNames.size() > 1)
         {
             fileName outputName
             (

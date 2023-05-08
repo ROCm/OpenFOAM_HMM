@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -52,7 +52,7 @@ if (doFiniteArea)
                 outputDir/regionDir/"finite-area"
               / "finiteArea" + timeDesc
             ),
-            Pstream::parRun()
+            UPstream::parRun()
         );
         Info<< "    Area      : "
             << args.relativePath(writer.output()) << nl;
@@ -62,10 +62,10 @@ if (doFiniteArea)
         writer.writeTimeValue(timeValue);
         writer.writeGeometry();
 
-        // Optionally with (cellID, faceLabels, procID) fields
+        // Optionally with (cellID, patchID, faceLabels, procID) fields
         writer.beginCellData
         (
-            (withMeshIds ? 2 + (writer.parallel() ? 1 : 0) : 0)
+            (withMeshIds ? 3 + (writer.parallel() ? 1 : 0) : 0)
           + nAreaFields
         );
 
@@ -75,6 +75,16 @@ if (doFiniteArea)
 
             // Use global indexed values for the 'cell' ids
             writer.writeCellData("cellID", identity(procAddr.range()));
+
+            // The patch ids can also be quite useful
+            const polyBoundaryMesh& pbm = areaMesh.mesh().boundaryMesh();
+
+            labelList patchIds
+            (
+                areaMesh.mesh().boundaryMesh().patchID(areaMesh.faceLabels())
+            );
+
+            writer.writeCellData("patchID", patchIds);
 
             // Use proc-local data for faceLabels
             // (confusing enough already without renumbering)
@@ -95,7 +105,7 @@ if (doFiniteArea)
 
         writer.close();
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
             // Add to file-series and emit as JSON
 

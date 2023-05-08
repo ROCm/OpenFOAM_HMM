@@ -82,7 +82,7 @@ Description
                     outputDir/regionDir
                   / "surface-fields"/"surfaceFields" + timeDesc
                 ),
-                Pstream::parRun()
+                UPstream::parRun()
             );
 
             Info<< "    Surface   : "
@@ -103,7 +103,7 @@ Description
 
             writer.close();
 
-            if (Pstream::master())
+            if (UPstream::master())
             {
                 // Add to file-series and emit as JSON
 
@@ -173,7 +173,7 @@ Description
                   / (meshProxy.useSubMesh() ? meshProxy.name() : fz.name())
                   + timeDesc
                 ),
-                Pstream::parRun()
+                UPstream::parRun()
             );
 
             Info<< "    FaceZone  : "
@@ -199,7 +199,7 @@ Description
 
             writer.close();
 
-            if (Pstream::master())
+            if (UPstream::master())
             {
                 // Add to file-series and emit as JSON
 

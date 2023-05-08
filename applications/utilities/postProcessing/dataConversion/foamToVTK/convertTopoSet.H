@@ -39,7 +39,7 @@ if (faceSetName.size())
         set,
         writeOpts,
         outputName,
-        Pstream::parRun()
+        UPstream::parRun()
     );
 
     wroteTopoSet = true;
@@ -67,7 +67,7 @@ if (pointSetName.size())
         set,
         writeOpts,
         outputName,
-        Pstream::parRun()
+        UPstream::parRun()
     );
 
     wroteTopoSet = true;

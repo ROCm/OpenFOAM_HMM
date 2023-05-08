@@ -30,7 +30,7 @@ if (doLagrangian)
         nameOp<fileName>()
     );
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         // Synchronise cloud names
         Pstream::combineReduce(cloudNames, ListOps::uniqueEqOp<word>());
@@ -78,7 +78,7 @@ if (doLagrangian)
                 outputDir/regionDir/cloud::prefix
               / cloudName/cloudName + timeDesc
             ),
-            Pstream::parRun()
+            UPstream::parRun()
         );
 
         Info<< "    Lagrangian: "
@@ -101,7 +101,7 @@ if (doLagrangian)
 
         writer.close();
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
             // Add to file-series and emit as JSON
 
