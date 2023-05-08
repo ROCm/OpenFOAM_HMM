@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,8 +33,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faPatchData_H
-#define faPatchData_H
+#ifndef Foam_faPatchData_H
+#define Foam_faPatchData_H
 
 #include "labelList.H"
 #include "labelPair.H"
@@ -91,6 +91,9 @@ public:
 
 
     // Other Functions
+
+        //- Has name/type etc
+        bool good() const;
 
         //- Reset data
         void clear();

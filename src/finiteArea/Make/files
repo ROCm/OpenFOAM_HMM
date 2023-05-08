@@ -24,6 +24,7 @@ $(faPatches)/constraint/processor/processorFaPatch.C
 $(faPatches)/constraint/wedge/wedgeFaPatch.C
 $(faPatches)/constraint/cyclic/cyclicFaPatch.C
 $(faPatches)/constraint/symmetry/symmetryFaPatch.C
+$(faPatches)/other/ignore/ignoreFaPatch.C
 
 distributed/faMeshDistributor.C
 distributed/faMeshDistributorNew.C
@@ -68,6 +69,7 @@ $(derivedFaPatchFields)/slip/slipFaPatchFields.C
 $(derivedFaPatchFields)/edgeNormalFixedValue/edgeNormalFixedValueFaPatchVectorField.C
 $(derivedFaPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFaPatchFields.C
 $(derivedFaPatchFields)/uniformFixedValue/uniformFixedValueFaPatchFields.C
+$(derivedFaPatchFields)/ignore/ignoreFaPatchFields.C
 $(derivedFaPatchFields)/clampedPlate/clampedPlateFaPatchFields.C
 
 faePatchFields = fields/faePatchFields

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "globalIndex.H"
 #include "globalMeshData.H"
 #include "edgeHashes.H"
+#include "ignoreFaPatch.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -371,6 +372,12 @@ void Foam::faMeshReconstructor::calcAddressing
     {
         const faPatch& fap = procMesh_.boundary()[patchi];
 
+        if (isA<ignoreFaPatch>(fap))
+        {
+            // These are not real edges
+            continue;
+        }
+
         labelList& patchEdgeLabels = singlePatchEdgeLabels_[patchi];
         patchEdgeLabels = fap.edgeLabels();
 
@@ -490,26 +497,37 @@ void Foam::faMeshReconstructor::createMesh()
 
     // Add in non-processor boundary patches
     faPatchList completePatches(singlePatchEdgeLabels_.size());
+    label nPatches = 0;
     forAll(completePatches, patchi)
     {
         const labelList& patchEdgeLabels = singlePatchEdgeLabels_[patchi];
 
         const faPatch& fap = procMesh_.boundary()[patchi];
 
+        if (isA<ignoreFaPatch>(fap))
+        {
+            // These are not real edges
+            continue;
+        }
+
         const label neiPolyPatchId = fap.ngbPolyPatchIndex();
 
         completePatches.set
         (
-            patchi,
+            nPatches,
             fap.clone
             (
                 completeMesh.boundary(),
                 patchEdgeLabels,
-                patchi,  // index
+                nPatches,  // index
                 neiPolyPatchId
             )
         );
+
+        ++nPatches;
     }
+
+    completePatches.resize(nPatches);
 
     // Serial mesh - no parallel communication
 
