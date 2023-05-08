@@ -131,29 +131,50 @@ void Foam::lduMatrix::updateMatrixInterfaces
         // without waiting for all requests.
 
         DynamicList<int> indices;  // (work array)
-        while
+
+        // const label maxPolling =
+        // (
+        //     (UPstream::nPollProcInterfaces < 0)
+        //   ? (UPstream::nRequests() - startRequest)
+        //   : UPstream::nPollProcInterfaces
+        // );
+
+        for
         (
-            UPstream::nPollProcInterfaces < 0
-         && UPstream::waitSomeRequests(startRequest, &indices)
+            bool pollingActive = (UPstream::nPollProcInterfaces < 0);
+            (
+                pollingActive
+             && UPstream::waitSomeRequests(startRequest, &indices)
+            );
+            /*nil*/
         )
         {
+            pollingActive = false;
+
             forAll(interfaces, interfacei)
             {
                 auto* intf = interfaces.get(interfacei);
 
-                if (intf && !intf->updatedMatrix() && intf->ready())
+                if (intf && !intf->updatedMatrix())
                 {
-                    intf->updateInterfaceMatrix
-                    (
-                        result,
-                        add,
-                        mesh().lduAddr(),
-                        interfacei,
-                        psiif,
-                        coupleCoeffs[interfacei],
-                        cmpt,
-                        commsType
-                    );
+                    if (intf->ready())
+                    {
+                        intf->updateInterfaceMatrix
+                        (
+                            result,
+                            add,
+                            mesh().lduAddr(),
+                            interfacei,
+                            psiif,
+                            coupleCoeffs[interfacei],
+                            cmpt,
+                            commsType
+                        );
+                    }
+                    else
+                    {
+                        pollingActive = true;
+                    }
                 }
             }
         }

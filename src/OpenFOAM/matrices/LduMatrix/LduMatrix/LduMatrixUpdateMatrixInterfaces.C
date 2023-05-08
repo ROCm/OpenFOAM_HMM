@@ -128,28 +128,42 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
         // without waiting for all requests.
 
         DynamicList<int> indices;  // (work array)
-        while
+
+        for
         (
-            UPstream::nPollProcInterfaces < 0
-         && UPstream::waitSomeRequests(startRequest, &indices)
+            bool pollingActive = (UPstream::nPollProcInterfaces < 0);
+            (
+                pollingActive
+             && UPstream::waitSomeRequests(startRequest, &indices)
+            );
+            /*nil*/
         )
         {
+            pollingActive = false;
+
             forAll(interfaces_, interfacei)
             {
                 auto* intf = interfaces_.get(interfacei);
 
-                if (intf && !intf->updatedMatrix() && intf->ready())
+                if (intf && !intf->updatedMatrix())
                 {
-                    intf->updateInterfaceMatrix
-                    (
-                        result,
-                        add,
-                        lduMesh_.lduAddr(),
-                        interfacei,
-                        psiif,
-                        interfaceCoeffs[interfacei],
-                        commsType
-                    );
+                    if (intf->ready())
+                    {
+                        intf->updateInterfaceMatrix
+                        (
+                            result,
+                            add,
+                            lduMesh_.lduAddr(),
+                            interfacei,
+                            psiif,
+                            interfaceCoeffs[interfacei],
+                            commsType
+                        );
+                    }
+                    else
+                    {
+                        pollingActive = true;
+                    }
                 }
             }
         }
