@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,6 +157,260 @@ Foam::List<T> Foam::mapDistributeBase::accessAndFlip
     }
 
     return output;
+}
+
+
+template<class T, class negateOp>
+void Foam::mapDistributeBase::send
+(
+    const labelListList& subMap,
+    const bool subHasFlip,
+    const labelListList& constructMap,
+    const bool constructHasFlip,
+    const UList<T>& field,
+    labelRange& requests,
+    PtrList<List<T>>& sendFields,
+    PtrList<List<T>>& recvFields,
+    const negateOp& negOp,
+    const int tag,
+    const label comm
+)
+{
+    if (!is_contiguous<T>::value)
+    {
+        FatalErrorInFunction
+            << "Only contiguous is currently supported"
+            << exit(FatalError);
+    }
+
+    const label myRank = UPstream::myProcNo(comm);
+    const label nProcs = UPstream::nProcs(comm);
+
+    requests.start() = UPstream::nRequests();
+    requests.size() = 0;
+
+    // Set up receives from neighbours
+
+    recvFields.clear();
+    recvFields.resize(nProcs);
+
+    for (const int domain : UPstream::allProcs(comm))
+    {
+        const labelList& map = constructMap[domain];
+
+        if (domain != myRank && map.size())
+        {
+            recvFields.set(domain, new List<T>(map.size()));
+            UIPstream::read
+            (
+                UPstream::commsTypes::nonBlocking,
+                domain,
+                recvFields[domain].data_bytes(),
+                recvFields[domain].size_bytes(),
+                tag,
+                comm
+            );
+        }
+    }
+
+    // TDB: save where recv finish and send start
+    // const label endRecvRequests = UPstream::nRequests();
+
+
+    // Set up sends to neighbours
+
+    sendFields.clear();
+    sendFields.resize(nProcs);
+
+    for (const int domain : UPstream::allProcs(comm))
+    {
+        const labelList& map = subMap[domain];
+
+        if (domain != myRank && map.size())
+        {
+            sendFields.set(domain, new List<T>(map.size()));
+            List<T>& subField = sendFields[domain];
+            forAll(map, i)
+            {
+                subField[i] = accessAndFlip
+                (
+                    field,
+                    map[i],
+                    subHasFlip,
+                    negOp
+                );
+            }
+
+            UOPstream::write
+            (
+                UPstream::commsTypes::nonBlocking,
+                domain,
+                subField.cdata_bytes(),
+                subField.size_bytes(),
+                tag,
+                comm
+            );
+        }
+    }
+
+    // Set up 'send' to myself
+
+    {
+        const labelList& map = subMap[myRank];
+
+        sendFields.set(myRank, new List<T>(map.size()));
+        List<T>& subField = sendFields[myRank];
+        forAll(map, i)
+        {
+            subField[i] = accessAndFlip
+            (
+                field,
+                map[i],
+                subHasFlip,
+                negOp
+            );
+        }
+    }
+
+    requests.size() = (UPstream::nRequests() - requests.start());
+}
+
+
+template<class T>
+void Foam::mapDistributeBase::send
+(
+    const UList<T>& field,
+    labelRange& requests,
+    PtrList<List<T>>& sendFields,
+    PtrList<List<T>>& recvFields,
+    const int tag
+) const
+{
+    send
+    (
+        subMap_,
+        subHasFlip_,
+        constructMap_,
+        constructHasFlip_,
+        field,
+        requests,
+        sendFields,
+        recvFields,
+        flipOp(),
+        tag,
+        comm_
+    );
+}
+
+
+template<class T, class CombineOp, class negateOp>
+void Foam::mapDistributeBase::receive
+(
+    const label constructSize,
+    const labelListList& constructMap,
+    const bool constructHasFlip,
+    const UPtrList<List<T>>& sendFields,
+    const UPtrList<List<T>>& recvFields,
+    const labelRange& requests,
+    List<T>& field,
+    const CombineOp& cop,
+    const negateOp& negOp,
+    const int tag,
+    const label comm
+)
+{
+    if (!is_contiguous<T>::value)
+    {
+        FatalErrorInFunction
+            << "Only contiguous is currently supported"
+            << exit(FatalError);
+    }
+
+    const label myRank = UPstream::myProcNo(comm);
+
+    // Combine bits. Note that can reuse field storage
+
+    field.resize(constructSize);
+
+
+    // Receive sub field from myself (sendFields[myRank])
+    if (sendFields.set(myRank))
+    {
+        const labelList& map = constructMap[myRank];
+        const List<T>& subField = sendFields[myRank];
+
+        flipAndCombine
+        (
+            map,
+            constructHasFlip,
+            subField,
+            cop,
+            negOp,
+            field
+        );
+    }
+
+
+    // Wait for all to finish
+    // TBD. sliced-range (ie, only wait for receives)
+    UPstream::waitRequests(requests.start(), requests.size());
+
+    // Collect neighbour fields
+    for (const int domain : UPstream::allProcs(comm))
+    {
+        const labelList& map = constructMap[domain];
+
+        if (domain != myRank && map.size())
+        {
+            if (!recvFields.set(domain))
+            {
+                FatalErrorInFunction
+                    << "Unallocated receive field from rank:" << domain
+                    << exit(FatalError);
+            }
+
+            const List<T>& subField = recvFields[domain];
+
+            checkReceivedSize(domain, map.size(), subField.size());
+
+            flipAndCombine
+            (
+                map,
+                constructHasFlip,
+                subField,
+                cop,
+                negOp,
+                field
+            );
+        }
+    }
+}
+
+
+template<class T>
+void Foam::mapDistributeBase::receive
+(
+    const labelRange& requests,
+    const UPtrList<List<T>>& sendFields,
+    const UPtrList<List<T>>& recvFields,
+    List<T>& field,
+    const int tag
+) const
+{
+    receive
+    (
+        constructSize_,
+        constructMap_,
+        constructHasFlip_,
+        sendFields,
+        recvFields,
+        requests,
+        field,
+        eqOp<T>(),
+        flipOp(),
+        tag,
+        comm_
+    );
 }
 
 
