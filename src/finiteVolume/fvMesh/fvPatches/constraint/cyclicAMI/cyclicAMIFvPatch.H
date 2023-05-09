@@ -35,12 +35,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicAMIFvPatch_H
-#define cyclicAMIFvPatch_H
+#ifndef Foam_cyclicAMIFvPatch_H
+#define Foam_cyclicAMIFvPatch_H
 
+#include "cyclicAMIPolyPatch.H"
 #include "coupledFvPatch.H"
 #include "cyclicAMILduInterface.H"
-#include "cyclicAMIPolyPatch.H"
 #include "fvBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,7 +57,7 @@ class cyclicAMIFvPatch
     public coupledFvPatch,
     public cyclicAMILduInterface
 {
-    // Private data
+    // Private Data
 
         const cyclicAMIPolyPatch& cyclicAMIPolyPatch_;
 
@@ -258,7 +258,6 @@ public:
                 const Pstream::commsTypes commsType,
                 const labelUList& internalData
             ) const;
-
 };
 
 

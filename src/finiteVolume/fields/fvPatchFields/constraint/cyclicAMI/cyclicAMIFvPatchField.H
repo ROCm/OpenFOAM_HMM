@@ -60,9 +60,9 @@ SourceFiles
 #ifndef Foam_cyclicAMIFvPatchField_H
 #define Foam_cyclicAMIFvPatchField_H
 
+#include "cyclicAMIFvPatch.H"
 #include "coupledFvPatchField.H"
 #include "cyclicAMILduInterfaceField.H"
-#include "cyclicAMIFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
