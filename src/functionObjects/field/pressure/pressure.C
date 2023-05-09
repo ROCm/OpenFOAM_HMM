@@ -332,7 +332,8 @@ bool Foam::functionObjects::pressure::calc()
                 p.mesh().time().timeName(),
                 p.mesh(),
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             coeff(calcPressure(p, rhoScale(p)))
         );

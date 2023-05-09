@@ -541,7 +541,8 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             time_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         ),
         mesh_,
         dimensionedScalar(dimless, Zero)
@@ -565,7 +566,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
         if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
         {
-            volScalarField* vfPtr = new volScalarField(fieldHeader, mesh_);
+            auto* vfPtr = new volScalarField(fieldHeader, mesh_);
             mesh_.objectRegistry::store(vfPtr);
         }
         else
@@ -595,7 +596,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
         if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
         {
-            volScalarField* vfPtr = new volScalarField(fieldHeader, mesh_);
+            auto* vfPtr = new volScalarField(fieldHeader, mesh_);
             mesh_.objectRegistry::store(vfPtr);
         }
         else
@@ -623,7 +624,7 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
 
         if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
         {
-            volScalarField* vfPtr(new volScalarField(fieldHeader, mesh_));
+            auto* vfPtr = new volScalarField(fieldHeader, mesh_);
             mesh_.objectRegistry::store(vfPtr);
         }
         else

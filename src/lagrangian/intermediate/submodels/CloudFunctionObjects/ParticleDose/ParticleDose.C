@@ -64,11 +64,11 @@ void Foam::ParticleDose<CloudType>::postEvolve
 {
     auto& c = this->owner();
 
-    auto* DPtr = c.template getObjectPtr<IOField<scalar>>("D");
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("D");
 
-    if (!DPtr)
+    if (!resultPtr)
     {
-        DPtr = new IOField<scalar>
+        resultPtr = new IOField<scalar>
         (
             IOobject
             (
@@ -81,9 +81,9 @@ void Foam::ParticleDose<CloudType>::postEvolve
             )
         );
 
-        DPtr->store();
+        resultPtr->store();
     }
-    auto& D = *DPtr;
+    auto& D = *resultPtr;
 
     D.resize(c.size(), Zero);
 

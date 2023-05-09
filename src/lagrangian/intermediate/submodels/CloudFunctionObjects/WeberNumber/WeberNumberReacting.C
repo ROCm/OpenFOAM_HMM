@@ -62,11 +62,11 @@ void Foam::WeberNumberReacting<CloudType>::postEvolve
 {
     const auto& c = this->owner();
 
-    auto* WePtr = c.template getObjectPtr<IOField<scalar>>("We");
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("We");
 
-    if (!WePtr)
+    if (!resultPtr)
     {
-        WePtr = new IOField<scalar>
+        resultPtr = new IOField<scalar>
         (
             IOobject
             (
@@ -79,9 +79,9 @@ void Foam::WeberNumberReacting<CloudType>::postEvolve
             )
         );
 
-        WePtr->store();
+        resultPtr->store();
     }
-    auto& We = *WePtr;
+    auto& We = *resultPtr;
 
     We.resize(c.size());
 

@@ -64,11 +64,11 @@ void Foam::NusseltNumber<CloudType>::postEvolve
     const auto& tc =
         static_cast<const ThermoCloud<KinematicCloud<Cloud<parcelType>>>&>(c);
 
-    auto* NuPtr = c.template getObjectPtr<IOField<scalar>>("Nu");
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("Nu");
 
-    if (!NuPtr)
+    if (!resultPtr)
     {
-        NuPtr = new IOField<scalar>
+        resultPtr = new IOField<scalar>
         (
             IOobject
             (
@@ -81,9 +81,9 @@ void Foam::NusseltNumber<CloudType>::postEvolve
             )
         );
 
-        NuPtr->store();
+        resultPtr->store();
     }
-    auto& Nu = *NuPtr;
+    auto& Nu = *resultPtr;
 
     Nu.resize(c.size());
 

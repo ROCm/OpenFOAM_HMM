@@ -292,7 +292,7 @@ bool Foam::mappedPatchBase::constructIOField
 
     if (tok.isCompound() && tok.compoundToken().type() == tag)
     {
-        IOField<Type>* fldPtr = obr.findObject<IOField<Type>>(name);
+        IOField<Type>* fldPtr = obr.getObjectPtr<IOField<Type>>(name);
         if (fldPtr)
         {
             fldPtr->transfer
@@ -305,14 +305,15 @@ bool Foam::mappedPatchBase::constructIOField
         }
         else
         {
-            IOField<Type>* fldPtr = new IOField<Type>
+            fldPtr = new IOField<Type>
             (
                 IOobject
                 (
                     name,
                     obr,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 ),
                 label(0)
             );
@@ -342,7 +343,7 @@ void Foam::mappedPatchBase::storeField
     const Field<Type>& values
 )
 {
-    IOField<Type>* fldPtr = obr.findObject<IOField<Type>>(fieldName);
+    IOField<Type>* fldPtr = obr.getObjectPtr<IOField<Type>>(fieldName);
     if (fldPtr)
     {
         *fldPtr = values;
@@ -356,7 +357,8 @@ void Foam::mappedPatchBase::storeField
                 fieldName,
                 obr,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             values
         );

@@ -899,7 +899,8 @@ int main(int argc, char *argv[])
                     runTime.system(),
                     runTime,
                     IOobject::MUST_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 ),
                 args.getOrDefault<fileName>("decomposeParDict", "")
             )

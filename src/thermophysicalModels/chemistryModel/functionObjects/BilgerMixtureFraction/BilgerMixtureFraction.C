@@ -58,9 +58,11 @@ namespace functionObjects
 
 void Foam::functionObjects::BilgerMixtureFraction::calcBilgerMixtureFraction()
 {
-    if (!mesh_.foundObject<volScalarField>(resultName_, false))
+    auto* resultPtr = mesh_.getObjectPtr<volScalarField>(resultName_);
+
+    if (!resultPtr)
     {
-        auto tCo = tmp<volScalarField>::New
+        resultPtr = new volScalarField
         (
             IOobject
             (
@@ -68,15 +70,15 @@ void Foam::functionObjects::BilgerMixtureFraction::calcBilgerMixtureFraction()
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero)
         );
-        mesh_.objectRegistry::store(tCo.ptr());
+        mesh_.objectRegistry::store(resultPtr);
     }
-
-    auto& f_Bilger = mesh_.lookupObjectRef<volScalarField>(resultName_);
+    auto& f_Bilger = *resultPtr;
 
     auto& Y = thermo_.Y();
 

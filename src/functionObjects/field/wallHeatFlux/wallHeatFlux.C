@@ -119,7 +119,8 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimMass/pow3(dimTime), Zero)

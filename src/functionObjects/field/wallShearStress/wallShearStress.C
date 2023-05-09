@@ -106,7 +106,8 @@ Foam::functionObjects::wallShearStress::wallShearStress
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedVector(sqr(dimLength)/sqr(dimTime), Zero)

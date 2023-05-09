@@ -91,7 +91,9 @@ void Foam::functionObjects::solverInfo::createResidualField
         IOobject::scopedName("initialResidual", fieldName)
     );
 
-    if (!mesh_.foundObject<IOField<scalar>>(residualName))
+    auto* fieldPtr = mesh_.getObjectPtr<IOField<scalar>>(residualName);
+
+    if (!fieldPtr)
     {
         auto* fieldPtr =
             new IOField<scalar>

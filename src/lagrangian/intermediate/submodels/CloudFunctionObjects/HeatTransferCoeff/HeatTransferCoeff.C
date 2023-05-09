@@ -64,11 +64,11 @@ void Foam::HeatTransferCoeff<CloudType>::postEvolve
     const auto& tc =
         static_cast<const ThermoCloud<KinematicCloud<Cloud<parcelType>>>&>(c);
 
-    auto* htcPtr = c.template getObjectPtr<IOField<scalar>>("htc");
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("htc");
 
-    if (!htcPtr)
+    if (!resultPtr)
     {
-        htcPtr = new IOField<scalar>
+        resultPtr = new IOField<scalar>
         (
             IOobject
             (
@@ -81,9 +81,9 @@ void Foam::HeatTransferCoeff<CloudType>::postEvolve
             )
         );
 
-        htcPtr->store();
+        resultPtr->store();
     }
-    auto& htc = *htcPtr;
+    auto& htc = *resultPtr;
 
     htc.resize(c.size());
 

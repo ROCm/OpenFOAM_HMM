@@ -92,7 +92,8 @@ int Foam::functionObjects::zeroGradient::apply
                 time_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensioned<Type>(input.dimensions(), Zero),

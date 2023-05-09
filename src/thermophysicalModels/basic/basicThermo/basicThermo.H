@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,8 +43,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicThermo_H
-#define basicThermo_H
+#ifndef Foam_basicThermo_H
+#define Foam_basicThermo_H
 
 #include "volFields.H"
 #include "typeInfo.H"
@@ -219,7 +219,7 @@ public:
         static autoPtr<Thermo> New
         (
             const fvMesh&,
-            const word& phaseName=word::null
+            const word& phaseName = word::null
         );
 
         //- Generic New for each of the related thermodynamics packages
@@ -228,7 +228,7 @@ public:
         (
             const fvMesh&,
             const dictionary&,
-            const word& phaseName=word::null
+            const word& phaseName = word::null
         );
 
         //- Generic New for each of the related thermodynamics packages
@@ -244,7 +244,7 @@ public:
         static autoPtr<basicThermo> New
         (
             const fvMesh&,
-            const word& phaseName=word::null
+            const word& phaseName = word::null
         );
 
 
@@ -254,20 +254,32 @@ public:
 
     // Member Functions
 
+        //- The dictionary name ("thermophysicalProperties")
         static const word dictName;
 
-        static word phasePropertyName
-        (
-            const word& name,
-            const word& phaseName
-        )
+        //- The phase property name as property.phase
+        //- \sa IOobject::groupName
+        static word phasePropertyName(const word& name, const word& phaseName)
         {
             return IOobject::groupName(name, phaseName);
         }
 
+        //- The phase property name as property.phase (using phaseName_)
+        //- \sa IOobject::groupName
         word phasePropertyName(const word& name) const
         {
             return IOobject::groupName(name, phaseName_);
+        }
+
+        //- The phase property name scoped as scope:property.phase
+        //- \sa IOobject::groupName and \sa IOobject::scopedName
+        word phaseScopedName(const std::string& scope, const word& name) const
+        {
+            return IOobject::groupName
+            (
+                IOobject::scopedName(scope, name),
+                phaseName_
+            );
         }
 
         static const basicThermo& lookupThermo(const fvPatchScalarField& pf);

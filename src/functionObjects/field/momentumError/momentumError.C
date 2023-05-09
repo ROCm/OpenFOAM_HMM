@@ -173,7 +173,8 @@ Foam::functionObjects::momentumError::momentumError
                 subMesh.time().timeName(),
                 subMesh,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             subMesh,
             dimensionedVector(momDims)
@@ -192,7 +193,8 @@ Foam::functionObjects::momentumError::momentumError
             time_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         ),
         mesh_,
         dimensionedVector(momDims)

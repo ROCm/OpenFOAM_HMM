@@ -71,28 +71,27 @@ Foam::PressureGradientForce<CloudType>::~PressureGradientForce()
 template<class CloudType>
 void Foam::PressureGradientForce<CloudType>::cacheFields(const bool store)
 {
-    static word fName("DUcDt");
+    static word resultName("DUcDt");
 
-    bool fieldExists = this->mesh().template foundObject<volVectorField>(fName);
+    volVectorField* resultPtr =
+        this->mesh().template getObjectPtr<volVectorField>(resultName);
 
     if (store)
     {
-        if (!fieldExists)
+        if (!resultPtr)
         {
             const volVectorField& Uc = this->mesh().template
                 lookupObject<volVectorField>(UName_);
 
-            volVectorField* DUcDtPtr = new volVectorField
+            resultPtr = new volVectorField
             (
-                fName,
+                resultName,
                 fvc::ddt(Uc) + (Uc & fvc::grad(Uc))
             );
 
-            DUcDtPtr->store();
+            resultPtr->store();
         }
-
-        const volVectorField& DUcDt = this->mesh().template
-            lookupObject<volVectorField>(fName);
+        const volVectorField& DUcDt = *resultPtr;
 
         DUcDtInterpPtr_.reset
         (
@@ -107,12 +106,9 @@ void Foam::PressureGradientForce<CloudType>::cacheFields(const bool store)
     {
         DUcDtInterpPtr_.clear();
 
-        if (fieldExists)
+        if (resultPtr)
         {
-            volVectorField& DUcDt =
-                this->mesh().template lookupObjectRef<volVectorField>(fName);
-
-            DUcDt.checkOut();
+            resultPtr->checkOut();
         }
     }
 }

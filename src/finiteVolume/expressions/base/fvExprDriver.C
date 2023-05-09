@@ -537,7 +537,9 @@ Foam::expressions::fvExprDriver::regionMesh
                 regionName,
                 mesh.time().constant(),
                 mesh.time(),
-                IOobject::MUST_READ
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         );
 

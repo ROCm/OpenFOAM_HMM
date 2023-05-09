@@ -65,10 +65,11 @@ Foam::functionObjects::processorField::processorField
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
-            dimensionedScalar(dimless, Pstream::myProcNo())
+            dimensionedScalar(dimless, UPstream::myProcNo())
         )
     );
 
@@ -92,7 +93,7 @@ bool Foam::functionObjects::processorField::execute()
         mesh_.lookupObjectRef<volScalarField>("processorID");
 
     procField ==
-        dimensionedScalar("proci", dimless, Pstream::myProcNo());
+        dimensionedScalar("proci", dimless, UPstream::myProcNo());
 
     return true;
 }
@@ -123,10 +124,11 @@ void Foam::functionObjects::processorField::updateMesh(const mapPolyMesh& mpm)
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
-            dimensionedScalar(dimless, Pstream::myProcNo())
+            dimensionedScalar(dimless, UPstream::myProcNo())
         )
     );
 

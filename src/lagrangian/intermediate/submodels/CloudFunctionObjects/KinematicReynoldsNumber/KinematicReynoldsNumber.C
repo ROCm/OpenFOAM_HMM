@@ -61,11 +61,11 @@ void Foam::KinematicReynoldsNumber<CloudType>::postEvolve
 {
     auto& c = this->owner();
 
-    auto* RePtr = c.template getObjectPtr<IOField<scalar>>("Re");
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("Re");
 
-    if (!RePtr)
+    if (!resultPtr)
     {
-        RePtr = new IOField<scalar>
+        resultPtr = new IOField<scalar>
         (
             IOobject
             (
@@ -78,9 +78,9 @@ void Foam::KinematicReynoldsNumber<CloudType>::postEvolve
             )
         );
 
-        RePtr->store();
+        resultPtr->store();
     }
-    auto& Re = *RePtr;
+    auto& Re = *resultPtr;
 
     Re.resize(c.size());
 

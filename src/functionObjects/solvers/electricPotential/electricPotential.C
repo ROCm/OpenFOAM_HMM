@@ -57,7 +57,8 @@ Foam::functionObjects::electricPotential::operandField()
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_
         );

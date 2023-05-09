@@ -84,25 +84,24 @@ Foam::LiftForce<CloudType>::~LiftForce()
 template<class CloudType>
 void Foam::LiftForce<CloudType>::cacheFields(const bool store)
 {
-    static word fName("curlUcDt");
+    static word resultName("curlUcDt");
 
-    bool fieldExists = this->mesh().template foundObject<volVectorField>(fName);
+    volVectorField* resultPtr =
+        this->mesh().template getObjectPtr<volVectorField>(resultName);
 
     if (store)
     {
-        if (!fieldExists)
+        if (!resultPtr)
         {
             const volVectorField& Uc = this->mesh().template
                 lookupObject<volVectorField>(UName_);
 
-            volVectorField* curlUcPtr =
-                new volVectorField(fName, fvc::curl(Uc));
+            resultPtr = new volVectorField(resultName, fvc::curl(Uc));
 
-            curlUcPtr->store();
+            resultPtr->store();
         }
 
-        const volVectorField& curlUc = this->mesh().template
-            lookupObject<volVectorField>(fName);
+        const volVectorField& curlUc = *resultPtr;
 
         curlUcInterpPtr_.reset
         (
@@ -117,12 +116,9 @@ void Foam::LiftForce<CloudType>::cacheFields(const bool store)
     {
         curlUcInterpPtr_.clear();
 
-        if (fieldExists)
+        if (resultPtr)
         {
-            volVectorField& curlUc =
-                this->mesh().template lookupObjectRef<volVectorField>(fName);
-
-            curlUc.checkOut();
+            resultPtr->checkOut();
         }
     }
 }

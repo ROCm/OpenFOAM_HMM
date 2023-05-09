@@ -78,17 +78,11 @@ bool Foam::functionObjects::CourantNo::calc()
             )
         );
 
-        if (foundObject<volScalarField>(resultName_, false))
-        {
-            volScalarField& Co =
-                lookupObjectRef<volScalarField>(resultName_);
+        auto* resultPtr = getObjectPtr<volScalarField>(resultName_);
 
-            Co.ref() = Coi();
-            Co.correctBoundaryConditions();
-        }
-        else
+        if (!resultPtr)
         {
-            auto tCo = tmp<volScalarField>::New
+            resultPtr = new volScalarField
             (
                 IOobject
                 (
@@ -96,16 +90,19 @@ bool Foam::functionObjects::CourantNo::calc()
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 ),
                 mesh_,
                 dimensionedScalar(dimless, Zero),
                 fvPatchFieldBase::zeroGradientType()
             );
-            tCo.ref().ref() = Coi();
-            tCo.ref().correctBoundaryConditions();
-            mesh_.objectRegistry::store(tCo.ptr());
+            mesh_.objectRegistry::store(resultPtr);
         }
+        auto& Co = *resultPtr;
+
+        Co.internalFieldRef() = Coi;
+        Co.correctBoundaryConditions();
 
         return true;
     }

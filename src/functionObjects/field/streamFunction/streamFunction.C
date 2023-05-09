@@ -404,10 +404,11 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
 
 bool Foam::functionObjects::streamFunction::calc()
 {
-    if (foundObject<surfaceScalarField>(fieldName_))
+    const auto* phiPtr = findObject<surfaceScalarField>(fieldName_);
+
+    if (phiPtr)
     {
-        const surfaceScalarField& phi =
-            mesh_.lookupObject<surfaceScalarField>(fieldName_);
+        const surfaceScalarField& phi = *phiPtr;
 
         return store(resultName_, calc(phi));
     }
