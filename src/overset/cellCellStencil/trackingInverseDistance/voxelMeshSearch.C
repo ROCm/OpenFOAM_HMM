@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -211,7 +211,7 @@ Foam::label Foam::voxelMeshSearch::searchProcPatch
     const pointField& cellCentres = mesh_.cellCentres();
     const polyBoundaryMesh& bMeshes = mesh_.boundaryMesh();
 
-    label patchi = bMeshes.patchID()[faceID-mesh_.nInternalFaces()];
+    const label patchi = bMeshes.patchID(faceID);
     const polyPatch& bMeshPatch = bMeshes[patchi];
 
     if (!isA<processorPolyPatch>(bMeshPatch))

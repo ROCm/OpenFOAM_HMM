@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -195,7 +195,7 @@ Foam::RemoveParcels<CloudType>::RemoveParcels
             Info<< "        " << zoneName << " faces: " << nFaces << nl;
 
             scalar totArea = 0.0;
-            for (label facei : fz)
+            for (const label facei : fz)
             {
                 if (facei < owner.mesh().nInternalFaces())
                 {
@@ -203,8 +203,7 @@ Foam::RemoveParcels<CloudType>::RemoveParcels
                 }
                 else
                 {
-                    label bFacei = facei - owner.mesh().nInternalFaces();
-                    label patchi = pbm.patchID()[bFacei];
+                    const label patchi = pbm.patchID(facei);
                     const polyPatch& pp = pbm[patchi];
 
                     if

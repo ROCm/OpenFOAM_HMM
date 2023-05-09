@@ -106,11 +106,10 @@ void ReadAndMapFields
             }
             else if (index < 0)
             {
-                label facei = -index-1;
-                label bFacei = facei - mesh.nInternalFaces();
-                if (bFacei >= 0)
+                const label facei = -index-1;
+                const label patchi = mesh.boundaryMesh().patchID(facei);
+                if (patchi >= 0)
                 {
-                    label patchi = mesh.boundaryMesh().patchID()[bFacei];
                     label localFacei = mesh.boundaryMesh()[patchi].whichFace
                     (
                         facei

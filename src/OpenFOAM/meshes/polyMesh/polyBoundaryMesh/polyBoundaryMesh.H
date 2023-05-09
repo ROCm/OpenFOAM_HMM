@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -247,19 +247,30 @@ public:
 
         //- Lookup mesh face index and return (patchi, patchFacei) tuple
         //- or (-1, meshFacei) for internal faces
-        labelPair whichPatchFace(const label faceIndex) const;
+        labelPair whichPatchFace(const label meshFacei) const;
 
         //- Lookup mesh face indices and return (patchi, patchFacei) tuples
-        labelPairList whichPatchFace(const labelUList& faceIndices) const;
+        labelPairList whichPatchFace(const labelUList& meshFaceIndices) const;
 
-        //- Return patch index for a given mesh face index
-        label whichPatch(const label faceIndex) const
+        //- Return patch index for a given mesh face index.
+        //- Uses binary search.
+        label whichPatch(const label meshFacei) const
         {
-            return whichPatchFace(faceIndex).first();
+            return whichPatchFace(meshFacei).first();
         }
 
         //- Per boundary face label the patch index
         const labelList& patchID() const;
+
+        //- Return patch index for a given mesh face index.
+        //- Uses direct lookup into patchID() list.
+        //- Returns -1 for internal or out-of-range faces
+        label patchID(const label meshFacei) const;
+
+        //- Lookup mesh face indices and return patch indices.
+        //- Uses direct lookup into patchID() list.
+        //- Returns values of -1 for internal or out-of-range faces
+        labelList patchID(const labelUList& meshFaceIndices) const;
 
         //- The patch indices per patch group
         const HashTable<labelList>& groupPatchIDs() const;

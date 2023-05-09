@@ -368,19 +368,18 @@ void Foam::isoAdvection::timeIntegratedFlux()
     const surfaceScalarField::Boundary& phib = phi_.boundaryField();
     const surfaceScalarField::Boundary& magSfb = mesh_.magSf().boundaryField();
     surfaceScalarField::Boundary& dVfb = dVf_.boundaryFieldRef();
-    const label nInternalFaces = mesh_.nInternalFaces();
 
     // Loop through boundary surface faces
     forAll(bsFaces_, i)
     {
         // Get boundary face index (in the global list)
         const label facei = bsFaces_[i];
-        const label patchi = boundaryMesh.patchID()[facei - nInternalFaces];
-        const label start = boundaryMesh[patchi].start();
+        const label patchi = boundaryMesh.patchID(facei);
 
         if (!phib[patchi].empty())
         {
-            const label patchFacei = facei - start;
+            const label patchFacei = boundaryMesh[patchi].whichFace(facei);
+
             const scalar phiP = phib[patchi][patchFacei];
 
             if (phiP >= 0)
@@ -601,7 +600,7 @@ void Foam::isoAdvection::checkIfOnProcPatch(const label facei)
     if (!mesh_.isInternalFace(facei))
     {
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-        const label patchi = pbm.patchID()[facei - mesh_.nInternalFaces()];
+        const label patchi = pbm.patchID(facei);
 
         if (isA<processorPolyPatch>(pbm[patchi]) && !pbm[patchi].empty())
         {

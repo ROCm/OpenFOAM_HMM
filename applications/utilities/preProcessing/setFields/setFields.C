@@ -391,7 +391,7 @@ bool setFaceFieldType
             }
             else
             {
-                label patchi = mesh.boundaryMesh().patchID()[bFacei];
+                const label patchi = mesh.boundaryMesh().patchID()[bFacei];
 
                 allBoundaryValues[bFacei] = fieldValue;
                 ++nChanged[patchi];

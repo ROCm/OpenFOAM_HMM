@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -843,7 +843,7 @@ void Foam::snappyLayerDriver::handleWarpedFaces
     {
         const face& f = pp[i];
         label faceI = pp.addressing()[i];
-        label patchI = patches.patchID()[faceI-mesh.nInternalFaces()];
+        label patchI = patches.patchID(faceI);
 
         // It is hard to calculate some length scale if not in relative
         // mode so disable this check.

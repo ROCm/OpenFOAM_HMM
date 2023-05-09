@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -522,10 +522,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         const face& f = mesh_.faces()[wallFaceIndex];
 
-        label patchi = mesh_.boundaryMesh().patchID()
-        [
-            wallFaceIndex - mesh_.nInternalFaces()
-        ];
+        const label patchi = mesh_.boundaryMesh().patchID(wallFaceIndex);
 
         referredWallFaces_[rWFI] = referredWallFace
         (
@@ -945,14 +942,10 @@ void Foam::InteractionLists<ParticleType>::prepareWallDataToRefer()
             globalTransforms.transformIndex(wfiat)
         );
 
-        label patchi = mesh_.boundaryMesh().patchID()
-        [
-            wallFaceIndex - mesh_.nInternalFaces()
-        ];
+        const label patchi = mesh_.boundaryMesh().patchID(wallFaceIndex);
 
-        label patchFacei =
-            wallFaceIndex
-          - mesh_.boundaryMesh()[patchi].start();
+        const label patchFacei =
+            mesh_.boundaryMesh()[patchi].whichFace(wallFaceIndex);
 
         // Need to transform velocity when tensor transforms are
         // supported

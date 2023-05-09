@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -412,7 +412,7 @@ void Foam::fv::directionalPressureGradientExplicitSource::correct
             }
             else if (fZone.flipMap()[i])
             {
-                label patchI = pbm.patchID()[faceI-mesh_.nInternalFaces()];
+                const label patchI = pbm.patchID(faceI);
                 label localFaceI = pbm[patchI].whichFace(faceI);
 
                 scalar w = mesh_.magSf().boundaryField()[patchI][localFaceI];

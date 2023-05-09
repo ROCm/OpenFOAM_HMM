@@ -50,7 +50,7 @@ Type Foam::isoAdvection::faceValue
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
         // Boundary face. Find out which face of which patch
-        const label patchi = pbm.patchID()[facei - mesh_.nInternalFaces()];
+        const label patchi = pbm.patchID(facei);
 
         if (patchi < 0 || patchi >= pbm.size())
         {
@@ -89,7 +89,7 @@ void Foam::isoAdvection::setFaceValue
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
         // Boundary face. Find out which face of which patch
-        const label patchi = pbm.patchID()[facei - mesh_.nInternalFaces()];
+        const label patchi = pbm.patchID(facei);
 
         if (patchi < 0 || patchi >= pbm.size())
         {
@@ -106,7 +106,6 @@ void Foam::isoAdvection::setFaceValue
         }
 
         const label patchFacei = pp.whichFace(facei);
-
         f.boundaryFieldRef()[patchi][patchFacei] = value;
     }
 }

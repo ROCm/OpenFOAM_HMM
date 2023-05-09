@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1029,23 +1029,14 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
 
             forAll(cells, celli)
             {
-                const cell& cFaces = cells[celli];
-
                 label nIntFaces = 0;
-                forAll(cFaces, i)
+                for (const label meshFacei : cells[celli])
                 {
-                    label bFacei = cFaces[i]-mesh.nInternalFaces();
-                    if (bFacei < 0)
+                    const label patchi = pbm.patchID(meshFacei);
+
+                    if (patchi < 0 || pbm[patchi].coupled())
                     {
-                        nIntFaces++;
-                    }
-                    else
-                    {
-                        label patchi = pbm.patchID()[bFacei];
-                        if (pbm[patchi].coupled())
-                        {
-                            nIntFaces++;
-                        }
+                        ++nIntFaces;
                     }
                 }
 

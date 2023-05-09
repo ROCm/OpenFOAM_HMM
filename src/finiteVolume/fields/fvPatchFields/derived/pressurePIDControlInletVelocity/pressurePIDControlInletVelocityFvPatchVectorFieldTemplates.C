@@ -39,7 +39,8 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
     Type& average
 ) const
 {
-    const fvMesh& mesh(patch().boundaryMesh().mesh());
+    const fvMesh& mesh = patch().boundaryMesh().mesh();
+    const auto& pbm = mesh.boundaryMesh();
 
     bitSet isMasterFace(syncTools::getInternalOrMasterFaces(mesh));
 
@@ -48,33 +49,30 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::faceZoneAverage
     area = 0;
     average = Type(Zero);
 
-    forAll(zone, faceI)
+    for (const label meshFacei : zone)
     {
-        const label f(zone[faceI]);
-
-        if (mesh.isInternalFace(f))
+        if (mesh.isInternalFace(meshFacei))
         {
-            const scalar da(mesh.magSf()[f]);
+            const scalar da = mesh.magSf()[meshFacei];
 
             area += da;
-            average += da*field[f];
+            average += da*field[meshFacei];
         }
-        else if (isMasterFace[f])
+        else if (isMasterFace[meshFacei])
         {
-            const label bf(f-mesh.nInternalFaces());
-            const label patchID = mesh.boundaryMesh().patchID()[bf];
-            const label lf(mesh.boundaryMesh()[patchID].whichFace(f));
-            const scalar da(mesh.magSf().boundaryField()[patchID][lf]);
+            const label patchi = pbm.patchID(meshFacei);
+            const label patchFacei = pbm[patchi].whichFace(meshFacei);
+            const scalar da = mesh.magSf().boundaryField()[patchi][patchFacei];
 
             area += da;
-            average += da*field.boundaryField()[patchID][lf];
+            average += da*field.boundaryField()[patchi][patchFacei];
         }
     }
 
     reduce(area, sumOp<scalar>());
     reduce(average, sumOp<Type>());
 
-    average /= area;
+    average /= (area + VSMALL);
 }
 
 

@@ -138,10 +138,7 @@ Foam::faMesh::getBoundaryEdgeConnections() const
 
             const label patchFacei = edgeFaces[0];
             const label meshFacei = faceLabels_[patchFacei];
-            const label bndFacei = (meshFacei - mesh().nInternalFaces());
-
-            /// const label patchId = pbm.whichPatch(meshFacei);
-            const label patchId = pbm.patchID()[bndFacei];
+            const label patchId = pbm.patchID(meshFacei);
 
             // Primary bookkeeping
             {
