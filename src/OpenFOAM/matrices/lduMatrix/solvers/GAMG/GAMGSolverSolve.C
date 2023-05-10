@@ -254,7 +254,10 @@ void Foam::GAMGSolver::Vcycle
                 (
                     coarseSources[leveli],
                     coarseCorrFields[leveli],
-                    coarseSources[leveli],
+                    ConstPrecisionAdaptor<scalar, solveScalar>
+                    (
+                        coarseSources[leveli]
+                    )(),
                     interfaceLevelsBouCoeffs_[leveli],
                     interfaceLevels_[leveli],
                     cmpt

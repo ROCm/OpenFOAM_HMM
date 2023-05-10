@@ -297,7 +297,7 @@ Foam::tmp<Foam::Field<Foam::solveScalar>> Foam::lduMatrix::residual
     const direction cmpt
 ) const
 {
-    tmp<solveScalarField> trA(new solveScalarField(psi.size()));
+    auto trA = tmp<solveScalarField>::New(psi.size());
     residual(trA.ref(), psi, source, interfaceBouCoeffs, interfaces, cmpt);
     return trA;
 }

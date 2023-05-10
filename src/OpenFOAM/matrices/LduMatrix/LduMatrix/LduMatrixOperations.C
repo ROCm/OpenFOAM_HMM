@@ -142,8 +142,8 @@ Foam::LduMatrix<Type, DType, LUType>::faceH(const Field<Type>& psi) const
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
-    tmp<Field<Type>> tfaceHpsi(new Field<Type> (Lower.size()));
-    Field<Type> & faceHpsi = tfaceHpsi();
+    auto tfaceHpsi = tmp<Field<Type>>::New(Lower.size());
+    auto& faceHpsi = tfaceHpsi.ref();
 
     for (label face=0; face<l.size(); face++)
     {
