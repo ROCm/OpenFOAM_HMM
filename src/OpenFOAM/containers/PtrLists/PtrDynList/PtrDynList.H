@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -126,9 +126,6 @@ public:
 
     // Edit
 
-        //- Delete the allocated entries, but retain the list size.
-        using PtrList<T>::free;
-
         //- Squeeze out intermediate nullptr entries in the list of pointers
         //- and adjust the addressable size accordingly.
         //  \return the number of non-null entries
@@ -137,6 +134,13 @@ public:
         //- Swap content, independent of sizing parameter
         template<int AnySizeMin>
         inline void swap(PtrDynList<T, AnySizeMin>& other);
+
+        //- Transfer contents of the argument PtrList into this.
+        inline void transfer(PtrList<T>& list);
+
+        //- Transfer contents of any sized PtrDynList into this.
+        template<int AnySizeMin>
+        inline void transfer(PtrDynList<T, AnySizeMin>& list);
 
         //- Construct an element at the end of the list,
         //- return reference to the new list element

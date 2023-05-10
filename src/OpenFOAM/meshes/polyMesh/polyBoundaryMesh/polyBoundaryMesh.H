@@ -94,21 +94,22 @@ class polyBoundaryMesh
         //- Read if IOobject flags set. Return true if read.
         bool readContents(const bool allowReadIfPresent);
 
-        //- No copy construct
-        polyBoundaryMesh(const polyBoundaryMesh&) = delete;
-
-        //- No copy assignment
-        void operator=(const polyBoundaryMesh&) = delete;
-
-
 public:
 
     //- Declare friendship with polyMesh
     friend class polyMesh;
 
-
     //- Runtime type information
     TypeName("polyBoundaryMesh");
+
+
+    // Generated Methods
+
+        //- No copy construct
+        polyBoundaryMesh(const polyBoundaryMesh&) = delete;
+
+        //- No copy assignment
+        void operator=(const polyBoundaryMesh&) = delete;
 
 
     // Constructors
@@ -142,14 +143,16 @@ public:
     ~polyBoundaryMesh() = default;
 
 
+    // Member Functions
+
+        //- Clear the patch list and all demand-driven data
+        void clear();
+
         //- Clear geometry at this level and at patches
         void clearGeom();
 
         //- Clear addressing at this level and at patches
         void clearAddressing();
-
-
-    // Member Functions
 
         //- Return the mesh reference
         const polyMesh& mesh() const noexcept

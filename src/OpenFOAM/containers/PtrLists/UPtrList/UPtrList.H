@@ -295,6 +295,9 @@ public:
         //- Set list size to zero.
         inline void clear();
 
+        //- Nullify all entries. Does not change the list size.
+        inline void free();
+
         //- Change the size of the list.
         //  New entries are initialized to nullptr.
         inline void resize(const label newLen);

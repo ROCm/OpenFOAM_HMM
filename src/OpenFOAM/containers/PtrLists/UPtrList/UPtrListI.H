@@ -206,6 +206,13 @@ inline void Foam::UPtrList<T>::clear()
 
 
 template<class T>
+inline void Foam::UPtrList<T>::free()
+{
+    ptrs_.setNull();
+}
+
+
+template<class T>
 inline void Foam::UPtrList<T>::swap(UPtrList<T>& list)
 {
     ptrs_.swap(list.ptrs_);

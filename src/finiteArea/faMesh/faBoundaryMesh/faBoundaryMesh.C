@@ -176,6 +176,15 @@ Foam::faBoundaryMesh::faBoundaryMesh
 {}
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+void Foam::faBoundaryMesh::clear()
+{
+    faPatchList::clear();
+    groupIDsPtr_.reset(nullptr);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::faBoundaryMesh::calcGeometry()

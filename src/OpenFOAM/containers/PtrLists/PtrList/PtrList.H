@@ -78,8 +78,6 @@ protected:
         template<class INew>
         void readIstream(Istream& is, const INew& inew);
 
-        //- Delete the allocated entries, but retain the list size.
-        inline void free();
 
 public:
 
@@ -141,6 +139,9 @@ public:
 
         //- Clear the PtrList. Delete allocated entries and set size to zero.
         inline void clear();
+
+        //- Free memory and nullify all entries. Does not change the list size.
+        inline void free();
 
         //- Adjust size of PtrList.
         //  New entries are initialized to nullptr, removed entries are deleted

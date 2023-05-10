@@ -30,15 +30,6 @@ License
 #include "refPtr.H"
 #include "tmp.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class T>
-inline void Foam::PtrList<T>::free()
-{
-    (this->ptrs_).free(); // free old pointers
-}
-
-
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
@@ -96,8 +87,15 @@ inline Foam::PtrList<T>::PtrList
 template<class T>
 inline void Foam::PtrList<T>::clear()
 {
-    (this->ptrs_).free(); // free old pointers
+    (this->ptrs_).free();  // Free and nullify old pointers
     UPtrList<T>::clear();
+}
+
+
+template<class T>
+inline void Foam::PtrList<T>::free()
+{
+    (this->ptrs_).free();  // Free and nullify old pointers
 }
 
 
@@ -260,7 +258,12 @@ inline Foam::autoPtr<T> Foam::PtrList<T>::release(const label i)
 template<class T>
 inline void Foam::PtrList<T>::transfer(PtrList<T>& list)
 {
-    (this->ptrs_).free(); // free old pointers
+    if (this == &list)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    (this->ptrs_).free();  // Free and nullify old pointers
     UPtrList<T>::transfer(list);
 }
 

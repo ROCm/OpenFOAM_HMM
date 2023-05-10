@@ -217,6 +217,44 @@ inline void Foam::PtrDynList<T, SizeMin>::swap
 
 
 template<class T, int SizeMin>
+inline void Foam::PtrDynList<T, SizeMin>::transfer(PtrList<T>& other)
+{
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&other)
+    )
+    {
+        return;  // Self assignment is a no-op
+    }
+
+    UPtrList<T>::swap(other);
+    other.clear();
+}
+
+
+template<class T, int SizeMin>
+template<int AnySizeMin>
+inline void Foam::PtrDynList<T, SizeMin>::transfer
+(
+    PtrDynList<T, AnySizeMin>& other
+)
+{
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&other)
+    )
+    {
+        return;  // Self assignment is a no-op
+    }
+
+    this->swap(other);
+    other.clear();
+}
+
+
+template<class T, int SizeMin>
 template<class... Args>
 inline T& Foam::PtrDynList<T, SizeMin>::emplace_back(Args&&... args)
 {

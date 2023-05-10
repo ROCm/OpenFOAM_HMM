@@ -206,6 +206,13 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+void Foam::polyBoundaryMesh::clear()
+{
+    polyPatchList::clear();
+    clearAddressing();
+}
+
+
 void Foam::polyBoundaryMesh::clearGeom()
 {
     polyPatchList& patches = *this;
@@ -219,9 +226,9 @@ void Foam::polyBoundaryMesh::clearGeom()
 
 void Foam::polyBoundaryMesh::clearAddressing()
 {
-    neighbourEdgesPtr_.clear();
-    patchIDPtr_.clear();
-    groupIDsPtr_.clear();
+    neighbourEdgesPtr_.reset(nullptr);
+    patchIDPtr_.reset(nullptr);
+    groupIDsPtr_.reset(nullptr);
 
     polyPatchList& patches = *this;
 
@@ -493,7 +500,7 @@ void Foam::polyBoundaryMesh::setGroup
     const labelUList& patchIDs
 )
 {
-    groupIDsPtr_.clear();
+    groupIDsPtr_.reset(nullptr);
 
     polyPatchList& patches = *this;
 
@@ -1179,9 +1186,9 @@ void Foam::polyBoundaryMesh::movePoints(const pointField& p)
 
 void Foam::polyBoundaryMesh::updateMesh()
 {
-    neighbourEdgesPtr_.clear();
-    patchIDPtr_.clear();
-    groupIDsPtr_.clear();
+    neighbourEdgesPtr_.reset(nullptr);
+    patchIDPtr_.reset(nullptr);
+    groupIDsPtr_.reset(nullptr);
 
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 

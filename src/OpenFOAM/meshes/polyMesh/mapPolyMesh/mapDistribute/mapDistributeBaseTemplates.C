@@ -191,7 +191,7 @@ void Foam::mapDistributeBase::send
 
     // Set up receives from neighbours
 
-    recvFields.clear();
+    recvFields.free();
     recvFields.resize(nProcs);
 
     for (const int domain : UPstream::allProcs(comm))
@@ -219,7 +219,7 @@ void Foam::mapDistributeBase::send
 
     // Set up sends to neighbours
 
-    sendFields.clear();
+    recvFields.free();
     sendFields.resize(nProcs);
 
     for (const int domain : UPstream::allProcs(comm))

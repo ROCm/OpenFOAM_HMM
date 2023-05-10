@@ -212,7 +212,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 << "unexpected consequences.  Proceed with care." << endl;
 
             boundary_.clear();
-            boundary_.setSize(newBoundary.size());
+            boundary_.resize(newBoundary.size());
 
             forAll(newBoundary, patchi)
             {
