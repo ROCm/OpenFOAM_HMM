@@ -40,7 +40,6 @@ SourceFiles
 
 #include "Field.H"
 #include "regIOobject.H"
-#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

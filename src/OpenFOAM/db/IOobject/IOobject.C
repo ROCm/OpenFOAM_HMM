@@ -551,6 +551,20 @@ void Foam::IOobject::setBad(const string& s)
 }
 
 
+void Foam::IOobject::resetHeader(const word& newName)
+{
+    if (!newName.empty())
+    {
+        name_ = newName;
+    }
+    objState_ = objectState::GOOD;
+    sizeofLabel_ = static_cast<unsigned char>(sizeof(label));
+    sizeofScalar_ = static_cast<unsigned char>(sizeof(scalar));
+    headerClassName_.clear();
+    note_.clear();
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 void Foam::IOobject::operator=(const IOobject& io)

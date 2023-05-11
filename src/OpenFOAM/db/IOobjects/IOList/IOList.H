@@ -40,7 +40,6 @@ SourceFiles
 
 #include "List.H"
 #include "regIOobject.H"
-#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

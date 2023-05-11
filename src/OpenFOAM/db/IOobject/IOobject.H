@@ -45,7 +45,7 @@ Description
         Object must be read from Istream on construction. \n
         Error if Istream does not exist or cannot be read.
         Does not check timestamp or re-read.
-      - \par MUST_READ_IF_MODIFIED
+      - \par READ_MODIFIED (MUST_READ_IF_MODIFIED)
         Object must be read from Istream on construction. \n
         Error if Istream does not exist or cannot be read. If object is
         registered its timestamp will be checked every timestep and possibly
@@ -100,7 +100,7 @@ SourceFiles
 
 #include "fileName.H"
 #include "typeInfo.H"
-#include "autoPtr.H"
+#include "refPtr.H"  // For autoPtr, refPtr, tmp, stdFoam
 #include "Enum.H"
 #include "InfoProxy.H"
 #include "IOobjectOption.H"
@@ -496,6 +496,11 @@ public:
 
         //- The sizeof (scalar) in bytes, possibly read from the header
         inline unsigned scalarByteSize() const noexcept;
+
+        //- Clear various bits (headerClassName, note, sizeof...)
+        //- that would be obtained when reading from a file.
+        //  \param newName if non-null, optionally rename the IOobject
+        void resetHeader(const word& newName = word::null);
 
 
     // Checks

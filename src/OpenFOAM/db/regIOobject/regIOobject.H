@@ -42,10 +42,6 @@ SourceFiles
 #define Foam_regIOobject_H
 
 #include "IOobject.H"
-#include "refPtr.H"
-#include "tmp.H"
-#include "typeInfo.H"
-#include "stdFoam.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,8 +51,8 @@ namespace Foam
 {
 
 // Forward Declarations
-
 class dictionary;
+class regIOobject;
 
 namespace functionEntries
 {
