@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ License
 #include "argList.H"
 #include "stringOps.H"
 #include "Fstream.H"
+#include "IOobject.H"
 #include "IOstreams.H"
 #include "OSspecific.H"
 #include "etcFiles.H"
@@ -166,12 +167,12 @@ bool Foam::dynamicCode::resolveTemplates
 
         if (file.empty())
         {
-            badFiles.append(templateName);
+            badFiles.push_back(templateName);
             allOkay = false;
         }
         else
         {
-            resolvedFiles.append(file);
+            resolvedFiles.push_back(file);
         }
     }
 
@@ -181,16 +182,15 @@ bool Foam::dynamicCode::resolveTemplates
 
 bool Foam::dynamicCode::writeCommentSHA1(Ostream& os) const
 {
-    const auto fnd = filterVars_.cfind("SHA1sum");
+    const auto iter = filterVars_.cfind("SHA1sum");
 
-    if (!fnd.good())
+    if (iter.good())
     {
-        return false;
+        os  << "/* dynamicCode:\n * SHA1 = ";
+        os.writeQuoted(iter.val(), false) << "\n */\n";
     }
 
-    os  << "/* dynamicCode:\n * SHA1 = ";
-    os.writeQuoted(*fnd, false) << "\n */\n";
-    return true;
+    return iter.good();
 }
 
 
@@ -352,23 +352,23 @@ void Foam::dynamicCode::reset
 
 void Foam::dynamicCode::addCompileFile(const fileName& name)
 {
-    compileFiles_.append(name);
+    compileFiles_.push_back(name);
 }
 
 
 void Foam::dynamicCode::addCopyFile(const fileName& name)
 {
-    copyFiles_.append(name);
+    copyFiles_.push_back(name);
 }
 
 
 void Foam::dynamicCode::addCreateFile
 (
     const fileName& name,
-    const string& contents
+    const std::string& fileContents
 )
 {
-    createFiles_.append(fileAndContent(name, contents));
+    createFiles_.emplace_back(name, fileContents);
 }
 
 
@@ -465,7 +465,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 
     // Create files:
-    for (const fileAndContent& content : createFiles_)
+    for (const auto& content : createFiles_)
     {
         const fileName dstFile(outputDir/stringOps::expand(content.first()));
 
@@ -502,7 +502,7 @@ bool Foam::dynamicCode::wmakeLibso() const
     // This can take a bit longer, so report that we are starting wmake
     // Even with details turned off, we want some feedback
 
-    OSstream& os = (Foam::infoDetailLevel > 0 ? Info : Serr);
+    OSstream& os = (Foam::infoDetailLevel > 0 ? Info : InfoErr);
     os  << "Invoking wmake libso " << this->codePath().c_str() << endl;
 
     if (Foam::system(cmd) == 0)
@@ -530,6 +530,110 @@ bool Foam::dynamicCode::upToDate(const SHA1Digest& sha1) const
 bool Foam::dynamicCode::upToDate(const dynamicCodeContext& context) const
 {
     return upToDate(context.sha1());
+}
+
+
+// * * * * * * * * * * * * * * * Synchronisation * * * * * * * * * * * * * * //
+
+void Foam::dynamicCode::waitForFile
+(
+    const fileName& file,
+    const dictionary& contextDict
+)
+{
+    const int debug = 0;
+
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    // If library has just been compiled on the master, the other nodes
+    // need to pick this library up through NFS, which likely has delays
+    // in it.
+
+    // We do this by just polling a few times using the
+    // fileModificationSkew.
+
+    off_t localSize = Foam::fileSize(file);
+    off_t masterSize = localSize;
+    Pstream::broadcast(masterSize);
+
+    for
+    (
+        label iter = 0;
+        (
+            iter < IOobject::maxFileModificationPolls
+         && IOobject::fileModificationSkew > 0
+        );
+        ++iter
+    )
+    {
+        DebugPout
+            << "Processor " << UPstream::myProcNo()
+            << " masterSize:" << masterSize
+            << " localSize:" << localSize << endl;
+
+        if (localSize == masterSize)
+        {
+            return;
+        }
+        if (localSize > masterSize)
+        {
+            FatalIOErrorInFunction(contextDict)
+                << "Excessive size when reading (NFS mounted) library "
+                << nl << file << nl
+                << "on processor " << UPstream::myProcNo()
+                << " detected size " << localSize
+                << " whereas master size is " << masterSize
+                << " bytes." << nl
+                << "If your case is NFS mounted increase"
+                << " fileModificationSkew or maxFileModificationPolls;"
+                << nl << "If your case is not NFS mounted"
+                << " (so distributed) set fileModificationSkew"
+                << " to 0"
+                << exit(FatalIOError);
+        }
+        else
+        {
+            DebugPout
+                << "Local file " << file
+                << " not of same size (" << localSize
+                << ") as master ("
+                << masterSize << "). Waiting for "
+                << IOobject::fileModificationSkew
+                << " seconds." << endl;
+
+            Foam::sleep(IOobject::fileModificationSkew);
+
+            // Recheck local size
+            localSize = Foam::fileSize(file);
+        }
+    }
+
+    // Finished doing iterations. Do final check
+    if (localSize != masterSize)
+    {
+        FatalIOErrorInFunction(contextDict)
+            << "Cannot read (NFS mounted) library:" << nl
+            << file << nl
+            << "on processor " << UPstream::myProcNo()
+            << " detected size " << localSize
+            << " whereas master size is " << masterSize
+            << " bytes." << nl
+            << "If your case is NFS mounted increase"
+            << " fileModificationSkew or maxFileModificationPolls;" << nl
+            << "If your case is not NFS mounted"
+            << " (so distributed) set fileModificationSkew"
+            << " to 0"
+            << exit(FatalIOError);
+    }
+
+    DebugPout
+        << "Processor " << UPstream::myProcNo()
+        << " masterSize:" << masterSize
+        << " localSize:" << localSize
+        << " ... after waiting" << endl;
 }
 
 

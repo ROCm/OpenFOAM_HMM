@@ -43,8 +43,8 @@ SourceFiles
 #ifndef Foam_dlLibraryTable_H
 #define Foam_dlLibraryTable_H
 
-#include "DynamicList.H"
 #include "fileName.H"
+#include "DynamicList.H"
 #include "InfoProxy.H"
 #include <memory>
 
@@ -218,10 +218,10 @@ public:
     // Member Functions
 
         //- True if there are no libraries loaded by the table
-        bool empty() const;
+        bool empty() const noexcept;
 
         //- The number of libraries loaded by the table
-        label size() const;
+        label size() const noexcept;
 
         //- Names of the libraries in use
         List<fileName> loaded() const;

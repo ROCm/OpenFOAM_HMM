@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codedBase_H
-#define codedBase_H
+#ifndef Foam_codedBase_H
+#define Foam_codedBase_H
 
 #include "dictionary.H"
 #include "dynamicCodeContext.H"
@@ -169,17 +169,19 @@ protected:
         ) const = 0;
 
 
+public:
+
+    //- Runtime type information
+    ClassName("codedBase");
+
+
+    // Generated Methods
+
         //- No copy construct
         codedBase(const codedBase&) = delete;
 
         //- No copy assignment
         void operator=(const codedBase&) = delete;
-
-
-public:
-
-    //- Runtime type information
-    ClassName("codedBase");
 
 
     // Constructors
