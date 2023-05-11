@@ -176,20 +176,14 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
             *V00Ptr_ = *V0Ptr_;
         }
 
-        if (V0Ptr_)
+        if (!V0Ptr_)
         {
-            // Copy V into V0 storage
-            V0Ptr_->scalarField::operator=(V);
-        }
-        else
-        {
-            // Allocate V0 storage, fill with V
             V0Ptr_ = new DimensionedField<scalar, volMesh>
             (
                 IOobject
                 (
                     "V0",
-                    time().timeName(),
+                    this->time().timeName(),
                     *this,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
@@ -198,12 +192,13 @@ void Foam::fvMesh::storeOldVol(const scalarField& V)
                 *this,
                 dimVolume
             );
-            scalarField& V0 = *V0Ptr_;
             // Note: V0 now sized with current mesh, not with (potentially
             //       different size) V.
-            V0.resize_nocopy(V.size());
-            V0 = V;
+            V0Ptr_->scalarField::resize_nocopy(V.size());
         }
+
+        // Copy V into V0 storage
+        V0Ptr_->scalarField::operator=(V);
 
         curTimeIndex_ = time().timeIndex();
 
@@ -285,52 +280,61 @@ bool Foam::fvMesh::init(const bool doInit)
         polyMesh::init(doInit);
     }
 
-    // Check the existence of the cell volumes and read if present
-    // and set the storage of V00
-    if (fileHandler().isFile(time().timePath()/dbDir()/"V0"))
+    // Read some optional fields
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    // For redistributePar + fileHandler can have master processor
+    // find the file but not the subprocs.
+
+    IOobject rio
+    (
+        "none",
+        this->time().timeName(),
+        *this,
+        IOobject::LAZY_READ,
+        IOobject::NO_WRITE,
+        IOobject::NO_REGISTER
+    );
+
+
+    // Read old cell volumes (if present) and set the storage of V00
+    rio.resetHeader("V0");
+    if (returnReduceOr(rio.typeHeaderOk<regIOobject>(false)))
     {
-        // Set the moving flag early in case the demand-driven geometry
-        // construction checks for it
-        moving(true);
+        DebugInFunction
+            << "Detected V0: " << rio.objectRelPath() << nl;
 
         V0Ptr_ = new DimensionedField<scalar, volMesh>
         (
-            IOobject
-            (
-                "V0",
-                time().timeName(),
-                *this,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                IOobject::NO_REGISTER
-            ),
-            *this
+            rio,
+            *this,
+            dimensionedScalar(dimVol, Zero)
         );
 
-        V00();
-    }
-
-    // Check the existence of the mesh fluxes, read if present and set the
-    // mesh to be moving
-    if (fileHandler().isFile(time().timePath()/dbDir()/"meshPhi"))
-    {
-        // Set the moving flag early in case the demand-driven geometry
+        // Set the moving flag early in case demand-driven geometry
         // construction checks for it
         moving(true);
 
+        (void)V00();
+    }
+
+
+    // Read mesh fluxes (if present) and set the mesh to be moving
+    rio.resetHeader("meshPhi");
+    if (returnReduceOr(rio.typeHeaderOk<regIOobject>(false)))
+    {
+        DebugInFunction
+            << "Detected meshPhi: " << rio.objectRelPath() << nl;
+
         phiPtr_ = new surfaceScalarField
         (
-            IOobject
-            (
-                "meshPhi",
-                time().timeName(),
-                *this,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                IOobject::NO_REGISTER
-            ),
-            *this
+            rio,
+            *this,
+            dimensionedScalar(dimVol/dimTime, Zero)
         );
+
+        // Set the moving flag early in case demand-driven geometry
+        // construction checks for it
+        moving(true);
 
         // The mesh is now considered moving so the old-time cell volumes
         // will be required for the time derivatives so if they haven't been
@@ -342,7 +346,7 @@ bool Foam::fvMesh::init(const bool doInit)
                 IOobject
                 (
                     "V0",
-                    time().timeName(),
+                    this->time().timeName(),
                     *this,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,

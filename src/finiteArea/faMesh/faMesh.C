@@ -421,21 +421,33 @@ Foam::faMesh::faMesh
         faMesh::init(false);  // do not init lower levels
     }
 
-    if (doInit && fileHandler().isFile(pMesh.time().timePath()/"S0"))
+    if (doInit)
     {
-        S0Ptr_ = new DimensionedField<scalar, areaMesh>
+        // Read some optional fields
+        // - logic as per fvMesh
+
+        IOobject rio
         (
-            IOobject
-            (
-                "S0",
-                time().timeName(),
-                faMesh::meshSubDir,
-                faMesh::thisDb(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            *this
+            "name",
+            time().timeName(),
+            faMesh::meshSubDir,
+            faMesh::thisDb(),
+            IOobject::LAZY_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         );
+
+        // Read old surface areas (if present)
+        rio.resetHeader("S0");
+        if (returnReduceOr(rio.typeHeaderOk<regIOobject>(false)))
+        {
+            S0Ptr_ = new DimensionedField<scalar, areaMesh>
+            (
+                rio,
+                *this,
+                dimensionedScalar(dimArea, Zero)
+            );
+        }
     }
 }
 
@@ -680,21 +692,33 @@ Foam::faMesh::faMesh
         faMesh::init(false);  // do not init lower levels
     }
 
-    if (doInit && fileHandler().isFile(pMesh.time().timePath()/"S0"))
+    if (doInit)
     {
-        S0Ptr_ = new DimensionedField<scalar, areaMesh>
+        // Read old surface areas (if present)
+        // - logic as per fvMesh
+
+        IOobject rio
         (
-            IOobject
-            (
-                "S0",
-                time().timeName(),
-                faMesh::meshSubDir,
-                faMesh::thisDb(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            *this
+            "name",
+            time().timeName(),
+            faMesh::meshSubDir,
+            faMesh::thisDb(),
+            IOobject::LAZY_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         );
+
+        // Read old surface areas (if present)
+        rio.resetHeader("S0");
+        if (returnReduceOr(rio.typeHeaderOk<regIOobject>(false)))
+        {
+            S0Ptr_ = new DimensionedField<scalar, areaMesh>
+            (
+                rio,
+                *this,
+                dimensionedScalar(dimArea, Zero)
+            );
+        }
     }
 }
 

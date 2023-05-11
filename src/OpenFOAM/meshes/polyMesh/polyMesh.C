@@ -153,8 +153,9 @@ Foam::autoPtr<Foam::labelIOList> Foam::polyMesh::readTetBasePtIs() const
         instance(),
         meshSubDir,
         *this,
-        IOobject::READ_IF_PRESENT,
-        IOobject::NO_WRITE
+        IOobject::LAZY_READ,
+        IOobject::NO_WRITE,
+        IOobject::NO_REGISTER
     );
 
     if (io.typeHeaderOk<labelIOList>(true))
@@ -244,7 +245,7 @@ Foam::polyMesh::polyMesh(const IOobject& io, const bool doInit)
     comm_(UPstream::worldComm),
     geometricD_(Zero),
     solutionD_(Zero),
-    tetBasePtIsPtr_(readTetBasePtIs()),
+    tetBasePtIsPtr_(nullptr),
     cellTreePtr_(nullptr),
     pointZones_
     (
@@ -908,6 +909,11 @@ const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
                 << endl;
         }
 
+        labelList basePts
+        (
+            polyMeshTetDecomposition::findFaceBasePts(*this)
+        );
+
         tetBasePtIsPtr_.reset
         (
             new labelIOList
@@ -918,10 +924,11 @@ const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
                     instance(),
                     meshSubDir,
                     *this,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    IOobject::NO_REGISTER
                 ),
-                polyMeshTetDecomposition::findFaceBasePts(*this)
+                std::move(basePts)
             )
         );
     }
