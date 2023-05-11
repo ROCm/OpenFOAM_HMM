@@ -325,6 +325,22 @@ int main(int argc, char *argv[])
     {
         list1.set(i, new Scalar(1.3*i));
     }
+    {
+        auto ptr = autoPtr<Scalar>::New(10);
+
+        Info<< "add: " << Foam::name(ptr.get());
+        list1.set(0, ptr);
+
+        Info<< "ptrlist: " << Foam::name(list1.get(0)) << nl;
+        Info<< "now: " << Foam::name(ptr.get()) << nl;
+
+        ptr = autoPtr<Scalar>::New(20);
+
+        list1.append(ptr);
+        // Delete method:  list1.push_back(ptr);
+        // list1.push_back(std::move(ptr));
+    }
+
 
     PtrList<Scalar> list2(15);
     Info<< "Emplace set " << list2.size() << " values" << nl;

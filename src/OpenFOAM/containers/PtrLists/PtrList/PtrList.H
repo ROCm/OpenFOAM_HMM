@@ -223,17 +223,22 @@ public:
 
     // Housekeeping
 
+        //- Disallow push_back with autoPtr without std::move
+        void push_back(autoPtr<T>& ptr) = delete;
+
         //- Set element to given autoPtr and return old element
+        //FOAM_DEPRECATED_FOR(2022-10, "set(autoPtr&&))")
         autoPtr<T> set(const label i, autoPtr<T>& ptr)
         {
-            return this->set(i, std::move(ptr));
+            return this->set(i, ptr.release());
         }
 
         //- Same as resize()
         void setSize(const label newLen) { this->resize(newLen); }
 
         //- Move append an element to the end of the list
-        void append(autoPtr<T>& ptr) { this->push_back(std::move(ptr)); }
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(autoPtr<T>& ptr) { this->push_back(ptr.release()); }
 
         //- Append an element to the end of the list
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
@@ -243,12 +248,12 @@ public:
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
         void append(std::unique_ptr<T>&& ptr)
         {
-            this->push_back(std::move(ptr));
+            this->push_back(ptr.release());
         }
 
         //- Move append an element to the end of the list
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
-        void append(autoPtr<T>&& ptr) { this->push_back(std::move(ptr)); }
+        void append(autoPtr<T>&& ptr) { this->push_back(ptr.release()); }
 
         //- Move or clone append a tmp to the end of the list
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")

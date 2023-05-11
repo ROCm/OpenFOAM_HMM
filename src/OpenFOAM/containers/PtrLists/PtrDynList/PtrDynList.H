@@ -172,9 +172,6 @@ public:
         //- Reduce size by 1 or more elements. Can be called on an empty list.
         inline void pop_back(label n = 1);
 
-        //- Remove and return the top element. Can be called on an empty list.
-        inline autoPtr<T> remove();
-
         //- Construct and set a new element at given position,
         //- (discard old element at that location).
         //- Return reference to the new list element.
@@ -230,10 +227,14 @@ public:
 
     // Housekeeping
 
+        //- Disallow push_back with autoPtr without std::move
+        void push_back(autoPtr<T>& ptr) = delete;
+
         //- Set element to given autoPtr and return old element
+        //FOAM_DEPRECATED_FOR(2022-10, "set(autoPtr&&))")
         autoPtr<T> set(const label i, autoPtr<T>& ptr)
         {
-            return this->set(i, std::move(ptr));
+            return this->set(i, ptr.release());
         }
 
         //- Same as resize()

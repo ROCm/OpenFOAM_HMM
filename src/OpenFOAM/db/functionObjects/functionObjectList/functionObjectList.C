@@ -1185,7 +1185,7 @@ bool Foam::functionObjectList::read()
             // Insert active functionObject into the list
             if (objPtr)
             {
-                newPtrs.set(nFunc, objPtr);
+                newPtrs.set(nFunc, std::move(objPtr));
                 newIndices.insert(key, nFunc);
                 ++nFunc;
             }
