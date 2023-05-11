@@ -49,7 +49,7 @@ bool Foam::OFstreamCollator::writeFile
     const fileName& fName,
     const string& masterData,
     const labelUList& recvSizes,
-    const PtrList<SubList<char>>& slaveData,    // optional slave data
+    const UPtrList<SubList<char>>& slaveData,    // optional slave data
     IOstreamOption streamOpt,
     IOstreamOption::atomicType atomic,
     IOstreamOption::appendType append,

@@ -158,7 +158,7 @@ class OFstreamCollator
             const fileName& fName,
             const string& masterData,
             const labelUList& recvSizes,
-            const PtrList<SubList<char>>& slaveData,
+            const UPtrList<SubList<char>>& slaveData,
             IOstreamOption streamOpt,
             IOstreamOption::atomicType atomic,
             IOstreamOption::appendType append,
