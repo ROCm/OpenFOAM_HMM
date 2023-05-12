@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -408,6 +408,9 @@ public:
 
         //- A pointer to the raw storage, reinterpreted as byte data
         inline char* data_bytes() noexcept;
+
+        //- The number of integer blocks addressed in the raw storage
+        inline std::streamsize size_data() const noexcept;
 
         //- The number of bytes used in the raw storage
         //- including any unused padding.

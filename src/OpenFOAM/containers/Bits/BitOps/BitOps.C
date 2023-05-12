@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -202,6 +202,30 @@ Foam::List<Foam::label> Foam::BitOps::toc(const UList<bool>& bools)
 Foam::List<Foam::label> Foam::BitOps::sortedToc(const UList<bool>& bools)
 {
     return BitOps::toc(bools);
+}
+
+
+Foam::List<Foam::label> Foam::BitOps::toc(const bitSet& bitset)
+{
+    return bitset.toc();
+}
+
+
+Foam::List<Foam::label> Foam::BitOps::sortedToc(const bitSet& bitset)
+{
+    return bitset.sortedToc();
+}
+
+
+Foam::List<Foam::label> Foam::BitOps::toc(const labelHashSet& hashset)
+{
+    return hashset.sortedToc();
+}
+
+
+Foam::List<Foam::label> Foam::BitOps::sortedToc(const labelHashSet& hashset)
+{
+    return hashset.sortedToc();
 }
 
 
