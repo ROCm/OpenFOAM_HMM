@@ -270,9 +270,8 @@ void evaluate
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         );
-        io.typeHeaderOk<IOobject>(false);
 
-        if (!io.hasHeaderClass() || io.isHeaderClass<IOobject>())
+        if (!io.typeHeaderOk<regIOobject>(false))
         {
             FatalErrorInFunction
                 << "Field '" << fieldName

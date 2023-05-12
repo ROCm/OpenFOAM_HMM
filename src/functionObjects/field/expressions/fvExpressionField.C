@@ -191,8 +191,7 @@ Foam::label Foam::functionObjects::fvExpressionField::loadFields
 
         const bool ok =
         (
-            io.typeHeaderOk<regIOobject>(false) // Preload header info
-         && io.hasHeaderClass()                 // Extra safety
+            io.typeHeaderOk<regIOobject>(false)
          &&
             (
                 loadField<scalar>(io)

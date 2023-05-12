@@ -199,7 +199,7 @@ Foam::word Foam::expressions::fvExprDriver::getHeaderClassName
         IOobject::MUST_READ,
         IOobject::NO_WRITE
     );
-    io.typeHeaderOk<IOobject>(false);
+    io.typeHeaderOk<regIOobject>(false);
 
     DebugInfo
         << "Registry: " << mesh.path()

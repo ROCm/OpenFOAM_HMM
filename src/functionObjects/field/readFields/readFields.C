@@ -117,8 +117,7 @@ bool Foam::functionObjects::readFields::execute()
 
         const bool ok =
         (
-            io.typeHeaderOk<regIOobject>(false) // Preload header info
-         && io.hasHeaderClass()                 // Extra safety
+            io.typeHeaderOk<regIOobject>(false)
          &&
             (
                 loadField<scalar>(io)

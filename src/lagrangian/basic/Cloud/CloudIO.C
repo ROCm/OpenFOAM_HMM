@@ -251,7 +251,7 @@ bool Foam::Cloud<ParticleType>::readStoreFile
     const IOobject& ioNew
 ) const
 {
-    if (io.headerClassName() == IOField<Type>::typeName)
+    if (io.isHeaderClass<IOField<Type>>())
     {
         IOField<Type> fld(io);
         auto* fldNewPtr = new IOField<Type>(ioNew, std::move(fld));

@@ -39,7 +39,7 @@ void Foam::addToFieldList
     const typename GeoField::Mesh& mesh
 )
 {
-    if (obj.headerClassName() == GeoField::typeName)
+    if (obj.isHeaderClass<GeoField>())
     {
         fieldList.set
         (

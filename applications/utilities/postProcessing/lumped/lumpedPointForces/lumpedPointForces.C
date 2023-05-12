@@ -52,9 +52,9 @@ autoPtr<GeoFieldType> loadField
     const IOobject* io
 )
 {
-    if (io && io->headerClassName() == GeoFieldType::typeName)
+    if (io && io->isHeaderClass<GeoFieldType>())
     {
-        Info<< "Reading " << GeoFieldType::typeName
+        Info<< "Reading " << io->headerClassName()
             << ' ' << io->name() << endl;
 
         return autoPtr<GeoFieldType>::New

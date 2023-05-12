@@ -35,37 +35,39 @@ License
 
 namespace Foam
 {
-    template<class GeoFieldType>
-    static autoPtr<GeoFieldType> loadPointField
-    (
-        const pointMesh::Mesh& mesh,
-        const IOobject* io
-    )
+
+template<class GeoFieldType>
+static autoPtr<GeoFieldType> loadPointField
+(
+    const pointMesh::Mesh& mesh,
+    const IOobject* io
+)
+{
+    if (io && io->isHeaderClass<GeoFieldType>())
     {
-        if (io && io->headerClassName() == GeoFieldType::typeName)
-        {
-            Info<< "Reading " << GeoFieldType::typeName
-                << ' ' << io->name() << endl;
+        Info<< "Reading " << io->headerClassName()
+            << ' ' << io->name() << endl;
 
-            return autoPtr<GeoFieldType>::New
+        return autoPtr<GeoFieldType>::New
+        (
+            IOobject
             (
-                IOobject
-                (
-                    io->name(),
-                    io->instance(),
-                    io->local(),
-                    io->db(),
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE,
-                    io->registerObject()
-                ),
-                mesh
-            );
-        }
-
-        return nullptr;
+                io->name(),
+                io->instance(),
+                io->local(),
+                io->db(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE,
+                io->registerObject()
+            ),
+            mesh
+        );
     }
+
+    return nullptr;
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -107,12 +107,12 @@ IOobjectList preFilterFields
             if
             (
                 //OR: fieldTypes::basic.found(io.headerClassName())
-                io.headerClassName() == IOField<label>::typeName
-             || io.headerClassName() == IOField<scalar>::typeName
-             || io.headerClassName() == IOField<vector>::typeName
-             || io.headerClassName() == IOField<sphericalTensor>::typeName
-             || io.headerClassName() == IOField<symmTensor>::typeName
-             || io.headerClassName() == IOField<tensor>::typeName
+                io.isHeaderClass<IOField<label>>()
+             || io.isHeaderClass<IOField<scalar>>()
+             || io.isHeaderClass<IOField<vector>>()
+             || io.isHeaderClass<IOField<sphericalTensor>>()
+             || io.isHeaderClass<IOField<symmTensor>>()
+             || io.isHeaderClass<IOField<tensor>>()
             )
             {
                 // Transfer from cloudObjects -> filteredObjects

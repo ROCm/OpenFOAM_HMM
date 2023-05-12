@@ -39,9 +39,9 @@ Foam::wordList Foam::helpTypes::helpBoundary::fieldConditions
     const bool write
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
 
-    if (io.headerClassName() == fieldType::typeName)
+    if (io.isHeaderClass<VolFieldType>())
     {
         wordList types
         (
@@ -74,6 +74,8 @@ void Foam::helpTypes::helpBoundary::fixedValueFieldConditions
     const IOobject& io
 ) const
 {
+    typedef GeometricField<Type, fvPatchField, volMesh> VolFieldType;
+
     wordList types(fieldConditions<Type>(io, false));
 
     if (!types.size())
@@ -81,11 +83,9 @@ void Foam::helpTypes::helpBoundary::fixedValueFieldConditions
         return;
     }
 
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
     const fvMesh& mesh = dynamic_cast<const fvMesh&>(io.db());
 
-    fieldType fld
+    VolFieldType fld
     (
         IOobject
         (

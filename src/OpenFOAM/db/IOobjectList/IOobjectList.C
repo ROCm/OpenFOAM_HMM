@@ -28,7 +28,6 @@ License
 
 #include "IOobjectList.H"
 #include "Time.H"
-#include "IOList.H"
 #include "predicates.H"
 #include "OSspecific.H"
 
@@ -135,7 +134,7 @@ Foam::IOobjectList::IOobjectList
         try
         {
             // Use object with local scope and current instance (no searching)
-            ok = objectPtr->typeHeaderOk<IOList<label>>(false, false);
+            ok = objectPtr->typeHeaderOk<regIOobject>(false, false);
         }
         catch (const Foam::IOerror& err)
         {
