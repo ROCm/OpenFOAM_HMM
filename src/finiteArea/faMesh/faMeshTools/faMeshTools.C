@@ -30,6 +30,8 @@ License
 #include "faBoundaryMeshEntries.H"
 #include "areaFields.H"
 #include "edgeFields.H"
+#include "fileOperation.H"
+#include "BitOps.H"
 #include "polyMesh.H"
 #include "processorFaPatch.H"
 
@@ -66,7 +68,8 @@ void Foam::faMeshTools::forceDemandDriven(faMesh& mesh)
 }
 
 
-Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::newMesh
+Foam::autoPtr<Foam::faMesh>
+Foam::faMeshTools::newMesh
 (
     const IOobject& io,
     const polyMesh& pMesh,
@@ -248,9 +251,11 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::newMesh
 }
 
 
-Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
+Foam::autoPtr<Foam::faMesh>
+Foam::faMeshTools::loadOrCreateMeshImpl
 (
     const IOobject& io,
+    refPtr<fileOperation>* readHandlerPtr,  // Can be nullptr
     const polyMesh& pMesh,
     const bool decompose,
     const bool verbose
@@ -270,9 +275,11 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
     // Read and scatter master patches (without reading master mesh!)
 
     PtrList<entry> patchEntries;
-    if (Pstream::master())
+    if (UPstream::master())
     {
-        const bool oldParRun = Pstream::parRun(false);
+        const bool oldParRun = UPstream::parRun(false);
+        const label oldNumProcs = fileHandler().nProcs();
+        const int oldCache = fileOperation::cacheLevel(0);
 
         patchEntries = faBoundaryMeshEntries
         (
@@ -288,46 +295,75 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
             )
         );
 
-        Pstream::parRun(oldParRun);
+        fileOperation::cacheLevel(oldCache);
+        if (oldParRun)
+        {
+            const_cast<fileOperation&>(fileHandler()).nProcs(oldNumProcs);
+        }
+        UPstream::parRun(oldParRun);
     }
 
     // Broadcast: send patches to all
-    Pstream::broadcast(patchEntries);  // == worldComm;
+    Pstream::broadcast(patchEntries, UPstream::worldComm);
 
-    /// Info<< patchEntries << nl;
-
-    // Dummy meshes
-    // ~~~~~~~~~~~~
 
     // Check who has or needs a mesh.
-    // For 'decompose', only need mesh on master.
-    // Otherwise check for presence of the "faceLabels" file
+    bool haveLocalMesh = false;
 
-    bool haveMesh =
-    (
-        decompose
-      ? Pstream::master()
-      : fileHandler().isFile
+    if (readHandlerPtr)
+    {
+        // Non-null reference when a mesh exists on given processor
+        haveLocalMesh = (*readHandlerPtr).good();
+    }
+    else
+    {
+        // No file handler.
+        // For 'decompose', only need mesh on master.
+        // Otherwise check for presence of the "faceLabels" file
+
+        haveLocalMesh =
         (
-            fileHandler().filePath
+            decompose
+          ? UPstream::master()
+          : fileHandler().isFile
             (
-                io.time().path()/io.instance()/meshSubDir/"faceLabels"
+                fileHandler().filePath
+                (
+                    io.time().path()/io.instance()/meshSubDir/"faceLabels"
+                )
             )
-        )
+        );
+    }
+
+
+    // Globally consistent information about who has a mesh
+    boolList haveMesh
+    (
+        UPstream::allGatherValues<bool>(haveLocalMesh)
     );
 
 
-    if (!haveMesh)
+    autoPtr<faMesh> meshPtr;
+
+    if (!haveLocalMesh)
     {
-        const bool oldParRun = Pstream::parRun(false);
+        // No local mesh - need to synthesize one
+
+        const bool oldParRun = UPstream::parRun(false);
+        const label oldNumProcs = fileHandler().nProcs();
+        const int oldCache = fileOperation::cacheLevel(0);
 
         // Create dummy mesh - on procs that don't already have a mesh
-        faMesh dummyMesh
+        meshPtr.reset
         (
-            pMesh,
-            labelList(),
-            IOobject(io, IOobject::NO_READ, IOobject::AUTO_WRITE)
+            new faMesh
+            (
+                pMesh,
+                labelList(),
+                IOobject(io, IOobject::NO_READ, IOobject::AUTO_WRITE)
+            )
         );
+        faMesh& mesh = *meshPtr;
 
         // Add patches
         faPatchList patches(patchEntries.size());
@@ -361,39 +397,119 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
                         name,
                         patchDict,
                         nPatches++,
-                        dummyMesh.boundary()
+                        mesh.boundary()
                     )
                 );
             }
         }
-
         patches.resize(nPatches);
-        dummyMesh.addFaPatches(patches, false);  // No parallel comms
+        mesh.addFaPatches(patches, false);  // No parallel comms
 
-        // Bad hack, but the underlying polyMesh is NO_WRITE
-        // so it does not create the faMesh subDir for us...
-        Foam::mkDir(dummyMesh.boundary().path());
+        if (!readHandlerPtr)
+        {
+            // The 'old' way of doing things.
+            // Write the dummy mesh to disk for subsequent re-reading.
+            //
+            // This is not particularly elegant.
 
-        //Pout<< "Writing dummy mesh to " << dummyMesh.boundary().path()
-        //    << endl;
-        dummyMesh.write();
+            // Bad hack, but the underlying polyMesh is NO_WRITE
+            // so it does not create the faMesh subDir for us...
+            Foam::mkDir(mesh.boundary().path());
 
-        Pstream::parRun(oldParRun);  // Restore parallel state
+            //Pout<< "Writing dummy mesh to " << mesh.boundary().path() << nl;
+            mesh.write();
+
+            // Discard - it will be re-read later
+            meshPtr.reset(nullptr);
+        }
+
+        fileOperation::cacheLevel(oldCache);
+        if (oldParRun)
+        {
+            const_cast<fileOperation&>(fileHandler()).nProcs(oldNumProcs);
+        }
+        UPstream::parRun(oldParRun);  // Restore parallel state
+    }
+    else if (readHandlerPtr && haveLocalMesh)
+    {
+        const labelList meshProcIds(BitOps::sortedToc(haveMesh));
+
+        UPstream::communicator newCommunicator;
+        const label oldWorldComm = UPstream::commWorld();
+
+        auto& readHandler = *readHandlerPtr;
+        auto oldHandler = fileOperation::fileHandler(readHandler);
+
+        // With IO ranks the communicator of the fileOperation will
+        // only include the ranks for the current IO rank.
+        // Instead allocate a new communicator for everyone with a mesh
+
+        const auto& handlerProcIds = UPstream::procID(fileHandler().comm());
+
+        // Comparing global ranks in the communicator.
+        // Use std::equal for the List<label> vs List<int> comparison
+
+        if
+        (
+            meshProcIds.size() == handlerProcIds.size()
+         && std::equal
+            (
+                meshProcIds.cbegin(),
+                meshProcIds.cend(),
+                handlerProcIds.cbegin()
+            )
+        )
+        {
+            // Can use the handler communicator as is.
+            UPstream::commWorld(fileHandler().comm());
+        }
+        else if
+        (
+            UPstream::nProcs(fileHandler().comm())
+         != UPstream::nProcs(UPstream::worldComm)
+        )
+        {
+            // Need a new communicator for the fileHandler.
+
+            // Warning: MS-MPI currently uses MPI_Comm_create() instead of
+            // MPI_Comm_create_group() so it will block here!
+
+            newCommunicator.reset(UPstream::worldComm, meshProcIds);
+            UPstream::commWorld(newCommunicator.comm());
+        }
+
+        // Load but do not initialise
+        meshPtr = autoPtr<faMesh>::New(pMesh, labelList(), io);
+
+        readHandler = fileOperation::fileHandler(oldHandler);
+        UPstream::commWorld(oldWorldComm);
+
+        // Reset mesh communicator to the real world comm
+        meshPtr().comm() = UPstream::commWorld();
     }
 
-    // Read mesh
-    // ~~~~~~~~~
-    // Now all processors have a (possibly zero size) mesh so read in
-    // parallel
 
-    /// Pout<< "Reading area mesh from " << io.objectRelPath() << endl;
-    auto meshPtr = autoPtr<faMesh>::New(pMesh, false);
-    faMesh& mesh = *meshPtr;
+    if (!meshPtr)
+    {
+        // Using the 'old' way of doing things (writing to disk and re-reading).
 
-    // Sync patches
-    // ~~~~~~~~~~~~
+        // Read mesh from disk
+        //
+        // Now all processors have a (possibly zero size) mesh so can
+        // read in parallel
 
-    if (!Pstream::master() && haveMesh)
+        /// Pout<< "Reading area mesh from " << io.objectRelPath() << endl;
+        // Load but do not initialise
+        meshPtr = autoPtr<faMesh>::New(pMesh, false);
+    }
+
+    faMesh& mesh = meshPtr();
+
+    // Check patches
+    // ~~~~~~~~~~~~~
+
+    #if 0
+    if (!UPstream::master() && haveLocalMesh)
     {
         // Check master names against mine
 
@@ -416,9 +532,8 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
             if (patchi >= patches.size())
             {
                 FatalErrorInFunction
-                    << "Non-processor patches not synchronised."
-                    << endl
-                    << "Processor " << Pstream::myProcNo()
+                    << "Non-processor patches not synchronised." << endl
+                    << "Processor " << UPstream::myProcNo()
                     << " has only " << patches.size()
                     << " patches, master has "
                     << patchi
@@ -432,12 +547,11 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
             )
             {
                 FatalErrorInFunction
-                    << "Non-processor patches not synchronised."
-                    << endl
+                    << "Non-processor patches not synchronised." << endl
                     << "Master patch " << patchi
                     << " name:" << type
                     << " type:" << type << endl
-                    << "Processor " << Pstream::myProcNo()
+                    << "Processor " << UPstream::myProcNo()
                     << " patch " << patchi
                     << " has name:" << patches[patchi].name()
                     << " type:" << patches[patchi].type()
@@ -445,6 +559,7 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
             }
         }
     }
+    #endif
 
 
     // Recreate basic geometry, globalMeshData etc.
@@ -464,6 +579,46 @@ Foam::autoPtr<Foam::faMesh> Foam::faMeshTools::loadOrCreateMesh
     mesh.boundary().checkParallelSync(verbose);
 
     return meshPtr;
+}
+
+
+Foam::autoPtr<Foam::faMesh>
+Foam::faMeshTools::loadOrCreateMesh
+(
+    const IOobject& io,
+    const polyMesh& pMesh,
+    const bool decompose,
+    const bool verbose
+)
+{
+    return faMeshTools::loadOrCreateMeshImpl
+    (
+        io,
+        nullptr,  // fileOperation (ignore)
+        pMesh,
+        decompose,
+        verbose
+    );
+}
+
+
+Foam::autoPtr<Foam::faMesh>
+Foam::faMeshTools::loadOrCreateMesh
+(
+    const IOobject& io,
+    const polyMesh& pMesh,
+    refPtr<fileOperation>& readHandler,
+    const bool verbose
+)
+{
+    return faMeshTools::loadOrCreateMeshImpl
+    (
+        io,
+       &readHandler,
+        pMesh,
+        false,  // decompose (ignored)
+        verbose
+    );
 }
 
 

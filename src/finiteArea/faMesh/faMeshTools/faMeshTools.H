@@ -61,6 +61,26 @@ class IOobject;
 
 class faMeshTools
 {
+    // Private Member Functions
+
+    // Read mesh if available. Otherwise create empty mesh with same non-proc
+    // patches as proc0 mesh.
+    //  Has two modes of operation.
+    //  If the readHandler is non-nullptr, use it to decide on availability.
+    //  Requires:
+    //  - all processors to have all patches (and in same order).
+    //  - io.instance() set to facesInstance
+    static autoPtr<faMesh> loadOrCreateMeshImpl
+    (
+        const IOobject& io,
+        refPtr<fileOperation>* readHandlerPtr,  // Can be nullptr
+        const polyMesh& pMesh,
+        const bool decompose,  // Only used if readHandlerPtr == nullptr
+        const bool verbose = false
+    );
+
+
+
 public:
 
     //- Unregister the faMesh from its associated polyMesh
@@ -94,6 +114,19 @@ public:
         const IOobject& io,
         const polyMesh& pMesh,
         const bool decompose,
+        const bool verbose = false
+    );
+
+    // Read mesh if available. Otherwise create empty mesh with same non-proc
+    // patches as proc0 mesh. Requires:
+    //  - all processors to have all patches (and in same order).
+    //  - io.instance() set to facesInstance
+    static autoPtr<faMesh> loadOrCreateMesh
+    (
+        const IOobject& io,
+        const polyMesh& pMesh,
+        //! Non-null reference if a mesh exists on given processor
+        refPtr<fileOperation>& readHandler,
         const bool verbose = false
     );
 

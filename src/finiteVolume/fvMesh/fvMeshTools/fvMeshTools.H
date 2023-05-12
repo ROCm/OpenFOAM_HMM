@@ -96,6 +96,21 @@ class fvMeshTools
     // Remove trailing patches
     static void trimPatches(fvMesh&, const label nPatches);
 
+    //- Read mesh if available, or create empty mesh with non-proc as per
+    //- proc0 mesh.
+    //  Has two modes of operation.
+    //  If the readHandler is non-nullptr, use it to decide on availability.
+    //  Requires:
+    //  - all processors to have all patches (and in same order).
+    //  - io.instance() set to facesInstance
+    static autoPtr<fvMesh> loadOrCreateMeshImpl
+    (
+        const IOobject& io,
+        refPtr<fileOperation>* readHandlerPtr,  // Can be nullptr
+        const bool decompose,  // Only used if readHandlerPtr == nullptr
+        const bool verbose = false
+    );
+
 
 public:
 
@@ -168,6 +183,18 @@ public:
         const IOobject& io,
         const bool decompose,
         const bool verbose = false
+    );
+
+    //- Read mesh if available, or create empty mesh with non-proc as per
+    //- proc0 mesh.
+    //  The fileHandler is specified on processors that have a processor mesh.
+    //  Generates empty mesh on other processors.
+    static autoPtr<fvMesh> loadOrCreateMesh
+    (
+        const IOobject& io,
+        //! Non-null reference if a mesh exists on given processor
+        refPtr<fileOperation>& readHandler,
+        const bool verbose = true
     );
 
     //- Create additional fvSchemes/fvSolution files

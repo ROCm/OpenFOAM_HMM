@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,8 @@ License
 #include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"
+#include "fileOperation.H"
+#include "BitOps.H"
 #include "IOobjectList.H"
 #include "basicFvGeometryScheme.H"
 #include "processorPolyPatch.H"
@@ -471,7 +473,7 @@ Foam::fvMeshTools::newMesh
     // Read and scatter master patches (without reading master mesh!)
 
     PtrList<entry> patchEntries;
-    if (Pstream::master())
+    if (UPstream::master())
     {
         const bool oldParRun = Pstream::parRun(false);
 
@@ -502,7 +504,7 @@ Foam::fvMeshTools::newMesh
             )
         );
 
-        Pstream::parRun(oldParRun);
+        UPstream::parRun(oldParRun);
     }
 
     // Broadcast information to all
@@ -730,14 +732,14 @@ Foam::fvMeshTools::newMesh
 
 
 Foam::autoPtr<Foam::fvMesh>
-Foam::fvMeshTools::loadOrCreateMesh
+Foam::fvMeshTools::loadOrCreateMeshImpl
 (
     const IOobject& io,
+    refPtr<fileOperation>* readHandlerPtr,  // Can be nullptr
     const bool decompose,
     const bool verbose
 )
 {
-
     // Region name
     // ~~~~~~~~~~~
 
@@ -752,9 +754,11 @@ Foam::fvMeshTools::loadOrCreateMesh
     // Read and scatter master patches (without reading master mesh!)
 
     PtrList<entry> patchEntries;
-    if (Pstream::master())
+    if (UPstream::master())
     {
-        const bool oldParRun = Pstream::parRun(false);
+        const bool oldParRun = UPstream::parRun(false);
+        const label oldNumProcs = fileHandler().nProcs();
+        const int oldCache = fileOperation::cacheLevel(0);
 
         patchEntries = polyBoundaryMeshEntries
         (
@@ -770,45 +774,74 @@ Foam::fvMeshTools::loadOrCreateMesh
             )
         );
 
-        Pstream::parRun(oldParRun);
+        fileOperation::cacheLevel(oldCache);
+        if (oldParRun)
+        {
+            const_cast<fileOperation&>(fileHandler()).nProcs(oldNumProcs);
+        }
+        UPstream::parRun(oldParRun);
     }
 
     // Broadcast: send patches to all
-    Pstream::broadcast(patchEntries);  // == worldComm;
+    Pstream::broadcast(patchEntries, UPstream::worldComm);
 
-
-    // Dummy meshes
-    // ~~~~~~~~~~~~
 
     // Check who has or needs a mesh.
-    // For 'decompose', only need mesh on master.
-    // Otherwise check for presence of the "faces" file
+    bool haveLocalMesh = false;
 
-    bool haveMesh =
-    (
-        decompose
-      ? Pstream::master()
-      : fileHandler().isFile
+    if (readHandlerPtr)
+    {
+        // Non-null reference when a mesh exists on given processor
+        haveLocalMesh = (*readHandlerPtr).good();
+    }
+    else
+    {
+        // No file handler.
+        // Check for presence of the "faces" file,
+        // but for 'decompose', only need mesh on master.
+
+        haveLocalMesh =
         (
-            fileHandler().filePath
+            decompose
+          ? UPstream::master()
+          : fileHandler().isFile
             (
-                io.time().path()/io.instance()/meshSubDir/"faces"
+                fileHandler().filePath
+                (
+                    io.time().path()/io.instance()/meshSubDir/"faces"
+                )
             )
-        )
+        );
+    }
+
+    // Globally consistent information about who has a mesh
+    boolList haveMesh
+    (
+        UPstream::allGatherValues<bool>(haveLocalMesh)
     );
 
 
-    if (!haveMesh)
+    autoPtr<fvMesh> meshPtr;
+
+    if (!haveLocalMesh)
     {
-        const bool oldParRun = Pstream::parRun(false);
+        // No local mesh - need to synthesize one
+
+        const bool oldParRun = UPstream::parRun(false);
+        const label oldNumProcs = fileHandler().nProcs();
+        const int oldCache = fileOperation::cacheLevel(0);
 
         // Create dummy mesh - on procs that don't already have a mesh
-        fvMesh dummyMesh
+        meshPtr.reset
         (
-            IOobject(io, IOobject::NO_READ, IOobject::AUTO_WRITE),
-            Foam::zero{},
-            false
+            new fvMesh
+            (
+                IOobject(io, IOobject::NO_READ, IOobject::AUTO_WRITE),
+                Foam::zero{},
+                false
+            )
         );
+        fvMesh& mesh = *meshPtr;
 
         // Add patches
         polyPatchList patches(patchEntries.size());
@@ -844,65 +877,142 @@ Foam::fvMeshTools::loadOrCreateMesh
                         name,
                         patchDict,
                         nPatches++,
-                        dummyMesh.boundaryMesh()
+                        mesh.boundaryMesh()
                     )
                 );
             }
         }
         patches.resize(nPatches);
-        dummyMesh.addFvPatches(patches, false);  // No parallel comms
+        mesh.addFvPatches(patches, false);  // No parallel comms
 
+        if (!readHandlerPtr)
+        {
+            // The 'old' way of doing things.
+            // Write the dummy mesh to disk for subsequent re-reading.
+            //
+            // This is not particularly elegant.
+            //
+            // Note: add some dummy zones so upon reading it does not read them
+            // from the undecomposed case. Should be done as extra argument to
+            // regIOobject::readStream?
 
-        // Add some dummy zones so upon reading it does not read them
-        // from the undecomposed case. Should be done as extra argument to
-        // regIOobject::readStream?
+            List<pointZone*> pz
+            (
+                1,
+                new pointZone("dummyZone", 0, mesh.pointZones())
+            );
+            List<faceZone*> fz
+            (
+                1,
+                new faceZone("dummyZone", 0, mesh.faceZones())
+            );
+            List<cellZone*> cz
+            (
+                1,
+                new cellZone("dummyZone", 0, mesh.cellZones())
+            );
+            mesh.addZones(pz, fz, cz);
+            mesh.pointZones().clear();
+            mesh.faceZones().clear();
+            mesh.cellZones().clear();
+            //Pout<< "Writing dummy mesh: " << mesh.polyMesh::objectPath()
+            //    << endl;
+            mesh.write();
 
-        List<pointZone*> pz
+            // Discard - it will be re-read later
+            meshPtr.reset(nullptr);
+        }
+
+        fileOperation::cacheLevel(oldCache);
+        if (oldParRun)
+        {
+            const_cast<fileOperation&>(fileHandler()).nProcs(oldNumProcs);
+        }
+        UPstream::parRun(oldParRun);  // Restore parallel state
+    }
+    else if (readHandlerPtr && haveLocalMesh)
+    {
+        const labelList meshProcIds(BitOps::sortedToc(haveMesh));
+
+        UPstream::communicator newCommunicator;
+        const label oldWorldComm = UPstream::commWorld();
+
+        auto& readHandler = *readHandlerPtr;
+        auto oldHandler = fileOperation::fileHandler(readHandler);
+
+        // With IO ranks the communicator of the fileOperation will
+        // only include the ranks for the current IO rank.
+        // Instead allocate a new communicator for everyone with a mesh
+
+        const auto& handlerProcIds = UPstream::procID(fileHandler().comm());
+
+        // Comparing global ranks in the communicator.
+        // Use std::equal for the List<label> vs List<int> comparison
+
+        if
         (
-            1,
-            new pointZone("dummyPointZone", 0, dummyMesh.pointZones())
-        );
-        List<faceZone*> fz
+            meshProcIds.size() == handlerProcIds.size()
+         && std::equal
+            (
+                meshProcIds.cbegin(),
+                meshProcIds.cend(),
+                handlerProcIds.cbegin()
+            )
+        )
+        {
+            // Can use the handler communicator as is.
+            UPstream::commWorld(fileHandler().comm());
+        }
+        else if
         (
-            1,
-            new faceZone("dummyFaceZone", 0, dummyMesh.faceZones())
-        );
-        List<cellZone*> cz
-        (
-            1,
-            new cellZone("dummyCellZone", 0, dummyMesh.cellZones())
-        );
-        dummyMesh.addZones(pz, fz, cz);
-        dummyMesh.pointZones().clear();
-        dummyMesh.faceZones().clear();
-        dummyMesh.cellZones().clear();
-        //Pout<< "Writing dummy mesh to " << dummyMesh.polyMesh::objectPath()
-        //    << endl;
-        dummyMesh.write();
+            UPstream::nProcs(fileHandler().comm())
+         != UPstream::nProcs(UPstream::worldComm)
+        )
+        {
+            // Need a new communicator for the fileHandler.
 
-        Pstream::parRun(oldParRun);  // Restore parallel state
+            // Warning: MS-MPI currently uses MPI_Comm_create() instead of
+            // MPI_Comm_create_group() so it will block here!
+
+            newCommunicator.reset(UPstream::worldComm, meshProcIds);
+            UPstream::commWorld(newCommunicator.comm());
+        }
+
+        // Load but do not initialise
+        meshPtr = autoPtr<fvMesh>::New(io, false);
+
+        readHandler = fileOperation::fileHandler(oldHandler);
+        UPstream::commWorld(oldWorldComm);
+
+        // Reset mesh communicator to the real world comm
+        meshPtr().polyMesh::comm() = UPstream::commWorld();
     }
 
 
-    // Read mesh
-    // ~~~~~~~~~
-    // Now all processors have a (possibly zero size) mesh so read in
-    // parallel
-
-    //Pout<< "Reading mesh from " << io.objectRelPath() << endl;
-    auto meshPtr = autoPtr<fvMesh>::New(io);
-    fvMesh& mesh = *meshPtr;
-
-    // Make sure to use a non-parallel geometry calculation method
-    fvMeshTools::setBasicGeometry(mesh);
-
-
-    // Sync patches
-    // ~~~~~~~~~~~~
-
-    if (!Pstream::master() && haveMesh)
+    if (!meshPtr)
     {
-        // Check master names against mine
+        // Using the 'old' way of doing things (writing to disk and re-reading).
+
+        // Read mesh from disk
+        //
+        // Now all processors have a (possibly zero size) mesh so can
+        // read in parallel
+
+        //Pout<< "Reading mesh from " << io.objectRelPath() << endl;
+        // Load but do not initialise
+        meshPtr = autoPtr<fvMesh>::New(io, false);
+    }
+
+    fvMesh& mesh = meshPtr();
+
+
+    // Check patches
+    // ~~~~~~~~~~~~~
+
+    #if 0
+    if (!UPstream::master() && haveLocalMesh)
+    {
+        // Check master patch entries names against local ones
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -924,12 +1034,11 @@ Foam::fvMeshTools::loadOrCreateMesh
             if (patchi >= patches.size())
             {
                 FatalErrorInFunction
-                    << "Non-processor patches not synchronised."
-                    << endl
-                    << "Processor " << Pstream::myProcNo()
+                    << "Non-processor patches not synchronised." << endl
+                    << "Processor " << UPstream::myProcNo()
                     << " has only " << patches.size()
                     << " patches, master has "
-                    << patchi
+                    << patchi << endl
                     << exit(FatalError);
             }
 
@@ -940,12 +1049,11 @@ Foam::fvMeshTools::loadOrCreateMesh
             )
             {
                 FatalErrorInFunction
-                    << "Non-processor patches not synchronised."
-                    << endl
+                    << "Non-processor patches not synchronised." << endl
                     << "Master patch " << patchi
                     << " name:" << type
                     << " type:" << type << endl
-                    << "Processor " << Pstream::myProcNo()
+                    << "Processor " << UPstream::myProcNo()
                     << " patch " << patchi
                     << " has name:" << patches[patchi].name()
                     << " type:" << patches[patchi].type()
@@ -953,92 +1061,109 @@ Foam::fvMeshTools::loadOrCreateMesh
             }
         }
     }
+    #endif
 
 
-    // Determine zones
-    // ~~~~~~~~~~~~~~~
+    // Synchronize zones
+    // ~~~~~~~~~~~~~~~~~
 
-    wordList pointZoneNames(mesh.pointZones().names());
-    wordList faceZoneNames(mesh.faceZones().names());
-    wordList cellZoneNames(mesh.cellZones().names());
-    Pstream::broadcasts
-    (
-        UPstream::worldComm,
-        pointZoneNames,
-        faceZoneNames,
-        cellZoneNames
-    );
-
-    if (!haveMesh)
     {
-        // Add the zones. Make sure to remove the old dummy ones first
-        mesh.pointZones().clear();
-        mesh.faceZones().clear();
-        mesh.cellZones().clear();
-
-        List<pointZone*> pz(pointZoneNames.size());
-        forAll(pointZoneNames, i)
-        {
-            pz[i] = new pointZone(pointZoneNames[i], i, mesh.pointZones());
-        }
-        List<faceZone*> fz(faceZoneNames.size());
-        forAll(faceZoneNames, i)
-        {
-            fz[i] = new faceZone(faceZoneNames[i], i, mesh.faceZones());
-        }
-        List<cellZone*> cz(cellZoneNames.size());
-        forAll(cellZoneNames, i)
-        {
-            cz[i] = new cellZone(cellZoneNames[i], i, mesh.cellZones());
-        }
-        mesh.addZones(pz, fz, cz);
-    }
+        wordList pointZoneNames(mesh.pointZones().names());
+        wordList faceZoneNames(mesh.faceZones().names());
+        wordList cellZoneNames(mesh.cellZones().names());
+        Pstream::broadcasts
+        (
+            UPstream::worldComm,
+            pointZoneNames,
+            faceZoneNames,
+            cellZoneNames
+        );
 
 
-    // Determine sets
-    // ~~~~~~~~~~~~~~
-
-    wordList pointSetNames;
-    wordList faceSetNames;
-    wordList cellSetNames;
-    if (Pstream::master())
-    {
-        // Read sets
-        const bool oldParRun = Pstream::parRun(false);
-        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
-        Pstream::parRun(oldParRun);
-
-        pointSetNames = objects.sortedNames<pointSet>();
-        faceSetNames = objects.sortedNames<faceSet>();
-        cellSetNames = objects.sortedNames<cellSet>();
-    }
-    Pstream::broadcasts
-    (
-        UPstream::worldComm,
-        pointSetNames,
-        faceSetNames,
-        cellSetNames
-    );
-
-    if (!haveMesh)
-    {
-        for (const word& setName : pointSetNames)
+        if (!haveLocalMesh)
         {
-            pointSet(mesh, setName, 0).write();
-        }
-        for (const word& setName : faceSetNames)
-        {
-            faceSet(mesh, setName, 0).write();
-        }
-        for (const word& setName : cellSetNames)
-        {
-            cellSet(mesh, setName, 0).write();
+            // Add the zones. Make sure to remove the old dummy ones first
+            mesh.pointZones().clear();
+            mesh.faceZones().clear();
+            mesh.cellZones().clear();
+
+            PtrList<pointZone> pz(pointZoneNames.size());
+            forAll(pointZoneNames, i)
+            {
+                pz.emplace_set(i, pointZoneNames[i], i, mesh.pointZones());
+            }
+
+            PtrList<faceZone> fz(faceZoneNames.size());
+            forAll(faceZoneNames, i)
+            {
+                fz.emplace_set(i, faceZoneNames[i], i, mesh.faceZones());
+            }
+
+            PtrList<cellZone> cz(cellZoneNames.size());
+            forAll(cellZoneNames, i)
+            {
+                cz.emplace_set(i, cellZoneNames[i], i, mesh.cellZones());
+            }
+            mesh.addZones(std::move(pz), std::move(fz), std::move(cz));
         }
     }
 
 
-    // Force recreation of globalMeshData.
+    // Synchronize sets (on disk)
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    if (!readHandlerPtr)
+    {
+        wordList pointSetNames;
+        wordList faceSetNames;
+        wordList cellSetNames;
+        if (UPstream::master())
+        {
+            // Read sets
+            const bool oldParRun = UPstream::parRun(false);
+
+            IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+            UPstream::parRun(oldParRun);
+
+            pointSetNames = objects.sortedNames<pointSet>();
+            faceSetNames = objects.sortedNames<faceSet>();
+            cellSetNames = objects.sortedNames<cellSet>();
+        }
+        Pstream::broadcasts
+        (
+            UPstream::worldComm,
+            pointSetNames,
+            faceSetNames,
+            cellSetNames
+        );
+
+        if (!haveLocalMesh)
+        {
+            for (const word& setName : pointSetNames)
+            {
+                pointSet(mesh, setName, 0).write();
+            }
+            for (const word& setName : faceSetNames)
+            {
+                faceSet(mesh, setName, 0).write();
+            }
+            for (const word& setName : cellSetNames)
+            {
+                cellSet(mesh, setName, 0).write();
+            }
+        }
+    }
+
+
+    // Meshes have been done without init so now can do full initialisation
+
+    fvMeshTools::setBasicGeometry(mesh);
+    mesh.init(true);
+
+    // Force early recreation of globalMeshData etc
     mesh.globalData();
+    mesh.tetBasePtIs();
+    mesh.geometricD();
 
 
     // Do some checks.
@@ -1057,6 +1182,42 @@ Foam::fvMeshTools::loadOrCreateMesh
     mesh.pointZones().checkParallelSync(verbose);
 
     return meshPtr;
+}
+
+
+Foam::autoPtr<Foam::fvMesh>
+Foam::fvMeshTools::loadOrCreateMesh
+(
+    const IOobject& io,
+    const bool decompose,
+    const bool verbose
+)
+{
+    return fvMeshTools::loadOrCreateMeshImpl
+    (
+        io,
+        nullptr,  // fileOperation (ignore)
+        decompose,
+        verbose
+    );
+}
+
+
+Foam::autoPtr<Foam::fvMesh>
+Foam::fvMeshTools::loadOrCreateMesh
+(
+    const IOobject& io,
+    refPtr<fileOperation>& readHandler,
+    const bool verbose
+)
+{
+    return fvMeshTools::loadOrCreateMeshImpl
+    (
+        io,
+       &readHandler,
+        false,  // decompose (ignored)
+        verbose
+    );
 }
 
 
