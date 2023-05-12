@@ -721,13 +721,14 @@ void Foam::faMeshReconstructor::writeMesh(const word& timeName) const
 {
     const faMesh& fullMesh = this->mesh();
 
-    const bool oldDistributed = fileHandler().distributed();
-    auto oldHandler = fileHandler(fileOperation::NewUncollated());
-    fileHandler().distributed(true);
+    refPtr<fileOperation> writeHandler(fileOperation::NewUncollated());
 
-    if (Pstream::master())
+    auto oldHandler = fileOperation::fileHandler(writeHandler);
+    const bool oldDistributed = fileHandler().distributed(true);
+
+    if (UPstream::master())
     {
-        const bool oldParRun = Pstream::parRun(false);
+        const bool oldParRun = UPstream::parRun(false);
 
         IOobject io(fullMesh.boundary());
 
@@ -736,15 +737,12 @@ void Foam::faMeshReconstructor::writeMesh(const word& timeName) const
 
         fullMesh.boundary().write();
 
-        Pstream::parRun(oldParRun);
+        UPstream::parRun(oldParRun);
     }
 
-    // Restore old settings
-    if (oldHandler)
-    {
-        fileHandler(std::move(oldHandler));
-    }
+    // Restore settings
     fileHandler().distributed(oldDistributed);
+    (void) fileOperation::fileHandler(oldHandler);
 }
 
 
