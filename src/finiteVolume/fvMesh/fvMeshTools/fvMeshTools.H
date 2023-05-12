@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class fileOperation;
 class mapDistributePolyMesh;
 
 /*---------------------------------------------------------------------------*\
@@ -192,7 +193,7 @@ public:
         const fvMesh& procMesh,
         const mapDistributePolyMesh& map,
         const bool decompose,
-        autoPtr<fileOperation>&& writeHandler
+        refPtr<fileOperation>& writeHandler
     );
 };
 

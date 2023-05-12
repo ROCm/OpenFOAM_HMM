@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -303,7 +303,7 @@ void Foam::fvMeshTools::writeProcAddressing
     const fvMesh& mesh,
     const mapDistributePolyMesh& map,
     const bool decompose,
-    autoPtr<fileOperation>&& writeHandler
+    refPtr<fileOperation>& writeHandler
 )
 {
     Info<< "Writing ("
@@ -421,21 +421,14 @@ void Foam::fvMeshTools::writeProcAddressing
         );
     }
 
-    autoPtr<fileOperation> defaultHandler;
-    if (writeHandler)
-    {
-        defaultHandler = fileHandler(std::move(writeHandler));
-    }
+    auto oldHandler = fileOperation::fileHandler(writeHandler);
 
     const bool cellOk = cellMap.write();
     const bool faceOk = faceMap.write();
     const bool pointOk = pointMap.write();
     const bool patchOk = patchMap.write();
 
-    if (defaultHandler)
-    {
-        writeHandler = fileHandler(std::move(defaultHandler));
-    }
+    writeHandler = fileOperation::fileHandler(oldHandler);
 
     if (!cellOk || !faceOk || !pointOk || !patchOk)
     {

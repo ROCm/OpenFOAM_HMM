@@ -551,7 +551,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 // Inplace redistribute mesh and any fields
 autoPtr<mapDistributePolyMesh> redistributeAndWrite
 (
-    autoPtr<fileOperation>&& writeHandler,
+    refPtr<fileOperation>& writeHandler,
     const Time& baseRunTime,
     const fileName& proc0CaseName,
 
@@ -834,18 +834,12 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     }
     else
     {
-        autoPtr<fileOperation> defaultHandler;
-        if (writeHandler)
-        {
-            defaultHandler = fileHandler(std::move(writeHandler));
-        }
+        auto oldHandler = fileOperation::fileHandler(writeHandler);
 
         mesh.write();
 
-        if (defaultHandler)
-        {
-            writeHandler = fileHandler(std::move(defaultHandler));
-        }
+        writeHandler = fileOperation::fileHandler(oldHandler);
+
         topoSet::removeFiles(mesh);
     }
     Info<< "Written redistributed mesh to "
@@ -861,7 +855,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             mesh,
             distMap(),
             decompose,
-            std::move(writeHandler)
+            writeHandler
         );
     }
     else
@@ -1064,7 +1058,7 @@ int main(int argc, char *argv[])
     //                than it writes to
     // - reconstruct - reads parallel, write on master only and to parent
     //                 directory
-    autoPtr<fileOperation> writeHandler;
+    refPtr<fileOperation> writeHandler;
     if
     (
         fileHandler().type()
@@ -1072,7 +1066,8 @@ int main(int argc, char *argv[])
     )
     {
         // Install 'uncollated' as fileHandler. Save old one in writeHandler.
-        writeHandler = fileHandler(fileOperation::NewUncollated());
+        writeHandler =
+            fileOperation::fileHandler(fileOperation::NewUncollated());
     }
 
     // Switch off parallel synchronisation of cached time directories
@@ -1582,7 +1577,7 @@ int main(int argc, char *argv[])
 
                     redistributeAndWrite
                     (
-                        std::move(writeHandler),
+                        writeHandler,
                         baseRunTime,
                         proc0CaseName,
 
@@ -1713,7 +1708,7 @@ int main(int argc, char *argv[])
                         areaBaseMeshPtr(),  // Reconstruct location
                         faDistMap,
                         false,              // decompose=false
-                        std::move(writeHandler),
+                        writeHandler,
                         areaMeshPtr.get()   // procMesh
                     );
                 }
@@ -2502,7 +2497,7 @@ int main(int argc, char *argv[])
             // - but not lagrangian fields; these are done later
             autoPtr<mapDistributePolyMesh> distMap = redistributeAndWrite
             (
-                std::move(writeHandler),
+                writeHandler,
                 baseRunTime,
                 proc0CaseName,
 
@@ -2575,11 +2570,7 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    autoPtr<fileOperation> defaultHandler;
-                    if (writeHandler)
-                    {
-                        defaultHandler = fileHandler(std::move(writeHandler));
-                    }
+                    auto oldHandler = fileOperation::fileHandler(writeHandler);
 
                     IOmapDistributePolyMeshRef
                     (
@@ -2598,10 +2589,7 @@ int main(int argc, char *argv[])
 
                     areaProcMeshPtr->write();
 
-                    if (defaultHandler)
-                    {
-                        writeHandler = fileHandler(std::move(defaultHandler));
-                    }
+                    writeHandler = fileOperation::fileHandler(oldHandler);
 
                     if (decompose)
                     {
@@ -2610,7 +2598,7 @@ int main(int argc, char *argv[])
                             areaProcMeshPtr(),
                             faDistMap,
                             decompose,
-                            std::move(writeHandler)
+                            writeHandler
                         );
                     }
                 }
