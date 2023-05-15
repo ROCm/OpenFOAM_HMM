@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019, 2022 PCOpt/NTUA
     Copyright (C) 2013-2019, 2022 FOSS GP
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -242,7 +242,7 @@ void objectiveForce::update_dxdbMultiplier()
 void objectiveForce::update_boundarydJdnut()
 {
     const volVectorField& U = vars_.U();
-    volSymmTensorField devGradU(dev(twoSymm(fvc::grad(U))));
+    volSymmTensorField devGradU(devTwoSymm(fvc::grad(U)));
 
     for (const label patchI : forcePatches_)
     {

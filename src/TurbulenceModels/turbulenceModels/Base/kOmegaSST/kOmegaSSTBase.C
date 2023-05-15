@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
     Copyright (C) 2022 Upstream CFD GmbH
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -174,7 +174,7 @@ tmp<volScalarField::Internal> kOmegaSSTBase<BasicEddyViscosityModel>::GbyNu0
     return tmp<volScalarField::Internal>::New
     (
         IOobject::scopedName(this->type(), "GbyNu"),
-        gradU() && dev(twoSymm(gradU()))
+        gradU() && devTwoSymm(gradU())
     );
 }
 

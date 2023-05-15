@@ -760,6 +760,36 @@ inline SymmTensor<Cmpt> twoSymm(const Tensor<Cmpt>& t)
 }
 
 
+//- Return the deviatoric part of the symmetric part of a Tensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devSymm(const Tensor<Cmpt>& t)
+{
+    const Cmpt sph(tr(t)/3.0);
+
+    return SymmTensor<Cmpt>
+    (
+        t.xx() - sph, 0.5*(t.xy() + t.yx()), 0.5*(t.xz() + t.zx()),
+                      t.yy() - sph,          0.5*(t.yz() + t.zy()),
+                                             t.zz() - sph
+    );
+}
+
+
+//- Return the deviatoric part of twice the symmetric part of a Tensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devTwoSymm(const Tensor<Cmpt>& t)
+{
+    const Cmpt sph((2.0/3.0)*tr(t));
+
+    return SymmTensor<Cmpt>
+    (
+        2*t.xx() - sph, (t.xy() + t.yx()), (t.xz() + t.zx()),
+                        2*t.yy() - sph,    (t.yz() + t.zy()),
+                                           2*t.zz() - sph
+    );
+}
+
+
 //- Return the skew-symmetric part of a Tensor
 template<class Cmpt>
 inline Tensor<Cmpt> skew(const Tensor<Cmpt>& t)

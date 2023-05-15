@@ -223,7 +223,7 @@ if (ign.ignited())
         volScalarField R(Gstar*XiEqStar/(XiEqStar - scalar(1)));
         volScalarField G(R*(XiEq - scalar(1.001))/XiEq);
 
-        //R *= (Gstar + 2*mag(dev(symm(fvc::grad(U)))))/Gstar;
+        //R *= (Gstar + 2*mag(devSymm(fvc::grad(U))))/Gstar;
 
         // Solve for the flame wrinkling
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

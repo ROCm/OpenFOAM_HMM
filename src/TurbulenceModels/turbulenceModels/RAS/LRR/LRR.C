@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -365,7 +365,7 @@ void LRR<BasicTurbulenceModel>::correct()
 
         REqn.ref() +=
             ((3*pow(Cmu_, 0.75)/kappa_)*(alpha*rho*sqrt(k_)/y_))
-           *dev(symm((n_ & reflect)*n_));
+           *devSymm((n_ & reflect)*n_);
     }
 
     REqn.ref().relax();
