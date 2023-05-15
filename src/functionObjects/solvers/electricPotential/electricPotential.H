@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -118,9 +118,11 @@ Usage
             }
 
         // Optional entries
-        nCorr                 <label>;
+        nCorr                 <int>;
         writeDerivedFields    <bool>;
-        fieldName             <word>;
+        V                     <word>;
+        electricField         <bool>;
+        E                     <word>;
 
         // Inherited entries
         ...
@@ -134,9 +136,11 @@ Usage
       libs      | Library name: solverFunctionObjects | word | yes  | -
       sigma     | Isotropic electrical conductivity of phase | scalar | yes | -
       epsilonr  | Isotropic relative permittivity of phase   | scalar | no  | -
-      nCorr     | Number of corrector iterations     | label | no   | 1
+      nCorr     | Number of corrector iterations      | int  | no   | 1
       writeDerivedFields | Flag to write extra fields | bool | no   | false
-      fieldName | Name of operand field   | word | no | electricPotential:V
+      V    | Name of electric potential field | word | no | electricPotential:V
+      electricField | Flag to calculate electric field  | bool | no | false
+      E    | Name of electric field           | word | no | electricPotential:E
     \endtable
 
     The inherited entries are elaborated in:
@@ -145,7 +149,6 @@ Usage
     Fields written out when the \c writeDerivedFields entry is \c true:
     \table
       Operand         | Type             | Location
-      Electric field  | volVectorField   | \<time\>/electricPotential:E
       Current density | volVectorField   | \<time\>/electricPotential:J
       Charge density  | volScalarField   | \<time\>/electricPotential:rho
     \endtable
@@ -199,21 +202,29 @@ class electricPotential
         //- Isotropic relative permittivity of a single phase
         dimensionedScalar epsilonr_;
 
-        //- Name of the operand field
-        word fieldName_;
+        //- Name of electric potential field
+        word Vname_;
+
+        //- Name of electric field
+        word Ename_;
 
         //- Number of corrector iterations
-        label nCorr_;
+        int nCorr_;
 
         //- Flag to write derived fields of
         //- electric field, current density and free-charge density
         bool writeDerivedFields_;
 
+        //- Flag to calculate electric field
+        bool electricField_;
+
 
     // Private Member Functions
 
-        //- Return reference to the registered operand field
-        volScalarField& operandField();
+        //- Return requested field from the object registry
+        //- or read+register the field to the object registry
+        volScalarField& getOrReadField(const word& fieldName) const;
+
 
         //- Return the isotropic electrical conductivity field of the mixture
         tmp<volScalarField> sigma() const;
