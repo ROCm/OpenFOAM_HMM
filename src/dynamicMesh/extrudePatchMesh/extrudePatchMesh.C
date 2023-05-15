@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -163,6 +163,12 @@ void Foam::extrudePatchMesh::extrudeMesh(polyPatchList& regionPatches)
         {
             if (columnCells)
             {
+                nonManifoldEdge.set(edgeI);
+            }
+            else if (extrudedPatch_.edgeFaces()[edgeI].size() > 2)
+            {
+                // TBD: issue #2780 : non-manifold edges get seen as internal
+                // This bit of code can be removed once #2780 is solved.
                 nonManifoldEdge.set(edgeI);
             }
         }
