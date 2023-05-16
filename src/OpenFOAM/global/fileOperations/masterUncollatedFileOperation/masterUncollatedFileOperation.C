@@ -740,10 +740,10 @@ masterUncollatedFileOperation
         UPstream::allocateCommunicator
         (
             UPstream::worldComm,
-            subRanks(Pstream::nProcs())
+            subRanks(UPstream::nProcs())
         )
     ),
-    managedComm_(comm_)
+    managedComm_(getManagedComm(comm_))  // Possibly locally allocated
 {
     init(verbose);
 }
@@ -763,15 +763,19 @@ masterUncollatedFileOperation
 }
 
 
+void Foam::fileOperations::masterUncollatedFileOperation::storeComm() const
+{
+    // From externally -> locally managed
+    managedComm_ = getManagedComm(comm_);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::fileOperations::masterUncollatedFileOperation::
 ~masterUncollatedFileOperation()
 {
-    if (UPstream::isUserComm(managedComm_))
-    {
-        UPstream::freeCommunicator(managedComm_);
-    }
+    UPstream::freeCommunicator(managedComm_);
 }
 
 

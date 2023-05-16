@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -316,7 +316,7 @@ bool Foam::fileOperation::uniformFile(const fileNameList& names)
 
 bool Foam::fileOperation::uniformFile(const label comm, const fileName& name)
 {
-    if (!Pstream::parRun())
+    if (!UPstream::parRun())
     {
         return true;
     }
@@ -1493,5 +1493,23 @@ Foam::label Foam::fileOperation::detectProcessorPath(const fileName& fName)
     return splitProcessorPath(fName, path, pDir, local, group, nProcs);
 }
 
+
+// * * * * * * * * * * * * * *  Friend Operators * * * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<fileOperation>& iproxy
+)
+{
+    const auto& fp = *iproxy;
+
+    os  << "fileHandler:" << fp.type()
+        // << " nProcs:" << fp.nProcs()
+        << " comm:" << fp.comm()
+        << " distributed:" << fp.distributed() << nl;
+
+    return os;
+}
 
 // ************************************************************************* //

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -287,7 +287,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
         ),
         false
     ),
-    managedComm_(comm_),
+    managedComm_(getManagedComm(comm_)),  // Possibly locally allocated
     writer_(mag(maxThreadFileBufferSize), comm_),
     nProcs_(Pstream::nProcs()),
     ioRanks_(ioRanks())
@@ -300,7 +300,6 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 (
     const label comm,
     const labelList& ioRanks,
-    const word& typeName,
     bool verbose
 )
 :
@@ -314,6 +313,13 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 }
 
 
+void Foam::fileOperations::collatedFileOperation::storeComm() const
+{
+    // From externally -> locally managed
+    managedComm_ = getManagedComm(comm_);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::fileOperations::collatedFileOperation::~collatedFileOperation()
@@ -321,10 +327,7 @@ Foam::fileOperations::collatedFileOperation::~collatedFileOperation()
     // Wait for any outstanding file operations
     flush();
 
-    if (UPstream::isUserComm(managedComm_))
-    {
-        UPstream::freeCommunicator(managedComm_);
-    }
+    UPstream::freeCommunicator(managedComm_);
 }
 
 

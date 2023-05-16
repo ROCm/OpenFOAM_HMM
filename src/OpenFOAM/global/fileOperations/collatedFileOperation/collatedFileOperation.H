@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2022 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,8 +46,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileOperations_collatedFileOperation_H
-#define fileOperations_collatedFileOperation_H
+#ifndef Foam_fileOperations_collatedFileOperation_H
+#define Foam_fileOperations_collatedFileOperation_H
 
 #include "masterUncollatedFileOperation.H"
 #include "OFstreamCollator.H"
@@ -70,13 +70,14 @@ class collatedFileOperation
     // Private Data
 
         //- Communicator allocated/managed by us
-        label managedComm_;
+        mutable label managedComm_;
 
 
     // Private Member Functions
 
         //- Any initialisation steps after constructing
         void init(bool verbose);
+
 
 protected:
 
@@ -129,15 +130,14 @@ public:
     // Constructors
 
         //- Default construct
-        explicit collatedFileOperation(bool verbose);
+        explicit collatedFileOperation(bool verbose = false);
 
         //- Construct from user communicator
         collatedFileOperation
         (
             const label comm,
             const labelList& ioRanks,
-            const word& typeName,
-            bool verbose
+            bool verbose = false
         );
 
 
@@ -146,6 +146,11 @@ public:
 
 
     // Member Functions
+
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const;
+
 
         // (reg)IOobject functionality
 

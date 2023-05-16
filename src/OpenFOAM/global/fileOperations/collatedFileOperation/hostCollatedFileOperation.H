@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,8 +57,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileOperations_hostCollatedFileOperation_H
-#define fileOperations_hostCollatedFileOperation_H
+#ifndef Foam_fileOperations_hostCollatedFileOperation_H
+#define Foam_fileOperations_hostCollatedFileOperation_H
 
 #include "collatedFileOperation.H"
 
@@ -80,7 +80,7 @@ class hostCollatedFileOperation
     // Private Data
 
         //- Communicator allocated/managed by us
-        label managedComm_;
+        mutable label managedComm_;
 
 
     // Private Member Functions
@@ -100,11 +100,18 @@ public:
     // Constructors
 
         //- Default construct
-        explicit hostCollatedFileOperation(const bool verbose);
+        explicit hostCollatedFileOperation(bool verbose = false);
 
 
     //- Destructor
     virtual ~hostCollatedFileOperation();
+
+
+    // Member Functions
+
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const;
 };
 
 
@@ -112,6 +119,7 @@ public:
             Class hostCollatedFileOperationInitialise Declaration
 \*---------------------------------------------------------------------------*/
 
+//! Internal class only
 class hostCollatedFileOperationInitialise
 :
     public collatedFileOperationInitialise

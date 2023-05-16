@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,12 +43,14 @@ Description
 
 #include "ISstream.H"
 #include "Ostream.H"
+#include "UPstream.H"
 #include "fileMonitor.H"
 #include "fileNameList.H"
 #include "instantList.H"
 #include "refPtr.H"
 #include "Enum.H"
 #include "Tuple2.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,10 +58,13 @@ namespace Foam
 {
 
 // Forward Declarations
-class IOobject;
-class regIOobject;
+class fileOperation;
 class objectRegistry;
+class regIOobject;
+class IOobject;
 class Time;
+
+Ostream& operator<<(Ostream& os, const InfoProxy<fileOperation>& info);
 
 /*---------------------------------------------------------------------------*\
                          Class fileOperation Declaration
@@ -159,6 +164,22 @@ protected:
         //- Does IOObject exist.
         //- Is either a directory (empty name()) or a file
         bool exists(IOobject& io) const;
+
+        //- Construction helper: check for locally allocated communicator
+        static inline label getManagedComm(const label communicator)
+        {
+            return
+            (
+                (
+                    communicator < 0
+                 || communicator == UPstream::globalComm
+                 || communicator == UPstream::selfComm
+                 || communicator == UPstream::worldComm
+                )
+              ? -1
+              : communicator
+            );
+        }
 
 
 public:
@@ -329,8 +350,17 @@ public:
             return old;
         }
 
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<fileOperation> info() const noexcept { return *this; }
+
 
     // Member Functions
+
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const = 0;
+
 
         // OSSpecific equivalents
 

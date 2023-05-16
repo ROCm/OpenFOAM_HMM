@@ -351,12 +351,6 @@ public:
         //- Number of currently defined communicators
         static label nComms() noexcept { return parentComm_.size(); }
 
-        //- True if communicator appears to be user-allocated
-        static bool isUserComm(const label communicator) noexcept
-        {
-            return (communicator > worldComm && communicator > selfComm);
-        }
-
         //- Debugging: print the communication tree
         static void printCommTree(const label communicator);
 

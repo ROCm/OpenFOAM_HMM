@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,15 +144,21 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
         UPstream::allocateCommunicator
         (
             UPstream::worldComm,
-            subRanks(Pstream::nProcs())
+            subRanks(UPstream::nProcs())
         ),
-        (Pstream::parRun() ? labelList() : ioRanks()), // processor dirs
-        typeName,
-        false // verbose
+        (UPstream::parRun() ? labelList() : ioRanks()), // processor dirs
+        false  // verbose
     ),
-    managedComm_(comm_)
+    managedComm_(getManagedComm(comm_))  // Possibly locally allocated
 {
     init(verbose);
+}
+
+
+void Foam::fileOperations::hostCollatedFileOperation::storeComm() const
+{
+    // From externally -> locally managed
+    managedComm_ = getManagedComm(comm_);
 }
 
 
@@ -160,10 +166,7 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 
 Foam::fileOperations::hostCollatedFileOperation::~hostCollatedFileOperation()
 {
-    if (UPstream::isUserComm(managedComm_))
-    {
-        UPstream::freeCommunicator(managedComm_);
-    }
+    UPstream::freeCommunicator(managedComm_);
 }
 
 

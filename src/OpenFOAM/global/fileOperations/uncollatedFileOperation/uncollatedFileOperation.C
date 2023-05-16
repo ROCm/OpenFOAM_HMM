@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -194,9 +194,16 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 )
 :
     fileOperation(UPstream::worldComm),
-    managedComm_(-1)  // worldComm is externally managed
+    managedComm_(-1)  // Externally managed
 {
     init(verbose);
+}
+
+
+void Foam::fileOperations::uncollatedFileOperation::storeComm() const
+{
+    // From externally -> locally managed
+    managedComm_ = getManagedComm(comm_);
 }
 
 
@@ -204,10 +211,7 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 
 Foam::fileOperations::uncollatedFileOperation::~uncollatedFileOperation()
 {
-    if (UPstream::isUserComm(managedComm_))
-    {
-        UPstream::freeCommunicator(managedComm_);
-    }
+    UPstream::freeCommunicator(managedComm_);
 }
 
 

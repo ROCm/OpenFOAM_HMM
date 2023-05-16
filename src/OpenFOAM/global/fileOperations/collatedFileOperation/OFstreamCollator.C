@@ -335,10 +335,7 @@ Foam::OFstreamCollator::~OFstreamCollator()
         thread_.reset(nullptr);
     }
 
-    if (threadComm_ != -1)
-    {
-        UPstream::freeCommunicator(threadComm_);
-    }
+    UPstream::freeCommunicator(threadComm_);
 }
 
 

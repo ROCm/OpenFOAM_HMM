@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,13 +91,14 @@ class masterUncollatedFileOperation
     // Private Data
 
         //- Communicator allocated/managed by us
-        label managedComm_;
+        mutable label managedComm_;
 
 
     // Private Member Functions
 
         //- Any initialisation steps after constructing
         void init(bool verbose);
+
 
 protected:
 
@@ -491,7 +492,7 @@ public:
     // Constructors
 
         //- Default construct
-        explicit masterUncollatedFileOperation(bool verbose);
+        explicit masterUncollatedFileOperation(bool verbose = false);
 
         //- Construct from communicator
         masterUncollatedFileOperation(const label comm, bool verbose);
@@ -502,6 +503,11 @@ public:
 
 
     // Member Functions
+
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const;
+
 
         // OSSpecific equivalents
 
