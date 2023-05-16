@@ -99,17 +99,20 @@ class faMeshDistributor
             const labelUList& boundaryProcAddr
         );
 
-        //- No copy construct
-        faMeshDistributor(const faMeshDistributor&) = delete;
-
-        //- No copy assignment
-        void operator=(const faMeshDistributor&) = delete;
-
 
 public:
 
     //- Output verbosity when writing
     static int verbose_;
+
+
+    // Generated Methods
+
+        //- No copy construct
+        faMeshDistributor(const faMeshDistributor&) = delete;
+
+        //- No copy assignment
+        void operator=(const faMeshDistributor&) = delete;
 
 
     // Constructors
@@ -147,21 +150,6 @@ public:
 
 
     // Member Functions
-
-        //- Get status of write enabled (on this proc)
-        bool isWriteProc() const noexcept
-        {
-            return isWriteProc_;
-        }
-
-        //- Change status of write enabled (on this proc)
-        bool isWriteProc(const bool on) noexcept
-        {
-            bool old(isWriteProc_);
-            isWriteProc_ = on;
-            return old;
-        }
-
 
     // Field Mapping
 

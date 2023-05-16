@@ -80,19 +80,19 @@ class parLagrangianDistributor
         labelList destinationCell_;
 
 
-    // Private Member Functions
+public:
+
+    //- Output verbosity when writing
+    static int verbose_;
+
+
+    // Generated Methods
 
         //- No copy construct
         parLagrangianDistributor(const parLagrangianDistributor&) = delete;
 
         //- No copy assignment
         void operator=(const parLagrangianDistributor&) = delete;
-
-
-public:
-
-    //- Output verbosity when writing
-    static int verbose_;
 
 
     // Constructors

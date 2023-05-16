@@ -98,19 +98,19 @@ class parPointFieldDistributor
         bool isWriteProc_;
 
 
-    // Private Member Functions
+public:
+
+    //- Output verbosity when writing
+    static int verbose_;
+
+
+    // Generated Methods
 
         //- No copy construct
         parPointFieldDistributor(const parPointFieldDistributor&) = delete;
 
         //- No copy assignment
         void operator=(const parPointFieldDistributor&) = delete;
-
-
-public:
-
-    //- Output verbosity when writing
-    static int verbose_;
 
 
     // Constructors
@@ -177,20 +177,6 @@ public:
             const pointMesh& tgtMesh,
             const mapDistributePolyMesh& distMap
         );
-
-        //- Get status of write enabled (on this proc)
-        bool isWriteProc() const noexcept
-        {
-            return isWriteProc_;
-        }
-
-        //- Change status of write enabled (on this proc)
-        bool isWriteProc(const bool on) noexcept
-        {
-            bool old(isWriteProc_);
-            isWriteProc_ = on;
-            return old;
-        }
 
 
     // Field Mapping

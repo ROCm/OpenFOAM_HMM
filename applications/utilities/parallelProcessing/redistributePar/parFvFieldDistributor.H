@@ -86,17 +86,20 @@ class parFvFieldDistributor
         //- Construct per-patch addressing
         void createPatchFaceMaps();
 
-        //- No copy construct
-        parFvFieldDistributor(const parFvFieldDistributor&) = delete;
-
-        //- No copy assignment
-        void operator=(const parFvFieldDistributor&) = delete;
-
 
 public:
 
     //- Output verbosity when writing
     static int verbose_;
+
+
+    // Generated Methods
+
+        //- No copy construct
+        parFvFieldDistributor(const parFvFieldDistributor&) = delete;
+
+        //- No copy assignment
+        void operator=(const parFvFieldDistributor&) = delete;
 
 
     // Constructors
@@ -117,21 +120,6 @@ public:
 
 
     // Member Functions
-
-        //- Get status of write enabled (on this proc)
-        bool isWriteProc() const noexcept
-        {
-            return isWriteProc_;
-        }
-
-        //- Change status of write enabled (on this proc)
-        bool isWriteProc(const bool on) noexcept
-        {
-            bool old(isWriteProc_);
-            isWriteProc_ = on;
-            return old;
-        }
-
 
         //- Helper: reconstruct and write mesh points
         //  (note: should be moved to something like processorMeshes class)
