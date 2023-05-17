@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,11 +148,12 @@ Foam::fileOperation::New
                 << abort(FatalError);
         }
 
+        // Forward to self
         return fileOperation::New(fileOperation::defaultFileHandler, verbose);
     }
 
     DebugInFunction
-        << "Constructing fileHandler" << endl;
+        << "Constructing fileHandler: " << handlerType << endl;
 
     auto* ctorPtr = wordConstructorTable(handlerType);
 
@@ -167,6 +168,56 @@ Foam::fileOperation::New
     }
 
     return autoPtr<fileOperation>(ctorPtr(verbose));
+}
+
+
+Foam::autoPtr<Foam::fileOperation>
+Foam::fileOperation::New
+(
+    const word& handlerType,
+    const Tuple2<label, labelList>& commAndIORanks,
+    const bool distributedRoots,
+    bool verbose
+)
+{
+    if (handlerType.empty())
+    {
+        if (fileOperation::defaultFileHandler.empty())
+        {
+            FatalErrorInFunction
+                << "defaultFileHandler name is undefined" << nl
+                << abort(FatalError);
+        }
+
+        // Forward to self
+        return fileOperation::New
+        (
+            fileOperation::defaultFileHandler,
+            commAndIORanks,
+            distributedRoots,
+            verbose
+        );
+    }
+
+    DebugInFunction
+        << "Constructing fileHandler: " << handlerType << endl;
+
+    auto* ctorPtr = commConstructorTable(handlerType);
+
+    if (!ctorPtr)
+    {
+        FatalErrorInLookup
+        (
+            "fileHandler",
+            handlerType,
+            *commConstructorTablePtr_
+        ) << abort(FatalError);
+    }
+
+    return autoPtr<fileOperation>
+    (
+        ctorPtr(commAndIORanks, distributedRoots, verbose)
+    );
 }
 
 

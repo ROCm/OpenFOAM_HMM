@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021-2023 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,50 +24,17 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileOperations::hostCollatedFileOperation
+    Foam::fileOperations::hostUncollatedFileOperation
 
 Description
-    Version of collatedFileOperation with multiple read/write ranks.
-
-    In parallel it will assume ranks are sorted according to hostname
-    and the lowest rank per hostname will be the IO rank. The output directories
-    will get a unique name processors\<N\>_\<low\>-\<high\> where N is the
-    overall number of processors and low and high is the range of ranks
-    contained in the files. Each of these subsets uses its own communicator.
-
-    Instead of using the hostnames the IO ranks can be assigned using the
-    FOAM_IORANKS environment variable (also when running non-parallel), e.g.
-    when decomposing into 4:
-
-    \verbatim
-        FOAM_IORANKS='(0 2)' decomposePar -fileHandler hostCollated
-        FOAM_IORANKS='0,2'   decomposePar -fileHandler hostCollated
-        FOAM_IORANKS='0 2'   decomposePar -fileHandler hostCollated
-    \endverbatim
-
-    will generate
-
-    \verbatim
-        processors4_0-1/  : containing data for processors 0 to 1
-        processors4_2-3/  : containing data for processors 2 to 3
-    \endverbatim
-
-Environment
-    - \c FOAM_ENV : list of io-ranks as plain space or comma separated
-      list or as an OpenFOAM formatted list. Eg, '(0 4 8)'
-
-See also
-    Foam::collatedFileOperation
-
-SourceFiles
-    hostCollatedFileOperation.C
+    Version of masterUncollated with host-based IO ranks
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_fileOperations_hostCollatedFileOperation_H
-#define Foam_fileOperations_hostCollatedFileOperation_H
+#ifndef Foam_fileOperations_hostUncollatedFileOperation_H
+#define Foam_fileOperations_hostUncollatedFileOperation_H
 
-#include "collatedFileOperation.H"
+#include "masterUncollatedFileOperation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,12 +44,12 @@ namespace fileOperations
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class hostCollatedFileOperation Declaration
+                 Class hostUncollatedFileOperation Declaration
 \*---------------------------------------------------------------------------*/
 
-class hostCollatedFileOperation
+class hostUncollatedFileOperation
 :
-    public collatedFileOperation
+    public masterUncollatedFileOperation
 {
     // Private Data
 
@@ -96,20 +62,19 @@ class hostCollatedFileOperation
         //- Any initialisation steps after constructing
         void init(bool verbose);
 
-
 public:
 
         //- Runtime type information
-        TypeName("hostCollated");
+        TypeName("hostUncollated");
 
 
     // Constructors
 
         //- Default construct
-        explicit hostCollatedFileOperation(bool verbose = false);
+        explicit hostUncollatedFileOperation(bool verbose = false);
 
         //- Construct from communicator with specified io-ranks
-        explicit hostCollatedFileOperation
+        explicit hostUncollatedFileOperation
         (
             const Tuple2<label, labelList>& commAndIORanks,
             const bool distributedRoots,
@@ -118,7 +83,7 @@ public:
 
 
     //- Destructor
-    virtual ~hostCollatedFileOperation();
+    virtual ~hostUncollatedFileOperation();
 
 
     // Member Functions
@@ -130,27 +95,26 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-            Class hostCollatedFileOperationInitialise Declaration
+            Class hostUncollatedFileOperationInitialise Declaration
 \*---------------------------------------------------------------------------*/
 
-//! Internal class only
-class hostCollatedFileOperationInitialise
+class hostUncollatedFileOperationInitialise
 :
-    public collatedFileOperationInitialise
+    public masterUncollatedFileOperationInitialise
 {
 public:
 
     // Constructors
 
         //- Construct from components
-        hostCollatedFileOperationInitialise(int& argc, char**& argv)
+        hostUncollatedFileOperationInitialise(int& argc, char**& argv)
         :
-            collatedFileOperationInitialise(argc, argv)
+            masterUncollatedFileOperationInitialise(argc, argv)
         {}
 
 
     //- Destructor
-    virtual ~hostCollatedFileOperationInitialise() = default;
+    virtual ~hostUncollatedFileOperationInitialise() = default;
 };
 
 

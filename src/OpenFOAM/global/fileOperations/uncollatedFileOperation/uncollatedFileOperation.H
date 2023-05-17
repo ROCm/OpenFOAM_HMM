@@ -64,6 +64,7 @@ class uncollatedFileOperation
         //- Any initialisation steps after constructing
         void init(bool verbose);
 
+
 protected:
 
     // Protected Member Functions
@@ -90,14 +91,22 @@ protected:
 
 public:
 
-        //- Runtime type information
-        TypeName("uncollated");
+    //- Runtime type information
+    TypeName("uncollated");
 
 
     // Constructors
 
         //- Default construct
         explicit uncollatedFileOperation(bool verbose = false);
+
+        //- Construct from communicator with specified io-ranks
+        explicit uncollatedFileOperation
+        (
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
+            bool verbose = false
+        );
 
 
     //- Destructor

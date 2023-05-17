@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,23 +86,11 @@ protected:
         //- Threaded writer
         mutable OFstreamCollator writer_;
 
-        // For non-parallel operation
-
-            //- Number of processors (overall)
-            label nProcs_;
-
-            //- Ranks of IO handlers
-            const labelList ioRanks_;
-
 
     // Protected Member Functions
 
         //- Print banner information, optionally with io ranks
         void printBanner(const bool withRanks = false) const;
-
-        //- Is proci master of communicator (in parallel) or master of
-        //- the io ranks (non-parallel)
-        bool isMasterRank(const label proci) const;
 
         //- Append to processorsNN/ file
         bool appendObject
@@ -115,8 +103,8 @@ protected:
 
 public:
 
-        //- Runtime type information
-        TypeName("collated");
+    //- Runtime type information
+    TypeName("collated");
 
 
     // Static Data
@@ -132,11 +120,11 @@ public:
         //- Default construct
         explicit collatedFileOperation(bool verbose = false);
 
-        //- Construct from user communicator
-        collatedFileOperation
+        //- Construct from communicator with specified io-ranks
+        explicit collatedFileOperation
         (
-            const label comm,
-            const labelList& ioRanks,
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
             bool verbose = false
         );
 
@@ -170,6 +158,7 @@ public:
                 const bool writeOnProc = true
             ) const;
 
+
         // Other
 
             //- Forcibly wait until all output done. Flush any cached data
@@ -180,10 +169,6 @@ public:
 
             //- Actual name of processors dir
             virtual word processorsDir(const fileName&) const;
-
-            //- Set number of processor directories/results.
-            //- Only used in decomposePar
-            virtual void setNProcs(const label nProcs);
 };
 
 

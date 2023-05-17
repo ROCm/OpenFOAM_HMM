@@ -47,7 +47,7 @@ void Foam::masterOFstream::checkWrite
         return;
     }
 
-    mkDir(fName.path());
+    Foam::mkDir(fName.path());
 
     OFstream os
     (
@@ -89,19 +89,23 @@ void Foam::masterOFstream::checkWrite
 
 void Foam::masterOFstream::commit()
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        List<fileName> filePaths(Pstream::nProcs());
-        filePaths[Pstream::myProcNo()] = pathName_;
-        Pstream::gatherList(filePaths);
+        List<fileName> filePaths(UPstream::nProcs(comm_));
+        filePaths[UPstream::myProcNo(comm_)] = pathName_;
+        Pstream::gatherList(filePaths, UPstream::msgType(), comm_);
 
-        bool uniform = fileOperation::uniformFile(filePaths);
+        bool uniform =
+        (
+            UPstream::master(comm_)
+         && fileOperation::uniformFile(filePaths)
+        );
 
-        Pstream::broadcast(uniform);
+        Pstream::broadcast(uniform, comm_);
 
         if (uniform)
         {
-            if (Pstream::master() && writeOnProc_)
+            if (UPstream::master(comm_) && writeOnProc_)
             {
                 checkWrite(pathName_, this->str());
             }
@@ -111,36 +115,38 @@ void Foam::masterOFstream::commit()
         }
 
         // Different files
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(comm_, UPstream::commsTypes::nonBlocking);
 
-        // Send my (valid) buffer to master
-        if (!Pstream::master())
+        if (!UPstream::master(comm_))
         {
             if (writeOnProc_)
             {
+                // Send buffer to master
                 string s(this->str());
 
-                UOPstream os(Pstream::masterNo(), pBufs);
+                UOPstream os(UPstream::masterNo(), pBufs);
                 os.write(s.data(), s.length());
             }
-            this->reset();
+            this->reset();  // Done with contents
         }
 
         pBufs.finishedGathers();
 
-        if (Pstream::master())
+
+        if (UPstream::master(comm_))
         {
-            // Write (valid) master data
             if (writeOnProc_)
             {
-                checkWrite(filePaths[Pstream::masterNo()], this->str());
+                // Write master data
+                checkWrite(filePaths[UPstream::masterNo()], this->str());
             }
-            this->reset();
+            this->reset();  // Done with contents
+
 
             // Allocate large enough to read without resizing
             List<char> buf(pBufs.maxRecvCount());
 
-            for (const int proci : Pstream::subProcs())
+            for (const int proci : UPstream::subProcs(comm_))
             {
                 const std::streamsize count(pBufs.recvDataCount(proci));
 
@@ -170,6 +176,7 @@ void Foam::masterOFstream::commit()
 Foam::masterOFstream::masterOFstream
 (
     IOstreamOption::atomicType atomic,
+    const label comm,
     const fileName& pathName,
     IOstreamOption streamOpt,
     IOstreamOption::appendType append,
@@ -181,7 +188,8 @@ Foam::masterOFstream::masterOFstream
     atomic_(atomic),
     compression_(streamOpt.compression()),
     append_(append),
-    writeOnProc_(writeOnProc)
+    writeOnProc_(writeOnProc),
+    comm_(comm)
 {}
 
 

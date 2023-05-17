@@ -243,7 +243,6 @@ Foam::labelList Foam::fileOperation::getGlobalIORanks
 }
 
 
-#if 0  // FUTURE
 bool Foam::fileOperation::isIOrank(const label proci) const
 {
     return
@@ -313,7 +312,6 @@ void Foam::fileOperation::printRanks() const
             << ')' << nl;
     }
 }
-#endif
 
 
 // ************************************************************************* //

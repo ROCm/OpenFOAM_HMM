@@ -41,7 +41,18 @@ namespace Foam
 namespace fileOperations
 {
     defineTypeNameAndDebug(uncollatedFileOperation, 0);
-    addToRunTimeSelectionTable(fileOperation, uncollatedFileOperation, word);
+    addToRunTimeSelectionTable
+    (
+        fileOperation,
+        uncollatedFileOperation,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        fileOperation,
+        uncollatedFileOperation,
+        comm
+    );
 
     // Mark as not needing threaded mpi
     addNamedToRunTimeSelectionTable
@@ -159,7 +170,7 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePathInfo
         }
     }
 
-    return fileName::null;
+    return fileName();
 }
 
 
@@ -172,6 +183,37 @@ Foam::fileOperations::uncollatedFileOperation::lookupProcessorsPath
     // No additional parallel synchronisation
     return fileOperation::lookupAndCacheProcessorsPath(fName, false);
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Construction helper: self/world/local communicator and IO ranks
+static Tuple2<label, labelList> getCommPattern()
+{
+    // Default is COMM_SELF (only involves itself)
+    Tuple2<label, labelList> commAndIORanks
+    (
+        UPstream::selfComm,
+        fileOperation::getGlobalIORanks()
+    );
+
+    if (UPstream::parRun() && commAndIORanks.second().size() > 1)
+    {
+        // Multiple masters: ranks for my IO range
+        commAndIORanks.first() = UPstream::allocateCommunicator
+        (
+            UPstream::worldComm,
+            fileOperation::subRanks(commAndIORanks.second())
+        );
+    }
+
+    return commAndIORanks;
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -193,7 +235,24 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
     bool verbose
 )
 :
-    fileOperation(UPstream::worldComm),
+    fileOperation
+    (
+        getCommPattern()
+    ),
+    managedComm_(getManagedComm(comm_))  // Possibly locally allocated
+{
+    init(verbose);
+}
+
+
+Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
+(
+    const Tuple2<label, labelList>& commAndIORanks,
+    const bool distributedRoots,
+    bool verbose
+)
+:
+    fileOperation(commAndIORanks, distributedRoots),
     managedComm_(-1)  // Externally managed
 {
     init(verbose);
@@ -211,6 +270,9 @@ void Foam::fileOperations::uncollatedFileOperation::storeComm() const
 
 Foam::fileOperations::uncollatedFileOperation::~uncollatedFileOperation()
 {
+    // Wait for any outstanding file operations
+    flush();
+
     UPstream::freeCommunicator(managedComm_);
 }
 

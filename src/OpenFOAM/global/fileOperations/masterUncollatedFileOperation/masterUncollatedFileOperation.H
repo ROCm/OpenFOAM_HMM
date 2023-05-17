@@ -392,9 +392,6 @@ protected:
 
     // Private Member Functions
 
-        //- Get the list of processors that are part of this communicator
-        static labelList subRanks(const label n);
-
         template<class Type>
         Type scatterList(const UList<Type>&, const int, const label comm) const;
 
@@ -436,6 +433,7 @@ protected:
             const bool checkGlobal,
             const bool isFile,
             const IOobject& io,
+            const dirIndexList& pDirs,
             const bool search,
             pathType& searchType,
             word& processorsDir,
@@ -494,8 +492,13 @@ public:
         //- Default construct
         explicit masterUncollatedFileOperation(bool verbose = false);
 
-        //- Construct from communicator
-        masterUncollatedFileOperation(const label comm, bool verbose);
+        //- Construct from communicator with specified io-ranks
+        explicit masterUncollatedFileOperation
+        (
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
+            bool verbose = false
+        );
 
 
     //- Destructor
@@ -772,6 +775,9 @@ public:
 
             //- Forcibly wait until all output done. Flush any cached data
             virtual void flush() const;
+
+            //- Forcibly parallel sync
+            virtual void sync();
 
             //- Return cached times
             const HashPtrTable<DynamicList<instant>>& times() const noexcept

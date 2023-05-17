@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021-2023 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "hostCollatedFileOperation.H"
+#include "hostUncollatedFileOperation.H"
 #include "addToRunTimeSelectionTable.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
@@ -35,17 +34,17 @@ namespace Foam
 {
 namespace fileOperations
 {
-    defineTypeNameAndDebug(hostCollatedFileOperation, 0);
+    defineTypeNameAndDebug(hostUncollatedFileOperation, 0);
     addToRunTimeSelectionTable
     (
         fileOperation,
-        hostCollatedFileOperation,
+        hostUncollatedFileOperation,
         word
     );
     addToRunTimeSelectionTable
     (
         fileOperation,
-        hostCollatedFileOperation,
+        hostUncollatedFileOperation,
         comm
     );
 
@@ -54,9 +53,9 @@ namespace fileOperations
     addNamedToRunTimeSelectionTable
     (
         fileOperationInitialise,
-        hostCollatedFileOperationInitialise,
+        hostUncollatedFileOperationInitialise,
         word,
-        hostCollated
+        hostUncollated
     );
 }
 }
@@ -66,6 +65,7 @@ namespace fileOperations
 
 namespace Foam
 {
+
 // Construction helper: self/world/local communicator and IO ranks
 static Tuple2<label, labelList> getCommPattern()
 {
@@ -100,23 +100,29 @@ static Tuple2<label, labelList> getCommPattern()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-void Foam::fileOperations::hostCollatedFileOperation::init(bool verbose)
+void Foam::fileOperations::hostUncollatedFileOperation::init(bool verbose)
 {
     verbose = (verbose && Foam::infoDetailLevel > 0);
 
     if (verbose)
     {
-        this->printBanner(ioRanks_.size());
+        DetailInfo
+            << "I/O    : " << this->type() << nl;
+
+        if (ioRanks_.size())
+        {
+            fileOperation::printRanks();
+        }
     }
 }
 
 
-Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
+Foam::fileOperations::hostUncollatedFileOperation::hostUncollatedFileOperation
 (
     bool verbose
 )
 :
-    collatedFileOperation
+    masterUncollatedFileOperation
     (
         getCommPattern(),
         false,  // distributedRoots
@@ -128,14 +134,14 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 }
 
 
-Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
+Foam::fileOperations::hostUncollatedFileOperation::hostUncollatedFileOperation
 (
     const Tuple2<label, labelList>& commAndIORanks,
     const bool distributedRoots,
     bool verbose
 )
 :
-    collatedFileOperation
+    masterUncollatedFileOperation
     (
         commAndIORanks,
         distributedRoots,
@@ -147,7 +153,7 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 }
 
 
-void Foam::fileOperations::hostCollatedFileOperation::storeComm() const
+void Foam::fileOperations::hostUncollatedFileOperation::storeComm() const
 {
     // From externally -> locally managed
     managedComm_ = getManagedComm(comm_);
@@ -156,8 +162,12 @@ void Foam::fileOperations::hostCollatedFileOperation::storeComm() const
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::fileOperations::hostCollatedFileOperation::~hostCollatedFileOperation()
+Foam::fileOperations::hostUncollatedFileOperation::
+~hostUncollatedFileOperation()
 {
+    // Wait for any outstanding file operations
+    flush();
+
     UPstream::freeCommunicator(managedComm_);
 }
 

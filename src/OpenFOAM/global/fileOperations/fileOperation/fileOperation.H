@@ -80,6 +80,7 @@ Description
 #include "fileNameList.H"
 #include "instantList.H"
 #include "refPtr.H"
+#include "bitSet.H"
 #include "Enum.H"
 #include "Tuple2.H"
 #include "InfoProxy.H"
@@ -144,13 +145,29 @@ public:
 
 protected:
 
+    // Protected Static Data
+
+        //- Cache level (eg, for caching time directories). Default: 1
+        static int cacheLevel_;
+
+
     // Protected Data
 
         //- Communicator to use
         mutable label comm_;
 
+        //- Overall number of processors.
+        //  Used to synthesise processor directory naming:
+        //  - parallel: UPstream::nProcs(UPstream::worldComm)
+        //  - non-parallel: detected from processor dir naming ('processorsNN')
+        label nProcs_;
+
         //- Distributed roots (parallel run)
         mutable bool distributed_;
+
+        //- The list of IO ranks (global ranks)
+        //  Primarily for additional bookkeeping in non-parallel
+        const labelList ioRanks_;
 
         //- Detected processors directories
         mutable HashTable<dirIndexList> procsDirs_;
@@ -195,6 +212,15 @@ protected:
         //- Is either a directory (empty name()) or a file
         bool exists(IOobject& io) const;
 
+
+        //- Is proci a master rank in the communicator (in parallel)
+        //- or a master rank in the IO ranks (non-parallel)
+        bool isIOrank(const label proci) const;
+
+        //- Helper: output which ranks are IO
+        void printRanks() const;
+
+
         //- Construction helper: check for locally allocated communicator
         static inline label getManagedComm(const label communicator)
         {
@@ -235,12 +261,22 @@ public:
 
     // Constructors
 
-        //- Construct from communicator, optionally with distributed roots
+        //- Construct from communicator,
+        //- optionally with specified io-ranks and/or distributed roots
         explicit fileOperation
         (
             const label comm,
+            const labelUList& ioRanks = labelUList::null(),
             const bool distributedRoots = false
         );
+
+        //- Construct from communicator with specified io-ranks
+        explicit fileOperation
+        (
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots = false
+        );
+
 
         //- Clone fileHandler
         /// virtual autoPtr<fileOperation> clone() const = 0;
@@ -259,6 +295,19 @@ public:
             (verbose)
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            fileOperation,
+            comm,
+            (
+                const Tuple2<label, labelList>& commAndIORanks,
+                const bool distributedRoots,
+                bool verbose
+            ),
+            (commAndIORanks, distributedRoots, verbose)
+        );
+
 
     // Selectors
 
@@ -267,6 +316,16 @@ public:
         static autoPtr<fileOperation> New
         (
             const word& handlerType,
+            bool verbose = false
+        );
+
+        //- Select fileHandler-type.
+        //- Uses defaultFileHandler if the handlerType is empty.
+        static autoPtr<fileOperation> New
+        (
+            const word& handlerType,
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
             bool verbose = false
         );
 
@@ -331,6 +390,20 @@ public:
 
    // Static Functions
 
+        //- Return cache level
+        static int cacheLevel() noexcept
+        {
+            return cacheLevel_;
+        }
+
+        //- Set cache level (0 = off). \return the previous value
+        static int cacheLevel(int level) noexcept
+        {
+            int old(cacheLevel_);
+            cacheLevel_ = level;
+            return old;
+        }
+
         //- Sort directory entries according to time value,
         //  with "constant" appearing first (if it exists)
         static instantList sortTimes
@@ -379,6 +452,10 @@ public:
             distributed_ = on;
             return old;
         }
+
+        //- The list of IO ranks (global ranks)
+        //  Primarily for additional bookkeeping in non-parallel
+        const labelList& ioRanks() const noexcept { return ioRanks_; }
 
         //- Return info proxy,
         //- used to print information to a stream
@@ -691,12 +768,23 @@ public:
                 return processorsBaseDir;
             }
 
-            //- Set number of processor directories/results. Only used in
-            //  decomposePar
-            virtual void setNProcs(const label nProcs);
+            //- Overall number of processors,
+            //- from UPstream::nProcs() or detected from directories/results.
+            label nProcs() const noexcept { return nProcs_; }
 
-            //- Get number of processor directories/results. Used for e.g.
-            //  reconstructPar, argList checking
+            //- Set number of processor directories/results.
+            //  Used to cache format of e.g. processorsDDD.
+            //  Returns old number of processors.
+            //  Only used in decomposePar
+            label nProcs(const label numProcs) noexcept
+            {
+                label old(nProcs_);
+                nProcs_ = numProcs;
+                return old;
+            }
+
+            //- Get number of processor directories/results.
+            //  Used for e.g. reconstructPar, argList checking
             virtual label nProcs
             (
                 const fileName& dir,
@@ -724,11 +812,14 @@ public:
             //- Forcibly wait until all output done. Flush any cached data
             virtual void flush() const;
 
+            //- Forcibly parallel sync
+            virtual void sync();
+
             //- Generate path (like io.path) from root+casename with any
             //  'processorXXX' replaced by procDir (usually 'processsors')
             fileName processorsCasePath
             (
-                const IOobject&,
+                const IOobject& io,
                 const word& procDir
             ) const;
 
@@ -736,7 +827,7 @@ public:
             //  'processorXXX' replaced by procDir (usually 'processsors')
             fileName processorsPath
             (
-                const IOobject&,
+                const IOobject& io,
                 const word& instance,
                 const word& procDir
             ) const;
@@ -778,6 +869,12 @@ public:
         //- Get list of global IO ranks from FOAM_IORANKS env variable.
         //- If set, these correspond to the IO master ranks.
         static labelList getGlobalIORanks();
+
+
+    // Housekeeping
+
+        //- Same as nProcs
+        label setNProcs(label numProcs) { return nProcs(numProcs); }
 };
 
 

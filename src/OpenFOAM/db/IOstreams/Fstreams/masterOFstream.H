@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,9 @@ Class
 Description
     Master-only drop-in replacement for OFstream.
 
+    Called on all processors (of the provided communicator).
+    Sends files to the master and writes them there.
+
 SourceFiles
     masterOFstream.C
 
@@ -39,6 +42,7 @@ SourceFiles
 #define Foam_masterOFstream_H
 
 #include "StringStream.H"
+#include "UPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,6 +74,9 @@ class masterOFstream
         //- Should file be written (on this processor)
         const bool writeOnProc_;
 
+        //- Communicator
+        const label comm_;
+
 
     // Private Member Functions
 
@@ -92,6 +99,40 @@ public:
 
     // Constructors
 
+        //- Construct with specified atomic behaviour and communicator
+        //- from pathname, stream option, optional append
+        masterOFstream
+        (
+            IOstreamOption::atomicType atomic,
+            const label comm,
+            const fileName& pathname,
+            IOstreamOption streamOpt = IOstreamOption(),
+            IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
+            const bool writeOnProc = true
+        );
+
+        //- Construct with specified communicator
+        //- from pathname, stream option, optional append
+        masterOFstream
+        (
+            const label comm,
+            const fileName& pathname,
+            IOstreamOption streamOpt = IOstreamOption(),
+            IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
+            const bool writeOnProc = true
+        )
+        :
+            masterOFstream
+            (
+                IOstreamOption::NON_ATOMIC,
+                comm,
+                pathname,
+                streamOpt,
+                append,
+                writeOnProc
+            )
+        {}
+
         //- Construct with specified atomic behaviour (with worldComm)
         //- from pathname, stream option, optional append
         masterOFstream
@@ -101,7 +142,18 @@ public:
             IOstreamOption streamOpt = IOstreamOption(),
             IOstreamOption::appendType append = IOstreamOption::NON_APPEND,
             const bool writeOnProc = true
-        );
+        )
+        :
+            masterOFstream
+            (
+                atomic,
+                UPstream::worldComm,
+                pathname,
+                streamOpt,
+                append,
+                writeOnProc
+            )
+        {}
 
         //- Construct (with worldComm)
         //- from pathname, stream option, optional append
@@ -116,6 +168,7 @@ public:
             masterOFstream
             (
                 IOstreamOption::NON_ATOMIC,
+                UPstream::worldComm,
                 pathname,
                 streamOpt,
                 append,
