@@ -261,11 +261,11 @@ int main(int argc, char *argv[])
         }
 
         {
-            const SHA1Digest myHostDigest(SHA1(hostName()).digest());
+            const SHA1Digest myDigest(SHA1(hostName()).digest());
 
             UPstream::mpiGather
             (
-                reinterpret_cast<const char*>(myHostDigest.cdata_bytes()),
+                myDigest.cdata_bytes(),     // Send
                 SHA1Digest::max_size(),     // Num send per proc
                 digests.data_bytes(),       // Recv
                 SHA1Digest::max_size(),     // Num recv per proc

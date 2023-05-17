@@ -128,16 +128,19 @@ public:
         //- Raw digest data (20 bytes) - const access
         const unsigned char* cdata() const noexcept { return dig_.data(); }
 
-        //- Raw digest data (20 bytes) - const access
-        const unsigned char* cdata_bytes() const noexcept
+        //- Raw digest char data (20 bytes) - const access.
+        //- For consistency with other objects, these are \em not unsigned.
+        const char* cdata_bytes() const noexcept
         {
-            return dig_.data();
+            return reinterpret_cast<const char*>(dig_.data());
         }
 
-        //- Raw digest data (20 bytes) - non-const access. Use with caution!
-        unsigned char* data_bytes() noexcept
+        //- Raw digest char data (20 bytes) - non-const access.
+        //- For consistency with other objects, these are \em not unsigned.
+        //- Use with caution - generally for broadcasting only.
+        char* data_bytes() noexcept
         {
-            return dig_.data();
+            return reinterpret_cast<char*>(dig_.data());
         }
 
         //- The number of bytes in digest (20)

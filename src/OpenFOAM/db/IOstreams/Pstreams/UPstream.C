@@ -88,11 +88,9 @@ static List<int> getHostGroupIds(const label parentCommunicator)
     SHA1Digest myDigest(SHA1(hostName()).digest());
 
     // The fixed-length digest allows use of MPI_Gather
-    // and avoids Pstream::gatherList() during setup...
-
     UPstream::mpiGather
     (
-        reinterpret_cast<const char*>(myDigest.cdata_bytes()),
+        myDigest.cdata_bytes(),     // Send
         SHA1Digest::max_size(),     // Num send per proc
         digests.data_bytes(),       // Recv
         SHA1Digest::max_size(),     // Num recv per proc
