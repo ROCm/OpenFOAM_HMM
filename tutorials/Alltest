@@ -7,7 +7,7 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 #     Copyright (C) 2011-2016 OpenFOAM Foundation
-#     Copyright (C) 2017-2022 OpenCFD Ltd.
+#     Copyright (C) 2017-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -291,21 +291,41 @@ then
     ( cd "$TEST_RUN_DIR" && tar -xf - )
 
     # How the tutorials were created
-    # - use full commit information since the SHA1 changes if rebased
-    echo "# Tutorials based on following commit:" >| "$TEST_RUN_DIR/commit-info"
-    echo >> "$TEST_RUN_DIR/commit-info"
+    # - provide full commit information since the SHA1 changes if rebased
+cat << '__HEADER_TEXT__' >| "$TEST_RUN_DIR/commit-info"
+# ===================================
+# Tutorials based on following commit
+# ===================================
+
+__HEADER_TEXT__
     git log -1 >> "$TEST_RUN_DIR/commit-info"
-    echo >> "$TEST_RUN_DIR/commit-info"
-    echo "# end-of-file" >> "$TEST_RUN_DIR/commit-info"
+
+    # - some additional context about previous commits
+cat << '__CONTEXT_TEXT__' >> "$TEST_RUN_DIR/commit-info"
+
+# ==============
+# within context
+# ==============
+
+__CONTEXT_TEXT__
+    git log --oneline -8 >> "$TEST_RUN_DIR/commit-info"
+cat << '__FOOTER_TEXT__' >> "$TEST_RUN_DIR/commit-info"
+
+# ===========
+# end-of-file
+# ===========
+__FOOTER_TEXT__
 
 else
     echo "Copying the tutorials directory" 1>&2
     cp -a "$rootDir" "$TEST_RUN_DIR"
 
     # How the tutorials were created
-    echo "# Tutorials copied from disk" >| "$TEST_RUN_DIR/commit-info"
-    echo >> "$TEST_RUN_DIR/commit-info"
-    echo "# end-of-file" >> "$TEST_RUN_DIR/commit-info"
+cat << '__HEADER_TEXT__' >| "$TEST_RUN_DIR/commit-info"
+# ==========================
+# Tutorials copied from disk
+# ==========================
+__HEADER_TEXT__
 fi
 
 cd "$TEST_RUN_DIR" || exit
