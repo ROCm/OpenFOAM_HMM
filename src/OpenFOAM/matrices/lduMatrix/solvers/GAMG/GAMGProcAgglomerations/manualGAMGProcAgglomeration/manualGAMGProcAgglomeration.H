@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,19 +59,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef manualGAMGProcAgglomeration_H
-#define manualGAMGProcAgglomeration_H
+#ifndef Foam_manualGAMGProcAgglomeration_H
+#define Foam_manualGAMGProcAgglomeration_H
 
 #include "GAMGProcAgglomeration.H"
-#include "DynamicList.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class GAMGAgglomeration;
 
 /*---------------------------------------------------------------------------*\
               Class manualGAMGProcAgglomeration Declaration
@@ -80,31 +78,23 @@ class manualGAMGProcAgglomeration
 :
     public GAMGProcAgglomeration
 {
-    // Private data
+    // Private Data
 
         //- Per level the agglomeration map
         const List<Tuple2<label, List<labelList>>> procAgglomMaps_;
-
-        //- Any allocated communicators
-        DynamicList<label> comms_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        manualGAMGProcAgglomeration
-        (
-            const manualGAMGProcAgglomeration&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const manualGAMGProcAgglomeration&) = delete;
 
 
 public:
 
     //- Runtime type information
     TypeName("manual");
+
+
+    //- No copy construct
+    manualGAMGProcAgglomeration(const manualGAMGProcAgglomeration&) = delete;
+
+    //- No copy assignment
+    void operator=(const manualGAMGProcAgglomeration&) = delete;
 
 
     // Constructors
@@ -123,9 +113,8 @@ public:
 
     // Member Functions
 
-       //- Modify agglomeration. Return true if modified
+        //- Modify agglomeration. Return true if modified
         virtual bool agglomerate();
-
 };
 
 

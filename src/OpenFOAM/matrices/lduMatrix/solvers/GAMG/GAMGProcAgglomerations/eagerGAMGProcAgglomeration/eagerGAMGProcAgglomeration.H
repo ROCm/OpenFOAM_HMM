@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,18 +37,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef eagerGAMGProcAgglomeration_H
-#define eagerGAMGProcAgglomeration_H
+#ifndef Foam_eagerGAMGProcAgglomeration_H
+#define Foam_eagerGAMGProcAgglomeration_H
 
 #include "GAMGProcAgglomeration.H"
-#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class GAMGAgglomeration;
 
 /*---------------------------------------------------------------------------*\
               Class eagerGAMGProcAgglomeration Declaration
@@ -57,29 +55,22 @@ class eagerGAMGProcAgglomeration
 :
     public GAMGProcAgglomeration
 {
-    // Private data
+    // Private Data
 
         //- Agglpmeration level
         const label mergeLevels_;
-
-        DynamicList<label> comms_;
-
-    // Private Member Functions
-
-        //- No copy construct
-        eagerGAMGProcAgglomeration
-        (
-            const eagerGAMGProcAgglomeration&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const eagerGAMGProcAgglomeration&) = delete;
 
 
 public:
 
     //- Runtime type information
     TypeName("eager");
+
+    //- No copy construct
+    eagerGAMGProcAgglomeration(const eagerGAMGProcAgglomeration&) = delete;
+
+    //- No copy assignment
+    void operator=(const eagerGAMGProcAgglomeration&) = delete;
 
 
     // Constructors
@@ -98,9 +89,8 @@ public:
 
     // Member Functions
 
-       //- Modify agglomeration. Return true if modified
+        //- Modify agglomeration. Return true if modified
         virtual bool agglomerate();
-
 };
 
 

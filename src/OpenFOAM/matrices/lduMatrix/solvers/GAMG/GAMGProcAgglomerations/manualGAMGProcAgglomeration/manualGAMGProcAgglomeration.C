@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,14 +60,8 @@ Foam::manualGAMGProcAgglomeration::manualGAMGProcAgglomeration
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::manualGAMGProcAgglomeration::
-~manualGAMGProcAgglomeration()
-{
-    forAllReverse(comms_, i)
-    {
-        UPstream::freeCommunicator(comms_[i]);
-    }
-}
+Foam::manualGAMGProcAgglomeration::~manualGAMGProcAgglomeration()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -165,9 +160,8 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                     }
 
 
-                    // Allocate a communicator for the processor-agglomerated
-                    // matrix
-                    comms_.append
+                    // Communicator for the processor-agglomerated matrix
+                    comms_.push_back
                     (
                         UPstream::allocateCommunicator
                         (
@@ -178,7 +172,7 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
 
                     // Use processor agglomeration maps to do the actual
                     // collecting
-                    if (Pstream::myProcNo(levelMesh.comm()) != -1)
+                    if (UPstream::myProcNo(levelMesh.comm()) != -1)
                     {
                         GAMGProcAgglomeration::agglomerate
                         (
@@ -186,7 +180,7 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                             procAgglomMap,
                             coarseToMaster,
                             agglomProcIDs,
-                            comms_.last()
+                            comms_.back()
                         );
                     }
                 }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,14 +60,8 @@ Foam::eagerGAMGProcAgglomeration::eagerGAMGProcAgglomeration
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::eagerGAMGProcAgglomeration::
-~eagerGAMGProcAgglomeration()
-{
-    forAllReverse(comms_, i)
-    {
-        UPstream::freeCommunicator(comms_[i]);
-    }
-}
+Foam::eagerGAMGProcAgglomeration::~eagerGAMGProcAgglomeration()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -122,9 +116,8 @@ bool Foam::eagerGAMGProcAgglomeration::agglomerate()
                         agglomProcIDs
                     );
 
-                    // Allocate a communicator for the processor-agglomerated
-                    // matrix
-                    comms_.append
+                    // Communicator for the processor-agglomerated matrix
+                    comms_.push_back
                     (
                         UPstream::allocateCommunicator
                         (
@@ -135,7 +128,7 @@ bool Foam::eagerGAMGProcAgglomeration::agglomerate()
 
                     // Use processor agglomeration maps to do the actual
                     // collecting.
-                    if (Pstream::myProcNo(levelComm) != -1)
+                    if (UPstream::myProcNo(levelComm) != -1)
                     {
                         GAMGProcAgglomeration::agglomerate
                         (
@@ -143,7 +136,7 @@ bool Foam::eagerGAMGProcAgglomeration::agglomerate()
                             procAgglomMap,
                             masterProcs,
                             agglomProcIDs,
-                            comms_.last()
+                            comms_.back()
                         );
                     }
                 }

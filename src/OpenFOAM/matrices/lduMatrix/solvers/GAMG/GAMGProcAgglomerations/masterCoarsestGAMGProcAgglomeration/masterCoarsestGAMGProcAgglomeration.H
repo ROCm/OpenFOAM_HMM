@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,18 +57,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef masterCoarsestGAMGProcAgglomeration_H
-#define masterCoarsestGAMGProcAgglomeration_H
+#ifndef Foam_masterCoarsestGAMGProcAgglomeration_H
+#define Foam_masterCoarsestGAMGProcAgglomeration_H
 
 #include "GAMGProcAgglomeration.H"
-#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class GAMGAgglomeration;
 
 /*---------------------------------------------------------------------------*\
               Class masterCoarsestGAMGProcAgglomeration Declaration
@@ -78,29 +75,24 @@ class masterCoarsestGAMGProcAgglomeration
 :
     public GAMGProcAgglomeration
 {
-    // Private data
+    // Private Data
 
         label nProcessorsPerMaster_;
-
-        DynamicList<label> comms_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        masterCoarsestGAMGProcAgglomeration
-        (
-            const masterCoarsestGAMGProcAgglomeration&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const masterCoarsestGAMGProcAgglomeration&) = delete;
 
 
 public:
 
     //- Runtime type information
     TypeName("masterCoarsest");
+
+    //- No copy construct
+    masterCoarsestGAMGProcAgglomeration
+    (
+        const masterCoarsestGAMGProcAgglomeration&
+    ) = delete;
+
+    //- No copy assignment
+    void operator=(const masterCoarsestGAMGProcAgglomeration&) = delete;
 
 
     // Constructors
@@ -119,9 +111,8 @@ public:
 
     // Member Functions
 
-       //- Modify agglomeration. Return true if modified
+        //- Modify agglomeration. Return true if modified
         virtual bool agglomerate();
-
 };
 
 
