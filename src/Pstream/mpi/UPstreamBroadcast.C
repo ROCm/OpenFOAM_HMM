@@ -47,7 +47,7 @@ bool Foam::UPstream::broadcast
 
     //Needed?  PstreamGlobals::checkCommunicator(comm, rootProcNo);
 
-    if (debug)
+    if (UPstream::debug)
     {
         Pout<< "UPstream::broadcast : root:" << rootProcNo
             << " comm:" << comm
@@ -66,7 +66,7 @@ bool Foam::UPstream::broadcast
 
     profilingPstream::beginTiming();
 
-    bool failed = MPI_Bcast
+    const int returnCode = MPI_Bcast
     (
         buf,
         bufSize,
@@ -77,7 +77,7 @@ bool Foam::UPstream::broadcast
 
     profilingPstream::addBroadcastTime();
 
-    return !failed;
+    return (returnCode == MPI_SUCCESS);
 }
 
 

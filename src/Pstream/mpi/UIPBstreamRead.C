@@ -58,7 +58,7 @@ void Foam::UIPBstream::bufferIPCrecv()
             << Foam::abort(FatalError);
     }
 
-    if (debug)
+    if (UPstream::debug)
     {
         Pout<< "UOPBstream IPC read buffer :"
             << " root:" << fromProcNo_

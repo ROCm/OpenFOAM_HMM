@@ -38,11 +38,11 @@ Description
 
     Example usage:
     \code
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        for (const int proci : Pstream::allProcs())
+        for (const int proci : UPstream::allProcs())
         {
-            if (proci != Pstream::myProcNo())
+            if (proci != UPstream::myProcNo())
             {
                 someObject vals;
 
@@ -53,9 +53,9 @@ Description
 
         pBufs.finishedSends();   // no-op for blocking
 
-        for (const int proci : Pstream::allProcs())
+        for (const int proci : UPstream::allProcs())
         {
-            if (proci != Pstream::myProcNo())
+            if (proci != UPstream::myProcNo())
             {
                 UIPstream recv(proci, pBufs);
                 someObject vals(recv);
@@ -68,12 +68,12 @@ Description
     one-to-all and all-to-one communication patterns.
     For example,
     \code
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
             someObject vals;
-            for (const int proci : Pstream::subProcs())
+            for (const int proci : UPstream::subProcs())
             {
                 UOPstream send(proci, pBufs);
                 send << vals;
@@ -82,9 +82,9 @@ Description
 
         pBufs.finishedScatters();
 
-        if (!Pstream::master())
+        if (!UPstream::master())
         {
-            UIPstream recv(Pstream::masterNo(), pBufs);
+            UIPstream recv(UPstream::masterNo(), pBufs);
             someObject vals(recv);
         }
     \endcode

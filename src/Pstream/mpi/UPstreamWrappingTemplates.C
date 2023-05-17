@@ -49,7 +49,7 @@ void Foam::PstreamDetail::broadcast0
 
     profilingPstream::beginTiming();
 
-    // const int retval =
+    // const int returnCode =
     MPI_Bcast
     (
         values,
@@ -80,7 +80,7 @@ void Foam::PstreamDetail::reduce0
 
     if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        Pout<< "** reducing:";
+        Pout<< "** MPI_Reduce (blocking):";
         if (count == 1)
         {
             Pout<< (*values);
@@ -96,7 +96,7 @@ void Foam::PstreamDetail::reduce0
 
     profilingPstream::beginTiming();
 
-    // const int retval =
+    // const int returnCode =
     MPI_Reduce
     (
         MPI_IN_PLACE,  // recv is also send

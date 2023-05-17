@@ -326,18 +326,18 @@ public:
         //- Communicator for all ranks (respecting any local worlds)
         static label commWorld() noexcept { return worldComm; }
 
-        //- Alter value of world communicator
-        //  \returns the previous value
+        //- Set world communicator. Negative values are a no-op.
+        //  \returns old world communicator index
         static label commWorld(const label communicator) noexcept
         {
             label old(worldComm);
-            worldComm = communicator;
+            if (communicator >= 0) worldComm = communicator;
             return old;
         }
 
         //- Alter communicator debugging setting.
         //- Warns for use of any communicator differing from specified.
-        //  \returns the previous warn communicator
+        //  \returns the previous warn index
         static label commWarn(const label communicator) noexcept
         {
             label old(warnComm);
@@ -384,7 +384,21 @@ public:
 
     // Member Functions
 
-        //- Allocate a new communicator with subRanks of parent communicator
+        //- Allocate new communicator with contiguous sub-ranks
+        //- on the parent communicator.
+        static label allocateCommunicator
+        (
+            //! The parent communicator
+            const label parent,
+
+            //! The contiguous sub-ranks of parent to use
+            const labelRange& subRanks,
+
+            //! Call allocateCommunicatorComponents()
+            const bool withComponents = true
+        );
+
+        //- Allocate new communicator with sub-ranks on the parent communicator
         static label allocateCommunicator
         (
             //! The parent communicator
@@ -418,7 +432,8 @@ public:
         );
 
 
-        //- Wrapper class for allocating/freeing communicators
+        //- Wrapper class for allocating/freeing communicators. Always invokes
+        //- allocateCommunicatorComponents() and freeCommunicatorComponents()
         class communicator
         {
             label comm_;
@@ -437,6 +452,19 @@ public:
             //- Move construct, takes ownership
             communicator(communicator&& c) : comm_(c.comm_) { c.comm_ = -1; }
 
+            //- Allocate communicator for contiguous sub-ranks on given parent
+            communicator
+            (
+                //! The parent communicator
+                const label parentComm,
+
+                //! The contiguous sub-ranks of parent to use
+                const labelRange& subRanks
+            )
+            :
+                comm_(UPstream::allocateCommunicator(parentComm, subRanks))
+            {}
+
             //- Allocate communicator for sub-ranks on given parent
             communicator
             (
@@ -450,7 +478,7 @@ public:
                 comm_(UPstream::allocateCommunicator(parentComm, subRanks))
             {}
 
-            //- Free allocated communicator and group
+            //- Free allocated communicator
             ~communicator() { UPstream::freeCommunicator(comm_); }
 
             //- True if communicator is non-negative (ie, was allocated)
@@ -459,17 +487,24 @@ public:
             //- The communicator label
             label comm() const noexcept { return comm_; }
 
-            //- Free allocated communicator and group
+            //- Free allocated communicator
             void reset() { UPstream::freeCommunicator(comm_); comm_ = -1; }
 
-            //- Allocate with subRanks of parent communicator
+            //- Allocate with contiguous sub-ranks of parent communicator
+            void reset(label parent, const labelRange& subRanks)
+            {
+                UPstream::freeCommunicator(comm_);
+                comm_ = UPstream::allocateCommunicator(parent, subRanks);
+            }
+
+            //- Allocate with sub-ranks of parent communicator
             void reset(label parent, const labelUList& subRanks)
             {
                 UPstream::freeCommunicator(comm_);
                 comm_ = UPstream::allocateCommunicator(parent, subRanks);
             }
 
-            //- Take ownership, free allocated communicator and group.
+            //- Take ownership, free allocated communicator
             void reset(communicator&& c)
             {
                 if (comm_ != c.comm_) UPstream::freeCommunicator(comm_);
@@ -974,8 +1009,10 @@ public:
         /*! \brief Receive identically-sized \c Native data from all ranks */ \
         static void mpiGather                                                 \
         (                                                                     \
+            /*! On rank: individual value to send */                          \
             const Native* sendData,                                           \
             int sendCount,                                                    \
+            /*! On master: receive buffer with all values */                  \
             Native* recvData,                                                 \
             int recvCount,                                                    \
             const label communicator = worldComm                              \
@@ -984,8 +1021,10 @@ public:
         /*! \brief Send identically-sized \c Native data to all ranks */      \
         static void mpiScatter                                                \
         (                                                                     \
+            /*! On master: send buffer with all values */                     \
             const Native* sendData,                                           \
             int sendCount,                                                    \
+            /*! On rank: individual value to receive */                       \
             Native* recvData,                                                 \
             int recvCount,                                                    \
             const label communicator = worldComm                              \
@@ -1068,7 +1107,7 @@ public:
 
     // Broadcast Functions
 
-        //- Broadcast buffer contents to all processes in communicator.
+        //- Broadcast buffer contents to all processes in given communicator.
         //- The sizes must match on all processes.
         //  For \b non-parallel : do nothing.
         //  \return True on success
@@ -1076,14 +1115,14 @@ public:
         (
             char* buf,
             const std::streamsize bufSize,
-            const label communicator = worldComm,
+            const label communicator,
             const int rootProcNo = masterNo()
         );
 
 
     // Logical reductions
 
-        //- Logical (and) reduction (cf. MPI AllReduce)
+        //- Logical (and) reduction (MPI_AllReduce)
         //  For \b non-parallel : do nothing
         static void reduceAnd
         (
@@ -1091,7 +1130,7 @@ public:
             const label communicator = worldComm
         );
 
-        //- Logical (or) reduction (cf. MPI AllReduce)
+        //- Logical (or) reduction (MPI_AllReduce)
         //  For \b non-parallel : do nothing
         static void reduceOr
         (

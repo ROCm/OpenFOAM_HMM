@@ -167,7 +167,7 @@ bool Foam::UPstream::initNull()
     MPI_Initialized(&flag);
     if (flag)
     {
-        if (debug)
+        if (UPstream::debug)
         {
             Pout<< "UPstream::initNull : was already initialized\n";
         }
@@ -225,7 +225,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
             return true;
         }
-        else if (debug)
+        else if (UPstream::debug)
         {
             Pout<< "UPstream::init : was already initialized\n";
         }
@@ -279,7 +279,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
 
-    if (debug)
+    if (UPstream::debug)
     {
         Pout<< "UPstream::init :"
             << " thread-support : wanted:" << needsThread
@@ -309,7 +309,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         // During startup, so worldComm == globalComm
 
         wordList worlds(numprocs);
-        worlds[Pstream::myProcNo(UPstream::globalComm)] = world;
+        worlds[UPstream::myProcNo(UPstream::globalComm)] = world;
         Pstream::gatherList(worlds, UPstream::msgType(), UPstream::globalComm);
 
         // Compact
@@ -336,7 +336,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         Pstream::broadcasts(UPstream::globalComm, allWorlds_, worldIDs_);
 
         const label myWorldId =
-            worldIDs_[Pstream::myProcNo(UPstream::globalComm)];
+            worldIDs_[UPstream::myProcNo(UPstream::globalComm)];
 
         DynamicList<label> subRanks;
         forAll(worldIDs_, proci)
@@ -363,7 +363,7 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
             procIDs_[UPstream::selfComm].front() = UPstream::myProcNo(subComm);
         }
 
-        if (debug)
+        if (UPstream::debug)
         {
             // Check
             int subNumProcs, subRank;
@@ -422,7 +422,7 @@ void Foam::UPstream::shutdown(int errNo)
             WarningInFunction
                 << "MPI was already finalized (by a connected program?)\n";
         }
-        else if (debug && errNo == 0)
+        else if (UPstream::debug && errNo == 0)
         {
             Pout<< "UPstream::shutdown : was already finalized\n";
         }
@@ -451,7 +451,7 @@ void Foam::UPstream::shutdown(int errNo)
     // Regular cleanup
     // ---------------
 
-    if (debug)
+    if (UPstream::debug)
     {
         Pout<< "UPstream::shutdown\n";
     }

@@ -62,7 +62,7 @@ bool Foam::UOPstream::write
 {
     PstreamGlobals::reset_request(req);
 
-    if (debug)
+    if (UPstream::debug)
     {
         Pout<< "UOPstream::write : starting write to:" << toProcNo
             << " tag:" << tag
@@ -83,14 +83,13 @@ bool Foam::UOPstream::write
 
     PstreamGlobals::checkCommunicator(communicator, toProcNo);
 
-
-    bool failed = true;
+    int returnCode = MPI_ERR_UNKNOWN;
 
     profilingPstream::beginTiming();
 
     if (commsType == UPstream::commsTypes::blocking)
     {
-        failed = MPI_Bsend
+        returnCode = MPI_Bsend
         (
             const_cast<char*>(buf),
             bufSize,
@@ -103,7 +102,7 @@ bool Foam::UOPstream::write
         // Assume these are from scatters ...
         profilingPstream::addScatterTime();
 
-        if (debug)
+        if (UPstream::debug)
         {
             Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
@@ -115,7 +114,7 @@ bool Foam::UOPstream::write
     {
         if (UPstream::sendModes::sync == sendMode)
         {
-            failed = MPI_Ssend
+            returnCode = MPI_Ssend
             (
                 const_cast<char*>(buf),
                 bufSize,
@@ -127,7 +126,7 @@ bool Foam::UOPstream::write
         }
         else
         {
-            failed = MPI_Send
+            returnCode = MPI_Send
             (
                 const_cast<char*>(buf),
                 bufSize,
@@ -141,7 +140,7 @@ bool Foam::UOPstream::write
         // Assume these are from scatters ...
         profilingPstream::addScatterTime();
 
-        if (debug)
+        if (UPstream::debug)
         {
             Pout<< "UOPstream::write : finished write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
@@ -155,7 +154,7 @@ bool Foam::UOPstream::write
 
         if (UPstream::sendModes::sync == sendMode)
         {
-            failed = MPI_Issend
+            returnCode = MPI_Issend
             (
                 const_cast<char*>(buf),
                 bufSize,
@@ -168,7 +167,7 @@ bool Foam::UOPstream::write
         }
         else
         {
-            failed = MPI_Isend
+            returnCode = MPI_Isend
             (
                 const_cast<char*>(buf),
                 bufSize,
@@ -180,7 +179,7 @@ bool Foam::UOPstream::write
             );
         }
 
-        if (debug)
+        if (UPstream::debug)
         {
             Pout<< "UOPstream::write : started write to:" << toProcNo
                 << " tag:" << tag << " size:" << label(bufSize)
@@ -200,7 +199,7 @@ bool Foam::UOPstream::write
             << Foam::abort(FatalError);
     }
 
-    return !failed;
+    return (returnCode == MPI_SUCCESS);
 }
 
 

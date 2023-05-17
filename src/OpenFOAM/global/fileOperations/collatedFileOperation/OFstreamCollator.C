@@ -295,7 +295,7 @@ Foam::OFstreamCollator::OFstreamCollator(const off_t maxBufferSize)
         UPstream::allocateCommunicator
         (
             localComm_,
-            identity(UPstream::nProcs(localComm_))
+            labelRange(UPstream::nProcs(localComm_))
         )
     )
 {}
@@ -315,7 +315,7 @@ Foam::OFstreamCollator::OFstreamCollator
         UPstream::allocateCommunicator
         (
             localComm_,
-            identity(UPstream::nProcs(localComm_))
+            labelRange(UPstream::nProcs(localComm_))
         )
     )
 {}

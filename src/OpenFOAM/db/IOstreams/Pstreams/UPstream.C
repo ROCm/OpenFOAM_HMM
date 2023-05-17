@@ -141,7 +141,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
     haveThreads_ = haveThreads;
 
     label comm = -1;
-    labelList singleProc(Foam::one{}, 0);
+    labelRange singleProc(1);
 
     // Redo communicators that were created during static initialisation.
     // When parRun == true, redo with MPI components
@@ -156,7 +156,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         freeCommunicator(UPstream::selfComm);
         freeCommunicator(UPstream::globalComm);
 
-        // 0: worldComm
+        // 0: worldComm/globalComm
         comm = allocateCommunicator(-1, singleProc, false);
         if (comm != UPstream::globalComm)
         {
@@ -190,8 +190,8 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         freeCommunicator(UPstream::selfComm);
         freeCommunicator(UPstream::globalComm);
 
-        // 0: worldComm
-        comm = allocateCommunicator(-1, identity(nProcs), true);
+        // 0: worldComm/globalComm
+        comm = allocateCommunicator(-1, labelRange(nProcs), true);
         if (comm != UPstream::globalComm)
         {
             // Failed sanity check
@@ -203,7 +203,7 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
 
         // 1: selfComm
         // - Processor number wrt world communicator
-        singleProc.front() = myProcNo(UPstream::globalComm);
+        singleProc.start() = UPstream::myProcNo(UPstream::globalComm);
         comm = allocateCommunicator(-2, singleProc, true);
         if (comm != UPstream::selfComm)
         {
@@ -265,7 +265,7 @@ Foam::label Foam::UPstream::getAvailableCommIndex(const label parentIndex)
 Foam::label Foam::UPstream::allocateCommunicator
 (
     const label parentIndex,
-    const labelUList& subRanks,
+    const labelRange& subRanks,
     const bool withComponents
 )
 {
@@ -276,6 +276,67 @@ Foam::label Foam::UPstream::allocateCommunicator
         Pout<< "Allocating communicator " << index << nl
             << "    parent : " << parentIndex << nl
             << "    procs  : " << subRanks << nl
+            << endl;
+    }
+
+    // Initially treat as master,
+    // overwritten by allocateCommunicatorComponents
+    myProcNo_[index] = UPstream::masterNo();
+
+    // The selected sub-ranks.
+    // - transcribe from label to int
+    // - already in incremental order
+    auto& procIds = procIDs_[index];
+    procIds.resize_nocopy(subRanks.size());
+
+    label numSubRanks = 0;
+    for (const label subRanki : subRanks)
+    {
+        procIds[numSubRanks] = subRanki;
+        ++numSubRanks;
+    }
+
+    // Sizing and filling are demand-driven
+    linearCommunication_[index].clear();
+    treeCommunication_[index].clear();
+
+    if (withComponents && parRun())
+    {
+        allocateCommunicatorComponents(parentIndex, index);
+
+        // Could 'remember' locations of uninvolved ranks
+        /// if (myProcNo_[index] < 0 && parentIndex >= 0)
+        /// {
+        ///     // As global rank
+        ///     myProcNo_[index] = -(myProcNo_[worldComm]+1);
+        ///
+        /// OR:
+        ///     // As parent rank number
+        ///     if (myProcNo_[parentIndex] >= 0)
+        ///     {
+        ///         myProcNo_[index] = -(myProcNo_[parentIndex]+1);
+        ///     }
+        /// }
+    }
+
+    return index;
+}
+
+
+Foam::label Foam::UPstream::allocateCommunicator
+(
+    const label parentIndex,
+    const labelUList& subRanks,
+    const bool withComponents
+)
+{
+    const label index = getAvailableCommIndex(parentIndex);
+
+    if (debug)
+    {
+        Pout<< "Allocating communicator " << index << nl
+            << "    parent : " << parentIndex << nl
+            << "    procs  : " << flatOutput(subRanks) << nl
             << endl;
     }
 
@@ -705,13 +766,11 @@ Foam::label Foam::UPstream::warnComm(-1);
 // These are overwritten in parallel mode (by UPstream::setParRun())
 const Foam::label nPredefinedComm = []()
 {
-    const Foam::labelList singleProc(Foam::one{}, 0);
-
-    // 0: worldComm
-    (void) Foam::UPstream::allocateCommunicator(-1, singleProc, false);
+    // 0: worldComm/globalComm
+    (void) Foam::UPstream::allocateCommunicator(-1, Foam::labelRange(1), false);
 
     // 1: selfComm
-    (void) Foam::UPstream::allocateCommunicator(-2, singleProc, false);
+    (void) Foam::UPstream::allocateCommunicator(-2, Foam::labelRange(1), false);
 
     return Foam::UPstream::nComms();
 }();
