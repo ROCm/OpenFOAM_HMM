@@ -40,17 +40,25 @@ Description
     FOAM_IORANKS environment variable (also when running non-parallel), e.g.
     when decomposing into 4:
 
+    \verbatim
         FOAM_IORANKS='(0 2)' decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='0,2'   decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='0 2'   decomposePar -fileHandler hostCollated
+    \endverbatim
 
     will generate
 
-        processors4_0-1/
-            containing data for processors 0 to 1
-        processors4_2-3/
-            containing data for processors 2 to 3
+    \verbatim
+        processors4_0-1/  : containing data for processors 0 to 1
+        processors4_2-3/  : containing data for processors 2 to 3
+    \endverbatim
+
+Environment
+    - \c FOAM_ENV : list of io-ranks as plain space or comma separated
+      list or as an OpenFOAM formatted list. Eg, '(0 4 8)'
 
 See also
-    collatedFileOperation
+    Foam::collatedFileOperation
 
 SourceFiles
     hostCollatedFileOperation.C

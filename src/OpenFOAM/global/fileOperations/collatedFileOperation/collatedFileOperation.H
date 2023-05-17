@@ -98,7 +98,7 @@ protected:
     // Protected Member Functions
 
         //- Print banner information, optionally with io ranks
-        void printBanner(const bool printRanks = false) const;
+        void printBanner(const bool withRanks = false) const;
 
         //- Is proci master of communicator (in parallel) or master of
         //- the io ranks (non-parallel)

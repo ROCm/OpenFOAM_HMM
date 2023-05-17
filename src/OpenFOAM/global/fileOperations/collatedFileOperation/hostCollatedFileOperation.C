@@ -64,60 +64,16 @@ Foam::labelList Foam::fileOperations::hostCollatedFileOperation::subRanks
     const label n
 )
 {
-    DynamicList<label> subRanks(64);
+    labelList mainIOranks(fileOperation::getGlobalIORanks());
 
-    labelList mainRanks(fileOperation::ioRanks());
-    if (!mainRanks.empty())
+    if (mainIOranks.empty())
     {
-        if (!mainRanks.found(0))
-        {
-            FatalErrorInFunction
-                << "Rank 0 (master) should be in the IO ranks. Currently "
-                << mainRanks << nl
-                << exit(FatalError);
-        }
-
-        // The lowest numbered rank is the IO rank
-        const bitSet isIOrank(n, mainRanks);
-
-        for (label proci = Pstream::myProcNo(); proci >= 0; --proci)
-        {
-            if (isIOrank[proci])
-            {
-                // Found my master. Collect all processors with same master
-                subRanks.append(proci);
-                for
-                (
-                    label rank = proci+1;
-                    rank < n && !isIOrank[rank];
-                    ++rank
-                )
-                {
-                    subRanks.append(rank);
-                }
-                break;
-            }
-        }
+        mainIOranks = fileOperation::getGlobalHostIORanks();
     }
-    else
-    {
-        // Normal operation: one lowest rank per hostname is the writer
-        const string myHostName(hostName());
 
-        stringList hosts(Pstream::nProcs());
-        hosts[Pstream::myProcNo()] = myHostName;
-        Pstream::allGatherList(hosts);
+    labelRange subRange = fileOperation::subRanks(mainIOranks);
 
-        // Collect procs with same hostname
-        forAll(hosts, proci)
-        {
-            if (hosts[proci] == myHostName)
-            {
-                subRanks.append(proci);
-            }
-        }
-    }
-    return subRanks;
+    return identity(subRange);
 }
 
 
@@ -146,7 +102,7 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
             UPstream::worldComm,
             subRanks(UPstream::nProcs())
         ),
-        (UPstream::parRun() ? labelList() : ioRanks()), // processor dirs
+        (UPstream::parRun() ? labelList() : getGlobalIORanks()),
         false  // verbose
     ),
     managedComm_(getManagedComm(comm_))  // Possibly locally allocated

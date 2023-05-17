@@ -219,20 +219,6 @@ void sortProcessorDirs(Foam::UList<Foam::fileOperation::dirIndex>& dirs)
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::labelList Foam::fileOperation::ioRanks()
-{
-    labelList ranks;
-
-    ITstream is(Foam::getEnv("FOAM_IORANKS"));
-    if (!is.empty())
-    {
-        is >> ranks;
-    }
-
-    return ranks;
-}
-
-
 Foam::instantList
 Foam::fileOperation::sortTimes
 (

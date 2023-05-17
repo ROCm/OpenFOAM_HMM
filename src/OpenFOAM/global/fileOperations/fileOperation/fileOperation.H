@@ -30,6 +30,38 @@ Class
 Description
     An encapsulation of filesystem-related operations.
 
+    Several of the file handlers can be configured to use specific ranks for
+    IO operations. These can either be defined from the command-line
+    \c -ioRanks option, or via the \c FOAM_ENV environment variable.
+    In either case, the list of IO ranks shall always include the value
+    \b 0 (master rank). The ranks may be specified as a plain list, or as an
+    OpenFOAM list. The special value \em host can be used to specify selection
+    based on hostname.
+
+    For example,
+    \verbatim
+        FOAM_IORANKS='0 4 8'   decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='0,4,8'   decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='(0 4 8)' decomposePar -fileHandler hostCollated
+    \endverbatim
+    will generate
+    \verbatim
+        processors12_0-3/   : containing data for processors 0 to 3
+        processors12_4-7/   : containing data for processors 4 to 7
+        processors12_8-11/  : containing data for processors 8 to 11
+    \endverbatim
+
+    The value \em host can be used to specify a single IO rank for each
+    host. For example,
+    \verbatim
+        decomposePar -fileHandler collated -ioRanks host
+        decomposePar -fileHandler hostCollated
+    \endverbatim
+
+Environment
+    - \c FOAM_ENV : list of io-ranks as plain space or comma separated
+      list or as an OpenFOAM formatted list. Eg, '(0 4 8)'
+
 Namespace
     Foam::fileOperations
 
@@ -109,6 +141,7 @@ public:
         //- identical to UPstream::rangeType
         typedef IntRange<int> procRangeType;
 
+
 protected:
 
     // Protected Data
@@ -130,9 +163,6 @@ protected:
 
         //- Get or create fileMonitor singleton
         fileMonitor& monitor() const;
-
-        //- Retrieve list of IO ranks from FOAM_IORANKS env variable
-        static labelList ioRanks();
 
         //- Merge two times
         static void mergeTimes
@@ -161,7 +191,7 @@ protected:
             const fileName& objectPath
         ) const;
 
-        //- Does IOObject exist.
+        //- Does IOobject exist?
         //- Is either a directory (empty name()) or a file
         bool exists(IOobject& io) const;
 
@@ -647,15 +677,15 @@ public:
 
         // Other
 
-            //- Actual name of processors dir (for use in mode PROCOBJECT,
-            //  PROCINSTANCE)
+            //- Actual name of processors dir
+            //- (for use in mode PROCOBJECT, PROCINSTANCE)
             virtual word processorsDir(const IOobject& io) const
             {
                 return processorsBaseDir;
             }
 
-            //- Actual name of processors dir (for use in mode PROCOBJECT,
-            //  PROCINSTANCE)
+            //- Actual name of processors dir
+            //- (for use in mode PROCOBJECT, PROCINSTANCE)
             virtual word processorsDir(const fileName&) const
             {
                 return processorsBaseDir;
@@ -733,6 +763,21 @@ public:
 
             //- Detect processor number from '/aa/bb/processorDDD/cc'
             static label detectProcessorPath(const fileName& objPath);
+
+
+    // Rank selection/sub-selection
+
+        //- Get (contiguous) range/bounds of ranks addressed
+        //- within the given main io-ranks.
+        static labelRange subRanks(const labelUList& mainIOranks);
+
+        //- Get list of global IO master ranks based on the hostname.
+        //- It is assumed that each host range is contiguous.
+        static labelList getGlobalHostIORanks();
+
+        //- Get list of global IO ranks from FOAM_IORANKS env variable.
+        //- If set, these correspond to the IO master ranks.
+        static labelList getGlobalIORanks();
 };
 
 

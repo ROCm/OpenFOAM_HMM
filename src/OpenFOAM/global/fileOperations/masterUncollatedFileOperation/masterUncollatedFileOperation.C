@@ -85,46 +85,17 @@ Foam::labelList Foam::fileOperations::masterUncollatedFileOperation::subRanks
     const label n
 )
 {
-    labelList mainRanks(fileOperation::ioRanks());
+    labelList mainIOranks(fileOperation::getGlobalIORanks());
 
-    if (mainRanks.empty())
+    if (mainIOranks.empty())
     {
         return identity(n);
     }
     else
     {
-        DynamicList<label> subRanks(n);
+        labelRange subRange = fileOperation::subRanks(mainIOranks);
 
-        if (!mainRanks.found(0))
-        {
-            FatalErrorInFunction
-                << "Rank 0 (master) should be in the IO ranks. Currently "
-                << mainRanks << nl
-                << exit(FatalError);
-        }
-
-        // The lowest numbered rank is the IO rank
-        const bitSet isIOrank(n, mainRanks);
-
-        for (label proci = Pstream::myProcNo(); proci >= 0; --proci)
-        {
-            if (isIOrank[proci])
-            {
-                // Found my master. Collect all processors with same master
-                subRanks.append(proci);
-                for
-                (
-                    label rank = proci+1;
-                    rank < n && !isIOrank[rank];
-                    ++rank
-                )
-                {
-                    subRanks.append(rank);
-                }
-                break;
-            }
-        }
-        return subRanks;
+        return identity(subRange);
     }
 }
 

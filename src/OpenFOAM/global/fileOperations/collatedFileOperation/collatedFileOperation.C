@@ -78,7 +78,7 @@ namespace fileOperations
 
 void Foam::fileOperations::collatedFileOperation::printBanner
 (
-    const bool printRanks
+    const bool withRanks
 ) const
 {
     DetailInfo
@@ -105,7 +105,7 @@ void Foam::fileOperations::collatedFileOperation::printBanner
             << "         OpenFOAM etc/controlDict" << endl;
     }
 
-    if (printRanks)
+    if (withRanks)
     {
         // Information about the ranks
         stringList hosts(Pstream::nProcs());
@@ -277,11 +277,11 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     masterUncollatedFileOperation
     (
         (
-            ioRanks().size()
+            fileOperation::getGlobalIORanks().size()
           ? UPstream::allocateCommunicator
             (
                 UPstream::worldComm,
-                subRanks(Pstream::nProcs())
+                subRanks(UPstream::nProcs())
             )
           : UPstream::worldComm
         ),
@@ -290,7 +290,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
     managedComm_(getManagedComm(comm_)),  // Possibly locally allocated
     writer_(mag(maxThreadFileBufferSize), comm_),
     nProcs_(Pstream::nProcs()),
-    ioRanks_(ioRanks())
+    ioRanks_(fileOperation::getGlobalIORanks())
 {
     init(verbose);
 }
