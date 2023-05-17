@@ -741,16 +741,16 @@ void Foam::cellCellStencil::walkFront
 }
 
 
-// * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * * //
 
 template<>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<cellCellStencil>& ic
+    const InfoProxy<cellCellStencil>& iproxy
 )
 {
-    const cellCellStencil& e = ic.t_;
+    const auto& e = *iproxy;
 
     const labelUList& cellTypes = e.cellTypes();
     const labelUList& interpolationCells = e.interpolationCells();
@@ -824,5 +824,6 @@ Foam::Ostream& Foam::operator<<
 
     return os;
 }
+
 
 // ************************************************************************* //

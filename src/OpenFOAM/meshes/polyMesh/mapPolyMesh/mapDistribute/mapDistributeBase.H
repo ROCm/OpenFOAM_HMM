@@ -97,6 +97,9 @@ class mapDistributeBase;
 Istream& operator>>(Istream&, mapDistributeBase&);
 Ostream& operator<<(Ostream&, const mapDistributeBase&);
 
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<mapDistributeBase>&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class mapDistributeBase Declaration
@@ -1031,8 +1034,9 @@ public:
 
     // IOstream Operators
 
-        //- Info proxy to print summary information to a stream
-        InfoProxy<mapDistributeBase> info() const
+        //- Return info proxy,
+        //- used to print summary information to a stream
+        InfoProxy<mapDistributeBase> info() const noexcept
         {
             return *this;
         }
@@ -1077,12 +1081,6 @@ public:
             const int tag = UPstream::msgType()
         );
 };
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<mapDistributeBase>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

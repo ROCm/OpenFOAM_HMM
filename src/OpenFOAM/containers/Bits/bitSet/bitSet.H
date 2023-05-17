@@ -604,8 +604,9 @@ public:
 
     // IOstream Operators
 
-        //- Return info proxy
-        InfoProxy<bitSet> info() const
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<bitSet> info() const noexcept
         {
             return *this;
         }
@@ -634,7 +635,7 @@ template<> struct Hash<bitSet> : bitSet::hasher {};
 Ostream& operator<<(Ostream& os, const bitSet& bitset);
 
 //- Output bitset information
-Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& info);
+Ostream& operator<<(Ostream& os, const InfoProxy<bitSet>& iproxy);
 
 
 //- Bitset complement, returns a copy of the bitset with all its bits flipped

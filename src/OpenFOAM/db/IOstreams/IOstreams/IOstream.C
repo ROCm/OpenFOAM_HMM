@@ -138,9 +138,13 @@ void Foam::IOstream::print(Ostream& os, const int streamState) const
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 template<>
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<IOstream>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<IOstream>& iproxy
+)
 {
-    ip.t_.print(os);
+    (*iproxy).print(os);
     return os;
 }
 

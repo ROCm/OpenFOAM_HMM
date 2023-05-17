@@ -73,6 +73,13 @@ using std::cout;
 namespace Foam
 {
 
+// Forward Declarations
+class IOstream;
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<IOstream>&);
+
+
 /*---------------------------------------------------------------------------*\
                            Class IOstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -405,19 +412,10 @@ public:
 
     // Info
 
-        //- Return info proxy.
-        //  Used to print IOstream information to a stream
-        InfoProxy<IOstream> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- used to print IOstream information to a stream
+        InfoProxy<IOstream> info() const noexcept { return *this; }
 };
-
-
-// Ostream Operator
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<IOstream>& ip);
 
 
 // --------------------------------------------------------------------

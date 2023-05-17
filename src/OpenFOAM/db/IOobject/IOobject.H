@@ -101,8 +101,8 @@ SourceFiles
 #include "fileName.H"
 #include "typeInfo.H"
 #include "autoPtr.H"
-#include "InfoProxy.H"
 #include "Enum.H"
+#include "InfoProxy.H"
 #include "IOobjectOption.H"
 #include "IOstreamOption.H"
 
@@ -115,6 +115,11 @@ namespace Foam
 class Time;
 class dictionary;
 class objectRegistry;
+class IOobject;
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<IOobject>&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class IOobject Declaration
@@ -646,11 +651,9 @@ public:
 
     // Info
 
-        //- Return info proxy, for printing information to a stream
-        InfoProxy<IOobject> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- for printing information to a stream
+        InfoProxy<IOobject> info() const noexcept { return *this; }
 
 
     // Member Operators
@@ -666,10 +669,6 @@ inline bool IOobject::isHeaderClass<void>() const
 {
     return true;
 }
-
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip);
 
 
 //- Template function for obtaining global vs. local status

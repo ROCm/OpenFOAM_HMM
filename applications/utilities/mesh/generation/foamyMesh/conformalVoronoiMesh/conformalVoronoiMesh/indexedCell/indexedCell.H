@@ -249,9 +249,9 @@ public:
 
     // Info
 
-        //- Return info proxy.
-        //  Used to print indexedCell information to a stream
-        Foam::InfoProxy<indexedCell<Gt, Cb>> info() const
+        //- Return info proxy,
+        //- used to print information to a stream
+        Foam::InfoProxy<indexedCell<Gt, Cb>> info() const noexcept
         {
             return *this;
         }
@@ -261,7 +261,6 @@ public:
             Foam::Ostream&,
             const Foam::InfoProxy<indexedCell<Gt, Cb>>&
         );
-
 };
 
 

@@ -98,14 +98,11 @@ public:
             ) const;
 
 
-        // Info
+    // Info
 
-            //- Return info proxy.
-            //  Used to print mesh information to a stream
-            InfoProxy<lduMesh> info() const
-            {
-                return *this;
-            }
+        //- Return info proxy,
+        //- used to print mesh information to a stream
+        InfoProxy<lduMesh> info() const noexcept { return *this; }
 
 
     // Ostream Operator

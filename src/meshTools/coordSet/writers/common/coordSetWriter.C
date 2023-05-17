@@ -461,10 +461,10 @@ bool Foam::coordSetWriter::merge() const
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<coordSetWriter>& ip
+    const InfoProxy<coordSetWriter>& iproxy
 )
 {
-    const coordSetWriter& w = ip.t_;
+    const auto& w = *iproxy;
 
     os  << "coordSetWriter:"
         << " upToDate: " << w.upToDate_

@@ -496,7 +496,7 @@ Foam::Ostream& Foam::operator<<
     const InfoProxy<blockDescriptor>& iproxy
 )
 {
-    const blockDescriptor& bd = iproxy.t_;
+    const auto& bd = *iproxy;
 
     os  << "Dimensions:" << bd.density()
         << " nPoints:" << bd.nPoints()

@@ -788,17 +788,14 @@ public:
             tmp<Field<Type>> faceH(const tmp<Field<Type>>&) const;
 
 
-        // Info
+    // Info
 
-            //- Return info proxy.
-            //  Used to print matrix information to a stream
-            InfoProxy<lduMatrix> info() const
-            {
-                return *this;
-            }
+        //- Return info proxy,
+        //- used to print matrix information to a stream
+        InfoProxy<lduMatrix> info() const noexcept { return *this; }
 
 
-    // Member operators
+    // Member Operators
 
         void operator=(const lduMatrix&);
 
@@ -811,7 +808,7 @@ public:
         void operator*=(scalar);
 
 
-    // Ostream operator
+    // Ostream Operators
 
         friend Ostream& operator<<(Ostream&, const lduMatrix&);
         friend Ostream& operator<<(Ostream&, const InfoProxy<lduMatrix>&);

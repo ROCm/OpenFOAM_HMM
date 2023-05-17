@@ -33,7 +33,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(lduMesh, 0);
+    defineTypeNameAndDebug(lduMesh, 0);
 }
 
 
@@ -49,9 +49,13 @@ const Foam::objectRegistry& Foam::lduMesh::thisDb() const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<lduMesh>& iproxy
+)
 {
-    const lduMesh& ldum = ip.t_;
+    const auto& ldum = *iproxy;
     const lduAddressing& addr = ldum.lduAddr();
     const lduInterfacePtrsList interfaces = ldum.interfaces();
 
@@ -62,6 +66,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMesh>& ip)
         << " interfaces:" << interfaces.size()
         << " comm:" << ldum.comm()
         << endl;
+
     label nCouples = 0;
     forAll(interfaces, i)
     {

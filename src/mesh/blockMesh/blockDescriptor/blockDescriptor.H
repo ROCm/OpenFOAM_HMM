@@ -55,8 +55,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef blockDescriptor_H
-#define blockDescriptor_H
+#ifndef Foam_blockDescriptor_H
+#define Foam_blockDescriptor_H
 
 #include "ijkMesh.H"
 #include "cellShape.H"
@@ -71,6 +71,14 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward Declarations
+class blockDescriptor;
+
+Ostream& operator<<(Ostream&, const blockDescriptor&);
+
+Ostream& operator<<(Ostream&, const InfoProxy<blockDescriptor>&);
+
 
 /*---------------------------------------------------------------------------*\
                        Class blockDescriptor Declaration
@@ -261,19 +269,10 @@ public:
         //- Write block index with dictionary lookup
         static void write(Ostream&, const label blocki, const dictionary&);
 
-        //- Return info proxy
-        InfoProxy<blockDescriptor> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<blockDescriptor> info() const noexcept { return *this; }
 };
-
-
-//- Output Operator
-Ostream& operator<<(Ostream& os, const blockDescriptor& bd);
-
-//- Info output
-Ostream& operator<<(Ostream& os, const InfoProxy<blockDescriptor>& info);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -654,7 +654,7 @@ Foam::Ostream& Foam::operator<<
     const InfoProxy<PDRobstacle>& iproxy
 )
 {
-    const PDRobstacle& obs = iproxy.t_;
+    const auto& obs = *iproxy;
 
     switch (obs.typeId)
     {

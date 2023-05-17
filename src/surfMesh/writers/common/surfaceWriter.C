@@ -744,10 +744,10 @@ defineSurfaceFieldMethods(Foam::surfaceWriter, Foam::tensor)
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<surfaceWriter>& ip
+    const InfoProxy<surfaceWriter>& iproxy
 )
 {
-    const surfaceWriter& w = ip.t_;
+    const auto& w = *iproxy;
 
     os  << "surfaceWriter:"
         << " upToDate: " << w.upToDate_

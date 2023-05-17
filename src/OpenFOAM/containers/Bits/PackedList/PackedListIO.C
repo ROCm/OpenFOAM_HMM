@@ -271,7 +271,7 @@ Foam::Ostream& Foam::operator<<
     const InfoProxy<PackedList<Width>>& iproxy
 )
 {
-    const PackedList<Width>& list = iproxy.t_;
+    const auto& list = *iproxy;
 
     os  << "PackedList<" << Width
         << "> size=" << list.size() << "/" << list.capacity()

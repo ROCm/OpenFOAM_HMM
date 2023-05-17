@@ -247,8 +247,9 @@ public:
 
     // Output
 
-        //- Return info proxy
-        InfoProxy<ensightFaces> info() const { return *this; }
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<ensightFaces> info() const noexcept { return *this; }
 
 
         //- Globally unique mesh points.
@@ -274,6 +275,7 @@ public:
 };
 
 
+//- Print information via proxy
 template<>
 Ostream& operator<<(Ostream&, const InfoProxy<ensightFaces>&);
 

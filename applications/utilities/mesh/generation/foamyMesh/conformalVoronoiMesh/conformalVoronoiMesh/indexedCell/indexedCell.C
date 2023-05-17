@@ -33,10 +33,10 @@ template<class Gt, class Cb>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<CGAL::indexedCell<Gt, Cb>>& p
+    const InfoProxy<CGAL::indexedCell<Gt, Cb>>& iproxy
 )
 {
-    const CGAL::indexedCell<Gt, Cb>& iv = p.t_;
+    const auto& iv = *iproxy;
 
     os  << "Cell: ";
 

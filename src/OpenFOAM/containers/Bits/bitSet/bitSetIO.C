@@ -42,10 +42,10 @@ Foam::Ostream& Foam::operator<<
     const InfoProxy<bitSet>& iproxy
 )
 {
-    const bitSet& bitset = iproxy.t_;
+    const auto& bitset = *iproxy;
 
     os  << "bitSet<" << bitSet::elem_per_block
-        << "> size=" << bitset.size() << "/" << bitset.capacity()
+        << "> size=" << bitset.size() << '/' << bitset.capacity()
         << " count=" << bitset.count()
         << nl;
 

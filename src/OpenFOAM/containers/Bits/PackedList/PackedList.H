@@ -510,8 +510,9 @@ public:
 
     // IOstream Operators
 
-        //- Return info proxy.
-        InfoProxy<PackedList<Width>> info() const
+        //- Return info proxy,
+        //- used to print information to  a stream
+        InfoProxy<PackedList<Width>> info() const noexcept
         {
             return *this;
         }

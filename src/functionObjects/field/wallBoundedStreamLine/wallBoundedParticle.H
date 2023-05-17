@@ -260,25 +260,25 @@ public:
                 );
 
 
-        // Info
+    // Info
 
-            //- Return info proxy.
-            //  Used to print particle information to a stream
-            inline InfoProxy<wallBoundedParticle> info() const
-            {
-                return *this;
-            }
+        //- Return info proxy,
+        //- used to print particle information to a stream
+        InfoProxy<wallBoundedParticle> info() const noexcept
+        {
+            return *this;
+        }
 
 
-        // I-O
+    // I-O
 
-            //- Read
-            template<class CloudType>
-            static void readFields(CloudType&);
+        //- Read
+        template<class CloudType>
+        static void readFields(CloudType&);
 
-            //- Write
-            template<class CloudType>
-            static void writeFields(const CloudType&);
+        //- Write
+        template<class CloudType>
+        static void writeFields(const CloudType&);
 
 
     // Ostream Operator

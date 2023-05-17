@@ -313,8 +313,9 @@ public:
 
     // IOstream Operators
 
-        //- Info proxy, to print information to a stream
-        Foam::InfoProxy<indexedVertex<Gt, Vb>> info() const
+        //- Return info proxy,
+        //- used to print information to a stream
+        Foam::InfoProxy<indexedVertex<Gt, Vb>> info() const noexcept
         {
             return *this;
         }

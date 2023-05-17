@@ -187,10 +187,10 @@ template<>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<mapDistributePolyMesh>& ip
+    const InfoProxy<mapDistributePolyMesh>& iproxy
 )
 {
-    const auto& map = ip.t_;
+    const auto& map = *iproxy;
 
     os.beginBlock("cellMap");
     os.writeEntry("oldSize", map.nOldCells());

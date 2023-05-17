@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dictionaryEntry_H
-#define dictionaryEntry_H
+#ifndef Foam_dictionaryEntry_H
+#define Foam_dictionaryEntry_H
 
 #include "entry.H"
 #include "dictionary.H"
@@ -54,9 +54,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class dictionaryEntry;
 Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<dictionaryEntry>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -68,13 +71,13 @@ class dictionaryEntry
     public entry,
     public dictionary
 {
-    // Private Member Functions
+public:
+
+    // Generated Methods
 
         //- No copy construct
         dictionaryEntry(const dictionaryEntry&) = delete;
 
-
-public:
 
     // Constructors
 
@@ -158,22 +161,15 @@ public:
         //- Write
         virtual void write(Ostream& os) const;
 
-        //- Return info proxy.
-        //  Used to print token information to a stream
-        InfoProxy<dictionaryEntry> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- used to print token information to a stream
+        InfoProxy<dictionaryEntry> info() const noexcept { return *this; }
 
 
-    // Ostream Operator
+    // Ostream Operators
 
         friend Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 };
-
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

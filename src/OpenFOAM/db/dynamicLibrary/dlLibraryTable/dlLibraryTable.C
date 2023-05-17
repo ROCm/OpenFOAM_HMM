@@ -611,10 +611,10 @@ bool Foam::dlLibraryTable::open
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<dlLibraryTable>& ip
+    const InfoProxy<dlLibraryTable>& iproxy
 )
 {
-    const dlLibraryTable& tbl = ip.t_;
+    const auto& tbl = *iproxy;
 
     os << token::BEGIN_LIST << nl;
 

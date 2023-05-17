@@ -111,10 +111,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const surfaceLocation& sl)
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<surfaceLocation>& ip
+    const InfoProxy<surfaceLocation>& iproxy
 )
 {
-    const surfaceLocation& sl = ip.t_;
+    const auto& sl = *iproxy;
 
     os  << "coord:" << sl.point();
 

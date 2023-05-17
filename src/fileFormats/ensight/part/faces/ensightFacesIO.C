@@ -141,10 +141,10 @@ template<>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<ensightFaces>& ip
+    const InfoProxy<ensightFaces>& iproxy
 )
 {
-    const ensightFaces& part = ip.t_;
+    const auto& part = *iproxy;
 
     os << part.name().c_str();
 

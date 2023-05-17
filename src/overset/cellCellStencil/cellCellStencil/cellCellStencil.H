@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellCellStencil_H
-#define cellCellStencil_H
+#ifndef Foam_cellCellStencil_H
+#define Foam_cellCellStencil_H
 
 #include "scalarList.H"
 #include "mapDistribute.H"
@@ -53,7 +53,13 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class cellCellStencil;
 class mapDistribute;
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<cellCellStencil>&);
+
 
 /*---------------------------------------------------------------------------*\
                      Class cellCellStencil Declaration
@@ -265,13 +271,6 @@ public:
         template<class GeoField, class SuppressBC>
         static void correctBoundaryConditions(GeoField& psi);
 
-        //- Return info proxy.
-        //- Used to print stencil information to a stream
-        InfoProxy<cellCellStencil> info() const
-        {
-            return *this;
-        }
-
         //- Surround holes with layer(s) of interpolated cells
         void walkFront
         (
@@ -310,10 +309,15 @@ public:
             bitSet& isFront,
             scalarField& fraction
         ) const;
+
+
+    // Write
+
+        //- Return info proxy,
+        //- used to print stencil information to a stream
+        InfoProxy<cellCellStencil> info() const noexcept { return *this; }
 };
 
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<cellCellStencil>& ic);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

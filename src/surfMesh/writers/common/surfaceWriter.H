@@ -611,8 +611,9 @@ public:
 
     // Other IO
 
-        //- Return info proxy.
-        virtual InfoProxy<surfaceWriter> info() const
+        //- Return info proxy,
+        //- used to print information to a stream
+        virtual InfoProxy<surfaceWriter> info() const noexcept
         {
             return *this;
         }
@@ -621,7 +622,7 @@ public:
         friend Ostream& operator<<
         (
             Ostream& os,
-            const InfoProxy<surfaceWriter>& ip
+            const InfoProxy<surfaceWriter>& iproxy
         );
 
 
