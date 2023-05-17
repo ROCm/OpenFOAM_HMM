@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,15 +56,34 @@ class InfoProxy
 {
 public:
 
-    const T& t_;
+    // Data
 
-    InfoProxy(const T& t)
-    :
-        t_(t)
-    {}
+        //- The captured object reference
+        const T& t_;
 
-    friend Ostream& operator<< <T>
-    (Ostream&, const InfoProxy<T>&);
+
+    // Constructors
+
+        //- Implicit construct from object reference
+        InfoProxy(const T& item) noexcept
+        :
+            t_(item)
+        {}
+
+
+    // Member Functions
+
+        //- Return const reference to the object
+        const T& operator*() const noexcept { return t_; }
+
+        // // TBD: Dereference const pointer to the object
+        // const T* operator->() const noexcept { return &t_; }
+
+
+    // Output Functions
+
+        //- Output information to stream
+        friend Ostream& operator<< <T> (Ostream&, const InfoProxy<T>&);
 };
 
 
