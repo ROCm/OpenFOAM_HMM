@@ -238,6 +238,20 @@ protected:
         }
 
 
+private:
+
+    // Private Member Functions
+
+        //- Low-level implementation for subsetting 'clone' operation
+        static autoPtr<fileOperation> New_impl
+        (
+            const fileOperation& origHandler,
+            //! The selected sub-ranks (in worldComm)
+            const labelUList& subProcs,
+            bool verbose
+        );
+
+
 public:
 
     // Static Data
@@ -276,10 +290,6 @@ public:
             const Tuple2<label, labelList>& commAndIORanks,
             const bool distributedRoots = false
         );
-
-
-        //- Clone fileHandler
-        /// virtual autoPtr<fileOperation> clone() const = 0;
 
 
     // Declare run-time constructor selection table
@@ -326,6 +336,33 @@ public:
             const word& handlerType,
             const Tuple2<label, labelList>& commAndIORanks,
             const bool distributedRoots,
+            bool verbose = false
+        );
+
+
+        //- Replicate the given fileHandler properties with
+        //- a subset of (global) ranks.
+        //  Always includes rank 0 and constrained by the global numProcs
+        //  Returns nullptr if myProcNo is not involved.
+        static autoPtr<fileOperation> New
+        (
+            //! The original file handler
+            const fileOperation& origHandler,
+            //! The selected sub-ranks (in worldComm)
+            const boolUList& useProc,
+            bool verbose = false
+        );
+
+        //- Replicate the given fileHandler properties with
+        //- a subset of (global) ranks.
+        //  Always includes rank 0 and constrained by the global numProcs
+        //  Returns nullptr if myProcNo is not involved.
+        static autoPtr<fileOperation> New
+        (
+            //! The original file handler
+            const fileOperation& origHandler,
+            //! The selected sub-ranks (in worldComm). Monotonic order!
+            const bitSet& useProc,
             bool verbose = false
         );
 

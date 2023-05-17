@@ -125,7 +125,7 @@ Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::NewUncollated()
 {
     return autoPtr<fileOperation>
     (
-        new fileOperations::uncollatedFileOperation(false)
+        new fileOperations::uncollatedFileOperation(false)  // verbose = false
     );
 }
 
@@ -218,6 +218,190 @@ Foam::fileOperation::New
     (
         ctorPtr(commAndIORanks, distributedRoots, verbose)
     );
+}
+
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// From boolUList/bitSet to list of labels,
+// always include rank 0 and constrain by numProcs
+template<class BoolListType>
+static labelList getSelectedProcs(const BoolListType& useProc)
+{
+    labelList ranks;
+
+    if
+    (
+        UPstream::master(UPstream::worldComm)
+     || useProc.test(UPstream::myProcNo(UPstream::worldComm))
+    )
+    {
+        DynamicList<label> subProcs(UPstream::nProcs(UPstream::worldComm));
+
+        for (const int proci : UPstream::allProcs(UPstream::worldComm))
+        {
+            // Always include the master rank
+            if (!proci || useProc.test(proci))
+            {
+                subProcs.push_back(proci);
+            }
+        }
+
+        ranks.transfer(subProcs);
+    }
+
+    return ranks;
+}
+
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+Foam::autoPtr<Foam::fileOperation>
+Foam::fileOperation::New_impl
+(
+    const fileOperation& origHandler,
+    const labelUList& subProcs,  // in worldComm
+    bool verbose
+)
+{
+    autoPtr<fileOperation> newHandler;
+
+    // NB: input must include master!
+
+    const label myProci = UPstream::myProcNo(UPstream::worldComm);
+    const label numProcs = UPstream::nProcs(UPstream::worldComm);
+
+    if (subProcs.contains(myProci))
+    {
+        // Retaining the original IO ranks if possible
+
+        // Retain the original IO ranks that coincide with the new subset.
+        // This may still need more attention...
+
+        const labelUList& origIOranks = origHandler.ioRanks();
+        DynamicList<label> subIORanks(origIOranks.size());
+
+        for (const label proci : subProcs)
+        {
+            if (origIOranks.contains(proci))
+            {
+                subIORanks.push_back(proci);
+            }
+        }
+
+        // Default starting point
+        Tuple2<label, labelList> commAndIORanks
+        (
+            UPstream::worldComm,
+            subIORanks
+        );
+
+        // TBD: special handling for uncollated
+        // if (origHandler.comm() == UPstream::selfComm)
+        // {
+        //     commAndIORanks.first() = UPstream::selfComm;
+        // }
+
+        const bool hasIOranks = (commAndIORanks.second().size() > 1);
+
+        if
+        (
+            UPstream::parRun()
+         && (hasIOranks || (subProcs.size() != numProcs))
+        )
+        {
+            // Without any IO range, restrict to overall proc range
+            // since we don't necessarily trust the input...
+            labelRange siblingRange(numProcs);
+
+            if (hasIOranks)
+            {
+                // Multiple masters: ranks included in my IO range
+                siblingRange = fileOperation::subRanks(commAndIORanks.second());
+            }
+
+            // Restrict to siblings within the IO range or proc range
+            labelList siblings;
+            if (siblingRange.size())
+            {
+                auto& dynSiblings = subIORanks;
+                dynSiblings.clear();
+
+                for (const label proci : subProcs)
+                {
+                    if (siblingRange.contains(proci))
+                    {
+                        dynSiblings.push_back(proci);
+                    }
+                }
+
+                siblings.transfer(dynSiblings);
+            }
+
+            // Warning: MS-MPI currently uses MPI_Comm_create() instead of
+            // MPI_Comm_create_group() so it will block there!
+
+            commAndIORanks.first() = UPstream::allocateCommunicator
+            (
+                UPstream::worldComm,
+                siblings
+            );
+        }
+
+
+        // Allocate new handler with same type and similar IO ranks
+        // but with different sub-ranks (and communicator)
+
+        newHandler = fileOperation::New
+        (
+            origHandler.type(),
+            commAndIORanks,
+            origHandler.distributed(),
+            verbose
+        );
+
+        if (newHandler)
+        {
+            newHandler->nProcs(origHandler.nProcs());
+            newHandler->storeComm();
+        }
+    }
+
+    return newHandler;
+}
+
+
+Foam::autoPtr<Foam::fileOperation>
+Foam::fileOperation::New
+(
+    const fileOperation& origHandler,
+    const boolUList& useProc,  // in worldComm
+    bool verbose
+)
+{
+    labelList subProcs = getSelectedProcs(useProc);
+
+    return fileOperation::New_impl(origHandler, subProcs, verbose);
+}
+
+
+Foam::autoPtr<Foam::fileOperation>
+Foam::fileOperation::New
+(
+    const fileOperation& origHandler,
+    const bitSet& useProc,  // in worldComm
+    bool verbose
+)
+{
+    labelList subProcs = getSelectedProcs(useProc);
+
+    return fileOperation::New_impl(origHandler, subProcs, verbose);
 }
 
 
