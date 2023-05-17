@@ -1011,10 +1011,10 @@ public:
         (                                                                     \
             /*! On rank: individual value to send */                          \
             const Native* sendData,                                           \
-            int sendCount,                                                    \
             /*! On master: receive buffer with all values */                  \
             Native* recvData,                                                 \
-            int recvCount,                                                    \
+            /*! Number of send/recv data per rank. Globally consistent! */    \
+            int count,                                                        \
             const label communicator = worldComm                              \
         );                                                                    \
                                                                               \
@@ -1023,10 +1023,10 @@ public:
         (                                                                     \
             /*! On master: send buffer with all values */                     \
             const Native* sendData,                                           \
-            int sendCount,                                                    \
             /*! On rank: individual value to receive */                       \
             Native* recvData,                                                 \
-            int recvCount,                                                    \
+            /*! Number of send/recv data per rank. Globally consistent! */    \
+            int count,                                                        \
             const label communicator = worldComm                              \
         );                                                                    \
                                                                               \
@@ -1034,7 +1034,9 @@ public:
         /*! Send data from proc slot, receive into all slots */               \
         static void mpiAllGather                                              \
         (                                                                     \
+            /*! On all ranks: the base of the data locations */               \
             Native* allData,                                                  \
+            /*! Number of send/recv data per rank. Globally consistent! */    \
             int count,                                                        \
             const label communicator = worldComm                              \
         );
@@ -1079,6 +1081,15 @@ public:
 
 
     // Gather single, contiguous value(s)
+
+        //- Allgather individual values into list locations.
+        //  The returned list has size nProcs, identical on all ranks.
+        template<class T>
+        static List<T> allGatherValues
+        (
+            const T& localValue,
+            const label communicator = worldComm
+        );
 
         //- Gather individual values into list locations.
         //  On master list length == nProcs, otherwise zero length.

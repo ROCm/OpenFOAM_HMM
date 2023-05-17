@@ -266,9 +266,8 @@ int main(int argc, char *argv[])
             UPstream::mpiGather
             (
                 myDigest.cdata_bytes(),     // Send
-                SHA1Digest::max_size(),     // Num send per proc
                 digests.data_bytes(),       // Recv
-                SHA1Digest::max_size(),     // Num recv per proc
+                SHA1Digest::max_size(),     // Num send/recv per rank
                 UPstream::commGlobal()
             );
         }

@@ -91,9 +91,8 @@ static List<int> getHostGroupIds(const label parentCommunicator)
     UPstream::mpiGather
     (
         myDigest.cdata_bytes(),     // Send
-        SHA1Digest::max_size(),     // Num send per proc
         digests.data_bytes(),       // Recv
-        SHA1Digest::max_size(),     // Num recv per proc
+        SHA1Digest::max_size(),     // Num send/recv data per rank
         parentCommunicator
     );
 

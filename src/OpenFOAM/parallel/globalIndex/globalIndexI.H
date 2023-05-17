@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
-#include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -121,7 +120,7 @@ inline Foam::globalIndex::globalIndex
     const label comm
 )
 {
-    // one-sided: non-master only
+    // one-sided: non-master sizes only
     reset
     (
         UPstream::listGatherValues
@@ -401,7 +400,7 @@ inline void Foam::globalIndex::reset
     const label comm
 )
 {
-    // one-sided: non-master only
+    // one-sided: non-master sizes only
     reset
     (
         UPstream::listGatherValues

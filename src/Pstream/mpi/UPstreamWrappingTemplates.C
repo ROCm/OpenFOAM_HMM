@@ -924,14 +924,12 @@ template<class Type>
 void Foam::PstreamDetail::gather
 (
     const Type* sendData,
-    int sendCount,
-
     Type* recvData,
-    int recvCount,
 
+    int count,
     MPI_Datatype datatype,
-    const label comm,
 
+    const label comm,
     UPstream::Request* req,
     label* requestID
 )
@@ -940,13 +938,16 @@ void Foam::PstreamDetail::gather
 
     const bool immediate = (req || requestID);
 
-    if (!UPstream::is_rank(comm))
+    if (!UPstream::is_rank(comm) || !count)
     {
         return;
     }
     if (!UPstream::is_parallel(comm))
     {
-        std::memmove(recvData, sendData, recvCount*sizeof(Type));
+        if (recvData)
+        {
+            std::memmove(recvData, sendData, count*sizeof(Type));
+        }
         return;
     }
 
@@ -963,7 +964,7 @@ void Foam::PstreamDetail::gather
             Pout<< "** MPI_Gather (blocking):";
         }
         Pout<< " numProc:" << numProc
-            << " recvCount:" << recvCount
+            << " count:" << count
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
             << endl;
@@ -982,13 +983,9 @@ void Foam::PstreamDetail::gather
         (
             MPI_Igather
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm],
                &request
             )
@@ -996,8 +993,7 @@ void Foam::PstreamDetail::gather
         {
             FatalErrorInFunction
                 << "MPI_Igather [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
 
@@ -1013,21 +1009,16 @@ void Foam::PstreamDetail::gather
         (
             MPI_Gather
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm]
             )
         )
         {
             FatalErrorInFunction
                 << "MPI_Gather [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
 
@@ -1040,14 +1031,12 @@ template<class Type>
 void Foam::PstreamDetail::scatter
 (
     const Type* sendData,
-    int sendCount,
-
     Type* recvData,
-    int recvCount,
 
+    int count,
     MPI_Datatype datatype,
-    const label comm,
 
+    const label comm,
     UPstream::Request* req,
     label* requestID
 )
@@ -1056,13 +1045,16 @@ void Foam::PstreamDetail::scatter
 
     const bool immediate = (req || requestID);
 
-    if (!UPstream::is_rank(comm))
+    if (!UPstream::is_rank(comm) || !count)
     {
         return;
     }
     if (!UPstream::is_parallel(comm))
     {
-        std::memmove(recvData, sendData, recvCount*sizeof(Type));
+        if (recvData)
+        {
+            std::memmove(recvData, sendData, count*sizeof(Type));
+        }
         return;
     }
 
@@ -1079,7 +1071,7 @@ void Foam::PstreamDetail::scatter
             Pout<< "** MPI_Scatter (blocking):";
         }
         Pout<< " numProc:" << numProc
-            << " recvCount:" << recvCount
+            << " count:" << count
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
             << endl;
@@ -1098,13 +1090,9 @@ void Foam::PstreamDetail::scatter
         (
             MPI_Iscatter
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm],
                &request
             )
@@ -1112,8 +1100,7 @@ void Foam::PstreamDetail::scatter
         {
             FatalErrorInFunction
                 << "MPI_Iscatter [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
 
@@ -1129,21 +1116,16 @@ void Foam::PstreamDetail::scatter
         (
             MPI_Scatter
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm]
             )
         )
         {
             FatalErrorInFunction
                 << "MPI_Scatter [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
 
@@ -1483,8 +1465,8 @@ void Foam::PstreamDetail::allGather
         (
             MPI_Iallgather
             (
-                MPI_IN_PLACE, count, MPI_BYTE,
-                allData, count, MPI_BYTE,
+                MPI_IN_PLACE, count, datatype,
+                allData, count, datatype,
                 PstreamGlobals::MPICommunicators_[comm],
                &request
             )
@@ -1507,8 +1489,8 @@ void Foam::PstreamDetail::allGather
         (
             MPI_Allgather
             (
-                MPI_IN_PLACE, count, MPI_BYTE,
-                allData, count, MPI_BYTE,
+                MPI_IN_PLACE, count, datatype,
+                allData, count, datatype,
                 PstreamGlobals::MPICommunicators_[comm]
             )
         )

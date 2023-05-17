@@ -164,12 +164,9 @@ void allToAllConsensus
 template<class Type>
 void gather
 (
-    const Type* sendData,
-    int sendCount,
-
-    Type* recvData,                     // Ignored on non-root rank
-    int recvCount,                      // Ignored on non-root rank
-
+    const Type* sendData,   // Local send value
+    Type* recvData,         // On master: recv buffer. Ignored elsewhere
+    int count,              // Per rank send/recv count. Globally consistent!
     MPI_Datatype datatype,              // The send/recv data type
     const label comm,                   // Communicator
     UPstream::Request* req = nullptr,   // Non-null for non-blocking
@@ -181,12 +178,9 @@ void gather
 template<class Type>
 void scatter
 (
-    const Type* sendData,               // Ignored on non-root rank
-    int sendCount,                      // Ignored on non-root rank
-
-    Type* recvData,
-    int recvCount,
-
+    const Type* sendData,   // On master: send buffer. Ignored elsewhere
+    Type* recvData,         // Local recv value
+    int count,              // Per rank send/recv count. Globally consistent!
     MPI_Datatype datatype,              // The send/recv data type
     const label comm,                   // Communicator
     UPstream::Request* req = nullptr,   // Non-null for non-blocking

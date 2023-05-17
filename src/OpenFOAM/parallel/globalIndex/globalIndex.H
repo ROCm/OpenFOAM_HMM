@@ -55,7 +55,6 @@ namespace Foam
 
 // Forward Declarations
 class globalIndex;
-class labelRange;
 
 Istream& operator>>(Istream& is, globalIndex& gi);
 Ostream& operator<<(Ostream& os, const globalIndex& gi);

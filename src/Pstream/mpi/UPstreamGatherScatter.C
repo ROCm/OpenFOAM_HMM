@@ -38,16 +38,14 @@ License
 void Foam::UPstream::mpiGather                                                \
 (                                                                             \
     const Native* sendData,                                                   \
-    int sendCount,                                                            \
-                                                                              \
     Native* recvData,                                                         \
-    int recvCount,                                                            \
+    int count,                                                                \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::gather                                                     \
     (                                                                         \
-        sendData, sendCount, recvData, recvCount,                             \
+        sendData, recvData, count,                                            \
         TaggedType, comm                                                      \
     );                                                                        \
 }                                                                             \
@@ -56,16 +54,14 @@ void Foam::UPstream::mpiGather                                                \
 void Foam::UPstream::mpiScatter                                               \
 (                                                                             \
     const Native* sendData,                                                   \
-    int sendCount,                                                            \
-                                                                              \
     Native* recvData,                                                         \
-    int recvCount,                                                            \
+    int count,                                                                \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::scatter                                                    \
     (                                                                         \
-        sendData, sendCount, recvData, recvCount,                             \
+        sendData, recvData, count,                                            \
         TaggedType, comm                                                      \
     );                                                                        \
 }                                                                             \

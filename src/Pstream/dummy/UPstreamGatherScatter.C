@@ -36,28 +36,24 @@ License
 void Foam::UPstream::mpiGather                                                \
 (                                                                             \
     const Native* sendData,                                                   \
-    int sendCount,                                                            \
-                                                                              \
     Native* recvData,                                                         \
-    int recvCount,                                                            \
+    int count,                                                                \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
-    std::memmove(recvData, sendData, recvCount*sizeof(Native));               \
+    std::memmove(recvData, sendData, count*sizeof(Native));                   \
 }                                                                             \
                                                                               \
                                                                               \
 void Foam::UPstream::mpiScatter                                               \
 (                                                                             \
     const Native* sendData,                                                   \
-    int sendCount,                                                            \
-                                                                              \
     Native* recvData,                                                         \
-    int recvCount,                                                            \
+    int count,                                                                \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
-    std::memmove(recvData, sendData, recvCount*sizeof(Native));               \
+    std::memmove(recvData, sendData, count*sizeof(Native));                   \
 }                                                                             \
                                                                               \
                                                                               \

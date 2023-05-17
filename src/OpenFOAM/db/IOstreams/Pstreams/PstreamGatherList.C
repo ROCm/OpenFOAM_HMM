@@ -350,20 +350,19 @@ void Foam::Pstream::allGatherList
 {
     if (UPstream::is_parallel(comm))
     {
-        // TBD
-        // if (std::is_arithmetic<T>::value)   // or is_contiguous ?
-        // {
-        //     if (values.size() != UPstream::nProcs(comm))
-        //     {
-        //         FatalErrorInFunction
-        //             << "Size of list:" << values.size()
-        //             << " != number of processors:"
-        //             << UPstream::nProcs(comm)
-        //             << Foam::abort(FatalError);
-        //     }
-        //     UPstream::mpiAllGather(values.data_bytes(), sizeof(T), comm);
-        //     return;
-        // }
+        if (is_contiguous<T>::value)
+        {
+            if (values.size() < UPstream::nProcs(comm))
+            {
+                FatalErrorInFunction
+                    << "List of values is too small:" << values.size()
+                    << " vs numProcs:" << UPstream::nProcs(comm) << nl
+                    << Foam::abort(FatalError);
+            }
+
+            UPstream::mpiAllGather(values.data_bytes(), sizeof(T), comm);
+            return;
+        }
 
         const auto& comms = UPstream::whichCommunication(comm);
 
