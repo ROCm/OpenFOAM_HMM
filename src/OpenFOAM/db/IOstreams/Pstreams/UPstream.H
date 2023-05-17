@@ -298,6 +298,9 @@ public:
         //- Optional maximum message size (bytes)
         static int maxCommsSize;
 
+        //- Tuning parameters for non-blocking exchange (NBX)
+        static int tuning_NBX_;
+
         //- MPI buffer-size (bytes)
         static const int mpiBufferSize;
 
@@ -930,6 +933,8 @@ public:
         //
         //  \note The message tag should be chosen to be a unique value
         //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
         static void allToAllConsensus
         (
             const UList<int32_t>& sendData,
@@ -950,6 +955,8 @@ public:
         //
         //  \note The message tag should be chosen to be a unique value
         //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
         static void allToAllConsensus
         (
             const UList<int64_t>& sendData,
@@ -971,6 +978,8 @@ public:
         //
         //  \note The message tag should be chosen to be a unique value
         //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
         static void allToAllConsensus
         (
             const Map<int32_t>& sendData,
@@ -992,6 +1001,8 @@ public:
         //
         //  \note The message tag should be chosen to be a unique value
         //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
         static void allToAllConsensus
         (
             const Map<int64_t>& sendData,

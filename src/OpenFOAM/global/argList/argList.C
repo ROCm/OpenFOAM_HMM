@@ -1723,16 +1723,19 @@ void Foam::argList::parse
             }
             Info<< "Pstream initialized with:" << nl
                 << "    floatTransfer      : "
-                << Switch::name(Pstream::floatTransfer) << nl
-                << "    nProcsSimpleSum    : " << Pstream::nProcsSimpleSum << nl
+                << Switch::name(UPstream::floatTransfer) << nl
+                << "    nProcsSimpleSum    : "
+                << UPstream::nProcsSimpleSum << nl
                 << "    nonBlockingExchange: "
-                << Pstream::nProcsNonblockingExchange << nl
+                << UPstream::nProcsNonblockingExchange
+                << " (tuning: " << UPstream::tuning_NBX_ << ')' << nl
                 << "    exchange algorithm : "
                 << PstreamBuffers::algorithm << nl
                 << "    commsType          : "
-                << Pstream::commsTypeNames[Pstream::defaultCommsType] << nl
-                << "    polling iterations : " << Pstream::nPollProcInterfaces
-                << nl;
+                << UPstream::commsTypeNames[UPstream::defaultCommsType] << nl
+                << "    polling iterations : "
+                << UPstream::nPollProcInterfaces << nl;
+
             if (UPstream::allWorlds().size() > 1)
             {
                 Info<< "    worlds             : "

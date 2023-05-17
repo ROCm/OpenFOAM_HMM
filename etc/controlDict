@@ -82,6 +82,10 @@ InfoSwitches
 
 OptimisationSwitches
 {
+    // ===========
+    // File system
+    // ===========
+
     // Use physical (0) or logical (1) value for the cwd.
     cwd     1;
 
@@ -101,7 +105,7 @@ OptimisationSwitches
     fileModificationChecking timeStampMaster;
 
     //- Parallel IO file handler
-    //  uncollated (default), collated or masterUncollated
+    //  uncollated (default), collated, masterUncollated etc.
     fileHandler uncollated;
 
     //- collated: thread buffer size for queued file writes.
@@ -124,15 +128,24 @@ OptimisationSwitches
     ensight.maxChunk 5000000;
 
 
+    // =====================
+    // MPI/Parallel settings
+    // =====================
+
     // Default communication type (nonBlocking | scheduled | blocking);
     commsType       nonBlocking;
+
+    // Transfer double as float for processor boundaries. Mostly defunct.
     floatTransfer   0;
-    // Number processors to change to tree communication
+
+    // Min number of processors to change to tree communication
     nProcsSimpleSum 0;
-    // Min numProc to use non-blocking exchange algorithm (Hoeffler: NBX)
+
+    // Min number processor to use non-blocking exchange (NBX) algorithm
+    // However, a zero value == disabled.
     nonBlockingExchange 0;
 
-    // MPI buffer size (bytes)
+    // MPI buffer size (bytes).
     // Can override with the MPI_BUFFER_SIZE env variable.
     // The default and minimum is (20000000).
     mpiBufferSize   0;
@@ -150,6 +163,15 @@ OptimisationSwitches
     // to poll (processor) interfaces for individual readiness
     // instead of waiting for all to complete first.
     nPollProcInterfaces 0;
+
+    // Additional non-blocking exchange (NBX) tuning parameters (experimental)
+    // 0: none, 1: initial barrier
+    nbx.tuning      0;
+
+
+    // =====
+    // Other
+    // =====
 
     // Trap floating point exception.
     // Can override with FOAM_SIGFPE env variable (true|false)

@@ -808,6 +808,17 @@ registerOptSwitch
     Foam::UPstream::nProcsNonblockingExchange
 );
 
+int Foam::UPstream::tuning_NBX_
+(
+    Foam::debug::optimisationSwitch("nbx.tuning", 0)
+);
+registerOptSwitch
+(
+    "nbx.tuning",
+    int,
+    Foam::UPstream::tuning_NBX_
+);
+
 
 int Foam::UPstream::nPollProcInterfaces
 (

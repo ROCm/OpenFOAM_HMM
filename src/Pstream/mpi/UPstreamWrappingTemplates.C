@@ -503,6 +503,8 @@ void Foam::PstreamDetail::allToAllConsensus
     const label comm
 )
 {
+    const bool initialBarrier = (UPstream::tuning_NBX_ > 0);
+
     if (!UPstream::is_rank(comm))
     {
         return;
@@ -564,11 +566,13 @@ void Foam::PstreamDetail::allToAllConsensus
 
     profilingPstream::beginTiming();
 
-    // If there are synchronisation problems,
-    // a beginning barrier can help, but should not be necessary
-    // when unique message tags are being used.
+    // An initial barrier may help to avoid synchronisation problems
+    // caused elsewhere
+    if (initialBarrier)
+    {
+        MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
+    }
 
-    //// MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
 
     // Start nonblocking synchronous send to process dest
     for (label proci = 0; proci < numProc; ++proci)
@@ -721,6 +725,8 @@ void Foam::PstreamDetail::allToAllConsensus
     const label comm
 )
 {
+    const bool initialBarrier = (UPstream::tuning_NBX_ > 0);
+
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
 
@@ -764,11 +770,13 @@ void Foam::PstreamDetail::allToAllConsensus
 
     profilingPstream::beginTiming();
 
-    // If there are synchronisation problems,
-    // a beginning barrier can help, but should not be necessary
-    // when unique message tags are being used.
+    // An initial barrier may help to avoid synchronisation problems
+    // caused elsewhere
+    if (initialBarrier)
+    {
+        MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
+    }
 
-    //// MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
 
     // Start nonblocking synchronous send to process dest
 

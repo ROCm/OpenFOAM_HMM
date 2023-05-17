@@ -76,6 +76,8 @@ void exchangeConsensus
 {
     static_assert(is_contiguous<Type>::value, "Contiguous data only!");
 
+    const bool initialBarrier = (UPstream::tuning_NBX_ > 0);
+
     const label startOfRequests = UPstream::nRequests();
     const label myProci = UPstream::myProcNo(comm);
     const label numProc = UPstream::nProcs(comm);
@@ -118,6 +120,12 @@ void exchangeConsensus
         return;
     }
 
+    // An initial barrier may help to avoid synchronisation problems
+    // caused elsewhere
+    if (initialBarrier)
+    {
+        UPstream::barrier(comm);
+    }
 
     // Algorithm NBX: Nonblocking consensus with List containers
 
