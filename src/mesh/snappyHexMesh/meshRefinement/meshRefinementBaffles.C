@@ -3941,14 +3941,14 @@ Foam::label Foam::meshRefinement::markPatchZones
 
     // Protect all non-manifold edges
     {
-        label nProtected = 0;
+        // label nProtected = 0;
 
         forAll(nMasterFacesPerEdge, edgeI)
         {
             if (nMasterFacesPerEdge[edgeI] > 2)
             {
                 allEdgeInfo[edgeI] = edgeTopoDistanceData<label>(0, -2);
-                nProtected++;
+                // ++nProtected;
             }
         }
         //Info<< "Protected from visiting "
@@ -4097,7 +4097,7 @@ void Foam::meshRefinement::consistentOrientation
     // - slaves of coupled faces
     // - non-manifold edges
     {
-        label nProtected = 0;
+        // label nProtected = 0;
 
         forAll(patch.addressing(), faceI)
         {
@@ -4113,7 +4113,7 @@ void Foam::meshRefinement::consistentOrientation
             {
                 // Slave side. Mark so doesn't get visited.
                 allFaceInfo[faceI] = orientedSurface::NOFLIP;
-                nProtected++;
+                // ++nProtected;
             }
         }
         //Info<< "Protected from visiting "
@@ -4128,7 +4128,7 @@ void Foam::meshRefinement::consistentOrientation
             if (nMasterFacesPerEdge[edgeI] > 2)
             {
                 allEdgeInfo[edgeI] = orientedSurface::NOFLIP;
-                nProtected++;
+                ++nProtected;
             }
         }
 

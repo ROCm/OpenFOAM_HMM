@@ -64,13 +64,13 @@ Foam::labelList Foam::refinementSurfaces::findHigherLevel
         // 3. uncached : use region 0 value
 
         DynamicList<label> retestSet;
-        label nHits = 0;
+        // label nHits = 0;
 
         forAll(intersectionInfo, i)
         {
             if (intersectionInfo[i].hit())
             {
-                nHits++;
+                // ++nHits;
 
                 // Check if minLevelField for this surface.
                 if (minLevelField.size())

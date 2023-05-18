@@ -3297,7 +3297,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
         // Work array - whether processor bb overlaps the bounding sphere.
         boolList procBbOverlaps(Pstream::nProcs());
 
-        label nFound = 0;
+        // label nFound = 0;
 
         forAll(nearestInfo, samplei)
         {
@@ -3305,10 +3305,10 @@ void Foam::distributedTriSurfaceMesh::findNearest
             const nearestAndDist& ni = nearestInfo[samplei];
             const pointIndexHit& info = ni.first();
 
-            if (info.hit())
-            {
-                nFound++;
-            }
+            // if (info.hit())
+            // {
+            //     nFound++;
+            // }
 
             scalar d2 =
             (

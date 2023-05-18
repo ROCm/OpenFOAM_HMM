@@ -104,7 +104,7 @@ Foam::scalar Foam::cellShapeControl::cellSize(const point& pt) const
     }
     else if (shapeControlMesh_.is_infinite(ch))
     {
-//        if (nFarPoints != 0)
+//        if (nFarPoints)
 //        {
 //            for (label pI = 0; pI < 4; ++pI)
 //            {
@@ -136,11 +136,11 @@ Foam::scalar Foam::cellShapeControl::cellSize(const point& pt) const
         {
             if (ch->vertex(pI)->farPoint())
             {
-                nFarPoints++;
+                ++nFarPoints;
             }
         }
 
-        if (nFarPoints != 0)
+        if (nFarPoints)
         {
             for (label pI = 0; pI < 4; ++pI)
             {
@@ -179,16 +179,16 @@ Foam::tensor Foam::cellShapeControl::cellAlignment(const point& pt) const
     }
     else
     {
-        label nFarPoints = 0;
-        for (label pI = 0; pI < 4; ++pI)
-        {
-            if (ch->vertex(pI)->farPoint())
-            {
-                nFarPoints++;
-            }
-        }
+        // label nFarPoints = 0;
+        // for (label pI = 0; pI < 4; ++pI)
+        // {
+        //     if (ch->vertex(pI)->farPoint())
+        //     {
+        //         ++nFarPoints;
+        //     }
+        // }
 
-//        if (nFarPoints != 0)
+//        if (nFarPoints)
 //        {
 //            for (label pI = 0; pI < 4; ++pI)
 //            {
@@ -259,11 +259,11 @@ void Foam::cellShapeControl::cellSizeAndAlignment
         {
             if (ch->vertex(pI)->farPoint())
             {
-                nFarPoints++;
+                ++nFarPoints;
             }
         }
 
-        if (nFarPoints != 0)
+        if (nFarPoints)
         {
             for (label pI = 0; pI < 4; ++pI)
             {

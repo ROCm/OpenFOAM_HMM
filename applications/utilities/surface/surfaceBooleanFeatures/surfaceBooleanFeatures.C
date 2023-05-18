@@ -1408,7 +1408,7 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
     label nIntOrExt = 0;
     label nFlat = 0;
     label nOpen = 0;
-    label nMultiple = 0;
+    // label nMultiple = 0;
 
     forAll(edgeNormals, eI)
     {
@@ -1432,10 +1432,10 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
                 nIntOrExt++;
             }
         }
-        else if (nEdNorms > 2)
-        {
-            nMultiple++;
-        }
+        // else if (nEdNorms > 2)
+        // {
+        //     ++nMultiple;
+        // }
     }
 
     if (action == booleanSurface::UNION)

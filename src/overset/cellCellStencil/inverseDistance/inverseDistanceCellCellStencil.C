@@ -1166,14 +1166,14 @@ void Foam::cellCellStencils::inverseDistance::findHoles
 
 
     // See which regions have not been visited (regionType == 1)
-    label count = 0;
+    // label count = 0;
     forAll(cellRegion, cellI)
     {
         label type = regionType[cellRegion[cellI]];
         if (type == 1 && cellTypes[cellI] != HOLE)
         {
             cellTypes[cellI] = HOLE;
-            count++;
+            // ++count;
         }
     }
 }

@@ -372,8 +372,7 @@ Foam::scalar Foam::oversetFvMeshBase::cellAverage
     const cell& cFaces = mesh_.cells()[celli];
 
     scalar avg = 0.0;
-    label n = 0;
-    label nFront = 0;
+    label nTotal = 0;
     for (const label facei : cFaces)
     {
         if (mesh_.isInternalFace(facei))
@@ -382,38 +381,32 @@ Foam::scalar Foam::oversetFvMeshBase::cellAverage
             if (norm[nbrCelli] == -GREAT)
             {
                 // Invalid neighbour. Add to front
-                if (isFront.set(facei))
-                {
-                    nFront++;
-                }
+                isFront.set(facei);
             }
             else
             {
                 // Valid neighbour. Add to average
                 avg += norm[nbrCelli];
-                n++;
+                ++nTotal;
             }
         }
         else
         {
             if (nbrNorm[facei-mesh_.nInternalFaces()] == -GREAT)
             {
-                if (isFront.set(facei))
-                {
-                    nFront++;
-                }
+                isFront.set(facei);
             }
             else
             {
                 avg += nbrNorm[facei-mesh_.nInternalFaces()];
-                n++;
+                ++nTotal;
             }
         }
     }
 
-    if (n > 0)
+    if (nTotal)
     {
-        return avg/n;
+        return avg/nTotal;
     }
     else
     {

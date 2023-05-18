@@ -474,7 +474,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
 
     // Determine blocked faces
     boolList blockedFace(mesh_.nFaces(), false);
-    label nBlocked = 0;
+    // label nBlocked = 0;
 
     {
         for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
@@ -489,7 +489,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             )
             {
                 blockedFace[facei] = true;
-                nBlocked++;
+                // ++nBlocked;
             }
         }
 
@@ -518,7 +518,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
                     )
                     {
                         blockedFace[start+i] = true;
-                        nBlocked++;
+                        // ++nBlocked;
                     }
                 }
             }

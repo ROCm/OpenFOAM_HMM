@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pairPatchAgglomeration_H
-#define pairPatchAgglomeration_H
+#ifndef Foam_pairPatchAgglomeration_H
+#define Foam_pairPatchAgglomeration_H
 
 #include "mathematicalConstants.H"
 #include "indirectPrimitivePatch.H"

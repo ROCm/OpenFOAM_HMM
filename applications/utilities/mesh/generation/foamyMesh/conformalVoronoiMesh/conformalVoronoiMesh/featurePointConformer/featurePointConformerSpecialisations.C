@@ -74,7 +74,7 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
             return false;
         }
 
-        label nVert = foamyHexMesh_.number_of_vertices();
+        //label nVert = foamyHexMesh_.number_of_vertices();
 
         const label initialNumOfPoints = pts.size();
 
@@ -267,7 +267,7 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
                 // Remove points that have just been added before returning
                 pts.pop_back(2);
-                nVert -= 2;
+                //nVert -= 2;
 
                 return false;
             }
@@ -503,7 +503,7 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
             return false;
         }
 
-        label nVert = foamyHexMesh_.number_of_vertices();
+        //label nVert = foamyHexMesh_.number_of_vertices();
 
         const label initialNumOfPoints = pts.size();
 
@@ -700,7 +700,7 @@ bool Foam::featurePointConformer::createSpecialisedFeaturePoint
 
                 // Remove points that have just been added before returning
                 pts.pop_back(2);
-                nVert -= 2;
+                //nVert -= 2;
 
                 return false;
             }

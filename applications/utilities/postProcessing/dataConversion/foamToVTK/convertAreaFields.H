@@ -81,7 +81,7 @@ if (doFiniteArea)
 
             labelList patchIds
             (
-                areaMesh.mesh().boundaryMesh().patchID(areaMesh.faceLabels())
+                pbm.patchID(areaMesh.faceLabels())
             );
 
             writer.writeCellData("patchID", patchIds);

@@ -165,14 +165,14 @@ Foam::tmp<Foam::scalarField> Foam::oversetFvMeshBase::normalisation
         const cellCellStencilObject& overlap = Stencil::New(mesh_);
         const labelUList& types = overlap.cellTypes();
 
-        label nHoles = 0;
+        // label nHoles = 0;
         scalarField extrapolatedNorm(norm);
         forAll(types, celli)
         {
             if (types[celli] == cellCellStencil::HOLE)
             {
                 extrapolatedNorm[celli] = -GREAT;
-                nHoles++;
+                // ++nHoles;
             }
         }
 

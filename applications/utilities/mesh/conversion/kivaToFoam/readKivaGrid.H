@@ -42,7 +42,7 @@ for (label i=0; i<nPoints; i++)
 labelList i1tab(nPoints), i3tab(nPoints), i8tab(nPoints), idreg(nPoints),
       f(nPoints), bcl(nPoints), bcf(nPoints), bcb(nPoints);
 
-label nBfaces = 0;
+// label nBfaces = 0;
 
 for (label i=0; i<nPoints; i++)
 {
@@ -65,9 +65,9 @@ for (label i=0; i<nPoints; i++)
     bcf[i] = label(fbcf);
     bcb[i] = label(fbcb);
 
-    if (bcl[i] > 0 && bcl[i] != 4) nBfaces++;
-    if (bcf[i] > 0 && bcf[i] != 4) nBfaces++;
-    if (bcb[i] > 0 && bcb[i] != 4) nBfaces++;
+    // if (bcl[i] > 0 && bcl[i] != 4) ++nBfaces;
+    // if (bcf[i] > 0 && bcf[i] != 4) ++nBfaces;
+    // if (bcb[i] > 0 && bcb[i] != 4) ++nBfaces;
 }
 
 

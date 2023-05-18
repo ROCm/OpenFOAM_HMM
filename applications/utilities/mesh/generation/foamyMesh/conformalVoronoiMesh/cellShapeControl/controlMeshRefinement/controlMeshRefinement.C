@@ -82,11 +82,11 @@ bool Foam::controlMeshRefinement::detectEdge
 
     Foam::point midPoint = (a + b)/2.0;
 
-    label nIterations = 0;
+    //label nIterations = 0;
 
     while (true)
     {
-        nIterations++;
+        //++nIterations;
 
         if
         (

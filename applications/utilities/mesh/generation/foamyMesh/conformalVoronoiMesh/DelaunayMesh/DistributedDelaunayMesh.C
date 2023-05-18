@@ -853,7 +853,7 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
     typename Triangulation::Locate_type lt;
     int li, lj;
 
-    label nNotInserted = 0;
+    //label nNotInserted = 0;
 
     labelPairHashSet uninserted
     (
@@ -979,7 +979,7 @@ Foam::DistributedDelaunayMesh<Triangulation>::rangeInsertReferredWithInfo
         else
         {
             uninserted.insert(labelPair(vert.procIndex(), vert.index()));
-            nNotInserted++;
+            //++nNotInserted;
         }
     }
 

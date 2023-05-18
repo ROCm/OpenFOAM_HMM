@@ -2109,7 +2109,7 @@ void Foam::extendedEdgeMesh::sortedOrder
     label nConvex = 0;
     label nConcave = 0;
     label nMixed = 0;
-    label nNonFeat = 0;
+    // label nNonFeat = 0;
 
     forAll(pointStat, pointI)
     {
@@ -2128,7 +2128,7 @@ void Foam::extendedEdgeMesh::sortedOrder
             break;
 
             case extendedEdgeMesh::NONFEATURE:
-                nNonFeat++;
+                // ++nNonFeat;
             break;
 
             default:
@@ -2179,7 +2179,7 @@ void Foam::extendedEdgeMesh::sortedOrder
     label nInternal = 0;
     label nFlat = 0;
     label nOpen = 0;
-    label nMultiple = 0;
+    // label nMultiple = 0;
 
     forAll(edgeStat, edgeI)
     {
@@ -2202,7 +2202,7 @@ void Foam::extendedEdgeMesh::sortedOrder
             break;
 
             case extendedEdgeMesh::MULTIPLE:
-                nMultiple++;
+                // ++nMultiple;
             break;
 
             case extendedEdgeMesh::NONE:

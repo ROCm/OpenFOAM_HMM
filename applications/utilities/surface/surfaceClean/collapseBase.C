@@ -775,7 +775,7 @@ label collapseBase
 {
     label nTotalSplit = 0;
 
-    label iter = 0;
+    // label iter = 0;
 
     while (true)
     {
@@ -980,7 +980,7 @@ label collapseBase
         //    surf.write(fName);
         //}
 
-        iter++;
+        // ++iter;
     }
 
     // Remove any unused vertices

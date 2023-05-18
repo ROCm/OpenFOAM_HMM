@@ -58,12 +58,10 @@ Foam::label Foam::functionObjects::vtkWrite::writeVolFieldsImpl
         }
 
         // Boundary
-        label writeri = 0;
         for (vtk::patchWriter& writer : patchWriters)
         {
             ok = true;
             writer.write(field);
-            ++writeri;
         }
 
         if (ok)

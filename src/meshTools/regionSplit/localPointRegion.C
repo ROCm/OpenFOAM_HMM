@@ -554,7 +554,7 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
     );
 
     labelList duplicateFace(allPatch.size(), -1);
-    label nDuplicateFaces = 0;
+    // label nDuplicateFaces = 0;
 
     // Find all duplicate faces.
     forAll(allPatch, bFacei)
@@ -611,7 +611,7 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
 
                     duplicateFace[bFacei] = otherFacei;
                     duplicateFace[otherFacei] = bFacei;
-                    nDuplicateFaces++;
+                    // ++nDuplicateFaces;
                 }
             }
         }
