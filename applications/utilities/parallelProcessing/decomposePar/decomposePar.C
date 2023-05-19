@@ -551,7 +551,7 @@ int main(int argc, char *argv[])
         );
 
         // Give file handler a chance to determine the output directory
-        const_cast<fileOperation&>(fileHandler()).setNProcs(nDomains);
+        const_cast<fileOperation&>(fileHandler()).nProcs(nDomains);
 
         if (decomposeFieldsOnly)
         {

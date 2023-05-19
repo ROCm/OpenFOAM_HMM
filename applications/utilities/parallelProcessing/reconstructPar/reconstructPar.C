@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
     }
 
     // Warn fileHandler of number of processors
-    const_cast<fileOperation&>(fileHandler()).setNProcs(nProcs);
+    const_cast<fileOperation&>(fileHandler()).nProcs(nProcs);
 
     // Create the processor databases
     PtrList<Time> databases(nProcs);
