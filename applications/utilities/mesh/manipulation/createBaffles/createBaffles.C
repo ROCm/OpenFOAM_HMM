@@ -882,11 +882,11 @@ int main(int argc, char *argv[])
         {
             const dictionary& dict = selector.dict();
             const word& groupName = selector.name();
-            const dictionary* patchesDict = dict.findDict("patches");
+            const dictionary* patchesDictPtr = dict.findDict("patches");
 
-            if (patchesDict)
+            if (patchesDictPtr)
             {
-                for (const entry& dEntry : *patchesDict)
+                for (const entry& dEntry : *patchesDictPtr)
                 {
                     const dictionary& dict = dEntry.dict();
                     const word patchName(dict.get<word>("name"));
@@ -897,13 +897,11 @@ int main(int argc, char *argv[])
 
                     if (patchFieldsDictPtr)
                     {
-                        const dictionary& patchFieldsDict = *patchFieldsDictPtr;
-
                         fvMeshTools::setPatchFields
                         (
                             mesh,
                             patchi,
-                            patchFieldsDict
+                            *patchFieldsDictPtr
                         );
                     }
                 }
@@ -916,15 +914,15 @@ int main(int argc, char *argv[])
                     patchSource.getOrDefault("sameGroup", true);
 
                 const dictionary* patchFieldsDictPtr
-                    = dict.findDict("patchFields");
+                    = patchSource.findDict("patchFields");
 
                 if (patchFieldsDictPtr)
                 {
-                    // Work on a copy
-                    dictionary patchFieldsDict(*patchFieldsDictPtr);
-
                     if (sameGroup)
                     {
+                        // Make a copy
+                        dictionary patchFieldsDict(*patchFieldsDictPtr);
+
                         // Add coupleGroup to all entries
                         for (entry& dEntry : patchFieldsDict)
                         {
@@ -935,9 +933,11 @@ int main(int argc, char *argv[])
                             }
                         }
 
-                        const labelList& patchIDs = pbm.groupPatchIDs()[groupName];
-
-                        for (const label patchi : patchIDs)
+                        for
+                        (
+                            const label patchi
+                          : pbm.groupPatchIDs()[groupName]
+                        )
                         {
                             fvMeshTools::setPatchFields
                             (
@@ -959,14 +959,14 @@ int main(int argc, char *argv[])
                         (
                             mesh,
                             patchiMaster,
-                            patchFieldsDict
+                            *patchFieldsDictPtr
                         );
 
                         fvMeshTools::setPatchFields
                         (
                             mesh,
                             patchiSlave,
-                            patchFieldsDict
+                            *patchFieldsDictPtr
                         );
                     }
                 }
