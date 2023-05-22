@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,6 +85,9 @@ void Foam::sixDoFSolvers::symplectic::solve
 
     // Update the linear acceleration and torque
     updateAcceleration(fGlobal, tauGlobal);
+
+    // Update the constraints to the object
+    updateConstraints();
 
     // Second simplectic step:
     //     Complete update of linear and angular velocities

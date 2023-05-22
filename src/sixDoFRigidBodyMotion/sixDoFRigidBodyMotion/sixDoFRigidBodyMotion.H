@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,6 +119,9 @@ class sixDoFRigidBodyMotion
         //- Reporting of motion data (on or off)
         bool report_;
 
+        //- Flag to enable time-variant constraints
+        bool updateConstraints_;
+
         //- Motion solver
         autoPtr<sixDoFSolver> solver_;
 
@@ -151,6 +154,9 @@ class sixDoFRigidBodyMotion
 
         //- Update and relax accelerations from the force and torque
         void updateAcceleration(const vector& fGlobal, const vector& tauGlobal);
+
+        //- Update the constraints to the object
+        void updateConstraints();
 
 
         // Access functions retained as private because of the risk of
@@ -270,6 +276,9 @@ public:
 
             //- Return the report Switch
             inline bool report() const;
+
+            //- Return the update-constraints flag
+            inline bool updateConstraints() const;
 
             //- Return time
             inline const Time& time() const;

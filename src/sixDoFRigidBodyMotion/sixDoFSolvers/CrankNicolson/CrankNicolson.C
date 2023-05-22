@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,6 +74,9 @@ void Foam::sixDoFSolvers::CrankNicolson::solve
 {
     // Update the linear acceleration and torque
     updateAcceleration(fGlobal, tauGlobal);
+
+    // Update the constraints to the object
+    updateConstraints();
 
     // Correct linear velocity
     v() = tConstraints()
