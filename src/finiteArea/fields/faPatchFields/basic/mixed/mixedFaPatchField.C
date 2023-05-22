@@ -98,6 +98,21 @@ Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
+    const Foam::zero
+)
+:
+    faPatchField<Type>(p, iF),
+    refValue_(p.size(), Zero),
+    refGrad_(p.size(), Zero),
+    valueFraction_(p.size(), Zero)
+{}
+
+
+template<class Type>
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
+(
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict,
     IOobjectOption::readOption requireMixed
 )

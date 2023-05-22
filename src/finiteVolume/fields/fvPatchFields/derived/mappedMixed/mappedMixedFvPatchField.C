@@ -61,8 +61,9 @@ Foam::mappedMixedFvPatchField<Type>::mappedMixedFvPatchField
     const dictionary& dict
 )
 :
-    // Reading of mixed entries handled later...
-    mixedFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    // Bypass dictionary constructor (all reading handled later)
+    // but cannot use NO_READ since will still trigger an evaluate()
+    mixedFvPatchField<Type>(p, iF),
     mappedPatchFieldBase<Type>
     (
         mappedFixedValueFvPatchField<Type>::mapper(p, iF),
@@ -71,6 +72,8 @@ Foam::mappedMixedFvPatchField<Type>::mappedMixedFvPatchField
     ),
     weightFieldName_(dict.getOrDefault<word>("weightField", word::null))
 {
+    fvPatchFieldBase::readDict(dict);  // Consistent with a dict constructor
+
     this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     if (this->readMixedEntries(dict))

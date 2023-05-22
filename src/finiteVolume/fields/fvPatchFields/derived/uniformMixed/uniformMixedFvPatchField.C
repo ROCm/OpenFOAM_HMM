@@ -66,7 +66,8 @@ Foam::uniformMixedFvPatchField<Type>::uniformMixedFvPatchField
     const dictionary& dict
 )
 :
-    mixedFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    // Bypass dict constructor, default initialise as zero-gradient
+    mixedFvPatchField<Type>(p, iF, Foam::zero{}),
     refValueFunc_
     (
         PatchFunction1<Type>::NewIfPresent(p.patch(), "uniformValue", dict)
@@ -77,6 +78,8 @@ Foam::uniformMixedFvPatchField<Type>::uniformMixedFvPatchField
     ),
     valueFractionFunc_(nullptr)
 {
+    fvPatchFieldBase::readDict(dict);  // Consistent with a dict constructor
+
     if (refValueFunc_)
     {
         if (refGradFunc_)

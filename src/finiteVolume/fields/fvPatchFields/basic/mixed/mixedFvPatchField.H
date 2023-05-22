@@ -133,6 +133,15 @@ public:
             const DimensionedField<Type, volMesh>&
         );
 
+        //- Construct from patch and internal field,
+        //- initialise as zero-gradient
+        mixedFvPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, volMesh>&,
+            const Foam::zero
+        );
+
         //- Construct from patch, internal field and dictionary
         mixedFvPatchField
         (

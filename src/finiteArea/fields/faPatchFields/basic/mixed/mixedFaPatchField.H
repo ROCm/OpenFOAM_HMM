@@ -109,6 +109,15 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
+        //- Construct from patch and internal field,
+        //- initialise as zero-gradient
+        mixedFaPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const Foam::zero
+        );
+
         //- Construct from patch, internal field and dictionary
         mixedFaPatchField
         (

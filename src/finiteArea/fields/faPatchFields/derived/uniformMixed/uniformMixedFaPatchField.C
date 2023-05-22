@@ -66,7 +66,8 @@ Foam::uniformMixedFaPatchField<Type>::uniformMixedFaPatchField
     const dictionary& dict
 )
 :
-    mixedFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    // Bypass dict constructor, default initialise as zero-gradient
+    mixedFaPatchField<Type>(p, iF, Foam::zero{}),
     refValueFunc_
     (
         Function1<Type>::NewIfPresent
@@ -87,6 +88,8 @@ Foam::uniformMixedFaPatchField<Type>::uniformMixedFaPatchField
     ),
     valueFractionFunc_(nullptr)
 {
+    faPatchFieldBase::readDict(dict);  // Consistent with a dict constructor
+
     if (refValueFunc_)
     {
         if (refGradFunc_)

@@ -99,6 +99,22 @@ Foam::mixedFvPatchField<Type>::mixedFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
+    const Foam::zero
+)
+:
+    fvPatchField<Type>(p, iF),
+    refValue_(p.size(), Zero),
+    refGrad_(p.size(), Zero),
+    valueFraction_(p.size(), Zero),
+    source_(p.size(), Zero)
+{}
+
+
+template<class Type>
+Foam::mixedFvPatchField<Type>::mixedFvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
     IOobjectOption::readOption requireMixed
 )
