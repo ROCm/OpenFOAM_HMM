@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -436,9 +436,23 @@ Foam::label Foam::parFvFieldDistributor::distributeInternalFields
         (
             distributeInternalField<Type>(*(objects[fieldName]))
         );
-        if (isWriteProc_)
+
+        if (isWriteProc_.good())
         {
+            if (isWriteProc_)
+            {
+                tfld().write();
+            }
+        }
+        else if (writeHandler_ && writeHandler_->good())
+        {
+            auto oldHandler = fileOperation::fileHandler(writeHandler_);
+            const label oldComm = UPstream::commWorld(fileHandler().comm());
+
             tfld().write();
+
+            writeHandler_ = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldComm);
         }
     }
 
@@ -486,9 +500,23 @@ Foam::label Foam::parFvFieldDistributor::distributeVolumeFields
         (
             distributeVolumeField<Type>(*(objects[fieldName]))
         );
-        if (isWriteProc_)
+
+        if (isWriteProc_.good())
         {
+            if (isWriteProc_)
+            {
+                tfld().write();
+            }
+        }
+        else if (writeHandler_ && writeHandler_->good())
+        {
+            auto oldHandler = fileOperation::fileHandler(writeHandler_);
+            const label oldComm = UPstream::commWorld(fileHandler().comm());
+
             tfld().write();
+
+            writeHandler_ = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldComm);
         }
     }
 
@@ -532,9 +560,23 @@ Foam::label Foam::parFvFieldDistributor::distributeSurfaceFields
         (
             distributeSurfaceField<Type>(*(objects[fieldName]))
         );
-        if (isWriteProc_)
+
+        if (isWriteProc_.good())
         {
+            if (isWriteProc_)
+            {
+                tfld().write();
+            }
+        }
+        else if (writeHandler_ && writeHandler_->good())
+        {
+            auto oldHandler = fileOperation::fileHandler(writeHandler_);
+            const label oldComm = UPstream::commWorld(fileHandler().comm());
+
             tfld().write();
+
+            writeHandler_ = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldComm);
         }
     }
 

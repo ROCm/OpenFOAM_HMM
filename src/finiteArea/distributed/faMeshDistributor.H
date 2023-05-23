@@ -45,6 +45,7 @@ SourceFiles
 #include "mapDistributePolyMesh.H"
 #include "areaFieldsFwd.H"
 #include "edgeFieldsFwd.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,8 +78,14 @@ class faMeshDistributor
         //- Patch edge mappers
         mutable PtrList<mapDistributeBase> patchEdgeMaps_;
 
-        //- Do I need to write (eg, master only for reconstruct)
-        bool isWriteProc_;
+        //- Storage for dummy handler (when using bool control)
+        refPtr<fileOperation> dummyHandler_;
+
+        //- Write control via a file handler
+        refPtr<fileOperation>& writeHandler_;
+
+        //- Write control as a bool
+        Switch isWriteProc_;
 
 
     // Private Member Functions
@@ -88,6 +95,9 @@ class faMeshDistributor
 
         //- Construct per-patch edge mapping
         void createPatchMaps() const;
+
+        //- Debug: check addressing
+        void checkAddressing() const;
 
         static mapDistributePolyMesh createReconstructMap
         (
@@ -117,13 +127,22 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from components, using bool to control writing
         faMeshDistributor
         (
             const faMesh& srcMesh,
             const faMesh& tgtMesh,
             const mapDistributePolyMesh& faDistMap,
-            const bool isWriteProc = false
+            const bool isWriteProc
+        );
+
+        //- Construct from components, using file handler to control writing
+        faMeshDistributor
+        (
+            const faMesh& srcMesh,
+            const faMesh& tgtMesh,
+            const mapDistributePolyMesh& faDistMap,
+            refPtr<fileOperation>& writeHandler
         );
 
 

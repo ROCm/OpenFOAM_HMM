@@ -2622,7 +2622,8 @@ int main(int argc, char *argv[])
                 (
                     areaMeshPtr(),      // source
                     areaProcMeshPtr(),  // target
-                    faDistMap
+                    faDistMap,
+                    true                // isWriteProc (unused)
                 );
 
                 areaFields.redistributeAndWrite(distributor, true);

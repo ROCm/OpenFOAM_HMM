@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ SourceFiles
 
 #include "PtrList.H"
 #include "fvMesh.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,8 +78,14 @@ class parFvFieldDistributor
         //- Patch mappers
         PtrList<mapDistributeBase> patchFaceMaps_;
 
-        //- Do I need to write (eg, master only for reconstruct)
-        bool isWriteProc_;
+        //- Storage for dummy handler (when using bool control)
+        refPtr<fileOperation> dummyHandler_;
+
+        //- Write control via a file handler
+        refPtr<fileOperation>& writeHandler_;
+
+        //- Write control as a bool
+        Switch isWriteProc_;
 
 
     // Private Member Functions
@@ -116,6 +123,20 @@ public:
             fvMesh& tgtMesh,
             const mapDistributePolyMesh& distMap,
             const bool isWriteProc
+        );
+
+        //- Construct from components
+        //
+        //  \param srcMesh  The source mesh (eg, processor)
+        //  \param tgtMesh  The target mesh (eg, reconstructed)
+        //  \param distMap  The distribution map
+        //  \param writeHandler  Handler for output writing (on this proc)
+        parFvFieldDistributor
+        (
+            const fvMesh& srcMesh,
+            fvMesh& tgtMesh,
+            const mapDistributePolyMesh& distMap,
+            refPtr<fileOperation>& writeHandler
         );
 
 

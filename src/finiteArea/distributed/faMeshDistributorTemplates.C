@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -327,9 +327,23 @@ Foam::label Foam::faMeshDistributor::distributeAreaFields
         ++nFields;
 
         tmp<fieldType> tfld(distributeAreaField<Type>(io));
-        if (isWriteProc_)
+
+        if (isWriteProc_.good())
         {
+            if (isWriteProc_)
+            {
+                tfld().write();
+            }
+        }
+        else if (writeHandler_ && writeHandler_->good())
+        {
+            auto oldHandler = fileOperation::fileHandler(writeHandler_);
+            const label oldComm = UPstream::commWorld(fileHandler().comm());
+
             tfld().write();
+
+            writeHandler_ = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldComm);
         }
     }
 
@@ -371,9 +385,22 @@ Foam::label Foam::faMeshDistributor::distributeEdgeFields
         ++nFields;
 
         tmp<fieldType> tfld(distributeEdgeField<Type>(io));
-        if (isWriteProc_)
+        if (isWriteProc_.good())
         {
+            if (isWriteProc_)
+            {
+                tfld().write();
+            }
+        }
+        else if (writeHandler_ && writeHandler_->good())
+        {
+            auto oldHandler = fileOperation::fileHandler(writeHandler_);
+            const label oldComm = UPstream::commWorld(fileHandler().comm());
+
             tfld().write();
+
+            writeHandler_ = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldComm);
         }
     }
 
@@ -397,9 +424,22 @@ void Foam::faMeshDistributor::redistributeAndWrite
         tmp<GeometricField<Type, faPatchField, areaMesh>> tfld =
             this->distributeField(fld);
 
-        if (isWriteProc_)
+        if (isWriteProc_.good())
         {
+            if (isWriteProc_)
+            {
+                tfld().write();
+            }
+        }
+        else if (writeHandler_ && writeHandler_->good())
+        {
+            auto oldHandler = fileOperation::fileHandler(writeHandler_);
+            const label oldComm = UPstream::commWorld(fileHandler().comm());
+
             tfld().write();
+
+            writeHandler_ = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldComm);
         }
     }
 }
@@ -416,9 +456,22 @@ void Foam::faMeshDistributor::redistributeAndWrite
         tmp<GeometricField<Type, faePatchField, edgeMesh>> tfld =
             this->distributeField(fld);
 
-        if (isWriteProc_)
+        if (isWriteProc_.good())
         {
+            if (isWriteProc_)
+            {
+                tfld().write();
+            }
+        }
+        else if (writeHandler_ && writeHandler_->good())
+        {
+            auto oldHandler = fileOperation::fileHandler(writeHandler_);
+            const label oldComm = UPstream::commWorld(fileHandler().comm());
+
             tfld().write();
+
+            writeHandler_ = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldComm);
         }
     }
 }

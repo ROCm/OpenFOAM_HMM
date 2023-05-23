@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,27 +96,12 @@ void Foam::faMeshDistributor::createInternalEdgeMap() const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::faMeshDistributor::faMeshDistributor
-(
-    const faMesh& srcMesh,
-    const faMesh& tgtMesh,
-    const mapDistributePolyMesh& distMap,
-    const bool isWriteProc
-)
-:
-    srcMesh_(srcMesh),
-    tgtMesh_(tgtMesh),
-    distMap_(distMap),
-    internalEdgeMap_(),
-    patchEdgeMaps_(),
-    isWriteProc_(isWriteProc)
+void Foam::faMeshDistributor::checkAddressing() const
 {
     #ifdef FULLDEBUG
     {
-        Pout<< "Create from nFaces:" << srcMesh.faceLabels().size()
-            << " to:" << tgtMesh.faceLabels().size() << endl;
+        Pout<< "Create from nFaces:" << srcMesh_.faceLabels().size()
+            << " to:" << tgtMesh_.faceLabels().size() << endl;
 
         // Check face centres
         {
@@ -155,7 +140,7 @@ Foam::faMeshDistributor::faMeshDistributor
             );
 
             Pout<< "distributed edges: " << oldEdgeCentres.size() << " from "
-                << srcMesh.nEdges() << " to " << tgtMesh.nEdges() << endl;
+                << srcMesh_.nEdges() << " to " << tgtMesh_.nEdges() << endl;
 
             // volume: faces, area: edges
             distMap_.distributeFaceData(oldEdgeCentres);
@@ -199,6 +184,50 @@ Foam::faMeshDistributor::faMeshDistributor
         }
     }
     #endif
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::faMeshDistributor::faMeshDistributor
+(
+    const faMesh& srcMesh,
+    const faMesh& tgtMesh,
+    const mapDistributePolyMesh& distMap,
+    const bool isWriteProc
+)
+:
+    srcMesh_(srcMesh),
+    tgtMesh_(tgtMesh),
+    distMap_(distMap),
+    internalEdgeMap_(),
+    patchEdgeMaps_(),
+    dummyHandler_(fileOperation::null()),
+    writeHandler_(dummyHandler_),
+    isWriteProc_(isWriteProc)
+{
+    checkAddressing();
+}
+
+
+Foam::faMeshDistributor::faMeshDistributor
+(
+    const faMesh& srcMesh,
+    const faMesh& tgtMesh,
+    const mapDistributePolyMesh& distMap,
+    refPtr<fileOperation>& writeHandler
+)
+:
+    srcMesh_(srcMesh),
+    tgtMesh_(tgtMesh),
+    distMap_(distMap),
+    internalEdgeMap_(),
+    patchEdgeMaps_(),
+    dummyHandler_(nullptr),
+    writeHandler_(writeHandler),
+    isWriteProc_(Switch::INVALID)
+{
+    checkAddressing();
 }
 
 

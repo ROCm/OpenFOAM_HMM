@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,7 @@ SourceFiles
 #include "PtrList.H"
 #include "pointMesh.H"
 #include "pointFieldsFwd.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,8 +95,14 @@ class parPointFieldDistributor
         //- Point patch mappers
         PtrList<mapDistributeBase> patchPointMaps_;
 
-        //- Do I need to write (eg, master only for reconstruct)
-        bool isWriteProc_;
+        //- Storage for dummy handler (when using bool control)
+        refPtr<fileOperation> dummyHandler_;
+
+        //- Write control via a file handler
+        refPtr<fileOperation>& writeHandler_;
+
+        //- Write control as a bool
+        Switch isWriteProc_;
 
 
 public:
@@ -123,8 +130,20 @@ public:
         explicit parPointFieldDistributor
         (
             const pointMesh& srcMesh,
-            const bool savePoints = false,
-            const bool isWriteProc = false
+            const bool savePoints,  // normally false
+            const bool isWriteProc
+        );
+
+        //- Basic construction
+        //
+        //  \param srcMesh  The source pointMesh
+        //  \param savePoints  Call saveMeshPoints() immediately
+        //  \param writeHandler  Valid for output writing (on this proc)
+        explicit parPointFieldDistributor
+        (
+            const pointMesh& srcMesh,
+            const bool savePoints,  // normally false
+            refPtr<fileOperation>& writeHandler
         );
 
         //- Full construction of source/target
@@ -139,8 +158,24 @@ public:
             const pointMesh& srcMesh,
             const pointMesh& tgtMesh,
             const mapDistributePolyMesh& distMap,
-            const bool savePoints = false,
-            const bool isWriteProc = false
+            const bool savePoints,  // normally false
+            const bool isWriteProc
+        );
+
+        //- Full construction of source/target
+        //
+        //  \param srcMesh  The source pointMesh
+        //  \param tgtMesh  The target pointMesh
+        //  \param distMap  The distribution map
+        //  \param savePoints  Call saveMeshPoints() immediately
+        //  \param writeHandler  Valid for output writing (on this proc)
+        explicit parPointFieldDistributor
+        (
+            const pointMesh& srcMesh,
+            const pointMesh& tgtMesh,
+            const mapDistributePolyMesh& distMap,
+            const bool savePoints,  // normally false
+            refPtr<fileOperation>& writeHandler
         );
 
 
