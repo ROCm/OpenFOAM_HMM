@@ -428,10 +428,12 @@ Foam::fileOperations::masterUncollatedFileOperation::localObjectPath
 void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
 (
     const fileName& filePath,
-    const labelUList& procs,
+    const labelUList& recvProcs,
     PstreamBuffers& pBufs
 )
 {
+    if (recvProcs.empty()) return;
+
     IFstream ifs(filePath, IOstreamOption::BINARY);
 
     if (!ifs.good())
@@ -462,7 +464,7 @@ void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
             std::istreambuf_iterator<char>()
         );
 
-        for (const label proci : procs)
+        for (const label proci : recvProcs)
         {
             UOPstream os(proci, pBufs);
             os.write(buf.data(), buf.length());
@@ -483,7 +485,7 @@ void Foam::fileOperations::masterUncollatedFileOperation::readAndSend
         List<char> buf(static_cast<label>(count));
         ifs.stdStream().read(buf.data(), count);
 
-        for (const label proci : procs)
+        for (const label proci : recvProcs)
         {
             UOPstream os(proci, pBufs);
             os.write(buf.cdata(), count);
@@ -505,13 +507,11 @@ Foam::fileOperations::masterUncollatedFileOperation::read
     IOobject& io,
     const label comm,
     const bool uniform,             // on comms master only
-    const fileNameList& filePaths,  // on comms master only
-    const boolList& procValid       // on comms master and sub-ranks
+    const fileNameList& filePaths,  // on comms master and sub-ranks
+    const boolUList& readOnProcs    // on comms master and sub-ranks
 )
 {
     autoPtr<ISstream> isPtr;
-
-    // const bool uniform = fileOperation::uniformFile(filePaths);
 
     PstreamBuffers pBufs(comm, UPstream::commsTypes::nonBlocking);
 
@@ -519,23 +519,23 @@ Foam::fileOperations::masterUncollatedFileOperation::read
     {
         if (uniform)
         {
-            if (procValid[0])
+            if (readOnProcs[0])
             {
                 if (filePaths[0].empty())
                 {
                     FatalIOErrorInFunction(filePaths[0])
-                        << "cannot find file " << io.objectPath()
+                        << "Cannot find file " << io.objectPath()
                         << " fileHandler : comm:" << comm
                         << " ioRanks:" << UPstream::procID(comm)
                         << exit(FatalIOError);
                 }
 
-                DynamicList<label> validProcs(Pstream::nProcs(comm));
-                for (const int proci : Pstream::allProcs(comm))
+                DynamicList<label> recvProcs(UPstream::nProcs(comm));
+                for (const int proci : UPstream::allProcs(comm))
                 {
-                    if (procValid[proci])
+                    if (readOnProcs[proci])
                     {
-                        validProcs.append(proci);
+                        recvProcs.push_back(proci);
                     }
                 }
 
@@ -545,20 +545,20 @@ Foam::fileOperations::masterUncollatedFileOperation::read
                 {
                     Pout<< "masterUncollatedFileOperation::readStream :"
                         << " For uniform file " << filePaths[0]
-                        << " sending to " << validProcs
+                        << " sending to " << recvProcs
                         << " in comm:" << comm << endl;
                 }
-                readAndSend(filePaths[0], validProcs, pBufs);
+                readAndSend(filePaths[0], recvProcs, pBufs);
             }
         }
         else
         {
-            if (procValid[0])
+            if (readOnProcs[0])
             {
                 if (filePaths[0].empty())
                 {
                     FatalIOErrorInFunction(filePaths[0])
-                        << "cannot find file " << io.objectPath()
+                        << "Cannot find file " << io.objectPath()
                         << " fileHandler : comm:" << comm
                         << " ioRanks:" << UPstream::procID(comm)
                         << exit(FatalIOError);
@@ -580,7 +580,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
             }
 
             // Read sub-rank files
-            for (const int proci : Pstream::subProcs(comm))
+            for (const int proci : UPstream::subProcs(comm))
             {
                 if (debug)
                 {
@@ -591,7 +591,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
 
                 const fileName& fPath = filePaths[proci];
 
-                if (procValid[proci] && !fPath.empty())
+                if (readOnProcs[proci] && !fPath.empty())
                 {
                     // Note: handle compression ourselves since size cannot
                     // be determined without actually uncompressing
@@ -609,14 +609,14 @@ Foam::fileOperations::masterUncollatedFileOperation::read
 
     if (!isPtr)
     {
-        if (procValid[Pstream::myProcNo(comm)])
+        if (readOnProcs[UPstream::myProcNo(comm)])
         {
             // This processor needs to return something
-            List<char> buf(pBufs.recvDataCount(Pstream::masterNo()));
+            List<char> buf(pBufs.recvDataCount(UPstream::masterNo()));
 
             if (!buf.empty())
             {
-                UIPstream is(Pstream::masterNo(), pBufs);
+                UIPstream is(UPstream::masterNo(), pBufs);
                 is.read(buf.data(), buf.size());
             }
 
@@ -633,7 +633,7 @@ Foam::fileOperations::masterUncollatedFileOperation::read
             isPtr.reset(new IListStream(std::move(buf)));
 
             // With the proper file name
-            isPtr->name() = filePaths[Pstream::myProcNo(comm)];
+            isPtr->name() = filePaths[UPstream::myProcNo(comm)];
 
             if (!io.readHeader(*isPtr))
             {
@@ -1971,7 +1971,7 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
         splitProcessorPath(fName, path, procDir, local, group, nProcs);
 
 
-        if (!Pstream::parRun())
+        if (!UPstream::parRun())
         {
             // Analyse the objectpath to find out the processor we're trying
             // to access
@@ -2078,16 +2078,16 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
         {
             // Use worldComm. Note: should not really need to gather filePaths
             // since we enforce sending from master anyway ...
-            fileNameList filePaths(Pstream::nProcs(UPstream::worldComm));
-            filePaths[Pstream::myProcNo(UPstream::worldComm)] = fName;
+            fileNameList filePaths(UPstream::nProcs(UPstream::worldComm));
+            filePaths[UPstream::myProcNo(UPstream::worldComm)] = fName;
             Pstream::gatherList
             (
                 filePaths,
-                Pstream::msgType(),
+                UPstream::msgType(),
                 UPstream::worldComm
             );
 
-            boolList procValid
+            boolList readOnProcs
             (
                 UPstream::listGatherValues<bool>
                 (
@@ -2096,30 +2096,40 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
                 )
             );
             // NB: local proc validity information required on sub-ranks too!
-            procValid.resize(Pstream::nProcs(UPstream::worldComm));
-            procValid[Pstream::myProcNo(UPstream::worldComm)] = readOnProc;
+            readOnProcs.resize(UPstream::nProcs(UPstream::worldComm));
+            readOnProcs[UPstream::myProcNo(UPstream::worldComm)] = readOnProc;
 
-            return read(io, UPstream::worldComm, true, filePaths, procValid);
+            // Uniform in local comm
+            return read(io, UPstream::worldComm, true, filePaths, readOnProcs);
         }
         else
         {
             // Use local communicator
-            fileNameList filePaths(Pstream::nProcs(comm_));
-            filePaths[Pstream::myProcNo(comm_)] = fName;
-            Pstream::gatherList(filePaths, Pstream::msgType(), comm_);
-
-            boolList procValid
+            fileNameList filePaths(UPstream::nProcs(comm_));
+            filePaths[UPstream::myProcNo(comm_)] = fName;
+            Pstream::gatherList
             (
-                UPstream::listGatherValues<bool>(readOnProc, comm_)
+                filePaths,
+                UPstream::msgType(),
+                comm_
+            );
+
+            boolList readOnProcs
+            (
+                UPstream::listGatherValues<bool>
+                (
+                    readOnProc,
+                    comm_
+                )
             );
             // NB: local proc validity information required on sub-ranks too!
-            procValid.resize(Pstream::nProcs(comm_));
-            procValid[Pstream::myProcNo(comm_)] = readOnProc;
+            readOnProcs.resize(UPstream::nProcs(comm_));
+            readOnProcs[UPstream::myProcNo(comm_)] = readOnProc;
 
             // Uniform in local comm
             const bool uniform = fileOperation::uniformFile(filePaths);
 
-            return read(io, comm_, uniform, filePaths, procValid);
+            return read(io, comm_, uniform, filePaths, readOnProcs);
         }
     }
 }

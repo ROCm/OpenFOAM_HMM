@@ -454,7 +454,7 @@ protected:
         static void readAndSend
         (
             const fileName& filePath,
-            const labelUList& procs,
+            const labelUList& recvProcs,
             PstreamBuffers& pBufs
         );
 
@@ -464,8 +464,8 @@ protected:
             IOobject& io,
             const label comm,
             const bool uniform,             // on comms master only
-            const fileNameList& filePaths,  // on comms master only
-            const boolList& procValid       // on comms master only
+            const fileNameList& filePaths,  // on comms master and sub-ranks
+            const boolUList& readOnProcs    // on comms master and sub-ranks
         );
 
         //- Helper: check IO for local existence. Like filePathInfo but
@@ -791,6 +791,7 @@ public:
            Class masterUncollatedFileOperationInitialise Declaration
 \*---------------------------------------------------------------------------*/
 
+//! Internal class only
 class masterUncollatedFileOperationInitialise
 :
     public unthreadedInitialise

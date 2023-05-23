@@ -176,6 +176,7 @@ public:
                Class collatedFileOperationInitialise Declaration
 \*---------------------------------------------------------------------------*/
 
+//! Internal class only
 class collatedFileOperationInitialise
 :
     public masterUncollatedFileOperationInitialise

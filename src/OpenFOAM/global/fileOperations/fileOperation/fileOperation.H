@@ -143,6 +143,14 @@ public:
         typedef IntRange<int> procRangeType;
 
 
+private:
+
+    // Private Static Data
+
+        //- Storage of the dummy file handler (demand-driven)
+        static refPtr<fileOperation> dummyHandlerPtr_;
+
+
 protected:
 
     // Protected Static Data
@@ -271,6 +279,9 @@ public:
 
     //- The currently active file handler. Avoid accessing directly
     static refPtr<fileOperation> fileHandlerPtr_;
+
+    //- Reference to a dummy file handler.
+    static refPtr<fileOperation> null();
 
 
     // Constructors
@@ -500,6 +511,10 @@ public:
 
 
     // Member Functions
+
+        //- True if the fileOperation can be considered valid.
+        //- At the moment, primarily used to detect the dummy fileOperation.
+        virtual bool good() const { return true; }
 
         //- Transfer ownership of communicator to this fileOperation.
         //- Use with caution

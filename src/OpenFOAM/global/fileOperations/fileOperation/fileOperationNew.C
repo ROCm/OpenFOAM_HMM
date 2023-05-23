@@ -26,14 +26,29 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fileOperation.H"
+#include "dummyFileOperation.H"
 #include "uncollatedFileOperation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+Foam::refPtr<Foam::fileOperation> Foam::fileOperation::dummyHandlerPtr_;
 
 Foam::refPtr<Foam::fileOperation> Foam::fileOperation::fileHandlerPtr_;
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::refPtr<Foam::fileOperation> Foam::fileOperation::null()
+{
+    if (!dummyHandlerPtr_)
+    {
+        // verbose = false
+        dummyHandlerPtr_.reset(new fileOperations::dummyFileOperation(false));
+    }
+
+    return dummyHandlerPtr_;
+}
+
 
 const Foam::fileOperation& Foam::fileOperation::fileHandler()
 {

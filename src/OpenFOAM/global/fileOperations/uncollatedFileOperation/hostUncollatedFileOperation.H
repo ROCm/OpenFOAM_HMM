@@ -98,6 +98,7 @@ public:
             Class hostUncollatedFileOperationInitialise Declaration
 \*---------------------------------------------------------------------------*/
 
+//! Internal class only
 class hostUncollatedFileOperationInitialise
 :
     public masterUncollatedFileOperationInitialise

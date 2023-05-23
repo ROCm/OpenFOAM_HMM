@@ -5,8 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2023 OpenCFD Ltd.
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,15 +24,18 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileOperations::uncollatedFileOperation
+    Foam::fileOperations::dummyFileOperation
 
 Description
-    fileOperation that assumes file operations are local.
+    Dummy fileOperation, to be used as a placeholder for interfaces
+    taking a reference to a fileOperation.
+    Will mostly behave like a no-op, but at the moment no guarantees
+    of any particular behaviour other than good() returning false.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_fileOperations_uncollatedFileOperation_H
-#define Foam_fileOperations_uncollatedFileOperation_H
+#ifndef Foam_fileOperations_dummyFileOperation_H
+#define Foam_fileOperations_dummyFileOperation_H
 
 #include "fileOperation.H"
 #include "OSspecific.H"
@@ -46,78 +48,36 @@ namespace fileOperations
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class uncollatedFileOperation Declaration
+                     Class dummyFileOperation Declaration
 \*---------------------------------------------------------------------------*/
 
-class uncollatedFileOperation
+class dummyFileOperation
 :
     public fileOperation
 {
-    // Private Data
-
-        //- Communicator allocated/managed by us
-        mutable label managedComm_;
-
-
-    // Private Member Functions
-
-        //- Any initialisation steps after constructing
-        void init(bool verbose);
-
-
-protected:
-
-    // Protected Member Functions
-
-        //- Search for an object.
-        //    checkGlobal : also check undecomposed case
-        //    isFile      : true:check for file  false:check for directory
-        fileName filePathInfo
-        (
-            const bool checkGlobal,
-            const bool isFile,
-            const IOobject& io,
-            const bool search
-        ) const;
-
-        //- Lookup name of processorsDDD using cache.
-        //  \note Do not use any parallel synchronisation
-        //  \return empty fileName if not found.
-        virtual refPtr<dirIndexList> lookupProcessorsPath
-        (
-            const fileName&
-        ) const;
-
-
 public:
 
     //- Runtime type information
-    TypeName("uncollated");
+    TypeNameNoDebug("dummy");
 
 
     // Constructors
 
         //- Default construct
-        explicit uncollatedFileOperation(bool verbose = false);
-
-        //- Construct from communicator with specified io-ranks
-        explicit uncollatedFileOperation
-        (
-            const Tuple2<label, labelList>& commAndIORanks,
-            const bool distributedRoots,
-            bool verbose = false
-        );
+        explicit dummyFileOperation(bool verbose = false);
 
 
     //- Destructor
-    virtual ~uncollatedFileOperation();
+    virtual ~dummyFileOperation();
 
 
     // Member Functions
 
-        //- Transfer ownership of communicator to this fileOperation.
-        //- Use with caution
-        virtual void storeComm() const;
+        //- This fileOperation is not really valid for anything.
+        virtual bool good() const { return false; }
+
+        //- No managed communicator
+        virtual void storeComm() const {}
 
 
         // OSSpecific equivalents
@@ -243,7 +203,7 @@ public:
 
         // (reg)IOobject functionality
 
-            //- Search for an object. checkGlobal : also check undecomposed case
+            //- Search for an object. checkGlobal
             virtual fileName filePath
             (
                 const bool checkGlobal,
@@ -252,8 +212,7 @@ public:
                 const bool search
             ) const;
 
-            //- Search for a directory. checkGlobal : also check undecomposed
-            //  case
+            //- Search for a directory. checkGlobal
             virtual fileName dirPath
             (
                 const bool checkGlobal,
@@ -279,7 +238,7 @@ public:
             ) const;
 
             //- Reads header for regIOobject and returns an ISstream
-            //  to read the contents.
+            //- to read the contents.
             virtual autoPtr<ISstream> readStream
             (
                 regIOobject&,

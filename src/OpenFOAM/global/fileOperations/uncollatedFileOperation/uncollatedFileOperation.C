@@ -614,10 +614,10 @@ Foam::fileOperations::uncollatedFileOperation::readStream
     regIOobject& io,
     const fileName& fName,
     const word& typeName,
-    const bool writeOnProc
+    const bool readOnProc
 ) const
 {
-    if (!writeOnProc)
+    if (!readOnProc)
     {
         return autoPtr<ISstream>(new dummyISstream());
     }
