@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,8 @@ Description
 #include "faceSet.H"
 #include "volFields.H"
 #include "areaFields.H"
+#include "coupledFvPatch.H"
+#include "coupledFaPatch.H"
 
 using namespace Foam;
 
@@ -186,6 +188,9 @@ bool setCellFieldType
             pfld = pfld.patchInternalField();
         }
 
+        // Handle any e.g. halo-swaps
+        field.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
+
         if (!field.write())
         {
             FatalErrorInFunction
@@ -270,6 +275,9 @@ bool setAreaFieldType
                 field[facei] = fieldValue;
             }
         }
+
+        // Handle any e.g. halo-swaps
+        field.boundaryFieldRef().template evaluateCoupled<coupledFaPatch>();
 
         if (!field.write())
         {
@@ -420,6 +428,9 @@ bool setFaceFieldType
                 );
             }
         }
+
+        // Handle any e.g. halo-swaps
+        field.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
         if (!field.write())
         {

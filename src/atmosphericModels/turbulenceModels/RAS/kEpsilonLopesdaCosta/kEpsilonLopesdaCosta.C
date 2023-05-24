@@ -421,6 +421,8 @@ void kEpsilonLopesdaCosta<BasicTurbulenceModel>::correct()
 
     // Update epsilon and G at the wall
     epsilon_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    epsilon_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
     volScalarField::Internal magU(mag(U));
     volScalarField::Internal magU3(pow3(magU));

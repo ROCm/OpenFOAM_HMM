@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd
+    Copyright (C) 2020,2023 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,8 @@ License
 #include "mapPolyMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "zeroGradientFvPatchField.H"
+#include "coupledFvPatchField.H"
+#include "processorFvPatchField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -125,16 +127,52 @@ bool Foam::functionObjects::ObukhovLength::calcOL()
             )
         );
 
+
+    // Special bit of coding here to handle cyclics
+    // - sign(B) can easily be positive in one cell but negative in its
+    //   coupled cell
+    // - so cyclic value might evaluate to 0
+    // - which upsets the division
+    // - note that instead of sign() any other field might have the same
+    //   positive and negative coupled values - it is just a lot less likely
+    // - problem is that overridden patch types do not propagate - use in-place
+    //   operations only
+
+    volScalarField denom
+    (
+        IOobject
+        (
+            "denom",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
+        ),
+        sign(B)
+    );
+
+    // Override interpolated value on interpolated coupled patches
+    for (auto& pfld : denom.boundaryFieldRef())
+    {
+        if
+        (
+            isA<coupledFvPatchField<scalar>>(pfld)
+        && !isA<processorFvPatchField<scalar>>(pfld)
+        )
+        {
+            pfld = pfld.patchInternalField();
+        }
+    }
+
+    denom *= kappa_*max(mag(B), dimensionedScalar(B.dimensions(), VSMALL));
+
     // (O:Eq. 26)
     *result1 = // ObukhovLength
         -min
         (
             dimensionedScalar(dimLength, ROOTVGREAT), // neutral stratification
-            pow3(*result2)/
-            (
-                sign(B)*kappa_
-                *max(mag(B), dimensionedScalar(B.dimensions(), VSMALL))
-            )
+            pow3(*result2)/denom
         );
 
     return isNew;

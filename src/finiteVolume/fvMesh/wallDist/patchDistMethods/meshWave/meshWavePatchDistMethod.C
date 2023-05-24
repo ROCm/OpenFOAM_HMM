@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,6 +99,9 @@ bool Foam::patchDistMethods::meshWave::correct(volScalarField& y)
         }
     }
 
+    // Make sure boundary values are up-to-date
+    y.correctBoundaryConditions();
+
     // Transfer number of unset values
     nUnset_ = wave.nUnset();
 
@@ -154,6 +157,10 @@ bool Foam::patchDistMethods::meshWave::correct
             nbf[patchi].transfer(wavePatchData);
         }
     }
+
+    // Make sure boundary values are up-to-date
+    y.correctBoundaryConditions();
+    n.correctBoundaryConditions();
 
     // Transfer number of unset values
     nUnset_ = wave.nUnset();

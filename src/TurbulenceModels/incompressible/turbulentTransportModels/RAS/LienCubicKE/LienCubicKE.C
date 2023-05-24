@@ -390,6 +390,8 @@ void LienCubicKE::correct()
 
     // Update epsilon and G at the wall
     epsilon_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    epsilon_.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
     const volScalarField f2(this->f2());
 

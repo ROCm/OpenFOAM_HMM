@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -374,20 +375,25 @@ tmp<surfaceScalarField> steadyStateDdtScheme<Type>::meshPhi
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    return tmp<surfaceScalarField>::New
+    auto tphi
     (
-        IOobject
+        tmp<surfaceScalarField>::New
         (
-            "meshPhi",
-            mesh().time().timeName(),
-            mesh().thisDb(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            IOobject::NO_REGISTER
-        ),
-        mesh(),
-        dimensionedScalar(dimVolume/dimTime, Zero)
+            IOobject
+            (
+                "meshPhi",
+                mesh().time().timeName(),
+                mesh().thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
+            ),
+            mesh(),
+            dimensionedScalar(dimVolume/dimTime, Zero)
+        )
     );
+    tphi.ref().setOriented();
+    return tphi;
 }
 
 

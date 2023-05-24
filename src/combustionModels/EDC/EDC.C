@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -143,6 +143,9 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
                         );
                 }
             }
+
+            // Evaluate bcs
+            kappa_.correctBoundaryConditions();
         }
         else
         {
@@ -171,6 +174,9 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
                         );
                 }
             }
+
+            // Evaluate bcs
+            kappa_.correctBoundaryConditions();
         }
 
         Info<< "Chemistry time solved max/min : "

@@ -141,7 +141,7 @@ void Foam::fieldsDistributor::readFieldsImpl
         // only need to know about themselves.
         // Can broadcast decompose = yes/no from master
 
-        bitSet localValues(haveMeshOnProc)
+        bitSet localValues(haveMeshOnProc);
         bitSet masterValues(localValues);
         Pstream::broadcast(masterValues);
 

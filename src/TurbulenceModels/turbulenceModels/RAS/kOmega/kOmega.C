@@ -211,6 +211,8 @@ void kOmega<BasicTurbulenceModel>::correct()
 
     // Update omega and G at the wall
     omega_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    omega_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn

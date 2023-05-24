@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,6 +99,9 @@ void Foam::combustionModels::PaSR<ReactionThermo>::correct()
                 kappa_[i] = 1.0;
             }
         }
+
+        // Evaluate bcs
+        kappa_.correctBoundaryConditions();
     }
 }
 
