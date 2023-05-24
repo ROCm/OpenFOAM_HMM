@@ -54,7 +54,7 @@ Description
             // Restart local agglomeration after processor agglomeration. Used
             // as nCellsInCoarsestLevel. Only applicable for pair-wise local
             // agglomeration methods.
-            nMasterCoarsestCells    1;
+            nCellsInMasterLevel     1;
         }
 
 SourceFiles
@@ -87,7 +87,7 @@ class masterCoarsestGAMGProcAgglomeration
 
         label nProcessorsPerMaster_;
 
-        const label nMasterCoarsestCells_;
+        const label nCellsInMasterLevel_;
 
         DynamicList<label> comms_;
 
@@ -108,15 +108,6 @@ public:
 
     //- Runtime type information
     TypeName("masterCoarsest");
-
-    //- No copy construct
-    masterCoarsestGAMGProcAgglomeration
-    (
-        const masterCoarsestGAMGProcAgglomeration&
-    ) = delete;
-
-    //- No copy assignment
-    void operator=(const masterCoarsestGAMGProcAgglomeration&) = delete;
 
 
     // Constructors
