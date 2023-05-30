@@ -179,7 +179,7 @@ void Foam::InjectedParticleDistributionInjection<CloudType>::initialise()
                 sumPow3 += pow3(diameters[particlei]);
             }
 
-            const scalar volume = sumPow3*mathematical::pi/16.0;
+            const scalar volume = sumPow3*mathematical::pi/6.0;
             sumVolume += volume;
             volumeFlowRate_[injectori] = volume/dTime;
 
