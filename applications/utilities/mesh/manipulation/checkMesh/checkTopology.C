@@ -896,7 +896,7 @@ Foam::label Foam::checkTopology
             bool hadBadEdges = checkPatch
             (
                 allGeometry,
-                "## ALL BOUNDARIES ##",
+                "\".*\"",
                  mesh,
                 pp,
                 // faceLabels,
