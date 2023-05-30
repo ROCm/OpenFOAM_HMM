@@ -269,7 +269,8 @@ bool Foam::faceAreaWeightAMI::setNextFaces
         return false;
     }
 
-    const labelList& srcNbrFaces = this->srcPatch().faceFaces()[srcFacei];
+    const auto& srcPatch = this->srcPatch();
+    const labelList& srcNbrFaces = srcPatch.faceFaces()[srcFacei];
 
     // Initialise tgtFacei
     tgtFacei = -1;
@@ -360,6 +361,7 @@ bool Foam::faceAreaWeightAMI::setNextFaces
     {
         FatalErrorInFunction
             << "Unable to set target face for source face " << srcFacei
+            << " with centre: " << srcPatch.faceCentres()[srcFacei]
             << abort(FatalError);
     }
 
