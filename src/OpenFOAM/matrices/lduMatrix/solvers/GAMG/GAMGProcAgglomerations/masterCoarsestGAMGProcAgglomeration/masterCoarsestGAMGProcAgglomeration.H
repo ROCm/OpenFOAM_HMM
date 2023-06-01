@@ -50,6 +50,11 @@ Description
 
             // Alternative : specify number of (equi-distributed) masters
             nMasters                2;
+
+            // Restart local agglomeration after processor agglomeration. Used
+            // as nCellsInCoarsestLevel. Only applicable for pair-wise local
+            // agglomeration methods.
+            nCellsInMasterLevel     1;
         }
 
 SourceFiles
@@ -67,6 +72,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
+class GAMGAgglomeration;
+
 /*---------------------------------------------------------------------------*\
               Class masterCoarsestGAMGProcAgglomeration Declaration
 \*---------------------------------------------------------------------------*/
@@ -79,20 +87,27 @@ class masterCoarsestGAMGProcAgglomeration
 
         label nProcessorsPerMaster_;
 
+        const label nCellsInMasterLevel_;
+
+        DynamicList<label> comms_;
+
+
+    // Private Member Functions
+
+        //- No copy construct
+        masterCoarsestGAMGProcAgglomeration
+        (
+            const masterCoarsestGAMGProcAgglomeration&
+        ) = delete;
+
+        //- No copy assignment
+        void operator=(const masterCoarsestGAMGProcAgglomeration&) = delete;
+
 
 public:
 
     //- Runtime type information
     TypeName("masterCoarsest");
-
-    //- No copy construct
-    masterCoarsestGAMGProcAgglomeration
-    (
-        const masterCoarsestGAMGProcAgglomeration&
-    ) = delete;
-
-    //- No copy assignment
-    void operator=(const masterCoarsestGAMGProcAgglomeration&) = delete;
 
 
     // Constructors

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,11 +48,15 @@ namespace Foam
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
+void Foam::GAMGAgglomeration::compactLevels
+(
+    const label nCreatedLevels,
+    const bool doProcessorAgglomerate
+)
 {
-    nCells_.setSize(nCreatedLevels);
+    nCells_.setSize(nCreatedLevels, 0);
     restrictAddressing_.setSize(nCreatedLevels);
-    nFaces_.setSize(nCreatedLevels);
+    nFaces_.setSize(nCreatedLevels, 0);
     faceRestrictAddressing_.setSize(nCreatedLevels);
     faceFlipMap_.setSize(nCreatedLevels);
     nPatchFaces_.setSize(nCreatedLevels);
@@ -60,8 +64,8 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
     meshLevels_.setSize(nCreatedLevels);
 
     // Have procCommunicator_ always, even if not procAgglomerating
-    procCommunicator_.setSize(nCreatedLevels + 1);
-    if (processorAgglomerate())
+    procCommunicator_.setSize(nCreatedLevels + 1, -1);
+    if (doProcessorAgglomerate && processorAgglomerate())
     {
         procAgglomMap_.setSize(nCreatedLevels);
         agglomProcIDs_.setSize(nCreatedLevels);
@@ -71,156 +75,160 @@ void Foam::GAMGAgglomeration::compactLevels(const label nCreatedLevels)
         procBoundaryFaceMap_.setSize(nCreatedLevels);
 
         procAgglomeratorPtr_().agglomerate();
+    }
+}
 
 
+void Foam::GAMGAgglomeration::printLevels() const
+{
+    Info<< "GAMGAgglomeration:" << nl
+        << "    local agglomerator     : " << type() << nl;
+    if (processorAgglomerate())
+    {
+        Info<< "    processor agglomerator : "
+            << procAgglomeratorPtr_().type() << nl
+            << nl;
     }
 
-    // Print a bit
-    if (debug)
+    Info<< setw(36) << "nCells"
+        << setw(20) << "nFaces/nCells"
+        << setw(20) << "nInterfaces"
+        << setw(20) << "nIntFaces/nCells"
+        << setw(12) << "profile"
+        << nl
+        << setw(8) << "Level"
+        << setw(8) << "nProcs"
+        << "    "
+        << setw(8) << "avg"
+        << setw(8) << "max"
+        << "    "
+        << setw(8) << "avg"
+        << setw(8) << "max"
+        << "    "
+        << setw(8) << "avg"
+        << setw(8) << "max"
+        << "    "
+        << setw(8) << "avg"
+        << setw(8) << "max"
+        //<< "    "
+        << setw(12) << "avg"
+        << nl
+        << setw(8) << "-----"
+        << setw(8) << "------"
+        << "    "
+        << setw(8) << "---"
+        << setw(8) << "---"
+        << "    "
+        << setw(8) << "---"
+        << setw(8) << "---"
+        << "    "
+        << setw(8) << "---"
+        << setw(8) << "---"
+        << "    "
+        << setw(8) << "---"
+        << setw(8) << "---"
+        //<< "    "
+        << setw(12) << "---"
+        //<< "    "
+        << nl;
+
+    const label maxSize = returnReduce(size(), maxOp<label>());
+
+    for (label levelI = 0; levelI <= maxSize; levelI++)
     {
-        Info<< "GAMGAgglomeration:" << nl
-            << "    local agglomerator     : " << type() << nl;
-        if (processorAgglomerate())
+        label nProcs = 0;
+        label nCells = 0;
+        scalar faceCellRatio = 0;
+        label nInterfaces = 0;
+        label nIntFaces = 0;
+        scalar ratio = 0.0;
+        scalar profile = 0.0;
+
+        if (hasMeshLevel(levelI))
         {
-            Info<< "    processor agglomerator : "
-                << procAgglomeratorPtr_().type() << nl
-                << nl;
+            nProcs = 1;
+
+            const lduMesh& fineMesh = meshLevel(levelI);
+            nCells = fineMesh.lduAddr().size();
+            faceCellRatio =
+                scalar(fineMesh.lduAddr().lowerAddr().size())/nCells;
+
+            const lduInterfacePtrsList interfaces =
+                fineMesh.interfaces();
+            forAll(interfaces, i)
+            {
+                if (interfaces.set(i))
+                {
+                    nInterfaces++;
+                    nIntFaces += interfaces[i].faceCells().size();
+                }
+            }
+            ratio = scalar(nIntFaces)/nCells;
+
+            profile = fineMesh.lduAddr().band().second();
         }
 
-        Info<< setw(36) << "nCells"
-            << setw(20) << "nFaces/nCells"
-            << setw(20) << "nInterfaces"
-            << setw(20) << "nIntFaces/nCells"
-            << setw(12) << "profile"
-            << nl
-            << setw(8) << "Level"
-            << setw(8) << "nProcs"
+        label totNprocs = returnReduce(nProcs, sumOp<label>());
+
+        label maxNCells = returnReduce(nCells, maxOp<label>());
+        label totNCells = returnReduce(nCells, sumOp<label>());
+
+        scalar maxFaceCellRatio =
+            returnReduce(faceCellRatio, maxOp<scalar>());
+        scalar totFaceCellRatio =
+            returnReduce(faceCellRatio, sumOp<scalar>());
+
+        label maxNInt = returnReduce(nInterfaces, maxOp<label>());
+        label totNInt = returnReduce(nInterfaces, sumOp<label>());
+
+        scalar maxRatio = returnReduce(ratio, maxOp<scalar>());
+        scalar totRatio = returnReduce(ratio, sumOp<scalar>());
+
+        scalar totProfile = returnReduce(profile, sumOp<scalar>());
+
+        const int oldPrecision = Info.stream().precision(4);
+
+        Info<< setw(8) << levelI
+            << setw(8) << totNprocs
             << "    "
-            << setw(8) << "avg"
-            << setw(8) << "max"
+            << setw(8) << totNCells/totNprocs
+            << setw(8) << maxNCells
             << "    "
-            << setw(8) << "avg"
-            << setw(8) << "max"
+            << setw(8) << totFaceCellRatio/totNprocs
+            << setw(8) << maxFaceCellRatio
             << "    "
-            << setw(8) << "avg"
-            << setw(8) << "max"
+            << setw(8) << scalar(totNInt)/totNprocs
+            << setw(8) << maxNInt
             << "    "
-            << setw(8) << "avg"
-            << setw(8) << "max"
-            //<< "    "
-            << setw(12) << "avg"
-            << nl
-            << setw(8) << "-----"
-            << setw(8) << "------"
-            << "    "
-            << setw(8) << "---"
-            << setw(8) << "---"
-            << "    "
-            << setw(8) << "---"
-            << setw(8) << "---"
-            << "    "
-            << setw(8) << "---"
-            << setw(8) << "---"
-            << "    "
-            << setw(8) << "---"
-            << setw(8) << "---"
-            //<< "    "
-            << setw(12) << "---"
-            //<< "    "
+            << setw(8) << totRatio/totNprocs
+            << setw(8) << maxRatio
+            << setw(12) << totProfile/totNprocs
             << nl;
 
-        for (label levelI = 0; levelI <= size(); levelI++)
-        {
-            label nProcs = 0;
-            label nCells = 0;
-            scalar faceCellRatio = 0;
-            label nInterfaces = 0;
-            label nIntFaces = 0;
-            scalar ratio = 0.0;
-            scalar profile = 0.0;
-
-            if (hasMeshLevel(levelI))
-            {
-                nProcs = 1;
-
-                const lduMesh& fineMesh = meshLevel(levelI);
-                nCells = fineMesh.lduAddr().size();
-                faceCellRatio =
-                    scalar(fineMesh.lduAddr().lowerAddr().size())/nCells;
-
-                const lduInterfacePtrsList interfaces =
-                    fineMesh.interfaces();
-                forAll(interfaces, i)
-                {
-                    if (interfaces.set(i))
-                    {
-                        nInterfaces++;
-                        nIntFaces += interfaces[i].faceCells().size();
-                    }
-                }
-                ratio = scalar(nIntFaces)/nCells;
-
-                profile = fineMesh.lduAddr().band().second();
-            }
-
-            label totNprocs = returnReduce(nProcs, sumOp<label>());
-
-            label maxNCells = returnReduce(nCells, maxOp<label>());
-            label totNCells = returnReduce(nCells, sumOp<label>());
-
-            scalar maxFaceCellRatio =
-                returnReduce(faceCellRatio, maxOp<scalar>());
-            scalar totFaceCellRatio =
-                returnReduce(faceCellRatio, sumOp<scalar>());
-
-            label maxNInt = returnReduce(nInterfaces, maxOp<label>());
-            label totNInt = returnReduce(nInterfaces, sumOp<label>());
-
-            scalar maxRatio = returnReduce(ratio, maxOp<scalar>());
-            scalar totRatio = returnReduce(ratio, sumOp<scalar>());
-
-            scalar totProfile = returnReduce(profile, sumOp<scalar>());
-
-            const int oldPrecision = Info.stream().precision(4);
-
-            Info<< setw(8) << levelI
-                << setw(8) << totNprocs
-                << "    "
-                << setw(8) << totNCells/totNprocs
-                << setw(8) << maxNCells
-                << "    "
-                << setw(8) << totFaceCellRatio/totNprocs
-                << setw(8) << maxFaceCellRatio
-                << "    "
-                << setw(8) << scalar(totNInt)/totNprocs
-                << setw(8) << maxNInt
-                << "    "
-                << setw(8) << totRatio/totNprocs
-                << setw(8) << maxRatio
-                << setw(12) << totProfile/totNprocs
-                << nl;
-
-            Info.stream().precision(oldPrecision);
-        }
-        Info<< endl;
+        Info.stream().precision(oldPrecision);
     }
+    Info<< endl;
 }
 
 
 bool Foam::GAMGAgglomeration::continueAgglomerating
 (
+    const label nCellsInCoarsestLevel,
     const label nFineCells,
-    const label nCoarseCells
+    const label nCoarseCells,
+    const label comm
 ) const
 {
-    const label nTotalCoarseCells = returnReduce(nCoarseCells, sumOp<label>());
-    if (nTotalCoarseCells < Pstream::nProcs()*nCellsInCoarsestLevel_)
+    const label nTotalCoarseCells =
+        returnReduce(nCoarseCells, sumOp<label>(), UPstream::msgType(), comm);
+    if (nTotalCoarseCells < Pstream::nProcs(comm)*nCellsInCoarsestLevel)
     {
         return false;
     }
     else
     {
-        const label nTotalFineCells = returnReduce(nFineCells, sumOp<label>());
+        const label nTotalFineCells =
+            returnReduce(nFineCells, sumOp<label>(), UPstream::msgType(), comm);
         return nTotalCoarseCells < nTotalFineCells;
     }
 }
@@ -333,7 +341,12 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
                 << exit(FatalError);
         }
 
-        return store(ctorPtr(mesh, controlDict).ptr());
+        auto agglomPtr(ctorPtr(mesh, controlDict));
+        if (debug)
+        {
+            agglomPtr().printLevels();
+        }
+        return store(agglomPtr.ptr());
     }
 }
 
@@ -378,7 +391,12 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
         }
         else
         {
-            return store(ctorPtr(matrix, controlDict).ptr());
+            auto agglomPtr(ctorPtr(matrix, controlDict));
+            if (debug)
+            {
+                agglomPtr().printLevels();
+            }
+            return store(agglomPtr.ptr());
         }
     }
 }
@@ -429,7 +447,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
                 << exit(FatalError);
         }
 
-        return store
+        auto agglomPtr
         (
             ctorPtr
             (
@@ -437,8 +455,13 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
                 cellVolumes,
                 faceAreas,
                 controlDict
-            ).ptr()
+            )
         );
+        if (debug)
+        {
+            agglomPtr().printLevels();
+        }
+        return store(agglomPtr.ptr());
     }
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +53,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward Declarations
 class lduMesh;
 class lduMatrix;
 class mapDistribute;
@@ -151,17 +152,27 @@ protected:
         //- Combine a level with the previous one
         void combineLevels(const label curLevel);
 
-        //- Shrink the number of levels to that specified
-        void compactLevels(const label nCreatedLevels);
+        //- Shrink the number of levels to that specified. Optionally do
+        //  processor agglomeration
+        void compactLevels
+        (
+            const label nCreatedLevels,
+            const bool doProcessorAgglomerate
+        );
 
         //- Check the need for further agglomeration
         bool continueAgglomerating
         (
+            const label nCellsInCoarsestLevel,
             const label nCells,
-            const label nCoarseCells
+            const label nCoarseCells,
+            const label comm
         ) const;
 
         void clearLevel(const label leveli);
+
+        //- Print level overview
+        void printLevels() const;
 
 
         // Processor agglomeration
@@ -468,16 +479,30 @@ public:
             const labelListListList& boundaryFaceMap(const label fineLeveli)
             const;
 
-        //- Given restriction determines if coarse cells are connected.
-        //  Return ok is so, otherwise creates new restriction that is
-        static bool checkRestriction
-        (
-            labelList& newRestrict,
-            label& nNewCoarse,
-            const lduAddressing& fineAddressing,
-            const labelUList& restriction,
-            const label nCoarse
-        );
+
+        // Helpers
+
+            //- Agglomerate from a starting level. Starting level is usually 0
+            //- (initial mesh) but sometimes >0 (restarting after processor
+            //- agglomeration)
+            virtual void agglomerate
+            (
+                const label nCellsInCoarsestLevel,
+                const label startLevel,
+                const scalarField& startFaceWeights,
+                const bool doProcessorAgglomerate = true
+            ) = 0;
+
+            //- Given restriction determines if coarse cells are connected.
+            //  Return ok is so, otherwise creates new restriction that is
+            static bool checkRestriction
+            (
+                labelList& newRestrict,
+                label& nNewCoarse,
+                const lduAddressing& fineAddressing,
+                const labelUList& restriction,
+                const label nCoarse
+            );
 };
 
 

@@ -51,7 +51,8 @@ void Foam::GAMGProcAgglomeration::printStats
     {
         if (agglom.hasMeshLevel(levelI))
         {
-            os  << agglom.meshLevel(levelI).info() << endl;
+            os  << "Level " << levelI << " mesh:"
+                << agglom.meshLevel(levelI).info() << endl;
         }
         else
         {
