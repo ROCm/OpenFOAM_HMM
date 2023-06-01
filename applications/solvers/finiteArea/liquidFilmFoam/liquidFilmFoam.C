@@ -87,7 +87,13 @@ int main(int argc, char *argv[])
             (
                 fam::ddt(h, Us)
               + fam::div(phi2s, Us)
-              + fam::Sp(0.0125*frictionFactor*mag(Us), Us)
+              + fam::Sp
+                (
+                    0.0125
+                   *frictionFactor.internalField()
+                   *mag(Us.internalField()),
+                    Us
+                )
              ==
                 Gs*h
               - fam::Sp(Sd, Us)

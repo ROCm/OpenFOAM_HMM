@@ -619,7 +619,11 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
 
         // Update k, epsilon and G at the wall
         kl.boundaryFieldRef().updateCoeffs();
+        // Push any changed cell values to coupled neighbours
+        kl.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
+
         epsilonl.boundaryFieldRef().updateCoeffs();
+        epsilonl.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
         Gc.ref().checkOut();
     }
@@ -639,7 +643,11 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
 
         // Update k, epsilon and G at the wall
         kg.boundaryFieldRef().updateCoeffs();
+        // Push any changed cell values to coupled neighbours
+        kg.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
         epsilong.boundaryFieldRef().updateCoeffs();
+        // Push any changed cell values to coupled neighbours
+        epsilong.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
         Gd.ref().checkOut();
     }

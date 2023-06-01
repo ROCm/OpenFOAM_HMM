@@ -524,8 +524,33 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
     volScalarField::Internal GbyNu0(this->GbyNu0(tgradU(), S2));
     volScalarField::Internal G(this->GName(), nut*GbyNu0);
 
+
+    // - boundary condition changes a cell value
+    // - normally this would be triggered through correctBoundaryConditions
+    // - which would do
+    //      - fvPatchField::evaluate() which calls
+    //      - fvPatchField::updateCoeffs()
+    // - however any processor boundary conditions already start sending
+    //   at initEvaluate so would send over the old value.
+    // - avoid this by explicitly calling updateCoeffs early and then
+    //   only doing the boundary conditions that rely on initEvaluate
+    //   (currently only coupled ones)
+
+    //- 1. Explicitly swap values on coupled boundary conditions
     // Update omega and G at the wall
     omega_.boundaryFieldRef().updateCoeffs();
+    // omegaWallFunctions change the cell value! Make sure to push these to
+    // coupled neighbours. Note that we want to avoid the re-updateCoeffs
+    // of the wallFunctions so make sure to bypass the evaluate on
+    // those patches and only do the coupled ones.
+    omega_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
+
+    ////- 2. Make sure the boundary condition calls updateCoeffs from
+    ////     initEvaluate
+    ////     (so before any swap is done - requires all coupled bcs to be
+    ////      after wall bcs. Unfortunately this conflicts with cyclicACMI)
+    //omega_.correctBoundaryConditions();
+
 
     const volScalarField CDkOmega
     (

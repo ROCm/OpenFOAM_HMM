@@ -679,6 +679,8 @@ void kkLOmega::correct()
 
 
     omega_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    omega_.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn

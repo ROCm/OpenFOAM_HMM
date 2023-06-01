@@ -238,6 +238,9 @@ void Foam::wallDistAddressing::correct(volScalarField& y)
         );
     }
 
+    // Make sure boundary values are up to date
+    y.correctBoundaryConditions();
+
 
     // Extract all addressing
     // ~~~~~~~~~~~~~~~~~~~~~~

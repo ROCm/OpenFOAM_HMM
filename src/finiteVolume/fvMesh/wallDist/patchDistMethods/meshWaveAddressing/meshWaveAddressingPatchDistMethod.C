@@ -99,6 +99,26 @@ bool Foam::patchDistMethods::meshWaveAddressing::correct
 
     y = wDist.y();
 
+    // Note: copying value only so might not be consistent with supplied
+    // patch types (e.g. zeroGradient when called from wallDist). Assume
+    // only affected ones are the supplied patches ...
+    {
+        auto& bfld = y.boundaryFieldRef();
+        const label startOfRequests = UPstream::nRequests();
+        for (const label patchi : patchIDs_)
+        {
+            bfld[patchi].initEvaluate(UPstream::commsTypes::nonBlocking);
+        }
+
+        // Wait for outstanding requests
+        UPstream::waitRequests(startOfRequests);
+
+        for (const label patchi : patchIDs_)
+        {
+            bfld[patchi].evaluate(UPstream::commsTypes::nonBlocking);
+        }
+    }
+
 
     // Only calculate n if the field is defined
     if (notNull(n))
@@ -109,6 +129,8 @@ bool Foam::patchDistMethods::meshWaveAddressing::correct
             pnf == pnf.patch().nf();
         }
 
+        // No problem with inconsistency as for y (see above) since doing
+        // correctBoundaryConditions on actual n field.
         wDist.map(n, mapDistribute::transform());
     }
 

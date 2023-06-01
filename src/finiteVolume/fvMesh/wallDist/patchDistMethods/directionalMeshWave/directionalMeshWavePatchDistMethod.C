@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,6 +149,10 @@ bool Foam::patchDistMethods::directionalMeshWave::correct
             nbf[patchi].transfer(wavePatchData);
         }
     }
+
+    // Make sure boundary values are up-to-date
+    y.correctBoundaryConditions();
+    n.correctBoundaryConditions();
 
     // Transfer number of unset values
     this->nUnset_ = wave.nUnset();
