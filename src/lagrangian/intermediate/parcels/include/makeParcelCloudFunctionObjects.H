@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,10 +38,10 @@ License
 #include "ParticleTracks.H"
 #include "ParticleTrap.H"
 #include "ParticleZoneInfo.H"
+#include "ParticleHistogram.H"
+#include "ParticlePostProcessing.H"
 #include "PatchCollisionDensity.H"
 #include "PatchInteractionFields.H"
-#include "PatchPostProcessing.H"
-#include "PatchParticleHistogram.H"
 #include "RemoveParcels.H"
 #include "VoidFraction.H"
 #include "KinematicReynoldsNumber.H"
@@ -60,10 +60,10 @@ License
     makeCloudFunctionObjectType(ParticleTracks, CloudType);                    \
     makeCloudFunctionObjectType(ParticleTrap, CloudType);                      \
     makeCloudFunctionObjectType(ParticleZoneInfo, CloudType);                  \
+    makeCloudFunctionObjectType(ParticleHistogram, CloudType);                 \
+    makeCloudFunctionObjectType(ParticlePostProcessing, CloudType);            \
     makeCloudFunctionObjectType(PatchCollisionDensity, CloudType);             \
     makeCloudFunctionObjectType(PatchInteractionFields, CloudType);            \
-    makeCloudFunctionObjectType(PatchPostProcessing, CloudType);               \
-    makeCloudFunctionObjectType(PatchParticleHistogram, CloudType);            \
     makeCloudFunctionObjectType(RemoveParcels, CloudType);                     \
     makeCloudFunctionObjectType(VoidFraction, CloudType);                      \
     makeCloudFunctionObjectType(KinematicReynoldsNumber, CloudType);           \

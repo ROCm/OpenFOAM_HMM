@@ -120,7 +120,7 @@ phaseProperties/phasePropertiesList/phasePropertiesList.C
 
 /* additional helper classes */
 clouds/Templates/KinematicCloud/cloudSolution/cloudSolution.C
-
+submodels/CloudFunctionObjects/CloudFunctionObject/cloudFunctionObjectTools.C
 
 /* averaging methods */
 submodels/MPPIC/AveragingMethods/makeAveragingMethods.C

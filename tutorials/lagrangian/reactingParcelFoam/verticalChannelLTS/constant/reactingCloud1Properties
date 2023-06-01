@@ -177,9 +177,9 @@ subModels
 
 cloudFunctions
 {
-    patchPostProcessing1
+    particlePostProcessing1
     {
-        type            patchPostProcessing;
+        type            particlePostProcessing;
         maxStoredParcels 100;
         patches         ( outlet );
     }
