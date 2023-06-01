@@ -309,6 +309,11 @@ $(ACMICycPatches)/cyclicACMIPointPatchField/cyclicACMIPointPatchFields.C
 PeriodicAMICycPatches=$(AMI)/patches/cyclicPeriodicAMI
 $(PeriodicAMICycPatches)/cyclicPeriodicAMIPolyPatch/cyclicPeriodicAMIPolyPatch.C
 
+extraPreconditioners=matrices/lduMatrix/preconditioners/distributedDILUPreconditioner
+$(extraPreconditioners)/distributedDILUPreconditioner.C
+$(extraPreconditioners)/distributedDICPreconditioner.C
+$(extraPreconditioners)/processorColour.C
+
 multiWorld/multiWorldConnectionsObject.C
 
 mappedPatches/mappedPolyPatch/mappedPatchBase.C
