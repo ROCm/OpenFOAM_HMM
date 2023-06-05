@@ -52,7 +52,7 @@ namespace Foam
 void Foam::distributedDILUPreconditioner::updateMatrixInterfaces
 (
     const bool add,
-    const FieldField<Field, solveScalar>& coupleCoeffs,
+    const FieldField<Field, scalar>& coupleCoeffs,
     const labelList& selectedInterfaces,
     const solveScalarField& psiif,
     solveScalarField& result,
@@ -119,13 +119,13 @@ void Foam::distributedDILUPreconditioner::sendGlobal
     if (selectedInterfaces.size())
     {
         // Save old data
-        FieldField<Field, solveScalar> one(interfaces.size());
+        FieldField<Field, scalar> one(interfaces.size());
         FieldField<Field, solveScalar> old(interfaces.size());
         for (const label inti : selectedInterfaces)
         {
             const auto& intf = interfaces[inti].interface();
             const auto& fc = intf.faceCells();
-            one.set(inti, new solveScalarField(fc.size(), 1.0));
+            one.set(inti, new scalarField(fc.size(), 1.0));
             old.set(inti, new solveScalarField(psi, intf.faceCells()));
         }
         updateMatrixInterfaces
@@ -537,8 +537,8 @@ Foam::distributedDILUPreconditioner::distributedDILUPreconditioner
         if (interfaces.set(inti))
         {
             const auto& bc = interfaceBouCoeffs[inti];
-            sendBufs_.set(inti, new scalarField(bc.size(), Zero));
-            recvBufs_.set(inti, new scalarField(bc.size(), Zero));
+            sendBufs_.set(inti, new solveScalarField(bc.size(), Zero));
+            recvBufs_.set(inti, new solveScalarField(bc.size(), Zero));
         }
     }
 

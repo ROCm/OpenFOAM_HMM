@@ -156,7 +156,7 @@ protected:
         void updateMatrixInterfaces
         (
             const bool add,
-            const FieldField<Field, solveScalar>& coupleCoeffs,
+            const FieldField<Field, scalar>& coupleCoeffs,
             const labelList& selectedInterfaces,
             const solveScalarField& psiif,
             solveScalarField& result,
