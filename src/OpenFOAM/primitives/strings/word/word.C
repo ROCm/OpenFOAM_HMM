@@ -30,6 +30,7 @@ License
 #include "debug.H"
 #include <cctype>
 #include <sstream>
+#include <cstdint>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
