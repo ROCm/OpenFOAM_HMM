@@ -239,7 +239,7 @@ inline Scalar sign(const Scalar s) noexcept
 }
 
 
-//- Return 1 if s is greater than zero, otherwise 1
+//- Return 1 if s is greater than zero, otherwise 0
 inline Scalar pos(const Scalar s) noexcept
 {
     return (s > 0)? 1: 0;
