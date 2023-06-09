@@ -172,19 +172,34 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
 )
 :
     GAMGAgglomeration(mesh, controlDict),
-    fvMesh_(refCast<const fvMesh>(mesh))
-{
-    // Min, max size of agglomerated cells
-    label minSize(controlDict.get<label>("minSize"));
-    label maxSize(controlDict.get<label>("maxSize"));
-
-    // Number of iterations applied to improve agglomeration consistency across
-    // processor boundaries
-    label nProcConsistencyIter
+    fvMesh_(refCast<const fvMesh>(mesh)),
+    minSize_(controlDict.get<label>("minSize")),
+    maxSize_(controlDict.get<label>("maxSize")),
+    nProcConsistencyIter_
     (
         controlDict.get<label>("nProcConsistencyIter")
+    )
+{
+    agglomerate
+    (
+        1,  //nCellsInCoarsestLevel
+        0,
+        scalarField::null(),
+        true
     );
+}
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::MGridGenGAMGAgglomeration::agglomerate
+(
+    const label nCellsInCoarsestLevel,
+    const label startLevel,
+    const scalarField& startFaceWeights,
+    const bool doProcessorAgglomerate
+)
+{
     // Start geometric agglomeration from the cell volumes and areas of the mesh
     scalarField* VPtr = const_cast<scalarField*>(&fvMesh_.cellVolumes());
 
@@ -226,8 +241,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
         tmp<labelField> finalAgglomPtr = agglomerate
         (
             nCoarseCells,
-            minSize,
-            maxSize,
+            minSize_,
+            maxSize_,
             meshLevel(nCreatedLevels).lduAddr(),
             *VPtr,
             *magSfPtr,
@@ -235,7 +250,7 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
         );
 
         // Adjust weights only
-        for (int i=0; i<nProcConsistencyIter; i++)
+        for (int i=0; i<nProcConsistencyIter_; i++)
         {
             const lduMesh& mesh = meshLevel(nCreatedLevels);
             const lduAddressing& addr = mesh.lduAddr();
@@ -281,8 +296,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
             finalAgglomPtr = agglomerate
             (
                 nCoarseCells,
-                minSize,
-                maxSize,
+                minSize_,
+                maxSize_,
                 meshLevel(nCreatedLevels).lduAddr(),
                 *VPtr,
                 weights,
@@ -368,7 +383,7 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
     }
 
     // Shrink the storage of the levels to those created
-    compactLevels(nCreatedLevels, true);
+    compactLevels(nCreatedLevels, doProcessorAgglomerate);
 
     // Delete temporary geometry storage
     if (nCreatedLevels)
