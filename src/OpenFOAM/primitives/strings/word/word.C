@@ -29,8 +29,8 @@ License
 #include "word.H"
 #include "debug.H"
 #include <cctype>
-#include <sstream>
 #include <cstdint>
+#include <sstream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

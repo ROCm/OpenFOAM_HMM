@@ -201,7 +201,8 @@ inline Foam::Matrix<Form, Type>::Matrix
 )
 :
     mRows_(Mb.m()),
-    nCols_(Mb.n())
+    nCols_(Mb.n()),
+    v_(nullptr)
 {
     doAlloc();
 
@@ -223,7 +224,8 @@ inline Foam::Matrix<Form, Type>::Matrix
 )
 :
     mRows_(Mb.m()),
-    nCols_(Mb.n())
+    nCols_(Mb.n()),
+    v_(nullptr)
 {
     doAlloc();
 

@@ -155,7 +155,7 @@ bool Foam::vtk::writePointSet
 
     if (parallel)
     {
-        vtk::writeListParallel(format(), mesh.points(), pointLabels);
+        vtk::writeListParallel(format.ref(), mesh.points(), pointLabels);
     }
     else
     {

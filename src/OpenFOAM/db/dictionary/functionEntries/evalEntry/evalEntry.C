@@ -174,7 +174,7 @@ Foam::tokenList Foam::functionEntries::evalEntry::evaluate
         result.writeField(toks);
     }
 
-    return std::move(toks);
+    return tokenList(std::move(toks.tokens()));
 }
 
 

@@ -119,7 +119,7 @@ void Foam::InjectedParticleInjection<CloudType>::initialise()
     scalar sumVolume = 0;
     forAll(volume, i)
     {
-        scalar vol = pow3(diameter_[i])*mathematical::pi/16.0;
+        scalar vol = pow3(diameter_[i])*mathematical::pi/6.0;
         volume[i] = vol;
         sumVolume += vol;
     }
