@@ -152,7 +152,7 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     UPstream::communicator singleCellMeshComm
     (
         mesh.comm(),
-        labelList(Foam::one{}, 0)   // only processor 0
+        labelRange(1)  // Processor 0 only
     );
 
     scalarField faceWeights;
@@ -197,7 +197,6 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     }
 
     Pstream::broadcast(fineToCoarse, mesh.comm());
-    singleCellMeshComm.reset();
 
     return tfineToCoarse;
 }

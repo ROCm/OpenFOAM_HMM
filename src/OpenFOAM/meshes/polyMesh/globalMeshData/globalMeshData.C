@@ -2504,8 +2504,8 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     const globalIndex globalPPoints(meshPoints.size());
 
     labelList patchToCoupled(meshPoints.size(), -1);
-    label nCoupled = 0;
     labelList coupledToGlobalPatch(pointSlavesMap.constructSize(), -1);
+    //label nCoupled = 0;
 
     // Note: loop over patch since usually smaller
     forAll(meshPoints, patchPointi)
@@ -2518,7 +2518,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
         {
             patchToCoupled[patchPointi] = iter();
             coupledToGlobalPatch[iter()] = globalPPoints.toGlobal(patchPointi);
-            nCoupled++;
+            //++nCoupled;
         }
     }
 
@@ -2718,55 +2718,31 @@ void Foam::globalMeshData::updateMesh()
     UPstream::communicator dupComm
     (
         UPstream::worldComm,
-        identity(UPstream::nProcs(UPstream::worldComm))
+        labelRange(UPstream::nProcs(UPstream::worldComm))
     );
 
     const label comm = dupComm.comm();
     const label oldWarnComm = UPstream::commWarn(comm);
 
+    FixedList<label, 3> totals;
 
-    // Total number of faces.
-    nTotalFaces_ = returnReduce
-    (
-        mesh_.nFaces(),
-        sumOp<label>(),
-        UPstream::msgType(),
-        comm
-    );
+    totals[0] = mesh_.nPoints();
+    totals[1] = mesh_.nFaces();
+    totals[2] = mesh_.nCells();
 
-    if (debug)
-    {
-        Pout<< "globalMeshData : nTotalFaces:" << nTotalFaces_ << endl;
-    }
+    reduce(totals, sumOp<label>(), UPstream::msgType(), comm);
 
-    nTotalCells_ = returnReduce
-    (
-        mesh_.nCells(),
-        sumOp<label>(),
-        UPstream::msgType(),
-        comm
-    );
-
-    if (debug)
-    {
-        Pout<< "globalMeshData : nTotalCells:" << nTotalCells_ << endl;
-    }
-
-    nTotalPoints_ = returnReduce
-    (
-        mesh_.nPoints(),
-        sumOp<label>(),
-        UPstream::msgType(),
-        comm
-    );
+    nTotalPoints_ = totals[0];
+    nTotalFaces_ = totals[1];
+    nTotalCells_ = totals[2];
 
     // Restore communicator settings
     UPstream::commWarn(oldWarnComm);
-    dupComm.reset();
 
     if (debug)
     {
-        Pout<< "globalMeshData : nTotalPoints:" << nTotalPoints_ << endl;
+        Info<< "globalMeshData : Total points/faces/cells : "
+            << totals << endl;
     }
 }
 
