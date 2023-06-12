@@ -176,9 +176,10 @@ void exchangeChunkedBuf
                 const auto proci = slot.first;
                 const auto count = slot.second.size();
 
-                if (proci != myProci)
+                if (proci != myProci && count > maxCount)
                 {
-                    maxCount = max(maxCount, count);
+                    // Note: using max() can be ambiguous
+                    maxCount = count;
                 }
             }
 

@@ -1039,7 +1039,8 @@ Foam::Istream& Foam::ISstream::readRaw(char* data, std::streamsize count)
         else
         {
             // Forward seek
-            is_.seekg(is_.tellg() + count);
+            // - use absolute positioning (see C++ notes about std::ifstream)
+            is_.seekg(is_.tellg() + std::istream::pos_type(count));
 
             // Not sure if this is needed (as per rewind)
             // some documentation indicates that ifstream needs
