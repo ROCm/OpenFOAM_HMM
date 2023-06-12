@@ -121,17 +121,22 @@ scalar sumReduce
 
 int main(int argc, char *argv[])
 {
+    argList::noCheckProcessorDirectories();
+    argList::addVerboseOption();
+    argList::addOption("repeat", "count");
 
     #include "setRootCase.H"
-    #include "createTime.H"
+
+    const label repeat = args.getOrDefault<label>("repeat", 1);
+    const int optVerbose = args.verbose();
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     // Allocate a communicator
     label n = Pstream::nProcs(UPstream::worldComm);
 
-    DynamicList<label> bottom;
-    DynamicList<label> top;
+    DynamicList<label> bottom(n/2);
+    DynamicList<label> top(n/2);
 
     for (label i = 0; i < n/2; i++)
     {
@@ -142,37 +147,49 @@ int main(int argc, char *argv[])
         top.append(i);
     }
 
-    //Pout<< "bottom:" << bottom << endl;
-    Pout<< "top             :" << top << endl;
 
+    Info<< "repeating: " << repeat << " times" << endl;
 
-    scalar localValue = 111*UPstream::myProcNo(UPstream::worldComm);
-    Pout<< "localValue      :" << localValue << endl;
-
-
-    label comm = UPstream::allocateCommunicator(UPstream::worldComm, top);
-
-    Pout<< "allocated comm  :" << comm << endl;
-    Pout<< "comm myproc     :" << Pstream::myProcNo(comm)
-        << endl;
-
-
-    if (Pstream::myProcNo(comm) != -1)
+    if (optVerbose || repeat == 1)
     {
-        scalar sum = returnReduce
-        (
-            localValue,
-            sumOp<scalar>(),
-            UPstream::msgType(),
-            comm
-        );
-        Pout<< "sum             :" << sum << endl;
+        //Pout<< "bottom:" << bottom << endl;
+        Pout<< "top             :" << top << endl;
     }
 
-    UPstream::freeCommunicator(comm);
+    for (label count = 0; count < repeat; ++count)
+    {
+        label comm = UPstream::allocateCommunicator(UPstream::worldComm, top);
+
+        scalar localValue = 111*UPstream::myProcNo(UPstream::worldComm);
+
+        if (optVerbose || (repeat == 1 && count == 0))
+        {
+            Pout<< "localValue      :" << localValue << endl;
+            Pout<< "allocated comm  :" << comm
+                << " proci :" << UPstream::myProcNo(comm) << endl;
+        }
+
+        if (Pstream::myProcNo(comm) != -1)
+        {
+            scalar sum = returnReduce
+            (
+                localValue,
+                sumOp<scalar>(),
+                UPstream::msgType(),
+                comm
+            );
+
+            if (optVerbose || (repeat == 1 && count == 0))
+            {
+                Pout<< "sum             :" << sum << endl;
+            }
+        }
+
+        UPstream::freeCommunicator(comm);
+    }
 
 
-    Pout<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }
