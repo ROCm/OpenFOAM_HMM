@@ -31,6 +31,10 @@ License
 #include "profilingPstream.H"
 #include "IOstreams.H"
 
+// FUTURE? probe and receive message
+// - as of 2023-06 appears to be broken with INTELMPI + PMI-2 (slurm)
+//   and perhaps other places so currently avoid
+
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 // General blocking/non-blocking MPI receive, optionally with probed
@@ -44,10 +48,6 @@ static Foam::label UPstream_mpi_receive
     const int tag,
     const Foam::label communicator,
     Foam::UPstream::Request* req
-#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    // MPI-3 : eg, openmpi-1.7 (2013) and later
-    , MPI_Message* message = nullptr
-#endif
 )
 {
     using namespace Foam;
@@ -84,21 +84,6 @@ static Foam::label UPstream_mpi_receive
         int returnCode = 0;
         MPI_Status status;
 
-#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-        // MPI-3 : eg, openmpi-1.7 (2013) and later
-        if (message)
-        {
-            returnCode = MPI_Mrecv
-            (
-                buf,
-                bufSize,
-                MPI_BYTE,
-                message,
-                &status
-            );
-        }
-        else
-#endif
         {
             returnCode = MPI_Recv
             (
@@ -151,21 +136,6 @@ static Foam::label UPstream_mpi_receive
         int returnCode = 0;
         MPI_Request request;
 
-#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-        // MPI-3 : eg, openmpi-1.7 (2013) and later
-        if (message)
-        {
-            returnCode = MPI_Imrecv
-            (
-                buf,
-                bufSize,
-                MPI_BYTE,
-                message,
-                &request
-            );
-        }
-        else
-#endif
         {
             returnCode = MPI_Irecv
             (
@@ -227,12 +197,6 @@ void Foam::UIPstream::bufferIPCrecv()
             << Foam::endl;
     }
 
-#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    // MPI-3 : eg, openmpi-1.7 (2013) and later
-    MPI_Message message;
-    MPI_Message* messagePtr = nullptr;
-#endif
-
     // No buffer size allocated/specified - probe size of incoming message
     if (!recvBuf_.capacity())
     {
@@ -240,18 +204,6 @@ void Foam::UIPstream::bufferIPCrecv()
 
         MPI_Status status;
 
-#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-        // MPI-3 : eg, openmpi-1.7 (2013) and later
-        messagePtr = &message;
-        MPI_Mprobe
-        (
-            fromProcNo_,
-            tag_,
-            PstreamGlobals::MPICommunicators_[comm_],
-           &message,
-           &status
-        );
-#else
         MPI_Probe
         (
             fromProcNo_,
@@ -259,7 +211,7 @@ void Foam::UIPstream::bufferIPCrecv()
             PstreamGlobals::MPICommunicators_[comm_],
            &status
         );
-#endif
+
         MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
         profilingPstream::addProbeTime();
@@ -282,9 +234,6 @@ void Foam::UIPstream::bufferIPCrecv()
         tag_,
         comm_,
         nullptr   // UPstream::Request
-#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-        , messagePtr
-#endif
     );
 
     // Set addressed size. Leave actual allocated memory intact.
