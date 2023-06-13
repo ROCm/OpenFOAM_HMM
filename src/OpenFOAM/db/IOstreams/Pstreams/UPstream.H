@@ -265,7 +265,7 @@ private:
         static void freeCommunicatorComponents(const label index);
 
         //- Allocate inter-host, intra-host communicators
-        //- with worldComm as parent
+        //- with comm-world as parent
         static bool allocateHostCommunicatorPairs();
 
 
@@ -308,17 +308,11 @@ public:
     // Standard Communicators
 
         //- Communicator for all ranks.
-        //- May differ from globalComm if local worlds are in use
+        //- May differ from commGlobal() if local worlds are in use
         static label worldComm;
 
         //- Debugging: warn for use of any communicator differing from warnComm
         static label warnComm;
-
-        //- Communicator for all ranks, irrespective of any local worlds
-        static constexpr label globalComm = 0;
-
-        //- A communicator within the current rank only
-        static constexpr label selfComm = 1;
 
         //- Communicator for all ranks, irrespective of any local worlds
         static constexpr label commGlobal() noexcept { return 0; }
@@ -816,32 +810,34 @@ public:
         }
 
 
-        // Worlds
+    // Worlds
 
-            //- All worlds
-            static const wordList& allWorlds() noexcept
-            {
-                return allWorlds_;
-            }
+        //- All worlds
+        static const wordList& allWorlds() noexcept
+        {
+            return allWorlds_;
+        }
 
-            //- The indices into allWorlds for all processes
-            static const labelList& worldIDs() noexcept
-            {
-                return worldIDs_;
-            }
+        //- The indices into allWorlds for all processes
+        static const labelList& worldIDs() noexcept
+        {
+            return worldIDs_;
+        }
 
-            //- My worldID
-            static label myWorldID()
-            {
-                return worldIDs_[myProcNo(globalComm)];
-            }
+        //- My worldID
+        static label myWorldID()
+        {
+            return worldIDs_[myProcNo(UPstream::commGlobal())];
+        }
 
-            //- My world
-            static const word& myWorld()
-            {
-                return allWorlds_[worldIDs_[myProcNo(globalComm)]];
-            }
+        //- My world
+        static const word& myWorld()
+        {
+            return allWorlds_[worldIDs_[myProcNo(UPstream::commGlobal())]];
+        }
 
+
+    // Rank addressing
 
         //- Range of process indices for all processes
         static rangeType allProcs(const label communicator = worldComm)

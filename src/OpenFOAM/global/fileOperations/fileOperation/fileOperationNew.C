@@ -318,9 +318,9 @@ Foam::fileOperation::New_impl
         );
 
         // TBD: special handling for uncollated
-        // if (origHandler.comm() == UPstream::selfComm)
+        // if (origHandler.comm() == UPstream::commSelf())
         // {
-        //     commAndIORanks.first() = UPstream::selfComm;
+        //     commAndIORanks.first() = UPstream::commSelf();
         // }
 
         const bool hasIOranks = (commAndIORanks.second().size() > 1);

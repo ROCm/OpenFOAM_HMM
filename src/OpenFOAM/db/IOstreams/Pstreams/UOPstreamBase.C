@@ -180,7 +180,7 @@ Foam::UOPstreamBase::UOPstreamBase
     Ostream(fmt),
     toProcNo_(UPstream::masterNo()),        // placeholder
     tag_(UPstream::msgType()),              // placeholder
-    comm_(UPstream::selfComm),              // placeholder
+    comm_(UPstream::commSelf()),            // placeholder
     sendAtDestruct_(false),   // Never sendAtDestruct!!
     sendBuf_(sendBuf)
 {

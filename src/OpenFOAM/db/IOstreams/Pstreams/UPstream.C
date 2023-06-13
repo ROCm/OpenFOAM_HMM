@@ -152,28 +152,28 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         // but just in case of future changes
 
         // Using (world, self) ordering
-        freeCommunicator(UPstream::selfComm);
-        freeCommunicator(UPstream::globalComm);
+        freeCommunicator(UPstream::commSelf());
+        freeCommunicator(UPstream::commGlobal());
 
-        // 0: worldComm/globalComm
+        // 0: COMM_WORLD : commWorld() / commGlobal()
         comm = allocateCommunicator(-1, singleProc, false);
-        if (comm != UPstream::globalComm)
+        if (comm != UPstream::commGlobal())
         {
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  expected globalComm:" << UPstream::globalComm
+                << "  expected comm-global:" << UPstream::commGlobal()
                 << Foam::exit(FatalError);
         }
 
-        // 1: selfComm
+        // 1: COMM_SELF
         comm = allocateCommunicator(-2, singleProc, false);
-        if (comm != UPstream::selfComm)
+        if (comm != UPstream::commSelf())
         {
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  expected selfComm:" << UPstream::selfComm
+                << "  expected comm-self:" << UPstream::commSelf()
                 << Foam::exit(FatalError);
         }
 
@@ -186,34 +186,34 @@ void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
         // but this time with MPI components
 
         // Using (world, self) ordering
-        freeCommunicator(UPstream::selfComm);
-        freeCommunicator(UPstream::globalComm);
+        freeCommunicator(UPstream::commSelf());
+        freeCommunicator(UPstream::commGlobal());
 
-        // 0: worldComm/globalComm
+        // 0: COMM_WORLD : commWorld() / commGlobal()
         comm = allocateCommunicator(-1, labelRange(nProcs), true);
-        if (comm != UPstream::globalComm)
+        if (comm != UPstream::commGlobal())
         {
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  expected globalComm:" << UPstream::globalComm
+                << "  expected comm-global:" << UPstream::commGlobal()
                 << Foam::exit(FatalError);
         }
 
-        // 1: selfComm
+        // 1: COMM_SELF
         // - Processor number wrt world communicator
-        singleProc.start() = UPstream::myProcNo(UPstream::globalComm);
+        singleProc.start() = UPstream::myProcNo(UPstream::commGlobal());
         comm = allocateCommunicator(-2, singleProc, true);
-        if (comm != UPstream::selfComm)
+        if (comm != UPstream::commSelf())
         {
             // Failed sanity check
             FatalErrorInFunction
                 << "problem : comm:" << comm
-                << "  expected selfComm:" << UPstream::selfComm
+                << "  expected comm-self:" << UPstream::commSelf()
                 << Foam::exit(FatalError);
         }
 
-        Pout.prefix() = '[' +  Foam::name(myProcNo(globalComm)) + "] ";
+        Pout.prefix() = '[' + Foam::name(myProcNo(commGlobal())) + "] ";
         Perr.prefix() = Pout.prefix();
     }
 
@@ -761,14 +761,14 @@ Foam::label Foam::UPstream::worldComm(0);
 Foam::label Foam::UPstream::warnComm(-1);
 
 
-// Predefine worldComm, selfComm slots.
+// Predefine world and self communicator slots.
 // These are overwritten in parallel mode (by UPstream::setParRun())
 const Foam::label nPredefinedComm = []()
 {
-    // 0: worldComm/globalComm
+    // 0: COMM_WORLD : commWorld() / commGlobal()
     (void) Foam::UPstream::allocateCommunicator(-1, Foam::labelRange(1), false);
 
-    // 1: selfComm
+    // 1: COMM_SELF
     (void) Foam::UPstream::allocateCommunicator(-2, Foam::labelRange(1), false);
 
     return Foam::UPstream::nComms();

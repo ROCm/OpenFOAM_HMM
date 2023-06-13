@@ -196,7 +196,7 @@ static Tuple2<label, labelList> getCommPattern()
     // Default is COMM_SELF (only involves itself)
     Tuple2<label, labelList> commAndIORanks
     (
-        UPstream::selfComm,
+        UPstream::commSelf(),
         fileOperation::getGlobalIORanks()
     );
 

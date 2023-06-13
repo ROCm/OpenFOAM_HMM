@@ -306,14 +306,19 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
     if (worldIndex != -1)
     {
-        // During startup, so worldComm == globalComm
+        // During startup, so commWorld() == commGlobal()
 
         wordList worlds(numprocs);
-        worlds[UPstream::myProcNo(UPstream::globalComm)] = world;
-        Pstream::gatherList(worlds, UPstream::msgType(), UPstream::globalComm);
+        worlds[UPstream::myProcNo(UPstream::commGlobal())] = world;
+        Pstream::gatherList
+        (
+            worlds,
+            UPstream::msgType(),
+            UPstream::commGlobal()
+        );
 
         // Compact
-        if (UPstream::master(UPstream::globalComm))
+        if (UPstream::master(UPstream::commGlobal()))
         {
             DynamicList<word> worldNames(numprocs);
             worldIDs_.resize_nocopy(numprocs);
@@ -333,10 +338,10 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
 
             allWorlds_.transfer(worldNames);
         }
-        Pstream::broadcasts(UPstream::globalComm, allWorlds_, worldIDs_);
+        Pstream::broadcasts(UPstream::commGlobal(), allWorlds_, worldIDs_);
 
         const label myWorldId =
-            worldIDs_[UPstream::myProcNo(UPstream::globalComm)];
+            worldIDs_[UPstream::myProcNo(UPstream::commGlobal())];
 
         DynamicList<label> subRanks;
         forAll(worldIDs_, proci)
@@ -347,9 +352,9 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
             }
         }
 
-        // Allocate new communicator with globalComm as its parent
+        // Allocate new communicator with comm-global as its parent
         const label subComm =
-            UPstream::allocateCommunicator(UPstream::globalComm, subRanks);
+            UPstream::allocateCommunicator(UPstream::commGlobal(), subRanks);
 
 
         // Override worldComm
@@ -357,10 +362,11 @@ bool Foam::UPstream::init(int& argc, char**& argv, const bool needsThread)
         // For testing: warn use of non-worldComm
         UPstream::warnComm = UPstream::worldComm;
 
-        // For selfComm : the processor number wrt the new world communicator
-        if (procIDs_[UPstream::selfComm].size())
+        // MPI_COMM_SELF : the processor number wrt the new world communicator
+        if (procIDs_[UPstream::commSelf()].size())
         {
-            procIDs_[UPstream::selfComm].front() = UPstream::myProcNo(subComm);
+            procIDs_[UPstream::commSelf()].front() =
+                UPstream::myProcNo(subComm);
         }
 
         if (UPstream::debug)
@@ -535,11 +541,11 @@ void Foam::UPstream::allocateCommunicatorComponents
     {
         // Global communicator. Same as world communicator for single-world
 
-        if (index != UPstream::globalComm)
+        if (index != UPstream::commGlobal())
         {
             FatalErrorInFunction
                 << "world communicator should always be index "
-                << UPstream::globalComm
+                << UPstream::commGlobal()
                 << Foam::exit(FatalError);
         }
 
@@ -570,7 +576,7 @@ void Foam::UPstream::allocateCommunicatorComponents
     }
     else if (parentIndex == -2)
     {
-        // Self communicator (selfComm)
+        // MPI_COMM_SELF
 
         PstreamGlobals::pendingMPIFree_[index] = false;
         PstreamGlobals::MPICommunicators_[index] = MPI_COMM_SELF;
@@ -592,8 +598,8 @@ void Foam::UPstream::allocateCommunicatorComponents
         }
         #endif
 
-        // For selfComm : the process IDs within the world communicator.
-        // Uses MPI_COMM_WORLD in case called before UPstream::globalComm
+        // For MPI_COMM_SELF : the process IDs within the world communicator.
+        // Uses MPI_COMM_WORLD in case called before UPstream::commGlobal()
         // was initialized
 
         procIDs_[index].resize_nocopy(1);

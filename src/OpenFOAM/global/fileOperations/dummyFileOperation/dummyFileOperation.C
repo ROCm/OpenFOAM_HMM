@@ -55,7 +55,7 @@ Foam::fileOperations::dummyFileOperation::dummyFileOperation
         // Use COMM_SELF for now, but COMM_NULL is probably more appropriate
         Tuple2<label, labelList>
         (
-            UPstream::selfComm,
+            UPstream::commSelf(),
             fileOperation::getGlobalIORanks()
         )
     )

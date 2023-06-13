@@ -220,7 +220,7 @@ Foam::UIPstreamBase::UIPstreamBase
     Istream(fmt),
     fromProcNo_(UPstream::masterNo()),      // placeholder
     tag_(UPstream::msgType()),              // placeholder
-    comm_(UPstream::selfComm),              // placeholder
+    comm_(UPstream::commSelf()),            // placeholder
     messageSize_(receiveBuf.size()),        // Message == buffer
     storedRecvBufPos_(0),
     clearAtEnd_(false),   // Do not clear recvBuf if at end!!

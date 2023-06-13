@@ -166,7 +166,7 @@ protected:
 
         //- Overall number of processors.
         //  Used to synthesise processor directory naming:
-        //  - parallel: UPstream::nProcs(UPstream::worldComm)
+        //  - parallel: UPstream::nProcs(UPstream::commWorld())
         //  - non-parallel: detected from processor dir naming ('processorsNN')
         label nProcs_;
 
@@ -236,9 +236,9 @@ protected:
             (
                 (
                     communicator < 0
-                 || communicator == UPstream::globalComm
-                 || communicator == UPstream::selfComm
-                 || communicator == UPstream::worldComm
+                 || communicator == UPstream::commGlobal()
+                 || communicator == UPstream::commSelf()
+                 || communicator == UPstream::commWorld()
                 )
               ? -1
               : communicator
@@ -254,7 +254,7 @@ private:
         static autoPtr<fileOperation> New_impl
         (
             const fileOperation& origHandler,
-            //! The selected sub-ranks (in worldComm)
+            //! The selected sub-ranks (in comm-world)
             const labelUList& subProcs,
             bool verbose
         );
@@ -359,7 +359,7 @@ public:
         (
             //! The original file handler
             const fileOperation& origHandler,
-            //! The selected sub-ranks (in worldComm)
+            //! The selected sub-ranks (in comm-world)
             const boolUList& useProc,
             bool verbose = false
         );
@@ -372,7 +372,7 @@ public:
         (
             //! The original file handler
             const fileOperation& origHandler,
-            //! The selected sub-ranks (in worldComm). Monotonic order!
+            //! The selected sub-ranks (in comm-world). Monotonic order!
             const bitSet& useProc,
             bool verbose = false
         );
