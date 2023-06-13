@@ -593,6 +593,33 @@ public:
         //  A no-op for non-parallel. No special treatment for null requests.
         static void addRequest(UPstream::Request& req);
 
+        //- Non-blocking comms: cancel and free outstanding request.
+        //- Corresponds to MPI_Cancel() + MPI_Request_free()
+        //  A no-op if parRun() == false
+        //  if there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        static void cancelRequest(const label i);
+
+        //- Non-blocking comms: cancel and free outstanding request.
+        //- Corresponds to MPI_Cancel() + MPI_Request_free()
+        //  A no-op if parRun() == false
+        static void cancelRequest(UPstream::Request& req);
+
+        //- Non-blocking comms: cancel and free outstanding requests.
+        //- Corresponds to MPI_Cancel() + MPI_Request_free()
+        //  A no-op if parRun() == false or list is empty
+        static void cancelRequests(UList<UPstream::Request>& requests);
+
+        //- Non-blocking comms: free outstanding request.
+        //- Corresponds to MPI_Request_free()
+        //  A no-op if parRun() == false
+        static void freeRequest(UPstream::Request& req);
+
+        //- Non-blocking comms: free outstanding requests.
+        //- Corresponds to MPI_Request_free()
+        //  A no-op if parRun() == false or list is empty
+        static void freeRequests(UList<UPstream::Request>& requests);
+
         //- Wait until all requests (from position onwards) have finished.
         //- Corresponds to MPI_Waitall()
         //  A no-op if parRun() == false,
@@ -699,7 +726,7 @@ public:
         //  if there are no pending requests,
         //  or if the indices are out-of-range (0 to nRequests)
         //  Each finished request parameter is set to -1 (ie, done).
-        static bool finishedRequestPair(label& req1, label& req2);
+        static bool finishedRequestPair(label& req0, label& req1);
 
         //- Non-blocking comms: wait for both requests to finish.
         //- Corresponds to pair of MPI_Wait()
@@ -707,7 +734,7 @@ public:
         //  if there are no pending requests,
         //  or if the indices are out-of-range (0 to nRequests)
         //  Each finished request parameter is set to -1 (ie, done).
-        static void waitRequestPair(label& req1, label& req2);
+        static void waitRequestPair(label& req0, label& req1);
 
 
     // General
@@ -1271,11 +1298,17 @@ public:
         //- Reset to default constructed value (MPI_REQUEST_NULL)
         void reset() noexcept;
 
-        //- Same as calling UPstream::waitRequest()
-        void wait() { UPstream::waitRequest(*this); }
+        //- Same as calling UPstream::cancelRequest()
+        void cancel() { UPstream::cancelRequest(*this); }
+
+        //- Same as calling UPstream::freeRequest()
+        void free() { UPstream::freeRequest(*this); }
 
         //- Same as calling UPstream::finishedRequest()
         bool finished() { return UPstream::finishedRequest(*this); }
+
+        //- Same as calling UPstream::waitRequest()
+        void wait() { UPstream::waitRequest(*this); }
 };
 
 

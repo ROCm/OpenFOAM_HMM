@@ -53,7 +53,14 @@ Foam::label Foam::UPstream::nRequests() noexcept { return 0; }
 
 void Foam::UPstream::resetRequests(const label n) {}
 
-void Foam::UPstream::addRequest(UPstream::Request& req) {}
+void Foam::UPstream::addRequest(UPstream::Request&) {}
+
+void Foam::UPstream::cancelRequest(const label i) {}
+void Foam::UPstream::cancelRequest(UPstream::Request&) {}
+void Foam::UPstream::cancelRequests(UList<UPstream::Request>&) {}
+
+void Foam::UPstream::freeRequest(UPstream::Request&) {}
+void Foam::UPstream::freeRequests(UList<UPstream::Request>&) {}
 
 void Foam::UPstream::waitRequests(const label pos, label len) {}
 void Foam::UPstream::waitRequests(UList<UPstream::Request>&) {}
@@ -96,18 +103,18 @@ bool Foam::UPstream::finishedRequests(UList<UPstream::Request>&)
 }
 
 
-bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
+bool Foam::UPstream::finishedRequestPair(label& req0, label& req1)
 {
+    req0 = -1;
     req1 = -1;
-    req2 = -1;
     return true;
 }
 
 
-void Foam::UPstream::waitRequestPair(label& req1, label& req2)
+void Foam::UPstream::waitRequestPair(label& req0, label& req1)
 {
+    req0 = -1;
     req1 = -1;
-    req2 = -1;
 }
 
 

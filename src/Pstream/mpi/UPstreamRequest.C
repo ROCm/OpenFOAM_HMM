@@ -88,6 +88,118 @@ void Foam::UPstream::addRequest(UPstream::Request& req)
 }
 
 
+void Foam::UPstream::cancelRequest(const label i)
+{
+    // No-op for non-parallel, or out-of-range (eg, placeholder indices)
+    if
+    (
+        !UPstream::parRun()
+     || i < 0
+     || i >= PstreamGlobals::outstandingRequests_.size()
+    )
+    {
+        return;
+    }
+
+    {
+        auto& request = PstreamGlobals::outstandingRequests_[i];
+        if (MPI_REQUEST_NULL != request)  // Active handle is mandatory
+        {
+            MPI_Cancel(&request);
+            MPI_Request_free(&request);  //<- Sets to MPI_REQUEST_NULL
+        }
+    }
+}
+
+
+void Foam::UPstream::cancelRequest(UPstream::Request& req)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    {
+        MPI_Request request = PstreamDetail::Request::get(req);
+        if (MPI_REQUEST_NULL != request)  // Active handle is mandatory
+        {
+            MPI_Cancel(&request);
+            MPI_Request_free(&request);
+        }
+        req = UPstream::Request(MPI_REQUEST_NULL);  // Now inactive
+    }
+}
+
+
+void Foam::UPstream::cancelRequests(UList<UPstream::Request>& requests)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    for (auto& req : requests)
+    {
+        MPI_Request request = PstreamDetail::Request::get(req);
+        if (MPI_REQUEST_NULL != request)  // Active handle is mandatory
+        {
+            MPI_Cancel(&request);
+            MPI_Request_free(&request);
+        }
+        req = UPstream::Request(MPI_REQUEST_NULL);  // Now inactive
+    }
+}
+
+
+void Foam::UPstream::freeRequest(UPstream::Request& req)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    {
+        MPI_Request request = PstreamDetail::Request::get(req);
+        if (MPI_REQUEST_NULL != request)  // Active handle is mandatory
+        {
+            // if (cancel)
+            // {
+            //     MPI_Cancel(&request);
+            // }
+            MPI_Request_free(&request);
+        }
+        req = UPstream::Request(MPI_REQUEST_NULL);  // Now inactive
+    }
+}
+
+
+void Foam::UPstream::freeRequests(UList<UPstream::Request>& requests)
+{
+    // No-op for non-parallel
+    if (!UPstream::parRun())
+    {
+        return;
+    }
+
+    for (auto& req : requests)
+    {
+        MPI_Request request = PstreamDetail::Request::get(req);
+        if (MPI_REQUEST_NULL != request)  // Active handle is mandatory
+        {
+            // if (cancel)
+            // {
+            //     MPI_Cancel(&request);
+            // }
+            MPI_Request_free(&request);
+        }
+        req = UPstream::Request(MPI_REQUEST_NULL);  // Now inactive
+    }
+}
+
+
 void Foam::UPstream::waitRequests(const label pos, label len)
 {
     // No-op for non-parallel, no pending requests or out-of-range
@@ -178,7 +290,7 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
     {
         MPI_Request request = PstreamDetail::Request::get(req);
 
-        if (MPI_REQUEST_NULL != request)
+        if (MPI_REQUEST_NULL != request)  // Apply some prefiltering
         {
             waitRequests[count] = request;
             ++count;
@@ -187,7 +299,7 @@ void Foam::UPstream::waitRequests(UList<UPstream::Request>& requests)
 
     if (!count)
     {
-        // Early exit: has NULL requests only
+        // No active request handles
         return;
     }
 
@@ -422,8 +534,8 @@ Foam::label Foam::UPstream::waitAnyRequest(UList<UPstream::Request>& requests)
 //
 /// void Foam::UPstream::waitRequests
 /// (
-///     UPstream::Request& req1,
-///     UPstream::Request& req2
+///     UPstream::Request& req0,
+///     UPstream::Request& req1
 /// )
 /// {
 ///     // No-op for non-parallel
@@ -435,21 +547,21 @@ Foam::label Foam::UPstream::waitAnyRequest(UList<UPstream::Request>& requests)
 ///     int count = 0;
 ///     MPI_Request waitRequests[2];
 ///
-///     waitRequests[count] = PstreamDetail::Request::get(req1);
+///     waitRequests[count] = PstreamDetail::Request::get(req0);
 ///     if (MPI_REQUEST_NULL != waitRequests[count])
 ///     {
-///         // Flag in advance as being handled
-///         req1 = UPstream::Request(MPI_REQUEST_NULL);
 ///         ++count;
 ///     }
 ///
-///     waitRequests[count] = PstreamDetail::Request::get(req2);
+///     waitRequests[count] = PstreamDetail::Request::get(req1);
 ///     if (MPI_REQUEST_NULL != waitRequests[count])
 ///     {
-///         // Flag in advance as being handled
-///         req2 = UPstream::Request(MPI_REQUEST_NULL);
 ///         ++count;
 ///     }
+///
+///     // Flag in advance as being handled
+///     req0 = UPstream::Request(MPI_REQUEST_NULL);
+///     req1 = UPstream::Request(MPI_REQUEST_NULL);
 ///
 ///     if (!count)
 ///     {
@@ -544,8 +656,7 @@ void Foam::UPstream::waitRequest(UPstream::Request& req)
 
     profilingPstream::addWaitTime();
 
-    // Handled, reset to MPI_REQUEST_NULL
-    req = UPstream::Request(MPI_REQUEST_NULL);
+    req = UPstream::Request(MPI_REQUEST_NULL);  // Now inactive
 }
 
 
@@ -605,7 +716,7 @@ bool Foam::UPstream::finishedRequest(UPstream::Request& req)
 
     if (flag)
     {
-        // Success: reset request to MPI_REQUEST_NULL
+        // Success: now inactive
         req = UPstream::Request(MPI_REQUEST_NULL);
     }
 
@@ -687,7 +798,7 @@ bool Foam::UPstream::finishedRequests(UList<UPstream::Request>& requests)
     {
         MPI_Request request = PstreamDetail::Request::get(req);
 
-        if (MPI_REQUEST_NULL != request)
+        if (MPI_REQUEST_NULL != request)  // Apply some prefiltering
         {
             waitRequests[count] = request;
             ++count;
@@ -696,7 +807,7 @@ bool Foam::UPstream::finishedRequests(UList<UPstream::Request>& requests)
 
     if (!count)
     {
-        // Early exit: has NULL requests only
+        // No active handles
         return true;
     }
 
@@ -736,45 +847,60 @@ bool Foam::UPstream::finishedRequests(UList<UPstream::Request>& requests)
 }
 
 
-bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
+bool Foam::UPstream::finishedRequestPair(label& req0, label& req1)
 {
     // No-op for non-parallel
     if (!UPstream::parRun())
     {
+        req0 = -1;
         req1 = -1;
-        req2 = -1;
         return true;
     }
 
-    int count = 0;
+    bool anyActive = false;
     MPI_Request waitRequests[2];
 
-    // In range?
-    if (req1 >= 0 && req1 < PstreamGlobals::outstandingRequests_.size())
+    // No-op for out-of-range (eg, placeholder indices)
+
+    if (req0 >= 0 && req0 < PstreamGlobals::outstandingRequests_.size())
     {
-        waitRequests[0] = PstreamGlobals::outstandingRequests_[req1];
-        ++count;
+        waitRequests[0] = PstreamGlobals::outstandingRequests_[req0];
     }
     else
     {
         waitRequests[0] = MPI_REQUEST_NULL;
-        req1 = -1;
     }
 
-    // No-op for non-parallel, or out-of-range (eg, placeholder indices)
-    if (req2 >= 0 && req2 < PstreamGlobals::outstandingRequests_.size())
+    if (req1 >= 0 && req1 < PstreamGlobals::outstandingRequests_.size())
     {
-        waitRequests[1] = PstreamGlobals::outstandingRequests_[req2];
-        ++count;
+        waitRequests[1] = PstreamGlobals::outstandingRequests_[req1];
     }
     else
     {
         waitRequests[1] = MPI_REQUEST_NULL;
-        req2 = -1;
     }
 
-    if (!count)
+    if (MPI_REQUEST_NULL != waitRequests[0])  // An active handle
     {
+        anyActive = true;
+    }
+    else
+    {
+        req0 = -1;
+    }
+
+    if (MPI_REQUEST_NULL != waitRequests[1])  // An active handle
+    {
+        anyActive = true;
+    }
+    else
+    {
+        req1 = -1;
+    }
+
+    if (!anyActive)
+    {
+        // No active handles
         return true;
     }
 
@@ -807,41 +933,41 @@ bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
         // No active request handles.
         // Slight pedantic, but copy back requests in case they were altered
 
-        if (req1 >= 0)
+        if (req0 >= 0)
         {
-            PstreamGlobals::outstandingRequests_[req1] = waitRequests[0];
+            PstreamGlobals::outstandingRequests_[req0] = waitRequests[0];
         }
 
-        if (req2 >= 0)
+        if (req1 >= 0)
         {
-            PstreamGlobals::outstandingRequests_[req2] = waitRequests[1];
+            PstreamGlobals::outstandingRequests_[req1] = waitRequests[1];
         }
 
         // Flag indices as 'done'
+        req0 = -1;
         req1 = -1;
-        req2 = -1;
         return true;
     }
 
     // Copy back requests to their 'stack' locations
     for (int i = 0; i < outcount; ++i)
     {
-        int reqid = indices[i];
+        const int idx = indices[i];
 
-        if (reqid == 0)
+        if (idx == 0)
+        {
+            if (req0 >= 0)
+            {
+                PstreamGlobals::outstandingRequests_[req0] = waitRequests[0];
+                req0 = -1;
+            }
+        }
+        if (idx == 1)
         {
             if (req1 >= 0)
             {
-                PstreamGlobals::outstandingRequests_[req1] = waitRequests[0];
+                PstreamGlobals::outstandingRequests_[req1] = waitRequests[1];
                 req1 = -1;
-            }
-        }
-        if (reqid == 1)
-        {
-            if (req2 >= 0)
-            {
-                PstreamGlobals::outstandingRequests_[req2] = waitRequests[1];
-                req2 = -1;
             }
         }
     }
@@ -850,13 +976,13 @@ bool Foam::UPstream::finishedRequestPair(label& req1, label& req2)
 }
 
 
-void Foam::UPstream::waitRequestPair(label& req1, label& req2)
+void Foam::UPstream::waitRequestPair(label& req0, label& req1)
 {
     // No-op for non-parallel. Flag indices as 'done'
     if (!UPstream::parRun())
     {
+        req0 = -1;
         req1 = -1;
-        req2 = -1;
         return;
     }
 
@@ -864,32 +990,37 @@ void Foam::UPstream::waitRequestPair(label& req1, label& req2)
     MPI_Request waitRequests[2];
 
     // No-op for out-of-range (eg, placeholder indices)
+    // Prefilter inactive handles
+
+    if (req0 >= 0 && req0 < PstreamGlobals::outstandingRequests_.size())
+    {
+        waitRequests[count] = PstreamGlobals::outstandingRequests_[req0];
+        PstreamGlobals::outstandingRequests_[req0] = MPI_REQUEST_NULL;
+
+        if (MPI_REQUEST_NULL != waitRequests[count])  // An active handle
+        {
+            ++count;
+        }
+    }
+
     if (req1 >= 0 && req1 < PstreamGlobals::outstandingRequests_.size())
     {
-        waitRequests[0] = PstreamGlobals::outstandingRequests_[req1];
-        ++count;
-    }
-    else
-    {
-        waitRequests[0] = MPI_REQUEST_NULL;
-        req1 = -1;  // Flag as 'done'
+        waitRequests[count] = PstreamGlobals::outstandingRequests_[req1];
+        PstreamGlobals::outstandingRequests_[req1] = MPI_REQUEST_NULL;
+
+        if (MPI_REQUEST_NULL != waitRequests[count])  // An active handle
+        {
+            ++count;
+        }
     }
 
-    // No-op for out-of-range (eg, placeholder indices)
-    if (req2 >= 0 && req2 < PstreamGlobals::outstandingRequests_.size())
-    {
-        waitRequests[1] = PstreamGlobals::outstandingRequests_[req2];
-        ++count;
-    }
-    else
-    {
-        waitRequests[1] = MPI_REQUEST_NULL;
-        req2 = -1;  // Flag as 'done'
-    }
+    // Flag in advance as being handled
+    req0 = -1;
+    req1 = -1;
 
-    // Early exit
     if (!count)
     {
+        // No active handles
         return;
     }
 
@@ -904,23 +1035,6 @@ void Foam::UPstream::waitRequestPair(label& req1, label& req2)
     }
 
     profilingPstream::addWaitTime();
-
-    // Copy back requests to their 'stack' locations
-    // and flag index as done
-
-    if (req1 >= 0)
-    {
-        PstreamGlobals::outstandingRequests_[req1] = waitRequests[0];
-    }
-
-    if (req2 >= 0)
-    {
-        PstreamGlobals::outstandingRequests_[req2] = waitRequests[1];
-    }
-
-    // Flag indices as 'done'
-    req1 = -1;
-    req2 = -1;
 }
 
 
