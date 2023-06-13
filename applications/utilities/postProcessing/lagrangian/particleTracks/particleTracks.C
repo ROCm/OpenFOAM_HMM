@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
         trackSampler.createTrackField(localTimes, allTrackTimes);
 
         // Create the track fields
-        ///trackSampler.setTrackFields(obr, labelFields);
+        trackSampler.setTrackFields(obr, labelFields);
         trackSampler.setTrackFields(obr, scalarFields);
         trackSampler.setTrackFields(obr, vectorFields);
         trackSampler.setTrackFields(obr, sphericalTensorFields);
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
             writer.setTrackTimes(times);
             writer.nFields(nFields);
 
-            ///writeTrackFields(writer, labelFields);
+            writeTrackFields(writer, labelFields);
             writeTrackFields(writer, scalarFields);
             writeTrackFields(writer, vectorFields);
             writeTrackFields(writer, sphericalTensorFields);
