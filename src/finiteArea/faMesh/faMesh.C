@@ -350,7 +350,7 @@ Foam::faMesh::faMesh
     faSchemes(mesh()),
     edgeInterpolation(*this),
     faSolution(mesh()),
-    data(mesh()),   // Always NO_READ, NO_WRITE
+    data(faMesh::thisDb()),   // Always NO_READ, NO_WRITE
     faceLabels_
     (
         IOobject
@@ -473,7 +473,7 @@ Foam::faMesh::faMesh
     faSchemes(mesh(), io.readOpt()),
     edgeInterpolation(*this),
     faSolution(mesh(), io.readOpt()),
-    data(mesh()),   // Always NO_READ, NO_WRITE
+    data(faMesh::thisDb()),   // Always NO_READ, NO_WRITE
     faceLabels_
     (
         IOobject
@@ -558,7 +558,7 @@ Foam::faMesh::faMesh
     ),
     data
     (
-        mesh(),
+        faMesh::thisDb(),
         static_cast<const data&>(baseMesh)
     ),
     faceLabels_

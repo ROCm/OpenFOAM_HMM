@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,16 +30,17 @@ Class
 Description
     Database for solution data, solver performance and other reduced data.
 
-    fvMesh is derived from data so that all fields have access to the data from
-    the mesh reference they hold.
+    Both faMesh and fvMesh are derived from this class so that every
+    GeometricField has access to this data via their mesh reference.
 
 SourceFiles
     data.C
+    dataTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef data_H
-#define data_H
+#ifndef Foam_data_H
+#define Foam_data_H
 
 #include "IOdictionary.H"
 #include "solverPerformance.H"
@@ -57,7 +58,7 @@ class data
 :
     public IOdictionary
 {
-    // Private data
+    // Private Data
 
         //- Previously used time-index, used for reset between iterations
         mutable label prevTimeIndex_;
@@ -65,26 +66,69 @@ class data
 
     // Private Member Functions
 
+        //- True if boolean entry exists and is set
+        bool getBoolEntry(const word& keyword) const
+        {
+            bool value = false;
+            return readIfPresent(keyword, value) && value;
+        }
+
+        //- Add/remove boolean entry
+        void setBoolEntry(const word& keyword, bool on)
+        {
+            if (on)
+            {
+                add(keyword, true);
+            }
+            else
+            {
+                remove(keyword);
+            }
+        }
+
         //- No copy construct
         data(const data&) = delete;
 
         //- No copy assignment
         void operator=(const data&) = delete;
 
-
 public:
-
-    //- Debug switch
-    static int debug;
-
 
     // Constructors
 
-        //- Construct for objectRegistry
-        data(const objectRegistry& obr);
+        //- Construct for objectRegistry (registered with specified name)
+        //- optionally with initial content
+        data
+        (
+            const word& name,
+            const objectRegistry& obr,
+            const dictionary* content = nullptr
+        );
 
-        //- Construct for objectRegistry and initial contents
-        data(const objectRegistry& obr, const dictionary& dict);
+        //- Construct for objectRegistry (registered as "data")
+        explicit data(const objectRegistry& obr)
+        :
+            data("data", obr)
+        {}
+
+        //- Construct for objectRegistry (registered with specified name)
+        //- copying initial content
+        data
+        (
+            const word& name,
+            const objectRegistry& obr,
+            const dictionary& dict
+        )
+        :
+            data(name, obr, &dict)
+        {}
+
+        //- Construct for objectRegistry (registered as "data")
+        //- copying initial content
+        data(const objectRegistry& obr, const dictionary& dict)
+        :
+            data("data", obr, &dict)
+        {}
 
 
     // Member Functions
@@ -92,6 +136,31 @@ public:
         //- Return the dictionary of solver performance data which
         //- includes initial and final residuals for convergence checking
         const dictionary& solverPerformanceDict() const;
+
+        //- True if "firstIteration" entry exists and is set
+        bool isFirstIteration() const
+        {
+            return getBoolEntry("firstIteration");
+        }
+
+        //- True if "finalIteration" entry exists and is set
+        bool isFinalIteration() const
+        {
+            return getBoolEntry("finalIteration");
+        }
+
+        //- Add/remove "firstIteration" entry
+        void isFirstIteration(bool on)
+        {
+            return setBoolEntry("firstIteration", on);
+        }
+
+        //- Add/remove "finalIteration" entry
+        void isFinalIteration(bool on)
+        {
+            return setBoolEntry("finalIteration", on);
+        }
+
 
         //- Add/set the solverPerformance entry for the named field
         template<class Type>
