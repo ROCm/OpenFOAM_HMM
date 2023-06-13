@@ -406,7 +406,8 @@ Foam::label Foam::checkTopology
     const bool allTopology,
     const bool allGeometry,
     autoPtr<surfaceWriter>& surfWriter,
-    autoPtr<coordSetWriter>& setWriter
+    autoPtr<coordSetWriter>& setWriter,
+    const bool writeBadEdges
 )
 {
     label noFailedChecks = 0;
@@ -906,7 +907,7 @@ Foam::label Foam::checkTopology
             );
             Info<< nl << endl;
 
-            if (hadBadEdges)
+            if (writeBadEdges && hadBadEdges)
             {
                 edgeList dumpEdges(pp.edges(), badEdges.sortedToc());
 
@@ -931,6 +932,12 @@ Foam::label Foam::checkTopology
                     << returnReduce(dumpEdges.size(), sumOp<label>())
                     << " bad edges: " << writer.output().name() << nl;
                 writer.close();
+            }
+            else if (hadBadEdges)
+            {
+                Info<< "Detected "
+                    << returnReduce(badEdges.size(), sumOp<label>())
+                    << " bad edges (possibly relevant for finite-area)" << nl;
             }
         }
 

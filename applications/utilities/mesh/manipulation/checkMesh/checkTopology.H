@@ -75,7 +75,8 @@ label checkTopology
     const bool allTopology,
     const bool allGeometry,
     autoPtr<surfaceWriter>& surfWriter,
-    autoPtr<coordSetWriter>& setWriter
+    autoPtr<coordSetWriter>& setWriter,
+    const bool writeBadEdges = false
 );
 
 } // End namespace Foam
