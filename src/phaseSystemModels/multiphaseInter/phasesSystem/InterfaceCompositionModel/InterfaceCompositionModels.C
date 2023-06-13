@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -479,6 +479,19 @@ namespace Foam
             solidThermo,
             pureMixture,
             hTabulatedPolyIcoSolidThermoPhysics
+        );
+
+        makeInterfacePureType
+        (
+            Lee,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics,
+            heRhoThermo,
+            rhoThermo,
+            pureMixture,
+            tabulatedThermoPhysics
         );
 
         // From pure phase (tabulated) to solid phase (icoTabulated)
