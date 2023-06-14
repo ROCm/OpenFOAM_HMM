@@ -37,16 +37,17 @@ Usage
     \endtable
 
 Note
-    Can also just use uniformFixedValueFvPatchField with an expression
-    for the PatchFunction1.
+    This boundary condition is deprecated in favour of
+    Foam::uniformFixedValueFvPatchField
+    with expression entries.
 
 SourceFiles
     exprFixedValueFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef exprFixedValueFvPatchField_H
-#define exprFixedValueFvPatchField_H
+#ifndef FoamDeprecated_exprFixedValueFvPatchField_H
+#define FoamDeprecated_exprFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchField.H"
 #include "patchExprFieldBase.H"

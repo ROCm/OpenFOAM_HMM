@@ -38,21 +38,19 @@ Usage
     \endtable
 
 Note
-    For fixed-value boundary conditions, can also just use
-    uniformFixedValueFvPatchField with an expression for the
-    PatchFunction1, or a exprMixedFvPatchField.
-
-    For gradient boundary conditions, can also just use
-    uniformFixedGradientFvPatchField with an expression for the
-    PatchFunction1.
+    This boundary condition is deprecated in favour of
+    Foam::uniformMixedFvPatchField,
+    Foam::uniformFixedValueFvPatchField,
+    Foam::uniformFixedGradientFvPatchField
+    with expression entries.
 
 SourceFiles
     exprMixedFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef exprMixedFvPatchField_H
-#define exprMixedFvPatchField_H
+#ifndef FoamDeprecated_exprMixedFvPatchField_H
+#define FoamDeprecated_exprMixedFvPatchField_H
 
 #include "mixedFvPatchField.H"
 #include "patchExprFieldBase.H"

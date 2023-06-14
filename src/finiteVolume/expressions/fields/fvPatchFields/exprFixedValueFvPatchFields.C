@@ -25,7 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "exprFixedValueFvPatchFields.H"
+#include "exprFixedValueFvPatchField.H"
+#include "fieldTypes.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -36,6 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+makePatchTypeFieldTypedefs(exprFixedValue);
 makePatchFields(exprFixedValue);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -109,6 +109,10 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     ),
     driver_(this->patch(), dict_)
 {
+    DeprecatedInFunction(2212)
+        << "Use uniformMixed with Function1 expressions instead." << nl
+        << "    This boundary condition will be removed in the future" << endl;
+
     setDebug();
     DebugInFunction << nl;
 
