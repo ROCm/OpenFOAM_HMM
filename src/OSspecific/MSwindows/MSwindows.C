@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
     Copyright (C) 2011 Symscape
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -998,14 +998,14 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
     if (exists(src, false))
     {
         constexpr const int maxIndex = 99;
-        char index[3];
+        char index[4];
 
         for (int n = 0; n <= maxIndex; ++n)
         {
             fileName dstName(src + "." + ext);
             if (n)
             {
-                sprintf(index, "%02d", n);
+                ::snprintf(index, 4, "%02d", n);
                 dstName += index;
             }
 

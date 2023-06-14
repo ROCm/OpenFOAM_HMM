@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1305,14 +1305,14 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
     if (exists(src, false))
     {
         constexpr const int maxIndex = 99;
-        char index[3];
+        char index[4];
 
         for (int n = 0; n <= maxIndex; ++n)
         {
             fileName dstName(src + "." + ext);
             if (n)
             {
-                ::sprintf(index, "%02d", n);
+                ::snprintf(index, 4, "%02d", n);
                 dstName += index;
             }
 
@@ -1639,6 +1639,7 @@ int Foam::system(const std::string& command, const bool bg)
         return 0;
     }
 
+    // TBD: vfork is deprecated as of macOS 12.0
     const pid_t child_pid = ::vfork();   // NB: vfork, not fork!
 
     if (child_pid == -1)
@@ -1698,6 +1699,7 @@ int Foam::system(const CStringList& command, const bool bg)
     // The normal system() command has a fork buried in it that causes
     // issues with infiniband and openmpi etc.
 
+    // TBD: vfork is deprecated as of macOS 12.0
     const pid_t child_pid = ::vfork();
 
     if (child_pid == -1)
