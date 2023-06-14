@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,14 +73,15 @@ inline void edgeLimitedGrad<Type>::limitEdge
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-tmp<areaVectorField> edgeLimitedGrad<scalar>::grad
+tmp<areaVectorField> edgeLimitedGrad<scalar>::calcGrad
 (
-    const areaScalarField& vsf
+    const areaScalarField& vsf,
+    const word& name
 ) const
 {
     const faMesh& mesh = vsf.mesh();
 
-    tmp<areaVectorField> tGrad = basicGradScheme_().grad(vsf);
+    tmp<areaVectorField> tGrad = basicGradScheme_().calcGrad(vsf, name);
 
     if (k_ < SMALL)
     {
@@ -206,14 +208,15 @@ tmp<areaVectorField> edgeLimitedGrad<scalar>::grad
 
 
 template<>
-tmp<areaTensorField> edgeLimitedGrad<vector>::grad
+tmp<areaTensorField> edgeLimitedGrad<vector>::calcGrad
 (
-    const areaVectorField& vvf
+    const areaVectorField& vvf,
+    const word& name
 ) const
 {
     const faMesh& mesh = vvf.mesh();
 
-    tmp<areaTensorField> tGrad = basicGradScheme_().grad(vvf);
+    tmp<areaTensorField> tGrad = basicGradScheme_().grad(vvf, name);
 
     if (k_ < SMALL)
     {

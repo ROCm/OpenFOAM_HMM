@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,8 +63,9 @@ class gaussGrad
 :
     public fa::gradScheme<Type>
 {
-    // Private data
+    // Private Data
 
+        //- Interpolation scheme
         tmp<edgeInterpolationScheme<Type>> tinterpScheme_;
 
 
@@ -118,16 +120,31 @@ public:
 
     // Member Functions
 
-        //- Return the gradient of the given field calculated
-        //  using Gauss' theorem on the interpolated field
+        //- Return the gradient of the given field
+        //- calculated using Gauss' theorem on the given surface field
+        static
         tmp
         <
             GeometricField
             <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
-        > grad
+        > gradf
         (
-            const GeometricField<Type, faPatchField, areaMesh>&
+            const GeometricField<Type, faePatchField, edgeMesh>&,
+            const word& name
+        );
+
+        //- Return the gradient of the given field to the
+        //- gradScheme::grad for optional caching
+        virtual tmp
+        <
+            GeometricField
+            <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
+        > calcGrad
+        (
+            const GeometricField<Type, faPatchField, areaMesh>& vsf,
+            const word& name
         ) const;
+
 
         //- Correct the boundary values of the gradient using the patchField
         // snGrad functions

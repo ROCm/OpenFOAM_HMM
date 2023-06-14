@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,8 @@ License
 
 #include "fa.H"
 #include "HashTable.H"
+#include "objectRegistry.H"
+#include "solution.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -83,11 +85,112 @@ tmp<gradScheme<Type>> gradScheme<Type>::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-gradScheme<Type>::~gradScheme()
-{}
+tmp
+<
+    GeometricField
+    <
+        typename outerProduct<vector, Type>::type,
+        faPatchField,
+        areaMesh
+    >
+>
+gradScheme<Type>::grad
+(
+    const GeometricField<Type, faPatchField, areaMesh>& vsf,
+    const word& name
+) const
+{
+    typedef typename outerProduct<vector, Type>::type GradType;
+    typedef GeometricField<GradType, faPatchField, areaMesh> GradFieldType;
+
+    GradFieldType* pgGrad =
+        mesh().thisDb().template getObjectPtr<GradFieldType>(name);
+
+    if (!this->mesh().cache(name)) // || this->mesh().changing()
+    {
+        // Delete any old occurrences to avoid double registration
+        if (pgGrad && pgGrad->ownedByRegistry())
+        {
+            solution::cachePrintMessage("Deleting", name, vsf);
+            delete pgGrad;
+        }
+
+        solution::cachePrintMessage("Calculating", name, vsf);
+        return calcGrad(vsf, name);
+    }
+
+
+    if (!pgGrad)
+    {
+        solution::cachePrintMessage("Calculating and caching", name, vsf);
+
+        pgGrad = calcGrad(vsf, name).ptr();
+        regIOobject::store(pgGrad);
+    }
+    else
+    {
+        if (pgGrad->upToDate(vsf))
+        {
+            solution::cachePrintMessage("Reusing", name, vsf);
+        }
+        else
+        {
+            solution::cachePrintMessage("Updating", name, vsf);
+            delete pgGrad;
+
+            pgGrad = calcGrad(vsf, name).ptr();
+            regIOobject::store(pgGrad);
+        }
+    }
+
+    return *pgGrad;
+}
+
+
+template<class Type>
+tmp
+<
+    GeometricField
+    <
+        typename outerProduct<vector, Type>::type,
+        faPatchField,
+        areaMesh
+    >
+>
+gradScheme<Type>::grad
+(
+    const GeometricField<Type, faPatchField, areaMesh>& vsf
+) const
+{
+    return grad(vsf, "grad(" + vsf.name() + ')');
+}
+
+
+template<class Type>
+tmp
+<
+    GeometricField
+    <
+        typename outerProduct<vector, Type>::type,
+        faPatchField,
+        areaMesh
+    >
+>
+gradScheme<Type>::grad
+(
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tvsf
+) const
+{
+    typedef typename outerProduct<vector, Type>::type GradType;
+    typedef GeometricField<GradType, faPatchField, areaMesh> GradFieldType;
+
+    tmp<GradFieldType> tgrad = grad(tvsf());
+    tvsf.clear();
+    return tgrad;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
