@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,6 +90,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const Time& time)
     aRelax_(1.0),
     aDamp_(1.0),
     report_(false),
+    updateConstraints_(false),
     solver_(nullptr)
 {}
 
@@ -130,6 +131,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     aRelax_(dict.getOrDefault<scalar>("accelerationRelaxation", 1)),
     aDamp_(dict.getOrDefault<scalar>("accelerationDamping", 1)),
     report_(dict.getOrDefault("report", false)),
+    updateConstraints_(dict.getOrDefault("updateConstraints", false)),
     solver_(sixDoFSolver::New(dict.subDict("solver"), *this))
 {
     addRestraints(dict);
@@ -178,6 +180,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     aRelax_(sDoFRBM.aRelax_),
     aDamp_(sDoFRBM.aDamp_),
     report_(sDoFRBM.report_),
+    updateConstraints_(sDoFRBM.updateConstraints_),
     solver_(sDoFRBM.solver_.clone())
 {}
 
@@ -301,6 +304,31 @@ void Foam::sixDoFRigidBodyMotion::updateAcceleration
     {
         first = false;
     }
+}
+
+
+void Foam::sixDoFRigidBodyMotion::updateConstraints()
+{
+    if (!updateConstraints_)
+    {
+        return;
+    }
+
+    pointConstraint pct;
+    pointConstraint pcr;
+
+    forAll(constraints_, i)
+    {
+        constraints_[i].setCentreOfRotation(initialCentreOfRotation_);
+        constraints_[i].constrainTranslation(pct);
+        constraints_[i].constrainRotation(pcr);
+    }
+
+    tConstraints_ = pct.constraintTransformation();
+    rConstraints_ = pcr.constraintTransformation();
+
+    Info<< "Translational constraint tensor " << tConstraints_ << nl
+        << "Rotational constraint tensor " << rConstraints_ << endl;
 }
 
 

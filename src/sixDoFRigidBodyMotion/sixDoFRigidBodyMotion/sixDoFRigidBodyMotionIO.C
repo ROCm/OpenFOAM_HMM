@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ bool Foam::sixDoFRigidBodyMotion::read(const dictionary& dict)
     aRelax_ = dict.getOrDefault<scalar>("accelerationRelaxation", 1);
     aDamp_ = dict.getOrDefault<scalar>("accelerationDamping", 1);
     report_ = dict.getOrDefault<Switch>("report", false);
+    updateConstraints_ = dict.getOrDefault("updateConstraints", false);
 
     restraints_.clear();
     addRestraints(dict);
@@ -61,6 +62,7 @@ void Foam::sixDoFRigidBodyMotion::write(Ostream& os) const
     os.writeEntry("accelerationRelaxation", aRelax_);
     os.writeEntry("accelerationDamping", aDamp_);
     os.writeEntry("report", report_);
+    os.writeEntry("updateConstraints", updateConstraints_);
 
     if (!restraints_.empty())
     {

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -273,6 +273,11 @@ inline const Foam::Time& Foam::sixDoFRigidBodyMotion::time() const
 inline bool Foam::sixDoFRigidBodyMotion::report() const
 {
     return report_;
+}
+
+inline bool Foam::sixDoFRigidBodyMotion::updateConstraints() const
+{
+    return updateConstraints_;
 }
 
 

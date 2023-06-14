@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,18 +28,67 @@ Class
     Foam::sixDoFRigidBodyMotionConstraints::axis
 
 Description
-    Orientation constraint:
-        may only rotate around a fixed axis.
+    This constraint imposes an orientation limitation where bodies
+    are restricted to rotate only around a fixed axis, optionally with
+    the inclusion of maximum and minimum rotation angle constraints.
+
+Usage
+    Minimal example by \c constant/dynamicMeshDict.sixDoFRigidBodyMotionCoeffs:
+    \verbatim
+    constraints
+    {
+        constrainRotation1
+        {
+            // Mandatory entries
+            sixDoFRigidBodyMotionConstraint     axis;
+            axis                                <vector>;
+
+            // Optional entries
+            maxClockwiseTheta                   <Function1<scalar>>;
+            maxCounterclockwiseTheta            <Function1<scalar>>;
+            thetaUnits                          <word>;
+            referenceOrientation                <tensor>;
+        }
+    }
+    \endverbatim
+
+    where the entries mean:
+    \table
+      Property     | Description                        | Type | Reqd | Deflt
+      sixDoFRigidBodyMotionConstraint | Type name: axis | word | yes  | -
+      axis         | Reference rotation axis fixed in global space   <!--
+                   -->                                | vector | yes  | -
+      maxClockwiseTheta | Maximum clockwise rotation angle about the <!--
+                   --> rotation axis            | Function1\<scalar\> | no | -
+      maxCounterlockwiseTheta | Maximum counterclockwise rotation    <!--
+             --> angle about the rotation axis  | Function1\<scalar\> | no | -
+      thetaUnits   | Units of theta angles             | word   | no  | radians
+      referenceOrientation | Reference orientation where there is no moment <!--
+                   -->                                 | tensor | no  | I
+    \endtable
+
+    The inherited entries are elaborated in:
+      - \link Function1.H \endlink
+
+Notes
+  - The units for \c thetaUnits can be specified
+    as either \c degrees or \c radians.
+  - The \c maxClockwiseTheta and \c maxCounterlockwiseTheta
+    are always non-negative.
+  - Negative and positive \c theta correspond to clockwise
+    and counterclockwise rotation sectors with respect to
+    the reference orientation, respectively.
 
 SourceFiles
     sixDoFRigidBodyMotionAxisConstraint.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sixDoFRigidBodyMotionAxisConstraint_H
-#define sixDoFRigidBodyMotionAxisConstraint_H
+#ifndef Foam_sixDoFRigidBodyMotionAxisConstraint_H
+#define Foam_sixDoFRigidBodyMotionAxisConstraint_H
 
 #include "sixDoFRigidBodyMotionConstraint.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,11 +106,34 @@ class axis
 :
     public sixDoFRigidBodyMotionConstraint
 {
+    // Private Data
 
-    // Private data
+        //- Reference orientation where there is no moment
+        tensor refQ_;
 
-        //- Reference axis in global space
+        //- Reference rotation axis fixed in global space
         vector axis_;
+
+        //- Maximum clockwise rotation angle around the rotation axis
+        autoPtr<Function1<scalar>> maxCWThetaPtr_;
+
+        //- Maximum counterclockwise rotation angle around the rotation axis
+        autoPtr<Function1<scalar>> maxCCWThetaPtr_;
+
+        //- Flag to enable to use maxTheta in degrees rather than in radians
+        bool degrees_;
+
+
+    // Private Member Functions
+
+        //- Return the index of the rotation sector that the
+        //- body resides with respect to the reference orientation
+        //  -1: clockwise, 0: reference orientation, 1: counterclockwise
+        label rotationSector(const vector& oldDir, const vector& newDir) const;
+
+        //- Return the direction of the given force or momentum
+        //  false: clockwise, true: counterclockwise
+        bool calcDir(const vector& fm, const bool rotationSector) const;
 
 
 public:
@@ -88,9 +161,12 @@ public:
             );
         }
 
+        //- No copy assignment
+        void operator=(const sixDoFRigidBodyMotionConstraint&) = delete;
+
 
     //- Destructor
-    virtual ~axis();
+    virtual ~axis() = default;
 
 
     // Member Functions

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,6 +128,11 @@ inline void Foam::sixDoFSolver::updateAcceleration
 )
 {
     body_.updateAcceleration(fGlobal, tauGlobal);
+}
+
+inline void Foam::sixDoFSolver::updateConstraints()
+{
+    body_.updateConstraints();
 }
 
 
