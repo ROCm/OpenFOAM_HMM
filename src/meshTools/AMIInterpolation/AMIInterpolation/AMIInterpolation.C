@@ -768,10 +768,8 @@ bool Foam::AMIInterpolation::calculate
     }
 
     Info<< indent
-        << "AMI: Creating addressing and weights between "
-        << srcTotalSize << " source faces and "
-        << tgtTotalSize << " target faces"
-        << endl;
+        << "AMI: Patch source faces: " << srcTotalSize << nl
+        << "AMI: Patch target faces: " << tgtTotalSize << endl;
 
     singlePatchProc_ = calcDistribution(srcPatch, tgtPatch);
 

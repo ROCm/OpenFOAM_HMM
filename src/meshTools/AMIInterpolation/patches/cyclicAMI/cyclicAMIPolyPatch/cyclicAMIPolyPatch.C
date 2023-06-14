@@ -386,6 +386,9 @@ void Foam::cyclicAMIPolyPatch::resetAMI(const UList<point>& points) const
     pointField srcPoints(localPoints());
     pointField nbrPoints(nbr.localPoints());
 
+    Info<< "AMI: Creating AMI for source:" << name()
+        << " and target:" << nbr.name() << endl;
+
     if (debug)
     {
         const Time& t = boundaryMesh().mesh().time();
