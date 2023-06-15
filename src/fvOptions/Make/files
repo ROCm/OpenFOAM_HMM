@@ -36,6 +36,7 @@ $(derivedSources)/tabulatedAccelerationSource/tabulated6DoFAcceleration/tabulate
 $(derivedSources)/viscousDissipation/viscousDissipation.C
 $(derivedSources)/buoyancyTurbSource/buoyancyTurbSource.C
 $(derivedSources)/patchCellsSource/patchCellsSource.C
+$(derivedSources)/fanMomentumSource/fanMomentumSource.C
 
 $(derivedSources)/heatExchangerSource/heatExchangerSource.C
 $(derivedSources)/heatExchangerSource/heatExchangerModels/heatExchangerModel/heatExchangerModel.C
