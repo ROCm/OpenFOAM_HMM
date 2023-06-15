@@ -146,12 +146,14 @@ Foam::solverPerformance Foam::PBiCG::solve
         solveScalar wArT = 0;
 
         // --- Select and construct the preconditioner
-        autoPtr<lduMatrix::preconditioner> preconPtr =
-        lduMatrix::preconditioner::New
-        (
-            *this,
-            controlDict_
-        );
+        if (!preconPtr_)
+        {
+            preconPtr_ = lduMatrix::preconditioner::New
+            (
+                *this,
+                controlDict_
+            );
+        }
 
         // --- Solver iteration
         do
@@ -160,8 +162,8 @@ Foam::solverPerformance Foam::PBiCG::solve
             const solveScalar wArTold = wArT;
 
             // --- Precondition residuals
-            preconPtr->precondition(wA, rA, cmpt);
-            preconPtr->preconditionT(wT, rT, cmpt);
+            preconPtr_->precondition(wA, rA, cmpt);
+            preconPtr_->preconditionT(wT, rT, cmpt);
 
             // --- Update search directions:
             wArT = gSumProd(wA, rT, matrix().mesh().comm());
@@ -233,6 +235,11 @@ Foam::solverPerformance Foam::PBiCG::solve
             << upperMaxIters << nl
             << "    Please try the more robust PBiCGStab solver."
             << exit(FatalError);
+    }
+
+    if (preconPtr_)
+    {
+        preconPtr_->setFinished(solverPerf);
     }
 
     matrix().setResidualField

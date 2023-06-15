@@ -575,6 +575,10 @@ public:
             {
                 NotImplemented;
             }
+
+            //- Signal end of solver
+            virtual void setFinished(const solverPerformance& perf) const
+            {}
     };
 
 
