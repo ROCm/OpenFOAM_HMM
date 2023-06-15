@@ -159,12 +159,14 @@ Foam::solverPerformance Foam::FPCG::scalarSolve
     )
     {
         // --- Select and construct the preconditioner
-        autoPtr<lduMatrix::preconditioner> preconPtr =
-            lduMatrix::preconditioner::New
+        if (!preconPtr_)
+        {
+            preconPtr_ = lduMatrix::preconditioner::New
             (
                 *this,
                 controlDict_
             );
+        }
 
         FixedList<solveScalar, 2> globalSum;
 
@@ -175,7 +177,7 @@ Foam::solverPerformance Foam::FPCG::scalarSolve
             wArAold = wArA;
 
             // --- Precondition residual
-            preconPtr->precondition(wA, rA, cmpt);
+            preconPtr_->precondition(wA, rA, cmpt);
 
             // --- Update search directions and calculate residual:
             gSumMagProd(globalSum, wA, rA, matrix().mesh().comm());
@@ -235,6 +237,11 @@ Foam::solverPerformance Foam::FPCG::scalarSolve
         (
             ++solverPerf.nIterations() < maxIter_
         );
+    }
+
+    if (preconPtr_)
+    {
+        preconPtr_->setFinished(solverPerf);
     }
 
     matrix().setResidualField

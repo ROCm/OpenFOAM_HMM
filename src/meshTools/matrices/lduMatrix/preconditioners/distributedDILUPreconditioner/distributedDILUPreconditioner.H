@@ -62,8 +62,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef distributedDILUPreconditioner_H
-#define distributedDILUPreconditioner_H
+#ifndef Foam_distributedDILUPreconditioner_H
+#define Foam_distributedDILUPreconditioner_H
 
 #include "lduMatrix.H"
 
@@ -82,7 +82,7 @@ class distributedDILUPreconditioner
 {
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Precondition across global coupled bc
         const bool coupled_;
@@ -187,8 +187,12 @@ protected:
             DynamicList<UPstream::Request>& requests
         ) const;
 
-        //- Wait for explicit requests
-        void wait(DynamicList<UPstream::Request>& requests) const;
+        //- Wait for requests or cancel/free requests
+        void wait
+        (
+            DynamicList<UPstream::Request>& requests,
+            const bool cancel = false
+        ) const;
 
         //- Update diagonal for interface
         virtual void addInterfaceDiag
@@ -260,6 +264,9 @@ public:
             const solveScalarField& rA,
             const direction cmpt=0
         ) const;
+
+        //- Signal end of solver
+        virtual void setFinished(const solverPerformance& perf) const;
 };
 
 

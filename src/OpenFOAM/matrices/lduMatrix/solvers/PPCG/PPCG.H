@@ -66,6 +66,12 @@ class PPCG
 :
     public lduMatrix::solver
 {
+    // Private Member Data
+
+        //- Cached preconditioner
+        mutable autoPtr<lduMatrix::preconditioner> preconPtr_;
+
+
     // Private Member Functions
 
         //- Non-blocking version of sum(a*b), sum(a*c), sum(mag(sumMag))

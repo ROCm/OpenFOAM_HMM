@@ -149,12 +149,14 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
         solveScalar omega = 0;
 
         // --- Select and construct the preconditioner
-        autoPtr<lduMatrix::preconditioner> preconPtr =
-        lduMatrix::preconditioner::New
-        (
-            *this,
-            controlDict_
-        );
+        if (!preconPtr_)
+        {
+            preconPtr_ = lduMatrix::preconditioner::New
+            (
+                *this,
+                controlDict_
+            );
+        }
 
         // --- Solver iteration
         do
@@ -196,7 +198,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
             }
 
             // --- Precondition pA
-            preconPtr->precondition(yA, pA, cmpt);
+            preconPtr_->precondition(yA, pA, cmpt);
 
             // --- Calculate AyA
             matrix_.Amul(AyA, yA, interfaceBouCoeffs_, interfaces_, cmpt);
@@ -233,7 +235,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
             }
 
             // --- Precondition sA
-            preconPtr->precondition(zA, sA, cmpt);
+            preconPtr_->precondition(zA, sA, cmpt);
 
             // --- Calculate tA
             matrix_.Amul(tA, zA, interfaceBouCoeffs_, interfaces_, cmpt);
@@ -262,6 +264,11 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
             )
          || solverPerf.nIterations() < minIter_
         );
+    }
+
+    if (preconPtr_)
+    {
+        preconPtr_->setFinished(solverPerf);
     }
 
     matrix().setResidualField

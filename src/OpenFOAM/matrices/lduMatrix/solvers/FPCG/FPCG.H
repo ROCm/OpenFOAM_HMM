@@ -61,6 +61,12 @@ class FPCG
 :
     public lduMatrix::solver
 {
+    // Private Member Data
+
+        //- Cached preconditioner
+        mutable autoPtr<lduMatrix::preconditioner> preconPtr_;
+
+
     // Private Member Functions
 
         //- Blocking version of sum(a*b), sum(mag(b))

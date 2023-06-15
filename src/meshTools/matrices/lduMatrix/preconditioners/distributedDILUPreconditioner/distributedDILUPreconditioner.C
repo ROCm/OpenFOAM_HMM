@@ -248,10 +248,18 @@ void Foam::distributedDILUPreconditioner::send
 
 void Foam::distributedDILUPreconditioner::wait
 (
-    DynamicList<UPstream::Request>& requests
+    DynamicList<UPstream::Request>& requests,
+    const bool cancel
 ) const
 {
-    UPstream::waitRequests(requests);
+    if (cancel)
+    {
+        UPstream::cancelRequests(requests);
+    }
+    else
+    {
+        UPstream::waitRequests(requests);
+    }
     requests.clear();
 }
 
@@ -757,12 +765,20 @@ Foam::distributedDILUPreconditioner::distributedDILUPreconditioner
 
 Foam::distributedDILUPreconditioner::~distributedDILUPreconditioner()
 {
+    DebugPout<< "~distributedDILUPreconditioner()" << endl;
+
     // Wait on all requests before storage is being taken down
-    // (could rely on construction order?)
+
     wait(lowerSendRequests_);
     wait(lowerRecvRequests_);
     wait(higherSendRequests_);
     wait(higherRecvRequests_);
+
+    // TBD: cancel/ignore outstanding messages
+    //wait(lowerSendRequests_, true);
+    //wait(lowerRecvRequests_, true);
+    //wait(higherSendRequests_, true);
+    //wait(higherRecvRequests_, true);
 }
 
 
@@ -891,6 +907,28 @@ void Foam::distributedDILUPreconditioner::precondition
 
     // Start writes of wA (using sendBufs)
     send(lowerNbrs_, wA, lowerSendRequests_);
+}
+
+
+void Foam::distributedDILUPreconditioner::setFinished
+(
+    const solverPerformance& s
+) const
+{
+    DebugPout<< "setFinished fieldName:" << s.fieldName() << endl;
+
+    // Wait on all requests before storage is being taken down
+    // (could rely on construction order?)
+    wait(lowerSendRequests_);
+    wait(lowerRecvRequests_);
+    wait(higherSendRequests_);
+    wait(higherRecvRequests_);
+
+    // TBD: cancel/ignore outstanding messages
+    //wait(lowerSendRequests_, true);
+    //wait(lowerRecvRequests_, true);
+    //wait(higherSendRequests_, true);
+    //wait(higherRecvRequests_, true);
 }
 
 

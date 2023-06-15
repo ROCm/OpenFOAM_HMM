@@ -113,16 +113,18 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     }
 
     // --- Select and construct the preconditioner
-    autoPtr<lduMatrix::preconditioner> preconPtr =
-        lduMatrix::preconditioner::New
+    if (!preconPtr_)
+    {
+        preconPtr_ = lduMatrix::preconditioner::New
         (
             *this,
             controlDict_
         );
+    }
 
     // --- Precondition residual (= u0)
     solveScalarField u(nCells);
-    preconPtr->precondition(u, r, cmpt);
+    preconPtr_->precondition(u, r, cmpt);
 
     // --- Calculate A*u - reuse w
     matrix_.Amul(w, u, interfaceBouCoeffs_, interfaces_, cmpt);
@@ -143,12 +145,12 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
         gSumMagProd(globalSum, u, r, w, r, outstandingRequest, comm);
 
         // --- Precondition residual
-        preconPtr->precondition(m, w, cmpt);
+        preconPtr_->precondition(m, w, cmpt);
     }
     else
     {
         // --- Precondition residual
-        preconPtr->precondition(m, w, cmpt);
+        preconPtr_->precondition(m, w, cmpt);
 
         // --- Start global reductions for inner products
         gSumMagProd(globalSum, w, u, m, r, outstandingRequest, comm);
@@ -229,12 +231,12 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
             gSumMagProd(globalSum, u, r, w, r, outstandingRequest, comm);
 
             // --- Precondition residual
-            preconPtr->precondition(m, w, cmpt);
+            preconPtr_->precondition(m, w, cmpt);
         }
         else
         {
             // --- Precondition residual
-            preconPtr->precondition(m, w, cmpt);
+            preconPtr_->precondition(m, w, cmpt);
 
             // --- Start global reductions for inner products
             gSumMagProd(globalSum, w, u, m, r, outstandingRequest, comm);
@@ -247,9 +249,21 @@ Foam::solverPerformance Foam::PPCG::scalarSolveCG
     // Cleanup any outstanding requests
     outstandingRequest.wait();
 
+    if (preconPtr_)
+    {
+        preconPtr_->setFinished(solverPerf);
+    }
+
+    //TBD
+    //matrix().setResidualField
+    //(
+    //    ConstPrecisionAdaptor<scalar, solveScalar>(rA)(),
+    //    fieldName_,
+    //    false
+    //);
+
     return solverPerf;
 }
-
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

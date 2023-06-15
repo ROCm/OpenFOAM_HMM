@@ -57,6 +57,12 @@ class PCG
 :
     public lduMatrix::solver
 {
+    // Private Member Data
+
+        //- Cached preconditioner
+        mutable autoPtr<lduMatrix::preconditioner> preconPtr_;
+
+
     // Private Member Functions
 
         //- No copy construct
