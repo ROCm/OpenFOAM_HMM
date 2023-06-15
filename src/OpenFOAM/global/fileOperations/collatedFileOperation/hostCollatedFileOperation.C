@@ -49,12 +49,11 @@ namespace fileOperations
         comm
     );
 
-    // Register initialisation routine. Signals need for threaded mpi and
-    // handles command line arguments
+    // Threaded MPI: depending on buffering
     addNamedToRunTimeSelectionTable
     (
         fileOperationInitialise,
-        hostCollatedFileOperationInitialise,
+        fileOperationInitialise_collated,
         word,
         hostCollated
     );

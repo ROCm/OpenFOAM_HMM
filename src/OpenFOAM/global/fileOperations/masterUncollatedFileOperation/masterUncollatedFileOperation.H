@@ -66,8 +66,6 @@ Description
 #include "OSspecific.H"
 #include "HashPtrTable.H"
 #include "DynamicList.H"
-#include "List.H"
-#include "unthreadedInitialise.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -784,31 +782,6 @@ public:
             {
                 return times_;
             }
-};
-
-
-/*---------------------------------------------------------------------------*\
-           Class masterUncollatedFileOperationInitialise Declaration
-\*---------------------------------------------------------------------------*/
-
-//! Internal class only
-class masterUncollatedFileOperationInitialise
-:
-    public unthreadedInitialise
-{
-public:
-
-    // Constructors
-
-        //- Construct from components
-        masterUncollatedFileOperationInitialise(int& argc, char**& argv)
-        :
-            unthreadedInitialise(argc, argv)
-        {}
-
-
-    //- Destructor
-    virtual ~masterUncollatedFileOperationInitialise() = default;
 };
 
 

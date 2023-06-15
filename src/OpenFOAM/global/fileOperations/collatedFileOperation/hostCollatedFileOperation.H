@@ -129,31 +129,6 @@ public:
 };
 
 
-/*---------------------------------------------------------------------------*\
-            Class hostCollatedFileOperationInitialise Declaration
-\*---------------------------------------------------------------------------*/
-
-//! Internal class only
-class hostCollatedFileOperationInitialise
-:
-    public collatedFileOperationInitialise
-{
-public:
-
-    // Constructors
-
-        //- Construct from components
-        hostCollatedFileOperationInitialise(int& argc, char**& argv)
-        :
-            collatedFileOperationInitialise(argc, argv)
-        {}
-
-
-    //- Destructor
-    virtual ~hostCollatedFileOperationInitialise() = default;
-};
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace fileOperations

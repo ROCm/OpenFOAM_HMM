@@ -50,6 +50,7 @@ SourceFiles
 #define Foam_fileOperations_collatedFileOperation_H
 
 #include "masterUncollatedFileOperation.H"
+#include "fileOperationInitialise.H"
 #include "OFstreamCollator.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -173,32 +174,33 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-               Class collatedFileOperationInitialise Declaration
+               Class fileOperationInitialise_collated Declaration
 \*---------------------------------------------------------------------------*/
 
-//! Internal class only
-class collatedFileOperationInitialise
+//- A fileOperation initialiser for collated file handlers.
+//- Requires threading for non-zero maxThreadFileBufferSize.
+class fileOperationInitialise_collated
 :
-    public masterUncollatedFileOperationInitialise
+    public fileOperationInitialise
 {
 public:
 
     // Constructors
 
         //- Construct from components
-        collatedFileOperationInitialise(int& argc, char**& argv)
+        fileOperationInitialise_collated(int& argc, char**& argv)
         :
-            masterUncollatedFileOperationInitialise(argc, argv)
+            fileOperationInitialise(argc, argv)
         {}
 
 
     //- Destructor
-    virtual ~collatedFileOperationInitialise() = default;
+    virtual ~fileOperationInitialise_collated() = default;
 
 
     // Member Functions
 
-        //- Requires threading for non-zero maxThreadFileBufferSize
+        //- The (MPI) threading requirement depends on buffering
         virtual bool needsThreading() const
         {
             return (collatedFileOperation::maxThreadFileBufferSize > 0);

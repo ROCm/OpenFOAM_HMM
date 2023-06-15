@@ -50,36 +50,43 @@ Foam::fileOperations::fileOperationInitialise::fileOperationInitialise
     char**& argv
 )
 {
-    // Check for -ioRanks, which requires an argument
+    // Check for -ioRanks: requires an argument
     int index = -1;
     for (int argi = 1; argi < argc; ++argi)
     {
-        if (argv[argi][0] == '-')
+        const char *optName = argv[argi];
+
+        if (optName[0] == '-')
         {
-            const char *optName = &argv[argi][1];
+            ++optName;  // Looks like an option, skip leading '-'
+            bool emitErrorMessage = false;
 
             if (strcmp(optName, "ioRanks") == 0)
             {
+                // Requires a parameter
                 if (argi < argc-1)
                 {
                     index = argi;
-                    Foam::setEnv("FOAM_IORANKS", argv[argi+1], true);
+                    ++argi;
+                    Foam::setEnv("FOAM_IORANKS", argv[argi], true);
                     break;
                 }
                 else
                 {
-                    // No argument to -ioRanks.
-                    // Give error message as in argList.
-                    // Slight problem: Pstream not yet initialised so
-                    // - no master-only output
-                    // - no early exit
-
-                    Info<< nl
-                        << "Error: option '-ioRanks' requires a list of"
-                           " IO ranks as argument" << nl << nl;
-
-                    //UPstream::exit(1);  // works for serial and parallel
+                    emitErrorMessage = true;
                 }
+            }
+
+            if (emitErrorMessage)
+            {
+                // Missing argument: emit message but not exit or
+                // FatalError since Pstream etc are not yet initialised
+
+                Info<< nl
+                    << "Error: option '-" << optName
+                    << "' requires an argument" << nl << nl;
+
+                //NO: UPstream::exit(1);  // works for serial and parallel
             }
         }
     }

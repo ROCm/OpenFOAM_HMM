@@ -27,6 +27,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "masterUncollatedFileOperation.H"
+#include "fileOperationInitialise.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Pstream.H"
 #include "Time.H"
@@ -38,7 +39,6 @@ License
 #include "registerSwitch.H"
 #include "dummyISstream.H"
 #include "SubList.H"
-#include "unthreadedInitialise.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -71,11 +71,11 @@ namespace fileOperations
         masterUncollatedFileOperation::maxMasterFileBufferSize
     );
 
-    // Mark as not needing threaded mpi
+    // Threaded MPI: not required
     addNamedToRunTimeSelectionTable
     (
         fileOperationInitialise,
-        masterUncollatedFileOperationInitialise,
+        fileOperationInitialise_unthreaded,
         word,
         masterUncollated
     );

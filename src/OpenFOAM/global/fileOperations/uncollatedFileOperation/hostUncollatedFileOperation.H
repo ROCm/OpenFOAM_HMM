@@ -94,31 +94,6 @@ public:
 };
 
 
-/*---------------------------------------------------------------------------*\
-            Class hostUncollatedFileOperationInitialise Declaration
-\*---------------------------------------------------------------------------*/
-
-//! Internal class only
-class hostUncollatedFileOperationInitialise
-:
-    public masterUncollatedFileOperationInitialise
-{
-public:
-
-    // Constructors
-
-        //- Construct from components
-        hostUncollatedFileOperationInitialise(int& argc, char**& argv)
-        :
-            masterUncollatedFileOperationInitialise(argc, argv)
-        {}
-
-
-    //- Destructor
-    virtual ~hostUncollatedFileOperationInitialise() = default;
-};
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace fileOperations

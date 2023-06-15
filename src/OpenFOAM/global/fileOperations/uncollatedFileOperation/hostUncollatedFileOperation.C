@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "hostUncollatedFileOperation.H"
+#include "fileOperationInitialise.H"
 #include "addToRunTimeSelectionTable.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
@@ -48,12 +49,11 @@ namespace fileOperations
         comm
     );
 
-    // Register initialisation routine. Signals need for threaded mpi and
-    // handles command line arguments
+    // Threaded MPI: not required
     addNamedToRunTimeSelectionTable
     (
         fileOperationInitialise,
-        hostUncollatedFileOperationInitialise,
+        fileOperationInitialise_unthreaded,
         word,
         hostUncollated
     );

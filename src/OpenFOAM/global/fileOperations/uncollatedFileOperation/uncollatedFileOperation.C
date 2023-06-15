@@ -27,12 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "uncollatedFileOperation.H"
+#include "fileOperationInitialise.H"
 #include "Time.H"
 #include "Fstream.H"
 #include "addToRunTimeSelectionTable.H"
 #include "decomposedBlockData.H"
 #include "dummyISstream.H"
-#include "unthreadedInitialise.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -54,11 +54,11 @@ namespace fileOperations
         comm
     );
 
-    // Mark as not needing threaded mpi
+    // Threaded MPI: not required
     addNamedToRunTimeSelectionTable
     (
         fileOperationInitialise,
-        unthreadedInitialise,
+        fileOperationInitialise_unthreaded,
         word,
         uncollated
     );

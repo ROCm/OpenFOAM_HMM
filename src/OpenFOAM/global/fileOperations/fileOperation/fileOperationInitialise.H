@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,17 +25,19 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::unthreadedInitialise
+    Foam::fileOperationInitialise
 
 Description
-    A fileOperation initialiser for unthreaded file handlers
+    General fileOperation initialiser.
+    Handles \c -ioRanks option, using it to set the FOAM_IORANKS environment
+    variable.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef unthreadedInitialise_H
-#define unthreadedInitialise_H
+#ifndef Foam_fileOperations_fileOperationInitialise_H
+#define Foam_fileOperations_fileOperationInitialise_H
 
-#include "fileOperationInitialise.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,10 +47,63 @@ namespace fileOperations
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class unthreadedInitialise Declaration
+                   Class fileOperationInitialise Declaration
 \*---------------------------------------------------------------------------*/
 
-class unthreadedInitialise
+class fileOperationInitialise
+{
+public:
+
+        //- Runtime type information
+        TypeName("fileOperationInitialise");
+
+
+    // Constructors
+
+        //- Construct from components
+        fileOperationInitialise(int& argc, char**& argv);
+
+
+    // Declare run-time constructor selection table
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            fileOperationInitialise,
+            word,
+            (
+                int& argc, char**& argv
+            ),
+            (argc, argv)
+        );
+
+
+    // Selectors
+
+        //- Select initialisation type
+        static autoPtr<fileOperationInitialise> New
+        (
+            const word& type, int& argc, char**& argv
+        );
+
+
+    //- Destructor
+    virtual ~fileOperationInitialise() = default;
+
+
+    // Member Functions
+
+        //- Requires (MPI) threading?
+        virtual bool needsThreading() const = 0;
+};
+
+
+/*---------------------------------------------------------------------------*\
+              Class fileOperationInitialise_unthreaded Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A fileOperation initialiser for unthreaded file handlers.
+class fileOperationInitialise_unthreaded
 :
     public fileOperationInitialise
 {
@@ -56,23 +112,20 @@ public:
     // Constructors
 
         //- Construct from components
-        unthreadedInitialise(int& argc, char**& argv)
+        fileOperationInitialise_unthreaded(int& argc, char**& argv)
         :
             fileOperationInitialise(argc, argv)
         {}
 
 
     //- Destructor
-    virtual ~unthreadedInitialise() = default;
+    virtual ~fileOperationInitialise_unthreaded() = default;
 
 
     // Member Functions
 
-        //- No threading required
-        virtual bool needsThreading() const
-        {
-            return false;
-        }
+        //- No (MPI) threading required
+        virtual bool needsThreading() const { return false; }
 };
 
 
