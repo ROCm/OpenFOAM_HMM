@@ -124,11 +124,14 @@ class argList
 {
     // Private Data
 
-        //- Track if command arguments are mandatory/optional
+        //- Command arguments are mandatory (default) or optional
         static bool argsMandatory_;
 
-        //- Track enabled/disabled checking of processor directories state
+        //- Check presence of processor directories (default: on)
         static bool checkProcessorDirectories_;
+
+        //- MPI threads are desired for the application (default: off)
+        static bool parallelThreads_;
 
         //- Switch on/off parallel mode, dry-run etc.
         //  Construct first so destructor is done last.
@@ -645,11 +648,11 @@ public:
         //- Remove the parallel options
         static void noParallel();
 
-        //- Remove checking of processor directories
+        //- Disable checking of processor directories
         static void noCheckProcessorDirectories();
 
-        //- Return true if the post-processing option is specified
-        static bool postProcess(int argc, char *argv[]);
+        //- MPI threads are desired for the application
+        static void parallelThreads_on();
 
         //- Set option directly (use with caution)
         //  An option with an empty param is a bool option.
@@ -662,6 +665,15 @@ public:
         //  Not all valid options can also be unset: eg, -case, -roots ...
         //  Return true if the option existed before being unset.
         bool unsetOption(const word& optName);
+
+
+    // Helpers
+
+        //- True if the post-processing option is found in the \c argv list
+        static bool postProcess(int argc, char *argv[]);
+
+        //- The number of times -verbose is found in the \c argv list
+        static int verbose(int argc, char *argv[]);
 
 
     // Print

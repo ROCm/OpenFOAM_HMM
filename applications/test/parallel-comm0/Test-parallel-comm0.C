@@ -42,6 +42,7 @@ Description
 
 using namespace Foam;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void printInfo(const label comm)
 {
@@ -65,20 +66,10 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noCheckProcessorDirectories();
-    argList::addBoolOption("verbose", "Set debug level");
+    argList::addVerboseOption("Set UPstream::debug level");
 
-    // Capture manually. We need values before proper startup
-    int nVerbose = 0;
-    for (int argi = 1; argi < argc; ++argi)
-    {
-        if (strcmp(argv[argi], "-verbose") == 0)
-        {
-            ++nVerbose;
-        }
-    }
-
-    UPstream::debug = nVerbose;
-
+    // Check -verbose before initialisation
+    UPstream::debug = argList::verbose(argc, argv);
 
     #include "setRootCase.H"
 

@@ -43,24 +43,15 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noFunctionObjects();
-    argList::addBoolOption("verbose", "Set debug level");
+    argList::addVerboseOption("Set UPstream::debug level");
     argList::addBoolOption("comm-graph", "Test simple graph communicator");
     argList::addNote
     (
         "Create graph of OpenFOAM mesh connections"
     );
 
-    // Capture manually. We need values before proper startup
-    int nVerbose = 0;
-    for (int argi = 1; argi < argc; ++argi)
-    {
-        if (strcmp(argv[argi], "-verbose") == 0)
-        {
-            ++nVerbose;
-        }
-    }
-
-    UPstream::debug = nVerbose;
+    // Check -verbose before initialisation
+    UPstream::debug = argList::verbose(argc, argv);
 
     #include "setRootCase.H"
 

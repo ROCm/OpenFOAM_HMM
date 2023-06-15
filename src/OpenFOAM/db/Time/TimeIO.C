@@ -166,10 +166,13 @@ void Foam::Time::readDict()
         }
         controlDict_.watchIndices().clear();
 
-        // The new handler, create with some verbosity
+        // Reporting verbosity corresponding to detail level
+        const bool verbose = (::Foam::infoDetailLevel > 0);
+
+        // The new handler
         refPtr<fileOperation> newHandler
         (
-            fileOperation::New(fileHandlerName, true)
+            fileOperation::New(fileHandlerName, verbose)
         );
 
         // Install the new handler
@@ -206,6 +209,9 @@ void Foam::Time::readDict()
 
         IStringStream dummyIs("");
 
+        // Reporting verbosity corresponding to detail level
+        const bool verbose = (::Foam::infoDetailLevel > 0);
+
         forAllConstIters(objs, iter)
         {
             const List<simpleRegIOobject*>& objects = *iter;
@@ -214,7 +220,7 @@ void Foam::Time::readDict()
             {
                 obj->readData(dummyIs);
 
-                if (Foam::infoDetailLevel > 0)
+                if (verbose)
                 {
                     Info<< "    ";
                     obj->writeData(Info);

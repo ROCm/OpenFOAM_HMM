@@ -54,6 +54,7 @@ License
 
 bool Foam::argList::argsMandatory_ = true;
 bool Foam::argList::checkProcessorDirectories_ = true;
+bool Foam::argList::parallelThreads_ = false;
 
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashSet<Foam::string>   Foam::argList::advancedOptions;
@@ -122,6 +123,14 @@ Foam::argList::initValidTables::initValidTables()
 
     argList::addBoolOption("parallel", "Run in parallel");
     validParOptions.set("parallel", "");
+
+    argList::addBoolOption
+    (
+        "mpi-threads",
+        "Request use of MPI threads",
+        true  //  advanced option
+    );
+
     argList::addOption
     (
         "roots",
@@ -401,7 +410,7 @@ void Foam::argList::addOption
 
 void Foam::argList::setAdvanced(const word& optName, bool advanced)
 {
-    if (advanced && validOptions.found(optName))
+    if (advanced && validOptions.contains(optName))
     {
         advancedOptions.set(optName);
     }
@@ -504,7 +513,13 @@ void Foam::argList::addDryRunOption
     bool advanced
 )
 {
-    argList::addBoolOption("dry-run", usage, advanced);
+    const word optName("dry-run", false);
+
+    argList::addBoolOption(optName, usage, advanced);
+    if (!advanced)
+    {
+        advancedOptions.erase(optName);  // Avoid 'stickiness'
+    }
 }
 
 
@@ -514,13 +529,24 @@ void Foam::argList::addVerboseOption
     bool advanced
 )
 {
+    const word optName("verbose", false);
+
     if (usage.empty())
     {
-        argList::addBoolOption("verbose", "Additional verbosity", advanced);
+        argList::addBoolOption
+        (
+            optName,
+            "Additional verbosity (can be used multiple times)",
+            advanced
+        );
     }
     else
     {
-        argList::addBoolOption("verbose", usage, advanced);
+        argList::addBoolOption(optName, usage, advanced);
+    }
+    if (!advanced)
+    {
+        advancedOptions.erase(optName);  // Avoid 'stickiness'
     }
 }
 
@@ -569,7 +595,14 @@ void Foam::argList::noParallel()
     removeOption("decomposeParDict");
     removeOption("hostRoots");
     removeOption("world");
+    removeOption("mpi-threads");
     validParOptions.clear();
+}
+
+
+void Foam::argList::parallelThreads_on()
+{
+    parallelThreads_ = true;
 }
 
 
@@ -581,15 +614,36 @@ void Foam::argList::noCheckProcessorDirectories()
 
 bool Foam::argList::postProcess(int argc, char *argv[])
 {
-    for (int i=1; i<argc; ++i)
+    for (int argi = 1; argi < argc; ++argi)
     {
-        if (argv[i] == '-' + postProcessOptionName)
+        const char *optName = argv[argi];
+
+        if (optName[0] == '-')
         {
-            return true;
+            ++optName;  // Looks like an option, skip leading '-'
+
+            if (optName == postProcessOptionName)
+            {
+                return true;
+            }
         }
     }
 
     return false;
+}
+
+
+int Foam::argList::verbose(int argc, char *argv[])
+{
+    int num = 0;
+    for (int argi = 1; argi < argc; ++argi)
+    {
+        if (strcmp(argv[argi], "-verbose") == 0)
+        {
+            ++num;
+        }
+    }
+    return num;
 }
 
 
@@ -694,6 +748,8 @@ int Foam::argList::optionIgnore(const word& optName)
         }
     }
 
+    // TBD: could ignore -verbose, -dry-run etc if they are not active...
+
     return 0; // Do not skip
 }
 
@@ -711,15 +767,19 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
     args_[0] = fileName(argv[0]);
     for (int argi = 1; argi < argc; ++argi)
     {
-        if (strcmp(argv[argi], "(") == 0)
+        const char *optName = argv[argi];
+
+        if (optName[0] == '(' && optName[1] == '\0')
         {
+            // Begin list
             ++depth;
             group += '(';
         }
-        else if (strcmp(argv[argi], ")") == 0)
+        else if (optName[0] == ')' && optName[1] == '\0')
         {
             if (depth)
             {
+                // End list
                 --depth;
                 group += ')';
                 if (!depth)
@@ -730,6 +790,7 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
             }
             else
             {
+                // A stray ')' - likely never happens
                 args_[nArgs++] = argv[argi];
             }
         }
@@ -740,12 +801,11 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
             group += argv[argi];
             group += '"';
         }
-        else if (argv[argi][0] == '-')
+        else if (optName[0] == '-')
         {
-            // Appears to be an option
-            const char *optName = &argv[argi][1];
+            ++optName;  // Looks like an option, skip leading '-'
 
-            if (validOptions.found(optName))
+            if (validOptions.contains(optName))
             {
                 // Known option name
                 args_[nArgs++] = argv[argi];
@@ -848,58 +908,116 @@ Foam::argList::argList
     bool initialise
 )
 :
+    runControl_(),
     args_(argc),
     options_(argc),
     libs_()
 {
-    // Check for -fileHandler, which requires an argument.
-    word handlerType;
-    for (int argi = argc-2; argi > 0; --argi)
-    {
-        if (argv[argi][0] == '-')
-        {
-            const char *optName = &argv[argi][1];
+    // Pre-scan for some options needed for initial setup:
+    //   -fileHandler (takes an argument)
+    //   -mpi-threads (bool option)
+    //
+    // Also handle -dry-run and -verbose counting
+    // (it is left to the application to decide what to do with them).
+    // Detect any parallel run options
 
-            if (strcmp(optName, "fileHandler") == 0)
-            {
-                handlerType = argv[argi+1];
-                break;
-            }
-        }
-    }
-    if (handlerType.empty())
+    word fileHandlerName;
+
+    if (parallelThreads_)
     {
-        handlerType = Foam::getEnv("FOAM_FILEHANDLER");
-        if (handlerType.empty())
-        {
-            handlerType = fileOperation::defaultFileHandler;
-        }
+        // Default -mpi-threads configured statically from application
+        runControl_.threads(true);
     }
 
-    // Detect any parallel options
-    const bool needsThread = fileOperations::fileOperationInitialise::New
-    (
-        handlerType,
-        argc,
-        argv
-    )().needsThreading();
-
-
-    // Check if this run is a parallel run by searching for any parallel option
-    // If found call runPar which might filter argv
     for (int argi = 1; argi < argc; ++argi)
     {
-        if (argv[argi][0] == '-')
-        {
-            const char *optName = &argv[argi][1];
+        const char *optName = argv[argi];
 
-            if (validParOptions.found(optName))
+        if (optName[0] == '-')
+        {
+            ++optName;  // Looks like an option, skip leading '-'
+            bool emitErrorMessage = false;
+
+            if (strcmp(optName, "dry-run") == 0)
             {
-                runControl_.runPar(argc, argv, needsThread);
-                break;
+                runControl_.incrDryRun();
+            }
+            else if (strcmp(optName, "verbose") == 0)
+            {
+                runControl_.incrVerbose();
+            }
+            else if (strcmp(optName, "mpi-threads") == 0)
+            {
+                runControl_.threads(true);
+            }
+            else if (strcmp(optName, "fileHandler") == 0)
+            {
+                // Requires a parameter
+                if (argi < argc-1)
+                {
+                    ++argi;
+                    fileHandlerName = argv[argi];
+                }
+                else
+                {
+                    emitErrorMessage = true;
+                }
+            }
+            else if (validParOptions.contains(optName))
+            {
+                // Contains a parallel run option
+                runControl_.parRun(true);
+            }
+
+            if (emitErrorMessage)
+            {
+                // Missing argument: emit message but not exit or
+                // FatalError since Pstream etc are not yet initialised
+
+                Info<< nl
+                    << "Error: option '-" << optName
+                    << "' requires an argument" << nl << nl;
+
+                //NO: UPstream::exit(1);  // works for serial and parallel
             }
         }
     }
+
+    // No -fileHandler specifed, get from environment or use default
+    if (fileHandlerName.empty())
+    {
+        fileHandlerName = Foam::getEnv("FOAM_FILEHANDLER");
+        if (fileHandlerName.empty())
+        {
+            fileHandlerName = fileOperation::defaultFileHandler;
+        }
+    }
+
+    // Parse out any additional fileHandler-specific options
+    // (may alter argv list). Recover its threading requirements
+    {
+        auto fileOperationInit = fileOperations::fileOperationInitialise::New
+        (
+            fileHandlerName,
+            argc,
+            argv
+        );
+
+        if (fileOperationInit && fileOperationInit->needsThreading())
+        {
+            runControl_.threads(true);
+        }
+    }
+
+    // Parallel job options detected?
+    // - start parallel run (possibly filters argv as a side-effect)
+    if (runControl_.parRun())
+    {
+        runControl_.runPar(argc, argv);
+    }
+
+
+    // ------------------------------------------------------------------------
 
     // Convert argv -> args_ and capture ( ... ) lists
     regroupArgv(argc, argv);
@@ -908,9 +1026,6 @@ Foam::argList::argList
     // Set executable name immediately - useful when emitting errors.
     executable_ = fileName(args_[0]).name();
 
-    // Count -dry-run and -verbose switches
-    int numDryRun = 0, numVerbose = 0;
-
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
     for (int argi = 1; argi < args_.size(); ++argi)
@@ -918,9 +1033,11 @@ Foam::argList::argList
         commandLine_ += ' ';
         commandLine_ += args_[argi];
 
-        if (args_[argi][0] == '-')
+        const char *optName = args_[argi].data();
+
+        if (optName[0] == '-')
         {
-            const char *optName = &args_[argi][1];
+            ++optName;  // Looks like an option, skip leading '-'
 
             if (!*optName)
             {
@@ -949,7 +1066,7 @@ Foam::argList::argList
 
             if (wantArg)
             {
-                // Known option and expects a parameter
+                // Option expects a parameter
                 // - get it or emit a FatalError.
 
                 ++argi;
@@ -1019,18 +1136,11 @@ Foam::argList::argList
 
                 options_.insert(optName, "");
 
-                // Special increment handling for some known flags
-                if (wantArg.good())
-                {
-                    if (strcmp(optName, "dry-run") == 0)
-                    {
-                        ++numDryRun;
-                    }
-                    else if (strcmp(optName, "verbose") == 0)
-                    {
-                        ++numVerbose;
-                    }
-                }
+                // // Special increment handling for some known flags
+                // if (wantArg.good())
+                // {
+                //     ...
+                // }
             }
         }
         else
@@ -1042,10 +1152,6 @@ Foam::argList::argList
             ++nArgs;
         }
     }
-
-    // Commit number of -dry-run and -verbose flag occurrences
-    runControl_.dryRun(numDryRun);
-    runControl_.verbose(numVerbose);
 
     args_.resize(nArgs);
 
@@ -1093,42 +1199,42 @@ void Foam::argList::parse
         bool quickExit = false;
 
         // Display either application or source documentation, not both
-        if (options_.found("doc"))
+        if (options_.contains("doc"))
         {
             displayDoc(false);
             quickExit = true;
         }
-        else if (options_.found("doc-source"))
+        else if (options_.contains("doc-source"))
         {
             displayDoc(true);
             quickExit = true;
         }
 
         // Display either short or full help, not both
-        if (options_.found("help-full"))
+        if (options_.contains("help-full"))
         {
             printUsage(true);
             quickExit = true;
         }
-        else if (options_.found("help-notes"))
+        else if (options_.contains("help-notes"))
         {
             printNotes();
             Info<< nl;
             quickExit = true;
         }
-        else if (options_.found("help"))
+        else if (options_.contains("help"))
         {
             printUsage(false);
             quickExit = true;
         }
-        else if (options_.found("help-man"))
+        else if (options_.contains("help-man"))
         {
             printMan();
             quickExit = true;
         }
 
         // Allow independent display of compatibility information
-        if (options_.found("help-compat"))
+        if (options_.contains("help-compat"))
         {
             printCompat();
             quickExit = true;
@@ -1221,19 +1327,19 @@ void Foam::argList::parse
     // 5. '-fileHandler' commmand-line option
 
     {
-        word handlerType
+        word fileHandlerName
         (
             options_.lookup("fileHandler", Foam::getEnv("FOAM_FILEHANDLER"))
         );
 
-        if (handlerType.empty())
+        if (fileHandlerName.empty())
         {
-            handlerType = fileOperation::defaultFileHandler;
+            fileHandlerName = fileOperation::defaultFileHandler;
         }
 
         (void) fileOperation::fileHandler
         (
-            fileOperation::New(handlerType, bannerEnabled())
+            fileOperation::New(fileHandlerName, bannerEnabled())
         );
     }
 
@@ -1346,7 +1452,7 @@ void Foam::argList::parse
                     dictNProcs = roots.size()+1;
                 }
             }
-            else if (options_.found("hostRoots"))
+            else if (options_.contains("hostRoots"))
             {
                 source = "-hostRoots";
                 runControl_.distributed(true);
@@ -1546,7 +1652,7 @@ void Foam::argList::parse
                 }
 
                 // Distribute the master's argument list (with new root)
-                const bool hadCaseOpt = options_.found("case");
+                const bool hadCaseOpt = options_.contains("case");
                 for (const int subproci : Pstream::subProcs())
                 {
                     options_.set("case", roots[subproci-1]/globalCase_);
@@ -1841,15 +1947,15 @@ Foam::argList::~argList()
 
 bool Foam::argList::allowFunctionObjects() const
 {
-    if (validOptions.found("withFunctionObjects"))
+    if (validOptions.contains("withFunctionObjects"))
     {
         // '-withFunctionObjects' is available and explicitly enabled
-        return options_.found("withFunctionObjects");
+        return options_.contains("withFunctionObjects");
     }
-    else if (validOptions.found("noFunctionObjects"))
+    else if (validOptions.contains("noFunctionObjects"))
     {
         // '-noFunctionObjects' is available and not explicitly disabled
-        return !options_.found("noFunctionObjects");
+        return !options_.contains("noFunctionObjects");
     }
 
     // Disallow functions if there is no way to enable/disable them
@@ -1859,7 +1965,7 @@ bool Foam::argList::allowFunctionObjects() const
 
 bool Foam::argList::allowLibs() const
 {
-    return !options_.found("no-libs");
+    return !options_.contains("no-libs");
 }
 
 
@@ -1867,32 +1973,29 @@ bool Foam::argList::allowLibs() const
 
 Foam::label Foam::argList::count(const UList<word>& optionNames) const
 {
-    label n = 0;
+    label num = 0;
     for (const word& optName : optionNames)
     {
-        if (options_.found(optName))
+        if (options_.contains(optName))
         {
-            ++n;
+            ++num;
         }
     }
-    return n;
+    return num;
 }
 
 
-Foam::label Foam::argList::count
-(
-    std::initializer_list<word> optionNames
-) const
+Foam::label Foam::argList::count(std::initializer_list<word> optionNames) const
 {
-    label n = 0;
+    label num = 0;
     for (const word& optName : optionNames)
     {
-        if (options_.found(optName))
+        if (options_.contains(optName))
         {
-            ++n;
+            ++num;
         }
     }
-    return n;
+    return num;
 }
 
 
@@ -1912,7 +2015,9 @@ bool Foam::argList::setOption(const word& optName, const string& param)
         return false;
     }
 
-    if (options_.found(optName) ? (options_[optName] != param) : true)
+    const auto optIter = options_.cfind(optName);
+
+    if (!optIter.good() || (optIter.val() != param))
     {
         options_.set(optName, param);
         return true;
@@ -1930,7 +2035,6 @@ bool Foam::argList::unsetOption(const word& optName)
         optName == "case"
      || optName == "parallel"
      || optName == "roots"
-     || optName == "hostRoots"
     )
     {
         FatalErrorInFunction
@@ -2040,8 +2144,8 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
                 const word& optName = iter.key();
                 if
                 (
-                    !validOptions.found(optName)
-                 && !validParOptions.found(optName)
+                    !validOptions.contains(optName)
+                 && !validParOptions.contains(optName)
                 )
                 {
                     FatalError

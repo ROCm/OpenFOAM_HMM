@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
     // enable noConstant by switching
     if (!args.found("noConstant"))
     {
-        args.setOption("constant", "");
+        args.setOption("constant");
     }
     else
     {

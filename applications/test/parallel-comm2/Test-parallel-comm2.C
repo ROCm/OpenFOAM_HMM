@@ -44,6 +44,8 @@ Description
 
 using namespace Foam;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 void rankInfo(const label comm)
 {
     const int ranki = UPstream::myProcNo(comm);
@@ -63,7 +65,7 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noCheckProcessorDirectories();
-    argList::addBoolOption("verbose", "Set debug level");
+    argList::addVerboseOption("Set UPstream::debug level");
     argList::addBoolOption("info", "information");
     argList::addBoolOption("print-tree", "Report tree(s) as graph");
     argList::addBoolOption("comm-split", "Test simple comm split");
@@ -71,17 +73,8 @@ int main(int argc, char *argv[])
     argList::addBoolOption("host-comm", "Test Pstream host-comm");
     argList::addBoolOption("host-broadcast", "Test host-base broadcasts");
 
-    // Capture manually. We need values before proper startup
-    int nVerbose = 0;
-    for (int argi = 1; argi < argc; ++argi)
-    {
-        if (strcmp(argv[argi], "-verbose") == 0)
-        {
-            ++nVerbose;
-        }
-    }
-
-    UPstream::debug = nVerbose;
+    // Check -verbose before initialisation
+    UPstream::debug = argList::verbose(argc, argv);
 
     #include "setRootCase.H"
 
