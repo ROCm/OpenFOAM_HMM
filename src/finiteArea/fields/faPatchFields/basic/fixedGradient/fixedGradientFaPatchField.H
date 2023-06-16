@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +28,35 @@ Class
     Foam::fixedGradientFaPatchField
 
 Description
+    This boundary condition supplies a fixed gradient condition, such that
+    the patch values are calculated using:
+
+        \f[
+            x_p = x_c + \frac{\nabla(x)}{\Delta}
+        \f]
+
+    where
+    \vartable
+        x_p      | patch values
+        x_c      | internal field values
+        \nabla(x)| gradient (user-specified)
+        \Delta   | inverse distance from patch face centre to cell centre
+    \endvartable
+
+Usage
+    \table
+        Property     | Description             | Required    | Default value
+        gradient     | gradient                | yes         |
+    \endtable
+
+    Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        type            fixedGradient;
+        gradient        uniform 0;
+    }
+    \endverbatim
 
 Author
     Zeljko Tukovic, FMENA
@@ -37,8 +67,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedGradientFaPatchField_H
-#define fixedGradientFaPatchField_H
+#ifndef Foam_fixedGradientFaPatchField_H
+#define Foam_fixedGradientFaPatchField_H
 
 #include "faPatchField.H"
 
@@ -56,10 +86,22 @@ class fixedGradientFaPatchField
 :
     public faPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         Field<Type> gradient_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "gradient" entry into corresponding member
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readGradientEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
 
 public:
 
@@ -76,12 +118,14 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
-        //- Construct from patch, internal field and dictionary
+        //- Construct from patch, internal field and dictionary.
         fixedGradientFaPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "gradient" entry (default: mandatory)
+            IOobjectOption::readOption requireGrad = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping the given fixedGradient patch field

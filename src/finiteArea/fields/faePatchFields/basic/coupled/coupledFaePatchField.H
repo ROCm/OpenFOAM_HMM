@@ -88,7 +88,7 @@ public:
             const DimensionedField<Type, edgeMesh>&,
             const dictionary& dict,
             //! The "value" entry (default: optional)
-            IOobjectOption::readOption valueRequired = IOobjectOption::LAZY_READ
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping the given coupledFaePatchField onto a new patch

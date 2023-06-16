@@ -63,6 +63,13 @@ bool Foam::faPatchField<Type>::readValueEntry
 }
 
 
+template<class Type>
+void Foam::faPatchField<Type>::extrapolateInternal()
+{
+    faPatchFieldBase::patch().patchInternalField(internalField_, *this);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>

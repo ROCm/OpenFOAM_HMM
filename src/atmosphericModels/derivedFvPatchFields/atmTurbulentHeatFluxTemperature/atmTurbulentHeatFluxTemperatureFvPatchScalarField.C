@@ -106,15 +106,9 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     Cp0_(Function1<scalar>::New("Cp0", dict, &db())),
     q_(PatchFunction1<scalar>::New(p.patch(), "q", dict))
 {
-    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
-
-    if (hasGrad && this->readValueEntry(dict))
+    if (!this->readGradientEntry(dict) || !this->readValueEntry(dict))
     {
-        gradient().assign(*hasGrad, p.size());
-    }
-    else
-    {
-        fvPatchField<scalar>::patchInternalField(*this);
+        extrapolateInternal();
         gradient() = Zero;
     }
 }

@@ -54,8 +54,7 @@ extrapolatedCalculatedFvPatchField
 :
     calculatedFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    // Set to the internal field
-    fvPatchField<Type>::patchInternalField(*this);
+    fvPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
 }
 
 
@@ -109,8 +108,7 @@ void Foam::extrapolatedCalculatedFvPatchField<Type>::evaluate
         this->updateCoeffs();
     }
 
-    // Set to the internal field
-    fvPatchField<Type>::patchInternalField(*this);
+    fvPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
     calculatedFvPatchField<Type>::evaluate();
 }
 

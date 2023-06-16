@@ -79,7 +79,7 @@ public:
             const DimensionedField<Type, areaMesh>&,
             const dictionary& dict,
             //! The "value" entry (default: optional)
-            IOobjectOption::readOption valueRequired = IOobjectOption::LAZY_READ
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping given patch field onto a new patch

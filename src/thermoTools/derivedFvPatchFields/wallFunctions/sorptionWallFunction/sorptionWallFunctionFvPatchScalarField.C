@@ -303,16 +303,9 @@ sorptionWallFunctionFvPatchScalarField::sorptionWallFunctionFvPatchScalarField
             << exit(FatalIOError);
     }
 
-    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
-
-    if (hasGrad && this->readValueEntry(dict))
+    if (!this->readGradientEntry(dict) || !this->readValueEntry(dict))
     {
-        gradient().assign(*hasGrad, p.size());
-    }
-    else
-    {
-        // Fallback: set to zero-gradient
-        fvPatchField<scalar>::patchInternalField(*this);
+        extrapolateInternal();
         gradient() = Zero;
     }
 }

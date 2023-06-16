@@ -110,7 +110,7 @@ public:
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary& dict,
-            const bool valueRequired=true
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping onto a new patch

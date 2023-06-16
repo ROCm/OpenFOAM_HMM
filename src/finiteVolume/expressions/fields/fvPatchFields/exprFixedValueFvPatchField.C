@@ -82,7 +82,7 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue  // (ignored)
 )
 :
     parent_bctype(p, iF), // bypass dictionary constructor

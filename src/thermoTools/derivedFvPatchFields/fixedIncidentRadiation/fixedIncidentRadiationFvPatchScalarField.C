@@ -77,16 +77,9 @@ fixedIncidentRadiationFvPatchScalarField
     temperatureCoupledBase(patch(), dict),
     qrIncident_("qrIncident", dict, p.size())
 {
-    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
-
-    if (hasGrad && this->readValueEntry(dict))
+    if (!this->readGradientEntry(dict) || !this->readValueEntry(dict))
     {
-        gradient().assign(*hasGrad, p.size());
-    }
-    else
-    {
-        // Still reading so cannot yet evaluate. Make up a value.
-        fvPatchField<scalar>::patchInternalField(*this);
+        extrapolateInternal();
         gradient() = Zero;
     }
 }

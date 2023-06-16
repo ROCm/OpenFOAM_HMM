@@ -64,8 +64,7 @@ Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 :
     faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    // Set to the internal field
-    faPatchField<Type>::patchInternalField(*this);
+    faPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
 }
 
 
@@ -100,8 +99,7 @@ void Foam::zeroGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    // Set to the internal field
-    faPatchField<Type>::patchInternalField(*this);
+    faPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
     faPatchField<Type>::evaluate();
 }
 

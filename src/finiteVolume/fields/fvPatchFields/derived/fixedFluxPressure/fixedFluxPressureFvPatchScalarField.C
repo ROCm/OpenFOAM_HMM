@@ -57,15 +57,9 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
 {
     fvPatchFieldBase::readDict(dict);
 
-    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
-
-    if (hasGrad && this->readValueEntry(dict))
+    if (!this->readGradientEntry(dict) || !this->readValueEntry(dict))
     {
-        gradient().assign(*hasGrad, p.size());
-    }
-    else
-    {
-        fvPatchField<scalar>::patchInternalField(*this);
+        extrapolateInternal();
         gradient() = Zero;
     }
 }
@@ -85,7 +79,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     patchType() = ptf.patchType();
 
     // Map gradient. Set unmapped values and overwrite with mapped ptf
-    gradient() = 0.0;
+    gradient() = Zero;
     gradient().map(ptf.gradient(), mapper);
 
     // Evaluate the value field from the gradient if the internal field is valid

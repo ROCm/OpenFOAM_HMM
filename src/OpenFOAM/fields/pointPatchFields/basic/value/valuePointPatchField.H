@@ -74,6 +74,9 @@ protected:
             Field<Type>::writeEntry("value", os);
         }
 
+        //- Assign the patch field from the internal field
+        void extrapolateInternal();
+
 
 public:
 

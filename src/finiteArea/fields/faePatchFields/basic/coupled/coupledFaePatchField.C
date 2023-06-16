@@ -71,10 +71,10 @@ Foam::coupledFaePatchField<Type>::coupledFaePatchField
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
     const dictionary& dict,
-    IOobjectOption::readOption valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
-    faePatchField<Type>(p, iF, dict, valueRequired)
+    faePatchField<Type>(p, iF, dict, requireValue)
 {}
 
 

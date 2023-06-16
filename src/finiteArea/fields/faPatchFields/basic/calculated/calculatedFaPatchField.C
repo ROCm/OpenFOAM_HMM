@@ -48,10 +48,10 @@ Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict,
-    IOobjectOption::readOption valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
-    faPatchField<Type>(p, iF, dict, valueRequired)
+    faPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 

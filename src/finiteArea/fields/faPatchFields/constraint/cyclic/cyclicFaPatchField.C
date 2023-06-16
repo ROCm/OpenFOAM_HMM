@@ -73,7 +73,7 @@ Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict,
-    IOobjectOption::readOption valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     coupledFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
@@ -90,7 +90,7 @@ Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
             << exit(FatalIOError);
     }
 
-    if (IOobjectOption::isReadRequired(valueRequired))
+    if (IOobjectOption::isReadRequired(requireValue))
     {
         this->evaluate(Pstream::commsTypes::blocking);
     }

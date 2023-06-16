@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +29,39 @@ License
 #include "fixedGradientFaPatchField.H"
 #include "dictionary.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::fixedGradientFaPatchField<Type>::readGradientEntry
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = faPatchFieldBase::patch();
+
+
+    const auto* eptr = dict.findEntry("gradient", keyType::LITERAL);
+
+    if (eptr)
+    {
+        gradient_.assign(*eptr, p.size());
+        return true;
+    }
+
+    if (IOobjectOption::isReadRequired(readOpt))
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entry 'gradient' : missing for patch " << p.name()
+            << " in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -45,6 +79,32 @@ Foam::fixedGradientFaPatchField<Type>::fixedGradientFaPatchField
 template<class Type>
 Foam::fixedGradientFaPatchField<Type>::fixedGradientFaPatchField
 (
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption requireGrad
+)
+:
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    gradient_(p.size())
+{
+    if (readGradientEntry(dict, requireGrad))
+    {
+        evaluate();
+    }
+    else
+    {
+        // Not read (eg, optional and missing):
+        // - treat as zero-gradient, do not evaluate
+        faPatchField<Type>::extrapolateInternal();
+        gradient_ = Zero;
+    }
+}
+
+
+template<class Type>
+Foam::fixedGradientFaPatchField<Type>::fixedGradientFaPatchField
+(
     const fixedGradientFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -54,21 +114,6 @@ Foam::fixedGradientFaPatchField<Type>::fixedGradientFaPatchField
     faPatchField<Type>(ptf, p, iF, mapper),
     gradient_(ptf.gradient_, mapper)
 {}
-
-
-template<class Type>
-Foam::fixedGradientFaPatchField<Type>::fixedGradientFaPatchField
-(
-    const faPatch& p,
-    const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
-)
-:
-    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
-    gradient_("gradient", dict, p.size())
-{
-    evaluate();
-}
 
 
 template<class Type>

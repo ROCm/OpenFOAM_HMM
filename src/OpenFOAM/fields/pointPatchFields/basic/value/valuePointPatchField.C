@@ -62,6 +62,23 @@ bool Foam::valuePointPatchField<Type>::readValueEntry
 }
 
 
+template<class Type>
+void Foam::valuePointPatchField<Type>::extrapolateInternal()
+{
+    const labelUList& meshPoints = pointPatchFieldBase::patch().meshPoints();
+
+    const Field<Type>& iF = this->primitiveField();
+    Field<Type>& pfld = *this;
+
+    pfld.resize_nocopy(meshPoints.size());  // In general this is a no-op
+
+    forAll(meshPoints, i)
+    {
+        pfld[i] = iF[meshPoints[i]];
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
 template<class Type>

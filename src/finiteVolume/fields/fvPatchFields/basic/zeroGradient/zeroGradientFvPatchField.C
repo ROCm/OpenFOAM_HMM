@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +52,7 @@ Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
 :
     fvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    // Set to the internal field
-    fvPatchField<Type>::patchInternalField(*this);
+    fvPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
 }
 
 
@@ -100,8 +100,7 @@ void Foam::zeroGradientFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    // Set to the internal field
-    fvPatchField<Type>::patchInternalField(*this);
+    fvPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
     fvPatchField<Type>::evaluate();
 }
 

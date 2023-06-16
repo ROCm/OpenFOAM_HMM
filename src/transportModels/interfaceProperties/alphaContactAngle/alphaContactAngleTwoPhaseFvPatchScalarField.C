@@ -70,18 +70,15 @@ alphaContactAngleTwoPhaseFvPatchScalarField
     fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     limit_(limitControlNames_.get("limit", dict))
 {
-    const auto* hasGrad = dict.findEntry("gradient", keyType::LITERAL);
-
-    if (hasGrad)
+    if (this->readGradientEntry(dict))
     {
-        gradient().assign(*hasGrad, p.size());
         fixedGradientFvPatchScalarField::updateCoeffs();
         fixedGradientFvPatchScalarField::evaluate();
     }
     else
     {
         // Fallback: set to zero-gradient
-        fvPatchField<scalar>::patchInternalField(*this);
+        extrapolateInternal();
         gradient() = Zero;
     }
 }
@@ -142,7 +139,7 @@ void Foam::alphaContactAngleTwoPhaseFvPatchScalarField::evaluate
     }
     else if (limit_ == lcZeroGradient)
     {
-        gradient() = 0.0;
+        gradient() = Zero;
     }
 
     fixedGradientFvPatchScalarField::evaluate();

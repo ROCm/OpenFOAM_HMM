@@ -90,7 +90,7 @@ public:
             const DimensionedField<Type, areaMesh>&,
             const dictionary& dict,
             //! The "value" entry (default: mandatory)
-            IOobjectOption::readOption valueRequired = IOobjectOption::MUST_READ
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping the given coupledFaPatchField onto a new patch

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,8 +66,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedGradientFvPatchField_H
-#define fixedGradientFvPatchField_H
+#ifndef Foam_fixedGradientFvPatchField_H
+#define Foam_fixedGradientFvPatchField_H
 
 #include "fvPatchField.H"
 
@@ -84,10 +85,22 @@ class fixedGradientFvPatchField
 :
     public fvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         Field<Type> gradient_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "gradient" entry into corresponding member
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readGradientEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
 
 public:
 
@@ -104,12 +117,14 @@ public:
             const DimensionedField<Type, volMesh>&
         );
 
-        //- Construct from patch, internal field and dictionary
+        //- Construct from patch, internal field and dictionary.
         fixedGradientFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "gradient" entry (default: mandatory)
+            IOobjectOption::readOption requireGrad = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping the given fixedGradientFvPatchField

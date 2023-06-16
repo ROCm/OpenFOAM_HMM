@@ -74,11 +74,11 @@ Foam::coupledFaPatchField<Type>::coupledFaPatchField
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict,
-    IOobjectOption::readOption valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     lduInterfaceField(refCast<const lduInterface>(p, dict)),
-    faPatchField<Type>(p, iF, dict, valueRequired)
+    faPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
