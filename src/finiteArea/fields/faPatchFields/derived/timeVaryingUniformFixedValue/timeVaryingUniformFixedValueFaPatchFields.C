@@ -26,21 +26,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingUniformFixedValueFaPatchFields.H"
+#include "timeVaryingUniformFixedValueFaPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "areaFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-makeFaPatchFields(timeVaryingUniformFixedValue);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makeFaPatchTypeFieldTypedefs(timeVaryingUniformFixedValue);
+    makeFaPatchFields(timeVaryingUniformFixedValue);
+}
 
 // ************************************************************************* //

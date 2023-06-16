@@ -208,7 +208,7 @@ electrostaticDepositionFvPatchScalarField
 {
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::patchInternalField(*this);
+        this->extrapolateInternal();  // Zero-gradient patch values
     }
 
     // If flow is multiphase

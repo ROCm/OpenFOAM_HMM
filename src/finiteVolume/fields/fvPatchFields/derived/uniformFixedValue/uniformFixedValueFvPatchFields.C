@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniformFixedValueFvPatchFields.H"
+#include "uniformFixedValueFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
@@ -33,6 +33,7 @@ License
 
 namespace Foam
 {
+    makePatchTypeFieldTypedefs(uniformFixedValue);
     makePatchFields(uniformFixedValue);
 }
 

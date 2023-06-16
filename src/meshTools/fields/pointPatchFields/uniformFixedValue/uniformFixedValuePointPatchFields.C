@@ -25,14 +25,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniformFixedValuePointPatchFields.H"
-#include "pointPatchFields.H"
+#include "uniformFixedValuePointPatchField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "pointPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    makePointPatchFieldTypedefs(uniformFixedValue);
     makePointPatchFields(uniformFixedValue);
 }
 

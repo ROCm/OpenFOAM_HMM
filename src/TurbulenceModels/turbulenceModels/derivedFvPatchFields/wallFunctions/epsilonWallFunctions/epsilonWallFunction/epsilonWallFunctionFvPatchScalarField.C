@@ -366,7 +366,7 @@ epsilonWallFunctionFvPatchScalarField
     cornerWeights_()
 {
     // Apply zero-gradient condition on start-up
-    fvPatchField<scalar>::patchInternalField(*this);
+    this->extrapolateInternal();
 }
 
 

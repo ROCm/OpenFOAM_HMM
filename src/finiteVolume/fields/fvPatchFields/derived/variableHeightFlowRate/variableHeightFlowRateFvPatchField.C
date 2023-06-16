@@ -86,7 +86,7 @@ Foam::variableHeightFlowRateFvPatchScalarField
     if (!this->readValueEntry(dict))
     {
         // Fallback: set to the internal field
-        fvPatchField<scalar>::patchInternalField(*this);
+        this->extrapolateInternal();
     }
 
     this->refValue() = 0.0;

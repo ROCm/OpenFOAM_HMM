@@ -70,7 +70,8 @@ freeSurfaceVelocityFvPatchVectorField
     fixedGradientFvPatchVectorField(p, iF)
 {
     fvPatchFieldBase::readDict(dict);
-    fvPatchField<vector>::patchInternalField(*this);
+    // Apply zero-gradient condition on start-up
+    this->extrapolateInternal();
 }
 
 

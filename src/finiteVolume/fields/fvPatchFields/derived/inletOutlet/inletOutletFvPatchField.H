@@ -38,6 +38,7 @@ Usage
         Property     | Description             | Required    | Default value
         phi          | Flux field name         | no          | phi
         inletValue   | Inlet value for reverse flow | yes    |
+        value        | initial field value          | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -88,10 +89,9 @@ class inletOutletFvPatchField
 :
     public mixedFvPatchField<Type>
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Name of flux field
         word phiName_;

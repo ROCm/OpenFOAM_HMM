@@ -35,9 +35,14 @@ Usage
         valueExpr    | expression for uniformValue          | partly  | 0
         gradientExpr | expression for uniformGradient       | partly  | 0
         fractionExpr | expression for valueFraction         | partly  | depends
+        value        | initial field value                  | optional |
     \endtable
 
 Note
+    The \c value entry (optional) is used for the initial values.
+    Otherwise uses some heuristics of other entries
+    (not properly documented now since this boundary condition is deprecated).
+
     This boundary condition is deprecated in favour of
     Foam::uniformMixedFvPatchField,
     Foam::uniformFixedValueFvPatchField,

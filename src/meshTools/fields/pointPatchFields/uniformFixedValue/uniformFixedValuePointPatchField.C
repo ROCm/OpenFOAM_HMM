@@ -32,6 +32,9 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
 
+// Alternative
+// refCast<const facePointPatch>(p).patch()
+
 template<class Type>
 const Foam::polyPatch&
 Foam::uniformFixedValuePointPatchField<Type>::getPatch(const pointPatch& p)
@@ -87,6 +90,10 @@ uniformFixedValuePointPatchField
 {
     if (!this->readValueEntry(dict))
     {
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
+
+        // Evaluate to assign a value
         this->evaluate();
     }
 }
@@ -194,7 +201,7 @@ void Foam::uniformFixedValuePointPatchField<Type>::updateCoeffs()
     }
     const scalar t = this->db().time().timeOutputValue();
 
-    fixedValuePointPatchField<Type>::operator==(refValueFunc_->value(t));
+    valuePointPatchField<Type>::operator=(refValueFunc_->value(t));
     fixedValuePointPatchField<Type>::updateCoeffs();
 }
 

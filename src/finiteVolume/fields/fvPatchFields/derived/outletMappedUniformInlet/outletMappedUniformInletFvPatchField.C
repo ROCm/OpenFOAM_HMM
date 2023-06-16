@@ -171,7 +171,7 @@ outletMappedUniformInletFvPatchField
     if (!this->readValueEntry(dict))
     {
         // Fallback: set to the internal field
-        fvPatchField<Type>::patchInternalField(*this);
+        this->extrapolateInternal();
     }
 }
 
@@ -205,7 +205,7 @@ outletMappedUniformInletFvPatchField
     else
     {
         // Fallback: set to the internal field
-        fvPatchField<Type>::patchInternalField(*this);
+        this->extrapolateInternal();
     }
 }
 

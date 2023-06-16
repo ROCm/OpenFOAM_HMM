@@ -44,6 +44,7 @@ Usage
         uniformValue | uniform value                    | partly | 0
         uniformGradient | uniform gradient              | partly | 0
         uniformValueFraction | uniform valueFraction    | partly | depends
+        value        | initial field value              | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -69,6 +70,11 @@ Note
     uniformValue).
     If both \c uniformValue and \c uniformGradient are defined,
     the \c uniformValueFraction must also be defined.
+
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the function(s) are used for the evaluation.
+    In some cases (eg, coded or expression entries with references to other
+    fields) this can be problematic and the \c value entry will be needed.
 
 See also
     Foam::Function1Types

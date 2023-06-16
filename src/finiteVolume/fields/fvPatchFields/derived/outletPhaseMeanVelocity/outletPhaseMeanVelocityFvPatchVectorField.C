@@ -82,11 +82,11 @@ Foam::outletPhaseMeanVelocityFvPatchVectorField
 
     refValue() = Zero;
     refGrad() = Zero;
-    valueFraction() = 0.0;
+    valueFraction() = 0;
 
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<vector>::patchInternalField(*this);
+        this->extrapolateInternal();
     }
 }
 

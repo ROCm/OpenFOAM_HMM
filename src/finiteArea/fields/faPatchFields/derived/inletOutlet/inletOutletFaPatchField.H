@@ -39,6 +39,7 @@ Usage
         Property     | Description             | Required    | Default value
         phi          | Flux field name         | no          | phi
         inletValue   | Inlet value for reverse flow | yes    |
+        value        | initial field value          | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -54,7 +55,6 @@ Usage
 
     The mode of operation is determined by the sign of the flux across the
     patch edges.
-
 
 Note
     Sign conventions:

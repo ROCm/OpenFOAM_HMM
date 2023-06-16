@@ -59,7 +59,7 @@ solidBodyMotionDisplacementPointPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchVectorField(p, iF, dict, false),
+    fixedValuePointPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     SBMFPtr_(solidBodyMotionFunction::New(dict, this->db().time())),
     localPoints0Ptr_(nullptr)
 {

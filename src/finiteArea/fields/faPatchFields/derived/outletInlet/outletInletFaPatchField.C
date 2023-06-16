@@ -41,7 +41,7 @@ Foam::outletInletFaPatchField<Type>::outletInletFaPatchField
 {
     this->refValue() = *this;
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = 0;
 }
 
 
@@ -72,15 +72,15 @@ Foam::outletInletFaPatchField<Type>::outletInletFaPatchField
 {
     faPatchFieldBase::readDict(dict);
 
+    // Require outletValue (MUST_READ)
     this->refValue().assign("outletValue", dict, p.size());
+    this->refGrad() = Zero;
+    this->valueFraction() = 0;
 
     if (!this->readValueEntry(dict))
     {
-        faPatchField<Type>::operator=(this->refValue());
+        faPatchField<Type>::extrapolateInternal();
     }
-
-    this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
 }
 
 

@@ -38,6 +38,7 @@ Usage
         Property     | Description             | Required    | Default value
         phi          | Flux field name         | no          | phi
         outletValue  | Outlet value for reverse flow | yes   |
+        value        | initial field value     | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -92,7 +93,7 @@ protected:
 
     // Protected Data
 
-        //- Name of flux field
+        //- Name of flux field (default: phi)
         word phiName_;
 
 

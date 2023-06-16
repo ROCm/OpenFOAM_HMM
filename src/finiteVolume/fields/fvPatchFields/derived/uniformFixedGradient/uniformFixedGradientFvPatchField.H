@@ -37,6 +37,7 @@ Usage
     \table
         Property     | Description                  | Required | Default
         uniformGradient | uniform gradient          | yes |
+        value        | initial field value          | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -52,6 +53,11 @@ Note
     The uniformGradient entry is a PatchFunction1 type,
     able to describe time and spatial varying functions.
     The example above gives the usage for supplying a constant value.
+
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the \c uniformGradient is used for the evaluation.
+    In some cases (eg, coded or expression entries with references to other
+    fields) this can be problematic and the \c value entry will be needed.
 
 See also
     Foam::Function1Types

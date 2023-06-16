@@ -25,21 +25,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "exprValuePointPatchFields.H"
-#include "pointPatchFields.H"
+#include "exprValuePointPatchField.H"
 #include "addToRunTimeSelectionTable.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "fieldTypes.H"
+#include "pointPatchFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePointPatchFields(exprValue);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePointPatchFieldTypedefs(exprValue);
+    makePointPatchFields(exprValue);
+}
 
 // ************************************************************************* //

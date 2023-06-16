@@ -107,8 +107,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codedMixedFvPatchField_H
-#define codedMixedFvPatchField_H
+#ifndef Foam_codedMixedFvPatchField_H
+#define Foam_codedMixedFvPatchField_H
 
 #include "mixedFvPatchFields.H"
 #include "codedBase.H"

@@ -120,7 +120,7 @@ Foam::processorFaPatchField<Type>::processorFaPatchField
     // Use 'value' supplied, or set to internal field
     if (!this->readValueEntry(dict))
     {
-        faPatchField<Type>::patchInternalField(*this);
+        this->extrapolateInternal();  // Zero-gradient patch values
     }
 }
 

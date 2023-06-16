@@ -32,9 +32,12 @@ Description
 Usage
     \table
         Property     | Description                          | Required | Default
-        value        | fixed value                          | yes |
         valueExpr    | expression for uniformValue          | yes |
+        value        | initial field value                  | optional |
     \endtable
+
+    The \c value entry (optional) is used for the initial values.
+    Otherwise uses zero-gradient values.
 
 SourceFiles
     exprValuePointPatchField.C

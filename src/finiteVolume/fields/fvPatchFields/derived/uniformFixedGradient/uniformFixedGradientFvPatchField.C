@@ -70,7 +70,15 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
     )
 {
     fvPatchFieldBase::readDict(dict);
-    this->evaluate();
+
+    if (!this->readValueEntry(dict))
+    {
+        // Ensure field has initialised values
+        this->extrapolateInternal();
+
+        // Evaluate to assign a value
+        this->evaluate();
+    }
 }
 
 

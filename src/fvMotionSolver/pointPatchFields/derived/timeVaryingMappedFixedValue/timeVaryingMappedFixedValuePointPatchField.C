@@ -64,7 +64,7 @@ timeVaryingMappedFixedValuePointPatchField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchField<Type>(p, iF, dict, false),
+    fixedValuePointPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     setAverage_(dict.getOrDefault("setAverage", false)),
     perturb_(dict.getOrDefault("perturb", 1e-5)),
     fieldTableName_(iF.name()),

@@ -80,7 +80,7 @@ timeVaryingMassSorptionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     kabs_(dict.getCheck<scalar>("kabs", scalarMinMax::ge(0))),
     max_(dict.getCheck<scalar>("max", scalarMinMax::ge(0))),
     kdes_(dict.getCheckOrDefault<scalar>("kdes", 0, scalarMinMax::ge(0)))

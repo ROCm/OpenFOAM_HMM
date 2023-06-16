@@ -169,7 +169,6 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     // Since we bypassed dictionary constructor
     fvPatchFieldBase::readDict(dict);
 
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
     const auto* hasRefValue = dict.findEntry("refValue", keyType::LITERAL);
 
     const auto* hasRefGradient
@@ -184,10 +183,8 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
         this->refValue().assign(*hasRefValue, p.size());
     }
 
-    if (hasValue)
+    if (this->readValueEntry(dict))
     {
-        Field<Type>::assign(*hasValue, p.size());
-
         if (!hasRefValue)
         {
             // Ensure refValue has a sensible value for the "update" below

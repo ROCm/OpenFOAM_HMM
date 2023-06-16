@@ -69,7 +69,8 @@ alphaFixedPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    // The 'value' is optional (handled below)
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     p_("p", dict, p.size())
 {
     if (!this->readValueEntry(dict))

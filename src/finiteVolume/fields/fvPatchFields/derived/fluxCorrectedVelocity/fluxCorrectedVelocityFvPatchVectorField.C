@@ -70,13 +70,10 @@ fluxCorrectedVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    zeroGradientFvPatchVectorField(p, iF),
+    zeroGradientFvPatchVectorField(p, iF, dict),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho"))
-{
-    fvPatchFieldBase::readDict(dict);
-    fvPatchField<vector>::patchInternalField(*this);
-}
+{}
 
 
 Foam::fluxCorrectedVelocityFvPatchVectorField::

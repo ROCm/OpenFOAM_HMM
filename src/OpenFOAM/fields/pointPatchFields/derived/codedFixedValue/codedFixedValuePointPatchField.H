@@ -31,6 +31,9 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValuePointPatchField) which is then used to evaluate.
 
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the code is executed.
+
     The code entries:
     \plaintable
        codeInclude | include files

@@ -32,11 +32,14 @@ Description
 Usage
     \table
         Property     | Description                          | Required | Default
-        value        | fixed value                          | yes |
         valueExpr    | expression for uniformValue          | yes |
+        value        | initial field value                  | optional |
     \endtable
 
 Note
+    The \c value entry (optional) is used for the initial values.
+    Otherwise uses a zero-gradient condition for the initial value.
+
     This boundary condition is deprecated in favour of
     Foam::uniformFixedValueFvPatchField
     with expression entries.

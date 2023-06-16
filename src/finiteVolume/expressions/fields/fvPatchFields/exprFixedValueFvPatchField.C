@@ -128,15 +128,10 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     // Since we bypassed dictionary constructor
     fvPatchFieldBase::readDict(dict);
 
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-    if (hasValue)
+    if (!this->readValueEntry(dict))
     {
-        Field<Type>::assign(*hasValue, p.size());
-    }
-    else
-    {
-        (*this) == this->patchInternalField();
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
 
         #ifdef FULLDEBUG
         WarningInFunction

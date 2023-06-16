@@ -68,6 +68,10 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 {
     if (!this->readValueEntry(dict))
     {
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
+
+        // Evaluate to assign a value
         this->evaluate();
     }
 }

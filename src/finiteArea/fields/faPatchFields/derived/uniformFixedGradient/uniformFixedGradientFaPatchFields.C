@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniformFixedGradientFaPatchFields.H"
+#include "uniformFixedGradientFaPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "areaFields.H"
 #include "edgeFields.H"
@@ -34,6 +34,7 @@ License
 
 namespace Foam
 {
+    makeFaPatchTypeFieldTypedefs(uniformFixedGradient);
     makeFaPatchFields(uniformFixedGradient);
 }
 

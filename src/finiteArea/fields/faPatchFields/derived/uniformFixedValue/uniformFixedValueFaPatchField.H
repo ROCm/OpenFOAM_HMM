@@ -36,6 +36,7 @@ Usage
     \table
         Property     | Description                  | Required | Default
         uniformValue | uniform value                | yes |
+        value        | initial field value          | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -51,6 +52,11 @@ Note
     The uniformValue entry is a Function1 type,
     able to describe time varying functions.
     The example above gives the usage for supplying a constant value.
+
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the \c uniformValue is evaluated.
+    In some cases (eg, coded or expression entries with references to other
+    fields) this can be problematic and the \c value entry will be needed.
 
 See also
     Foam::Function1Types

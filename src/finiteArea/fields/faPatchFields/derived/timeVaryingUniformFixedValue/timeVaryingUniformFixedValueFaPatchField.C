@@ -58,6 +58,9 @@ timeVaryingUniformFixedValueFaPatchField
 {
     if (!this->readValueEntry(dict))
     {
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
+
         updateCoeffs();
     }
 

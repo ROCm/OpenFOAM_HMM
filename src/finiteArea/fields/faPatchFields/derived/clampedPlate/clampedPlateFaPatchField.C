@@ -58,8 +58,7 @@ clampedPlateFaPatchField<Type>::clampedPlateFaPatchField
 :
     faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    // Set to the internal field
-    faPatchField<Type>::patchInternalField(*this);
+    this->extrapolateInternal();  // Zero-gradient patch values
 }
 
 

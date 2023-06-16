@@ -120,6 +120,10 @@ Foam::uniformMixedFaPatchField<Type>::uniformMixedFaPatchField
     // Use restart value if provided...
     if (!this->readValueEntry(dict))
     {
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
+
+        // Evaluate to assign a value
         this->evaluate();
     }
 }
@@ -240,7 +244,7 @@ void Foam::uniformMixedFaPatchField<Type>::write(Ostream& os) const
         valueFractionFunc_->writeData(os);
     }
 
-    // Eg, for visualisation
+    // For visualisation / restart
     faPatchField<Type>::writeValueEntry(os);
 }
 

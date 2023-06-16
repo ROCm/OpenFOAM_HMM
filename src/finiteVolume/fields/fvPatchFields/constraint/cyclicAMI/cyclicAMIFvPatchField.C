@@ -77,7 +77,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
         }
         else
         {
-            fvPatchField<Type>::patchInternalField(*this);
+            this->extrapolateInternal();  // Zero-gradient patch values
         }
     }
 }

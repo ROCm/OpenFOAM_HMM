@@ -115,6 +115,11 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
         dict_
     )
 {
+    //FUTURE?
+    //DeprecatedInFunction(2212)
+    //    << "Use uniformFixedValue with an expression Function1 instead." << nl
+    //    << "    This boundary condition will be removed in the future" << endl;
+
     // Require valueExpr
     if (this->valueExpr_.empty())
     {
@@ -125,18 +130,10 @@ Foam::exprValuePointPatchField<Type>::exprValuePointPatchField
 
     driver_.readDict(dict_);
 
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-    if (hasValue)
+    if (!this->readValueEntry(dict))
     {
-        Field<Type>::assign(*hasValue, p.size());
-    }
-    else
-    {
-        // Note: valuePointPatchField defaults to Zero
-        // but internalField might be better
-
-        Field<Type>::operator=(Zero);
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
     }
 
     if (this->evalOnConstruct_)

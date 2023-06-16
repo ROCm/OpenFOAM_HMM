@@ -188,9 +188,10 @@ Foam::codedFixedValueFvPatchField<Type>::codedFixedValueFvPatchField
 
     if (!this->readValueEntry(dict))
     {
-        // Assign dummy value to get redirectPatchField not fail
-        fvPatchField<Type>::patchInternalField(*this);
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
 
+        // Evaluate to assign a value
         this->evaluate(Pstream::commsTypes::blocking);
     }
 }

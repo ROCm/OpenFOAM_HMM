@@ -25,21 +25,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "codedMixedFvPatchFields.H"
+#include "codedMixedFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fieldTypes.H"
 #include "volFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchFields(codedMixed);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeFieldTypedefs(codedMixed);
+    makePatchFields(codedMixed);
+}
 
 // ************************************************************************* //

@@ -113,7 +113,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     // Use 'value' supplied, or set to internal field
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::patchInternalField(*this);
+        fvPatchField<Type>::extrapolateInternal();
     }
 }
 

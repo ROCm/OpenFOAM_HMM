@@ -160,7 +160,7 @@ externalCoupledTemperatureMixedFvPatchScalarField
         // or extrapolated value
         if (!this->readValueEntry(dict))
         {
-            fvPatchField<scalar>::patchInternalField(*this);
+            fvPatchField<scalar>::extrapolateInternal();
         }
 
         // Initialise as a fixed value
@@ -254,7 +254,7 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
     const scalarField& Twall = *this;
 
     // Fluid temperature [K]
-    tmp<scalarField> tfluid;
+    scalarField Tfluid(size());
 
     if (refTempType_ == refTemperatureType::USER)
     {
@@ -262,15 +262,13 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
         const scalar currTref =
             Tref_->value(this->db().time().timeOutputValue());
 
-        tfluid = tmp<scalarField>::New(size(), currTref);
+        Tfluid = currTref;
     }
     else
     {
         // Near wall cell temperature
-        tfluid = patchInternalField();
+        this->patchInternalField(Tfluid);
     }
-
-    const scalarField Tfluid(tfluid);
 
     // Heat transfer coefficient [W/m2/K]
     // This htc needs to be always larger or equal to zero

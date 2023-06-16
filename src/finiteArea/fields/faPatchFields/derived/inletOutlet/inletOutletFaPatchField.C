@@ -74,14 +74,13 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 {
     // Require inletValue (MUST_READ)
     this->refValue().assign("inletValue", dict, p.size());
+    this->refGrad() = Zero;
+    this->valueFraction() = 0;
 
     if (!this->readValueEntry(dict))
     {
-        faPatchField<Type>::operator=(this->refValue());
+        faPatchField<Type>::extrapolateInternal();
     }
-
-    this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
 }
 
 

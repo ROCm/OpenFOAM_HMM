@@ -166,7 +166,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchField<vector>(p, iF, dict, false),
+    fixedValuePointPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
     motionType_(motionTypeNames.get("motionType", dict)),
     n_(dict.get<vector>("n")),
     gHat_(Zero),

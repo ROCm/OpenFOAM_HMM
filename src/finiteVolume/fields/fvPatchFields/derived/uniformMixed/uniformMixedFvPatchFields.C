@@ -25,7 +25,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniformMixedFvPatchFields.H"
+#include "uniformMixedFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
@@ -33,6 +33,7 @@ License
 
 namespace Foam
 {
+    makePatchTypeFieldTypedefs(uniformMixed);
     makePatchFields(uniformMixed);
 }
 

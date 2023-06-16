@@ -42,7 +42,7 @@ Foam::outletInletFvPatchField<Type>::outletInletFvPatchField
 {
     this->refValue() = *this;
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = 0;
 }
 
 
@@ -73,15 +73,15 @@ Foam::outletInletFvPatchField<Type>::outletInletFvPatchField
 {
     fvPatchFieldBase::readDict(dict);
 
+    // Require outletValue (MUST_READ)
     this->refValue().assign("outletValue", dict, p.size());
+    this->refGrad() = Zero;
+    this->valueFraction() = 0;
 
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::operator=(this->refValue());
+        fvPatchField<Type>::extrapolateInternal();
     }
-
-    this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
 }
 
 

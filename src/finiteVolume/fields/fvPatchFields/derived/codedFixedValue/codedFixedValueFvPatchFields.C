@@ -25,21 +25,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "codedFixedValueFvPatchFields.H"
+#include "codedFixedValueFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fieldTypes.H"
 #include "volFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchFields(codedFixedValue);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeFieldTypedefs(codedFixedValue);
+    makePatchFields(codedFixedValue);
+}
 
 // ************************************************************************* //

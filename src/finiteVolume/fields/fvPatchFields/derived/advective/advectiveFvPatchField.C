@@ -91,12 +91,12 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
     // Use 'value' supplied, or set to internal field
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::patchInternalField(*this);
+        this->extrapolateInternal();  // Zero-gradient patch values
     }
 
     this->refValue() = *this;
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = 0;
 
     if (dict.readIfPresent("lInf", lInf_))
     {

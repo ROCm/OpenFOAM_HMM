@@ -62,7 +62,7 @@ Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
 {
     if (!this->readValueEntry(dict))
     {
-        fixedValueFvPatchField<Type>::operator==(referenceField_);
+        fvPatchField<Type>::operator=(referenceField_);
     }
 }
 

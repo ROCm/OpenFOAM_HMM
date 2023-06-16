@@ -89,7 +89,7 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
     // Use 'value' supplied, or set to internal field
     if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::patchInternalField(*this);
+        this->extrapolateInternal();
     }
 }
 
