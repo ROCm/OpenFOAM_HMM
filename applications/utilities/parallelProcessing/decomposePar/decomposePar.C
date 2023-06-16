@@ -724,7 +724,9 @@ int main(int argc, char *argv[])
                     (
                         Time::controlDictName,
                         args.rootPath(),
-                        args.caseName()/("processor" + Foam::name(proci))
+                        args.caseName()/("processor" + Foam::name(proci)),
+                        false,  // No function objects
+                        false   // No extra controlDict libs
                     );
                     // processorDb.setTime(runTime);
 
@@ -1247,8 +1249,9 @@ int main(int argc, char *argv[])
                         (
                             Time::controlDictName,
                             args.rootPath(),
-                            args.caseName()
-                          / ("processor" + Foam::name(proci))
+                            args.caseName()/("processor" + Foam::name(proci)),
+                            false,  // No function objects
+                            false   // No extra controlDict libs
                         );
 
                         processorDb.setTime(runTime);

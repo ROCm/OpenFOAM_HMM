@@ -315,19 +315,14 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
         // Create processor mesh without a boundary
 
-        fileName processorCasePath
-        (
-            time().caseName()/("processor" + Foam::name(proci))
-        );
-
         // create a database
         Time processorDb
         (
             Time::controlDictName,
             time().rootPath(),
-            processorCasePath,
-            word("system"),
-            word("constant")
+            time().caseName()/("processor" + Foam::name(proci)),
+            false,  // No function objects
+            false   // No extra controlDict libs
         );
         processorDb.setTime(time());
 

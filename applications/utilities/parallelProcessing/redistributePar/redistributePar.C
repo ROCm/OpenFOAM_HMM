@@ -1245,7 +1245,8 @@ int main(int argc, char *argv[])
         runTime.globalCaseName(),
         runTime.system(),
         runTime.constant(),
-        false                   // enableFunctionObjects
+        false,  // No function objects
+        false   // No extra controlDict libs
     );
 
 
