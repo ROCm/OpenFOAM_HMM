@@ -61,6 +61,8 @@ functions
         fvOptions
         {
         }
+
+        writeControl    writeTime;
     }
 
     fileUpdate
