@@ -45,6 +45,18 @@ Foam::fixedValueFaPatchField<Type>::fixedValueFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
+    const Type& value
+)
+:
+    faPatchField<Type>(p, iF, value)
+{}
+
+
+template<class Type>
+Foam::fixedValueFaPatchField<Type>::fixedValueFaPatchField
+(
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
     const dictionary& dict,
     IOobjectOption::readOption valueRequired
 )

@@ -96,6 +96,14 @@ public:
             const DimensionedField<Type, pointMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        valuePointPatchField
+        (
+            const pointPatch&,
+            const DimensionedField<Type, pointMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and dictionary
         valuePointPatchField
         (

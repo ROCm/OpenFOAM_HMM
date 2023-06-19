@@ -45,6 +45,18 @@ Foam::fixedValueFvsPatchField<Type>::fixedValueFvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
+    const Type& value
+)
+:
+    fvsPatchField<Type>(p, iF, value)
+{}
+
+
+template<class Type>
+Foam::fixedValueFvsPatchField<Type>::fixedValueFvsPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, surfaceMesh>& iF,
     const dictionary& dict
 )
 :

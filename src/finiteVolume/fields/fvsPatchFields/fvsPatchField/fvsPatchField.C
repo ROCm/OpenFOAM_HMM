@@ -85,6 +85,20 @@ Foam::fvsPatchField<Type>::fvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
+    const Type& value
+)
+:
+    fvsPatchFieldBase(p),
+    Field<Type>(p.size(), value),
+    internalField_(iF)
+{}
+
+
+template<class Type>
+Foam::fvsPatchField<Type>::fvsPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, surfaceMesh>& iF,
     const Field<Type>& pfld
 )
 :

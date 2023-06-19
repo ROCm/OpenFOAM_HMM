@@ -81,6 +81,19 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
+    const Type& value
+)
+:
+    pointPatchField<Type>(p, iF),
+    Field<Type>(p.size(), value)
+{}
+
+
+template<class Type>
+Foam::valuePointPatchField<Type>::valuePointPatchField
+(
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF,
     const dictionary& dict,
     IOobjectOption::readOption requireValue
 )

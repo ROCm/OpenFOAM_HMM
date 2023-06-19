@@ -293,6 +293,14 @@ public:
             const DimensionedField<Type, surfaceMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        fvsPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, surfaceMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and patch field
         fvsPatchField
         (

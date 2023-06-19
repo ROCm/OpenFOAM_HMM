@@ -47,6 +47,18 @@ Foam::fixedValuePointPatchField<Type>::fixedValuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
+    const Type& value
+)
+:
+    valuePointPatchField<Type>(p, iF, value)
+{}
+
+
+template<class Type>
+Foam::fixedValuePointPatchField<Type>::fixedValuePointPatchField
+(
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF,
     const dictionary& dict,
     IOobjectOption::readOption requireValue
 )

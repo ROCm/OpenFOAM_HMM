@@ -299,6 +299,14 @@ public:
             const DimensionedField<Type, edgeMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        faePatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and patch field
         faePatchField
         (

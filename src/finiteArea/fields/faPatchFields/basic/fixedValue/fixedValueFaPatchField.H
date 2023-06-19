@@ -72,6 +72,14 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        fixedValueFaPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and dictionary
         fixedValueFaPatchField
         (
