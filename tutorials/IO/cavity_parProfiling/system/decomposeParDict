@@ -14,14 +14,26 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  2;
-
-method  hierarchical;
-
+numberOfSubdomains  20;
+method              scotch;
 coeffs
 {
-    n   (2 1 1);
+    // Divide into 20/10=2 nodes
+    domains (10);
+    // Inside a node the communication weight is 1% of that inbetween nodes
+    domainWeights (0.01);
 }
+
+
+
+//numberOfSubdomains  2;
+//
+//method  hierarchical;
+//
+//coeffs
+//{
+//    n   (2 1 1);
+//}
 
 
 // ************************************************************************* //

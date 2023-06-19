@@ -1,3 +1,4 @@
 Testcase for parProfiling wrapper linear solver.
-
-It only activates parProfiling within the linear solver.
+- activates parProfiling within the linear solver.
+- tests multiLevel scotch
+- test distributedDI* preconditioners

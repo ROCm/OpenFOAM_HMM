@@ -20,7 +20,7 @@ solvers
     {
         solver          parProfiling;
         baseSolver      PCG;
-        preconditioner  DIC;
+        preconditioner  distributedDIC;
         tolerance       1e-06;
         relTol          0.05;
     }
@@ -28,14 +28,16 @@ solvers
     {
         solver          parProfiling;
         baseSolver      PCG;
-        preconditioner  DIC;
+        preconditioner  distributedDIC;
         tolerance       1e-06;
         relTol          0;
     }
     U
     {
-        solver          smoothSolver;
-        smoother        symGaussSeidel;
+        //solver          smoothSolver;
+        //smoother        symGaussSeidel;
+        solver          PBiCGStab;
+        preconditioner  distributedDILU;
         tolerance       1e-05;
         relTol          0;
     }
