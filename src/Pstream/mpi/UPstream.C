@@ -695,11 +695,20 @@ void Foam::UPstream::freeCommunicatorComponents(const label index)
     }
 
     // Not touching the first two communicators (SELF, WORLD)
-    if (index > 1)
+    // or anything out-of bounds.
+    //
+    // No UPstream communicator indices when MPI is initialized outside
+    // of OpenFOAM - thus needs a bounds check too!
+
+    if
+    (
+        index > 1
+     && index < PstreamGlobals::MPICommunicators_.size()
+    )
     {
         if
         (
-            (true == PstreamGlobals::pendingMPIFree_[index])
+            PstreamGlobals::pendingMPIFree_[index]
          && (MPI_COMM_NULL != PstreamGlobals::MPICommunicators_[index])
         )
         {
