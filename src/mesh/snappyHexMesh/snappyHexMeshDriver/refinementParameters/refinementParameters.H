@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,6 +108,9 @@ class refinementParameters
         //- Allowed load unbalance
         const scalar maxLoadUnbalance_;
 
+        //- Trigger cell count to start balancing
+        const label maxCellUnbalance_;
+
         const Switch handleSnapProblems_;
 
         const Switch interfaceRefine_;
@@ -119,6 +122,9 @@ class refinementParameters
         const scalar minCellFraction_;
 
         const label nMinCells_;
+
+        //- Force final balancing after castellation
+        const bool balanceAtEnd_;
 
         const bool dryRun_;
 
@@ -228,6 +234,12 @@ public:
                 return maxLoadUnbalance_;
             }
 
+            //- Trigger cell count to start balancing
+            label maxCellUnbalance() const
+            {
+                return maxCellUnbalance_;
+            }
+
             bool handleSnapProblems() const
             {
                 return handleSnapProblems_;
@@ -264,6 +276,12 @@ public:
             label nMinCells() const
             {
                 return nMinCells_;
+            }
+
+            //- Force final balancing after castallation
+            bool balanceAtEnd() const
+            {
+                return balanceAtEnd_;
             }
 
 

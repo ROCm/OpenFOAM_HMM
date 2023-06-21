@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1271,6 +1271,17 @@ public:
             //- Refine some cells
             autoPtr<mapPolyMesh> refine(const labelList& cellsToRefine);
 
+            //- Balance the mesh
+            autoPtr<mapDistributePolyMesh> balance
+            (
+                const string& msg,
+                decompositionMethod& decomposer,
+                fvMeshDistribute& distributor,
+                labelList& cellsToRefine,
+                const scalar maxLoadUnbalance,
+                const label maxCellUnbalance
+            );
+
             //- Refine some cells and rebalance
             autoPtr<mapDistributePolyMesh> refineAndBalance
             (
@@ -1278,7 +1289,8 @@ public:
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor,
                 const labelList& cellsToRefine,
-                const scalar maxLoadUnbalance
+                const scalar maxLoadUnbalance,
+                const label maxCellUnbalance
             );
 
             //- Balance before refining some cells
@@ -1288,7 +1300,8 @@ public:
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor,
                 const labelList& cellsToRefine,
-                const scalar maxLoadUnbalance
+                const scalar maxLoadUnbalance,
+                const label maxCellUnbalance
             );
 
             //- Calculate list of cells to directionally refine

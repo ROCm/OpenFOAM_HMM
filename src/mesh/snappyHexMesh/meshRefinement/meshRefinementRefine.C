@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2598,6 +2598,120 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
 }
 
 
+// Load balancing
+Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
+(
+    const string& msg,
+    decompositionMethod& decomposer,
+    fvMeshDistribute& distributor,
+    labelList& cellsToRefine,
+    const scalar maxLoadUnbalance,
+    const label maxCellUnbalance
+)
+{
+    autoPtr<mapDistributePolyMesh> distMap;
+
+    if (Pstream::nProcs() > 1)
+    {
+        // First check if we need to balance at all. Precalculate number of
+        // cells after refinement and see what maximum difference is.
+        const scalar nNewCells =
+            scalar(mesh_.nCells() + 7*cellsToRefine.size());
+        const scalar nNewCellsAll = returnReduce(nNewCells, sumOp<scalar>());
+        const scalar nIdealNewCells = nNewCellsAll / Pstream::nProcs();
+        const scalar unbalance = returnReduce
+        (
+            mag(1.0-nNewCells/nIdealNewCells),
+            maxOp<scalar>()
+        );
+
+        // Trigger the balancing to avoid too early balancing for better
+        // scaling performance.
+        const scalar nNewCellsOnly = scalar(7*cellsToRefine.size());
+
+        const label maxNewCells =
+            label(returnReduce(nNewCellsOnly, maxOp<scalar>()));
+
+        const label maxDeltaCells =
+            label(mag(returnReduce(nNewCells, maxOp<scalar>())-nIdealNewCells));
+
+        // New trigger to avoid too early balancing
+        // 1. Check if globally one proc exceeds the maxCellUnbalance value
+        //    related to the new added cells at the refinement loop
+        // 2. Check if globally one proc exceeds the maxCellUnbalance based on
+        //    the average cell count a proc should have
+        if
+        (
+            (maxNewCells <= maxCellUnbalance)
+         && (maxDeltaCells <= maxCellUnbalance)
+        )
+        {
+            Info<< "Skipping balancing since trigger value not reached:" << "\n"
+                << "    Trigger cell count: " << maxCellUnbalance << nl
+                << "    Max new cell count in proc: " << maxNewCells << nl
+                << "    Max difference between new cells and balanced: "
+                << maxDeltaCells << nl
+                << "    Max load unbalance " << maxLoadUnbalance
+                << nl <<endl;
+        }
+        else
+        {
+            if (unbalance <= maxLoadUnbalance)
+            {
+                Info<< "Skipping balancing since max unbalance " << unbalance
+                    << " is less than allowable " << maxLoadUnbalance
+                    << endl;
+            }
+            else
+            {
+                scalarField cellWeights(mesh_.nCells(), 1);
+                forAll(cellsToRefine, i)
+                {
+                    cellWeights[cellsToRefine[i]] += 7;
+                }
+
+                distMap = balance
+                (
+                    false,  //keepZoneFaces
+                    false,  //keepBaffles
+                    cellWeights,
+                    decomposer,
+                    distributor
+                );
+
+                // Update cells to refine
+                distMap().distributeCellIndices(cellsToRefine);
+
+                Info<< "Balanced mesh in = "
+                    << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+                printMeshInfo(debug, "After balancing " + msg);
+
+
+                if (debug&meshRefinement::MESH)
+                {
+                    Pout<< "Writing balanced " << msg
+                        << " mesh to time " << timeName() << endl;
+                    write
+                    (
+                        debugType(debug),
+                        writeType(writeLevel() | WRITEMESH),
+                        mesh_.time().path()/timeName()
+                    );
+                    Pout<< "Dumped debug data in = "
+                        << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+                    // test all is still synced across proc patches
+                    checkData();
+                }
+            }
+        }
+    }
+
+    return distMap;
+}
+
+
 // Do refinement of consistent set of cells followed by truncation and
 // load balancing.
 Foam::autoPtr<Foam::mapDistributePolyMesh>
@@ -2607,10 +2721,13 @@ Foam::meshRefinement::refineAndBalance
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor,
     const labelList& cellsToRefine,
-    const scalar maxLoadUnbalance
+    const scalar maxLoadUnbalance,
+    const label maxCellUnbalance
 )
 {
-    // Do all refinement
+    // Refinement
+    // ~~~~~~~~~~
+
     refine(cellsToRefine);
 
     if (debug&meshRefinement::MESH)
@@ -2638,63 +2755,17 @@ Foam::meshRefinement::refineAndBalance
     // Load balancing
     // ~~~~~~~~~~~~~~
 
-    autoPtr<mapDistributePolyMesh> distMap;
+    labelList noCellsToRefine;
 
-    if (Pstream::nProcs() > 1)
-    {
-        scalar nIdealCells =
-            mesh_.globalData().nTotalCells()
-          / Pstream::nProcs();
-
-        scalar unbalance = returnReduce
-        (
-            mag(1.0-mesh_.nCells()/nIdealCells),
-            maxOp<scalar>()
-        );
-
-        if (unbalance <= maxLoadUnbalance)
-        {
-            Info<< "Skipping balancing since max unbalance " << unbalance
-                << " is less than allowable " << maxLoadUnbalance
-                << endl;
-        }
-        else
-        {
-            scalarField cellWeights(mesh_.nCells(), 1);
-
-            distMap = balance
-            (
-                false,  //keepZoneFaces
-                false,  //keepBaffles
-                cellWeights,
-                decomposer,
-                distributor
-            );
-
-            Info<< "Balanced mesh in = "
-                << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-            printMeshInfo(debug, "After balancing " + msg);
-
-
-            if (debug&meshRefinement::MESH)
-            {
-                Pout<< "Writing balanced " << msg
-                    << " mesh to time " << timeName() << endl;
-                write
-                (
-                    debugType(debug),
-                    writeType(writeLevel() | WRITEMESH),
-                    mesh_.time().path()/timeName()
-                );
-                Pout<< "Dumped debug data in = "
-                    << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-                // test all is still synced across proc patches
-                checkData();
-            }
-        }
-    }
+    auto distMap = balance
+    (
+        msg,
+        decomposer,
+        distributor,
+        noCellsToRefine,    // mesh is already refined; no need to predict
+        maxLoadUnbalance,
+        maxCellUnbalance
+    );
 
     return distMap;
 }
@@ -2708,7 +2779,8 @@ Foam::meshRefinement::balanceAndRefine
     decompositionMethod& decomposer,
     fvMeshDistribute& distributor,
     const labelList& initCellsToRefine,
-    const scalar maxLoadUnbalance
+    const scalar maxLoadUnbalance,
+    const label maxCellUnbalance
 )
 {
     labelList cellsToRefine(initCellsToRefine);
@@ -2737,90 +2809,24 @@ Foam::meshRefinement::balanceAndRefine
     //}
 
 
+
     // Load balancing
     // ~~~~~~~~~~~~~~
 
-    autoPtr<mapDistributePolyMesh> distMap;
-
-    if (Pstream::nProcs() > 1)
-    {
-        // First check if we need to balance at all. Precalculate number of
-        // cells after refinement and see what maximum difference is.
-        scalar nNewCells = scalar(mesh_.nCells() + 7*cellsToRefine.size());
-        scalar nIdealNewCells =
-            returnReduce(nNewCells, sumOp<scalar>())
-          / Pstream::nProcs();
-        scalar unbalance = returnReduce
-        (
-            mag(1.0-nNewCells/nIdealNewCells),
-            maxOp<scalar>()
-        );
-
-        if (unbalance <= maxLoadUnbalance)
-        {
-            Info<< "Skipping balancing since max unbalance " << unbalance
-                << " is less than allowable " << maxLoadUnbalance
-                << endl;
-        }
-        else
-        {
-            scalarField cellWeights(mesh_.nCells(), 1);
-            forAll(cellsToRefine, i)
-            {
-                cellWeights[cellsToRefine[i]] += 7;
-            }
-
-            distMap = balance
-            (
-                false,  //keepZoneFaces
-                false,  //keepBaffles
-                cellWeights,
-                decomposer,
-                distributor
-            );
-
-            // Update cells to refine
-            distMap().distributeCellIndices(cellsToRefine);
-
-            Info<< "Balanced mesh in = "
-                << mesh_.time().cpuTimeIncrement() << " s" << endl;
-        }
-
-        //{
-        //    globalIndex globalCells(mesh_.nCells());
-        //
-        //    Info<< "** Distribution after balancing:" << endl;
-        //    for (const int procI : Pstream::allProcs())
-        //    {
-        //        Info<< "    " << procI << '\t'
-        //            << globalCells.localSize(procI) << endl;
-        //    }
-        //    Info<< endl;
-        //}
-
-        printMeshInfo(debug, "After balancing " + msg);
-
-        if (debug&meshRefinement::MESH)
-        {
-            Pout<< "Writing balanced " << msg
-                << " mesh to time " << timeName() << endl;
-            write
-            (
-                debugType(debug),
-                writeType(writeLevel() | WRITEMESH),
-                mesh_.time().path()/timeName()
-            );
-            Pout<< "Dumped debug data in = "
-                << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-            // test all is still synced across proc patches
-            checkData();
-        }
-    }
+    auto distMap = balance
+    (
+        msg,
+        decomposer,
+        distributor,
+        cellsToRefine,
+        maxLoadUnbalance,
+        maxCellUnbalance
+    );
 
 
     // Refinement
     // ~~~~~~~~~~
+    // Note: uses updated cellsToRefine
 
     refine(cellsToRefine);
 

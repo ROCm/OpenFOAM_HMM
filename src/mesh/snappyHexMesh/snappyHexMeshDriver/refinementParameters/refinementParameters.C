@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020,2022 OpenCFD Ltd.
+    Copyright (C) 2015-2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,7 @@ Foam::refinementParameters::refinementParameters
         dict.getOrDefault("useTopologicalSnapDetection", true)
     ),
     maxLoadUnbalance_(dict.getOrDefault<scalar>("maxLoadUnbalance", 0)),
+    maxCellUnbalance_(dict.getOrDefault<label>("maxCellUnbalance", -1)),
     handleSnapProblems_
     (
         dict.getOrDefault<Switch>("handleSnapProblems", true)
@@ -97,6 +98,10 @@ Foam::refinementParameters::refinementParameters
     nFilterIter_(dict.getOrDefault<label>("nFilterIter", 2)),
     minCellFraction_(dict.getOrDefault<scalar>("minCellFraction", 0)),
     nMinCells_(dict.getOrDefault<label>("nMinCells", 0)),
+    balanceAtEnd_
+    (
+        dict.getOrDefault("balanceAtEnd", false)
+    ),
     dryRun_(dryRun)
 {
     point locationInMesh;
