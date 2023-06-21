@@ -320,6 +320,15 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
     DynamicList<label> thisPoints;
     DynamicList<label> nbrPoints;
 
+
+    // Reduce communication by only sending non-zero data,
+    // but with multiply-connected processor/processor
+    // (eg, processorCyclic) also need to send zero information
+    // to keep things synchronised
+
+    // If data needs to be sent
+    Map<int> isActiveSend(2*neighbourProcs.size());
+
     for (const label patchi : procPatches)
     {
         const auto& procPatch =
@@ -329,8 +338,10 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
 
         patchInfo.clear();
         patchInfo.reserve(procPatch.nPoints());
+
         thisPoints.clear();
         thisPoints.reserve(procPatch.nPoints());
+
         nbrPoints.clear();
         nbrPoints.reserve(procPatch.nPoints());
 
@@ -350,20 +361,31 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         // Adapt for leaving domain
         leaveDomain(procPatch, thisPoints, patchInfo);
 
-        if (patchInfo.size())
+        // Send to neighbour
         {
+            UOPstream toNbr(nbrProci, pBufs_);
+            toNbr << nbrPoints << patchInfo;
+
+            // Record if send is required (non-empty data)
+            isActiveSend(nbrProci) |= int(!patchInfo.empty());
+
             //if (debug & 2)
             //{
             //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
             //        << "  send:" << patchInfo.size()
             //        << " to proc:" << nbrProci << endl;
             //}
-
-            UOPstream os(nbrProci, pBufs_);
-            os << nbrPoints << patchInfo;
         }
     }
 
+    // Eliminate unnecessary sends
+    forAllConstIters(isActiveSend, iter)
+    {
+        if (!iter.val())
+        {
+            pBufs_.clearSend(iter.key());
+        }
+    }
 
     // Finished sends
     pBufs_.finishedNeighbourSends(neighbourProcs);
@@ -382,6 +404,7 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
 
         if (!pBufs_.recvDataCount(nbrProci))
         {
+            // Nothing to receive
             continue;
         }
 

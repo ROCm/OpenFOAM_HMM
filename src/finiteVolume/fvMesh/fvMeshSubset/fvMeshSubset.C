@@ -172,24 +172,23 @@ void Foam::fvMeshSubset::doCoupledPatches
 
     label nUncoupled = 0;
 
-    if (syncPar && Pstream::parRun())
+    if (syncPar && UPstream::parRun())
     {
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Send face usage across processor patches
-        for (const polyPatch& pp : oldPatches)
+        if (!nCellsUsingFace.empty())
         {
-            const auto* procPatch = isA<processorPolyPatch>(pp);
-
-            if (procPatch)
+            for (const polyPatch& pp : oldPatches)
             {
-                const label nbrProci = procPatch->neighbProcNo();
+                const auto* procPatch = isA<processorPolyPatch>(pp);
 
-                if (!nCellsUsingFace.empty())
+                if (procPatch)
                 {
-                    UOPstream toNeighbour(nbrProci, pBufs);
+                    const label nbrProci = procPatch->neighbProcNo();
 
-                    toNeighbour <<
+                    UOPstream toNbr(nbrProci, pBufs);
+                    toNbr <<
                         SubList<label>(nCellsUsingFace, pp.size(), pp.start());
                 }
             }
@@ -208,19 +207,18 @@ void Foam::fvMeshSubset::doCoupledPatches
 
                 if (!pBufs.recvDataCount(nbrProci))
                 {
+                    // Nothing to receive
                     continue;
                 }
 
-                UIPstream fromNeighbour(nbrProci, pBufs);
-
-                const labelList nbrList(fromNeighbour);
-
-                // Combine with this side.
-
-                if (!nCellsUsingFace.empty())
+                labelList nbrCellsUsingFace;
                 {
-                    const labelList& nbrCellsUsingFace(nbrList);
+                    UIPstream fromNbr(nbrProci, pBufs);
+                    fromNbr >> nbrCellsUsingFace;
+                }
 
+                if (!nCellsUsingFace.empty() && !nbrCellsUsingFace.empty())
+                {
                     // Combine with this side.
 
                     forAll(pp, i)

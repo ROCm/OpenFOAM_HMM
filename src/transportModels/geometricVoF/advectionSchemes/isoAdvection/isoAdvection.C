@@ -497,7 +497,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
     if (Pstream::parRun())
     {
         DynamicList<label> neighProcs;
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Send
         for (const label patchi : procPatchLabels_)
@@ -506,8 +506,8 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
                 refCast<const processorPolyPatch>(patches[patchi]);
             const label nbrProci = procPatch.neighbProcNo();
 
-            neighProcs.append(nbrProci);
-            UOPstream toNbr(nbrProci, pBufs);
+            // Neighbour connectivity
+            neighProcs.push_uniq(nbrProci);
 
             const scalarField& pFlux = dVf.boundaryField()[patchi];
             const List<label>& surfCellFacesOnProcPatch =
@@ -519,6 +519,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
                 surfCellFacesOnProcPatch
             );
 
+            UOPstream toNbr(nbrProci, pBufs);
             toNbr << surfCellFacesOnProcPatch << dVfPatch;
         }
 
@@ -533,11 +534,14 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
                 refCast<const processorPolyPatch>(patches[patchi]);
             const label nbrProci = procPatch.neighbProcNo();
 
-            UIPstream fromNeighb(nbrProci, pBufs);
             List<label> faceIDs;
             List<scalar> nbrdVfs;
 
-            fromNeighb >> faceIDs >> nbrdVfs;
+            {
+                UIPstream fromNbr(nbrProci, pBufs);
+                fromNbr >> faceIDs >> nbrdVfs;
+            }
+
             if (returnSyncedFaces)
             {
                 List<label> syncedFaceI(faceIDs);

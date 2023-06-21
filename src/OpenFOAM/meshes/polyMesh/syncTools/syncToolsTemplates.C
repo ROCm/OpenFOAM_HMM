@@ -130,7 +130,15 @@ void Foam::syncTools::syncPointMap
         DynamicList<label> neighbProcs;
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Send
+        // Sample and send.
+        // Reduce communication by only sending non-zero data,
+        // but with multiply-connected processor/processor
+        // (eg, processorCyclic) also need to send zero information
+        // to keep things synchronised
+
+        // If data needs to be sent
+        Map<int> isActiveSend(2*min(patches.size(),pBufs.nProcs()));
+
         for (const polyPatch& pp : patches)
         {
             const auto* ppp = isA<processorPolyPatch>(pp);
@@ -140,10 +148,10 @@ void Foam::syncTools::syncPointMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                neighbProcs.push_back(nbrProci);
+                // Neighbour connectivity
+                neighbProcs.push_uniq(nbrProci);
 
                 // Get data per patchPoint in neighbouring point numbers.
-
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
 
@@ -161,11 +169,24 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                if (!patchInfo.empty())
+
+                // Send to neighbour
                 {
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << patchInfo;
+
+                    // Record if send is required (non-empty data)
+                    isActiveSend(nbrProci) |= int(!patchInfo.empty());
                 }
+            }
+        }
+
+        // Eliminate unnecessary sends
+        forAllConstIters(isActiveSend, iter)
+        {
+            if (!iter.val())
+            {
+                pBufs.clearSend(iter.key());
             }
         }
 
@@ -185,6 +206,7 @@ void Foam::syncTools::syncPointMap
 
                 if (!pBufs.recvDataCount(nbrProci))
                 {
+                    // Nothing to receive
                     continue;
                 }
 
@@ -386,7 +408,15 @@ void Foam::syncTools::syncEdgeMap
         DynamicList<label> neighbProcs;
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Send
+        // Sample and send.
+        // Reduce communication by only sending non-zero data,
+        // but with multiply-connected processor/processor
+        // (eg, processorCyclic) also need to send zero information
+        // to keep things synchronised
+
+        // If data needs to be sent
+        Map<int> isActiveSend(2*min(patches.size(),pBufs.nProcs()));
+
         for (const polyPatch& pp : patches)
         {
             const auto* ppp = isA<processorPolyPatch>(pp);
@@ -396,10 +426,10 @@ void Foam::syncTools::syncEdgeMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                neighbProcs.push_back(nbrProci);
+                // Neighbour connectivity
+                neighbProcs.push_uniq(nbrProci);
 
                 // Get data per patch edge in neighbouring edge.
-
                 const edgeList& edges = procPatch.edges();
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
@@ -419,11 +449,23 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
-                if (!patchInfo.empty())
+                // Send to neighbour
                 {
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << patchInfo;
+
+                    // Record if send is required (non-empty data)
+                    isActiveSend(nbrProci) |= int(!patchInfo.empty());
                 }
+            }
+        }
+
+        // Eliminate unnecessary sends
+        forAllConstIters(isActiveSend, iter)
+        {
+            if (!iter.val())
+            {
+                pBufs.clearSend(iter.key());
             }
         }
 
@@ -443,6 +485,7 @@ void Foam::syncTools::syncEdgeMap
 
                 if (!pBufs.recvDataCount(nbrProci))
                 {
+                    // Nothing to receive
                     continue;
                 }
 
@@ -1138,7 +1181,8 @@ void Foam::syncTools::syncBoundaryFaceList
                     const auto& procPatch = *ppp;
                     const label nbrProci = procPatch.neighbProcNo();
 
-                    neighbProcs.push_back(nbrProci);
+                    // Neighbour connectivity
+                    neighbProcs.push_uniq(nbrProci);
 
                     const SubList<T> fld
                     (
