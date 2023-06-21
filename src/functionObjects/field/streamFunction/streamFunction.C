@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,8 +63,6 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
         slabNormal
       & Vector<label>(Vector<label>::X, Vector<label>::Y, Vector<label>::Z)
     );
-
-    scalar thickness = vector(slabNormal) & mesh_.bounds().span();
 
     const pointMesh& pMesh = pointMesh::New(mesh_);
 
@@ -395,6 +393,9 @@ Foam::tmp<Foam::pointScalarField> Foam::functionObjects::streamFunction::calc
     } while (!finished);
 
     // Normalise the stream-function by the 2D mesh thickness
+    // calculate thickness here to avoid compiler oddness (#2603)
+    const scalar thickness = vector(slabNormal) & mesh_.bounds().span();
+
     streamFunction /= thickness;
     streamFunction.boundaryFieldRef() = 0.0;
 
