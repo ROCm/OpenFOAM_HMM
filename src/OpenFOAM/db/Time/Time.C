@@ -397,6 +397,12 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     if (runTimeModifiable_)
     {
         // Monitor all files that controlDict depends on
+        // Files might have been set during token reading so only on master
+        // processor. Broadcast names to all processors
+        // (even although they are only checked on master)
+        // so that the watched states are synchronised
+
+        Pstream::broadcast(controlDict_.files(), UPstream::worldComm);
         fileHandler().addWatches(controlDict_, controlDict_.files());
     }
 

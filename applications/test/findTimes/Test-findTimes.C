@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,18 +39,28 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::noParallel();
+    argList::addBoolOption("setTime", "Time::setTime(..) for each instance");
     // timeSelector::addOptions();
     timeSelector::addOptions(true, true);
 
     #include "setRootCase.H"
-    #include "createTime.H"
 
-    Info<< "Times found:" << runTime.times() << endl;
+    Info<< "Using fileHandler: " << fileHandler().type() << endl;
+
+    #include "createTime.H"
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    Info<< "Times selected:" << timeDirs << endl;
+    Pout<< "Times selected:" << timeDirs << endl;
+
+    if (args.found("setTime"))
+    {
+        forAll(timeDirs, timei)
+        {
+            runTime.setTime(timeDirs[timei], timei);
+        }
+    }
+
     Info<< "\nEnd\n" << endl;
 
     return 0;
