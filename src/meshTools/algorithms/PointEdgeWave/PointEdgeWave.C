@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -326,8 +326,8 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
     // (eg, processorCyclic) also need to send zero information
     // to keep things synchronised
 
-    // If data needs to be sent
-    Map<int> isActiveSend(2*neighbourProcs.size());
+    // If data needs to be sent (index corresponding to neighbourProcs)
+    List<bool> isActiveSend(neighbourProcs.size(), false);
 
     for (const label patchi : procPatches)
     {
@@ -361,13 +361,20 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         // Adapt for leaving domain
         leaveDomain(procPatch, thisPoints, patchInfo);
 
+        // Record if send is required (non-empty data)
+        if (!patchInfo.empty())
+        {
+            const label nbrIndex = neighbourProcs.find(nbrProci);
+            if (nbrIndex >= 0)  // Safety check (should be unnecessary)
+            {
+                isActiveSend[nbrIndex] = true;
+            }
+        }
+
         // Send to neighbour
         {
             UOPstream toNbr(nbrProci, pBufs_);
             toNbr << nbrPoints << patchInfo;
-
-            // Record if send is required (non-empty data)
-            isActiveSend(nbrProci) |= int(!patchInfo.empty());
 
             //if (debug & 2)
             //{
@@ -379,15 +386,15 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
     }
 
     // Eliminate unnecessary sends
-    forAllConstIters(isActiveSend, iter)
+    forAll(neighbourProcs, nbrIndex)
     {
-        if (!iter.val())
+        if (!isActiveSend[nbrIndex])
         {
-            pBufs_.clearSend(iter.key());
+            pBufs_.clearSend(neighbourProcs[nbrIndex]);
         }
     }
 
-    // Finished sends
+    // Limit exchange to involved procs
     pBufs_.finishedNeighbourSends(neighbourProcs);
 
 

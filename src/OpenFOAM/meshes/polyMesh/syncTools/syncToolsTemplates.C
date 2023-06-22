@@ -127,7 +127,9 @@ void Foam::syncTools::syncPointMap
 
     if (UPstream::parRun())
     {
-        DynamicList<label> neighbProcs;
+        // Presize according to number of processor patches
+        // (global topology information may not yet be available...)
+        DynamicList<label> neighbProcs(patches.nProcessorPatches());
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Sample and send.
@@ -136,8 +138,8 @@ void Foam::syncTools::syncPointMap
         // (eg, processorCyclic) also need to send zero information
         // to keep things synchronised
 
-        // If data needs to be sent
-        Map<int> isActiveSend(2*min(patches.size(),pBufs.nProcs()));
+        // If data needs to be sent (index corresponding to neighbProcs)
+        DynamicList<bool> isActiveSend(neighbProcs.capacity());
 
         for (const polyPatch& pp : patches)
         {
@@ -147,9 +149,6 @@ void Foam::syncTools::syncPointMap
             {
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
-
-                // Neighbour connectivity
-                neighbProcs.push_uniq(nbrProci);
 
                 // Get data per patchPoint in neighbouring point numbers.
                 const labelList& meshPts = procPatch.meshPoints();
@@ -170,23 +169,40 @@ void Foam::syncTools::syncPointMap
                 }
 
 
+                const bool hasSendData = (!patchInfo.empty());
+
+                // Neighbour connectivity (push_uniq)
+                // - record if send is required (non-empty data)
+                {
+                    label nbrIndex = neighbProcs.find(nbrProci);
+                    if (nbrIndex < 0)
+                    {
+                        nbrIndex = neighbProcs.size();
+                        neighbProcs.push_back(nbrProci);
+                        isActiveSend.push_back(false);
+                    }
+
+                    if (hasSendData)
+                    {
+                        isActiveSend[nbrIndex] = true;
+                    }
+                }
+
+
                 // Send to neighbour
                 {
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << patchInfo;
-
-                    // Record if send is required (non-empty data)
-                    isActiveSend(nbrProci) |= int(!patchInfo.empty());
                 }
             }
         }
 
         // Eliminate unnecessary sends
-        forAllConstIters(isActiveSend, iter)
+        forAll(neighbProcs, nbrIndex)
         {
-            if (!iter.val())
+            if (!isActiveSend[nbrIndex])
             {
-                pBufs.clearSend(iter.key());
+                pBufs.clearSend(neighbProcs[nbrIndex]);
             }
         }
 
@@ -405,7 +421,9 @@ void Foam::syncTools::syncEdgeMap
 
     if (UPstream::parRun())
     {
-        DynamicList<label> neighbProcs;
+        // Presize according to number of processor patches
+        // (global topology information may not yet be available...)
+        DynamicList<label> neighbProcs(patches.nProcessorPatches());
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Sample and send.
@@ -414,8 +432,8 @@ void Foam::syncTools::syncEdgeMap
         // (eg, processorCyclic) also need to send zero information
         // to keep things synchronised
 
-        // If data needs to be sent
-        Map<int> isActiveSend(2*min(patches.size(),pBufs.nProcs()));
+        // If data needs to be sent (index corresponding to neighbProcs)
+        DynamicList<bool> isActiveSend(neighbProcs.capacity());
 
         for (const polyPatch& pp : patches)
         {
@@ -425,9 +443,6 @@ void Foam::syncTools::syncEdgeMap
             {
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
-
-                // Neighbour connectivity
-                neighbProcs.push_uniq(nbrProci);
 
                 // Get data per patch edge in neighbouring edge.
                 const edgeList& edges = procPatch.edges();
@@ -449,23 +464,41 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
+
+                const bool hasSendData = (!patchInfo.empty());
+
+                // Neighbour connectivity (push_uniq)
+                // and record if send is required (non-empty data)
+                {
+                    label nbrIndex = neighbProcs.find(nbrProci);
+                    if (nbrIndex < 0)
+                    {
+                        nbrIndex = neighbProcs.size();
+                        neighbProcs.push_back(nbrProci);
+                        isActiveSend.push_back(false);
+                    }
+
+                    if (hasSendData)
+                    {
+                        isActiveSend[nbrIndex] = true;
+                    }
+                }
+
+
                 // Send to neighbour
                 {
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << patchInfo;
-
-                    // Record if send is required (non-empty data)
-                    isActiveSend(nbrProci) |= int(!patchInfo.empty());
                 }
             }
         }
 
         // Eliminate unnecessary sends
-        forAllConstIters(isActiveSend, iter)
+        forAll(neighbProcs, nbrIndex)
         {
-            if (!iter.val())
+            if (!isActiveSend[nbrIndex])
             {
-                pBufs.clearSend(iter.key());
+                pBufs.clearSend(neighbProcs[nbrIndex]);
             }
         }
 
