@@ -630,7 +630,7 @@ bool Foam::oversetFvMeshBase::writeObject
 ) const
 {
     // For postprocessing : write cellTypes and zoneID
-    bool ok = false;
+    bool ok = true;
     {
         const cellCellStencilObject& overlap = Stencil::New(mesh_);
 
