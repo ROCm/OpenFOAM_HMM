@@ -152,6 +152,9 @@ public:
         //- The number of patches before the first processor patch.
         label nNonProcessor() const;
 
+        //- The number of processorFaPatch patches
+        label nProcessorPatches() const;
+
         //- Return a list of patch names
         wordList names() const;
 

@@ -487,6 +487,9 @@ void Foam::globalPoints::sendPatchPoints
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     const labelPairList& patchInfo = globalTransforms_.patchTransformSign();
 
+    // Reset send/recv information
+    pBufs.clear();
+
     // Information to send:
 
     // The patch face
@@ -499,6 +502,19 @@ void Foam::globalPoints::sendPatchPoints
     DynamicList<labelPairList> allInfo;
 
 
+    // Reduce communication by only sending non-zero data,
+    // but with multiply-connected processor/processor
+    // (eg, processorCyclic) also need to send zero information
+    // to keep things synchronised
+
+    // Has non-zero data sent
+    Map<int> isActiveSend(0);
+
+    if (UPstream::parRun())
+    {
+        isActiveSend.resize(2*min(patches.size(),pBufs.nProcs()));
+    }
+
     forAll(patches, patchi)
     {
         const polyPatch& pp = patches[patchi];
@@ -508,7 +524,7 @@ void Foam::globalPoints::sendPatchPoints
 
         if
         (
-            (Pstream::parRun() && isA<processorPolyPatch>(pp))
+            (UPstream::parRun() && isA<processorPolyPatch>(pp))
          && (mergeSeparated || patchInfo[patchi].first() == -1)
         )
         {
@@ -561,19 +577,30 @@ void Foam::globalPoints::sendPatchPoints
             }
 
 
-            if (!patchFaces.empty())
+            // Send to neighbour
             {
-                // Send to neighbour
+                UOPstream toNbr(nbrProci, pBufs);
+                toNbr << patchFaces << indexInFace << allInfo;
+
+                // Record if send is required (data are non-zero)
+                isActiveSend(nbrProci) |= int(!patchFaces.empty());
+
                 if (debug)
                 {
-                    Pout<< " Sending from " << pp.name() << " to proc:"
+                    Pout<< "Sending from " << pp.name() << " to proc:"
                         << nbrProci << " point information:"
                         << patchFaces.size() << endl;
                 }
-
-                UOPstream toNeighbour(nbrProci, pBufs);
-                toNeighbour << patchFaces << indexInFace << allInfo;
             }
+        }
+    }
+
+    // Eliminate unnecessary sends
+    forAllConstIters(isActiveSend, iter)
+    {
+        if (!iter.val())
+        {
+            pBufs.clearSend(iter.key());
         }
     }
 }
@@ -606,7 +633,7 @@ void Foam::globalPoints::receivePatchPoints
 
         if
         (
-            (Pstream::parRun() && isA<processorPolyPatch>(pp))
+            (UPstream::parRun() && isA<processorPolyPatch>(pp))
          && (mergeSeparated || patchInfo[patchi].first() == -1)
         )
         {
@@ -615,6 +642,7 @@ void Foam::globalPoints::receivePatchPoints
 
             if (!pBufs.recvDataCount(nbrProci))
             {
+                // Nothing to receive
                 continue;
             }
 
@@ -623,8 +651,8 @@ void Foam::globalPoints::receivePatchPoints
             List<labelPairList> nbrInfo;
 
             {
-                UIPstream fromNeighbour(nbrProci, pBufs);
-                fromNeighbour >> patchFaces >> indexInFace >> nbrInfo;
+                UIPstream fromNbr(nbrProci, pBufs);
+                fromNbr >> patchFaces >> indexInFace >> nbrInfo;
             }
 
             if (debug)
@@ -929,8 +957,6 @@ void Foam::globalPoints::calculateSharedPoints
 
     // Do one exchange iteration to get neighbour points.
     {
-        pBufs.clear();
-
         sendPatchPoints
         (
             mergeSeparated,
@@ -962,8 +988,6 @@ void Foam::globalPoints::calculateSharedPoints
 
     do
     {
-        pBufs.clear();
-
         sendPatchPoints
         (
             mergeSeparated,

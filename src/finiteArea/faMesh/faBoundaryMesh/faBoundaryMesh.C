@@ -309,7 +309,7 @@ Foam::label Foam::faBoundaryMesh::nNonProcessor() const
 {
     const faPatchList& patches = *this;
 
-    label nonProc = 0;
+    label count = 0;
 
     for (const faPatch& p : patches)
     {
@@ -318,10 +318,28 @@ Foam::label Foam::faBoundaryMesh::nNonProcessor() const
             break;
         }
 
-        ++nonProc;
+        ++count;
     }
 
-    return nonProc;
+    return count;
+}
+
+
+Foam::label Foam::faBoundaryMesh::nProcessorPatches() const
+{
+    const faPatchList& patches = *this;
+
+    label count = 0;
+
+    for (const faPatch& p : patches)
+    {
+        if (isA<processorFaPatch>(p))
+        {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 

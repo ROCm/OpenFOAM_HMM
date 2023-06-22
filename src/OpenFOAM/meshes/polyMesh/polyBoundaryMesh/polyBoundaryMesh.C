@@ -541,7 +541,7 @@ Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
 {
     const polyPatchList& patches = *this;
 
-    label nonProc = 0;
+    label count = 0;
 
     for (const polyPatch& p : patches)
     {
@@ -550,10 +550,28 @@ Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
             break;
         }
 
-        ++nonProc;
+        ++count;
     }
 
-    return nonProc;
+    return count;
+}
+
+
+Foam::label Foam::polyBoundaryMesh::nProcessorPatches() const
+{
+    const polyPatchList& patches = *this;
+
+    label count = 0;
+
+    for (const polyPatch& p : patches)
+    {
+        if (isA<processorPolyPatch>(p))
+        {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 

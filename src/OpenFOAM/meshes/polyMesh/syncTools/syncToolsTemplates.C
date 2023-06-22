@@ -127,10 +127,20 @@ void Foam::syncTools::syncPointMap
 
     if (UPstream::parRun())
     {
-        DynamicList<label> neighbProcs;
+        // Presize according to number of processor patches
+        // (global topology information may not yet be available...)
+        DynamicList<label> neighbProcs(patches.nProcessorPatches());
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Send
+        // Sample and send.
+        // Reduce communication by only sending non-zero data,
+        // but with multiply-connected processor/processor
+        // (eg, processorCyclic) also need to send zero information
+        // to keep things synchronised
+
+        // If data needs to be sent (index corresponding to neighbProcs)
+        DynamicList<bool> isActiveSend(neighbProcs.capacity());
+
         for (const polyPatch& pp : patches)
         {
             const auto* ppp = isA<processorPolyPatch>(pp);
@@ -140,10 +150,7 @@ void Foam::syncTools::syncPointMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                neighbProcs.push_back(nbrProci);
-
                 // Get data per patchPoint in neighbouring point numbers.
-
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
 
@@ -161,11 +168,41 @@ void Foam::syncTools::syncPointMap
                     }
                 }
 
-                if (!patchInfo.empty())
+
+                const bool hasSendData = (!patchInfo.empty());
+
+                // Neighbour connectivity (push_uniq)
+                // - record if send is required (non-empty data)
+                {
+                    label nbrIndex = neighbProcs.find(nbrProci);
+                    if (nbrIndex < 0)
+                    {
+                        nbrIndex = neighbProcs.size();
+                        neighbProcs.push_back(nbrProci);
+                        isActiveSend.push_back(false);
+                    }
+
+                    if (hasSendData)
+                    {
+                        isActiveSend[nbrIndex] = true;
+                    }
+                }
+
+
+                // Send to neighbour
                 {
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << patchInfo;
                 }
+            }
+        }
+
+        // Eliminate unnecessary sends
+        forAll(neighbProcs, nbrIndex)
+        {
+            if (!isActiveSend[nbrIndex])
+            {
+                pBufs.clearSend(neighbProcs[nbrIndex]);
             }
         }
 
@@ -185,6 +222,7 @@ void Foam::syncTools::syncPointMap
 
                 if (!pBufs.recvDataCount(nbrProci))
                 {
+                    // Nothing to receive
                     continue;
                 }
 
@@ -383,10 +421,20 @@ void Foam::syncTools::syncEdgeMap
 
     if (UPstream::parRun())
     {
-        DynamicList<label> neighbProcs;
+        // Presize according to number of processor patches
+        // (global topology information may not yet be available...)
+        DynamicList<label> neighbProcs(patches.nProcessorPatches());
         PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Send
+        // Sample and send.
+        // Reduce communication by only sending non-zero data,
+        // but with multiply-connected processor/processor
+        // (eg, processorCyclic) also need to send zero information
+        // to keep things synchronised
+
+        // If data needs to be sent (index corresponding to neighbProcs)
+        DynamicList<bool> isActiveSend(neighbProcs.capacity());
+
         for (const polyPatch& pp : patches)
         {
             const auto* ppp = isA<processorPolyPatch>(pp);
@@ -396,10 +444,7 @@ void Foam::syncTools::syncEdgeMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                neighbProcs.push_back(nbrProci);
-
                 // Get data per patch edge in neighbouring edge.
-
                 const edgeList& edges = procPatch.edges();
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
@@ -419,11 +464,41 @@ void Foam::syncTools::syncEdgeMap
                     }
                 }
 
-                if (!patchInfo.empty())
+
+                const bool hasSendData = (!patchInfo.empty());
+
+                // Neighbour connectivity (push_uniq)
+                // and record if send is required (non-empty data)
+                {
+                    label nbrIndex = neighbProcs.find(nbrProci);
+                    if (nbrIndex < 0)
+                    {
+                        nbrIndex = neighbProcs.size();
+                        neighbProcs.push_back(nbrProci);
+                        isActiveSend.push_back(false);
+                    }
+
+                    if (hasSendData)
+                    {
+                        isActiveSend[nbrIndex] = true;
+                    }
+                }
+
+
+                // Send to neighbour
                 {
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << patchInfo;
                 }
+            }
+        }
+
+        // Eliminate unnecessary sends
+        forAll(neighbProcs, nbrIndex)
+        {
+            if (!isActiveSend[nbrIndex])
+            {
+                pBufs.clearSend(neighbProcs[nbrIndex]);
             }
         }
 
@@ -443,6 +518,7 @@ void Foam::syncTools::syncEdgeMap
 
                 if (!pBufs.recvDataCount(nbrProci))
                 {
+                    // Nothing to receive
                     continue;
                 }
 
@@ -1138,7 +1214,8 @@ void Foam::syncTools::syncBoundaryFaceList
                     const auto& procPatch = *ppp;
                     const label nbrProci = procPatch.neighbProcNo();
 
-                    neighbProcs.push_back(nbrProci);
+                    // Neighbour connectivity
+                    neighbProcs.push_uniq(nbrProci);
 
                     const SubList<T> fld
                     (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -320,6 +320,15 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
     DynamicList<label> thisPoints;
     DynamicList<label> nbrPoints;
 
+
+    // Reduce communication by only sending non-zero data,
+    // but with multiply-connected processor/processor
+    // (eg, processorCyclic) also need to send zero information
+    // to keep things synchronised
+
+    // If data needs to be sent (index corresponding to neighbourProcs)
+    List<bool> isActiveSend(neighbourProcs.size(), false);
+
     for (const label patchi : procPatches)
     {
         const auto& procPatch =
@@ -329,8 +338,10 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
 
         patchInfo.clear();
         patchInfo.reserve(procPatch.nPoints());
+
         thisPoints.clear();
         thisPoints.reserve(procPatch.nPoints());
+
         nbrPoints.clear();
         nbrPoints.reserve(procPatch.nPoints());
 
@@ -350,22 +361,40 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         // Adapt for leaving domain
         leaveDomain(procPatch, thisPoints, patchInfo);
 
-        if (patchInfo.size())
+        // Record if send is required (non-empty data)
+        if (!patchInfo.empty())
         {
+            const label nbrIndex = neighbourProcs.find(nbrProci);
+            if (nbrIndex >= 0)  // Safety check (should be unnecessary)
+            {
+                isActiveSend[nbrIndex] = true;
+            }
+        }
+
+        // Send to neighbour
+        {
+            UOPstream toNbr(nbrProci, pBufs_);
+            toNbr << nbrPoints << patchInfo;
+
             //if (debug & 2)
             //{
             //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
             //        << "  send:" << patchInfo.size()
             //        << " to proc:" << nbrProci << endl;
             //}
-
-            UOPstream os(nbrProci, pBufs_);
-            os << nbrPoints << patchInfo;
         }
     }
 
+    // Eliminate unnecessary sends
+    forAll(neighbourProcs, nbrIndex)
+    {
+        if (!isActiveSend[nbrIndex])
+        {
+            pBufs_.clearSend(neighbourProcs[nbrIndex]);
+        }
+    }
 
-    // Finished sends
+    // Limit exchange to involved procs
     pBufs_.finishedNeighbourSends(neighbourProcs);
 
 
@@ -382,6 +411,7 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
 
         if (!pBufs_.recvDataCount(nbrProci))
         {
+            // Nothing to receive
             continue;
         }
 

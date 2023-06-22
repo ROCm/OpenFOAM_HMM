@@ -532,6 +532,19 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
     // Reset buffers
     pBufs_.clear();
 
+
+    // Information to send:
+    DynamicList<Type> sendFacesInfo;
+    DynamicList<label> sendFaces;
+
+    // Reduce communication by only sending non-zero data,
+    // but with multiply-connected processor/processor
+    // (eg, processorCyclic) also need to send zero information
+    // to keep things synchronised
+
+    // If data needs to be sent (index corresponding to neighbourProcs)
+    List<bool> isActiveSend(neighbourProcs.size(), false);
+
     for (const label patchi : procPatches)
     {
         const auto& procPatch =
@@ -539,13 +552,12 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
 
         const label nbrProci = procPatch.neighbProcNo();
 
-        // Allocate buffers
-        label nSendFaces;
-        labelList sendFaces(procPatch.size());
-        List<Type> sendFacesInfo(procPatch.size());
+        // Resize buffers
+        sendFaces.resize_nocopy(procPatch.size());
+        sendFacesInfo.resize_nocopy(procPatch.size());
 
         // Determine which faces changed on current patch
-        nSendFaces = getChangedPatchFaces
+        const label nSendFaces = getChangedPatchFaces
         (
             procPatch,
             0,
@@ -553,6 +565,10 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
             sendFaces,
             sendFacesInfo
         );
+
+        // Shrink
+        sendFaces.resize(nSendFaces);
+        sendFacesInfo.resize(nSendFaces);
 
         // Adapt wallInfo for leaving domain
         leaveDomain
@@ -563,24 +579,42 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
             sendFacesInfo
         );
 
-        if (nSendFaces)
+        // Record if send is required (non-empty data)
+        if (!sendFaces.empty())
         {
+            const label nbrIndex = neighbourProcs.find(nbrProci);
+            if (nbrIndex >= 0)  // Safety check (should be unnecessary)
+            {
+                isActiveSend[nbrIndex] = true;
+            }
+        }
+
+        // Send to neighbour
+        {
+            UOPstream toNbr(nbrProci, pBufs_);
+            toNbr << sendFaces << sendFacesInfo;
+
             if (debug & 2)
             {
                 Pout<< " Processor patch " << patchi << ' ' << procPatch.name()
-                    << "  send:" << nSendFaces << " to proc:" << nbrProci
+                    << "  send:" << sendFaces.size() << " to proc:" << nbrProci
                     << endl;
             }
-
-            UOPstream os(nbrProci, pBufs_);
-            os
-                << SubList<label>(sendFaces, nSendFaces)
-                << SubList<Type>(sendFacesInfo, nSendFaces);
         }
     }
 
-    // Finished sends
+    // Eliminate unnecessary sends
+    forAll(neighbourProcs, nbrIndex)
+    {
+        if (!isActiveSend[nbrIndex])
+        {
+            pBufs_.clearSend(neighbourProcs[nbrIndex]);
+        }
+    }
+
+    // Limit exchange to involved procs
     pBufs_.finishedNeighbourSends(neighbourProcs);
+
 
     for (const label patchi : procPatches)
     {
@@ -591,6 +625,7 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
 
         if (!pBufs_.recvDataCount(nbrProci))
         {
+            // Nothing to receive
             continue;
         }
 
@@ -601,6 +636,8 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
             UIPstream is(nbrProci, pBufs_);
             is >> receiveFaces >> receiveFacesInfo;
         }
+
+        const label nReceiveFaces = receiveFaces.size();
 
         if (debug & 2)
         {
@@ -615,7 +652,7 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
             transform
             (
                 procPatch.forwardT(),
-                receiveFaces.size(),
+                nReceiveFaces,
                 receiveFacesInfo
             );
         }
@@ -624,7 +661,7 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
         enterDomain
         (
             procPatch,
-            receiveFaces.size(),
+            nReceiveFaces,
             receiveFaces,
             receiveFacesInfo
         );
@@ -633,7 +670,7 @@ void Foam::FaceCellWave<Type, TrackingData>::handleProcPatches()
         mergeFaceInfo
         (
             procPatch,
-            receiveFaces.size(),
+            nReceiveFaces,
             receiveFaces,
             receiveFacesInfo
         );
@@ -656,12 +693,11 @@ void Foam::FaceCellWave<Type, TrackingData>::handleCyclicPatches()
             const auto& nbrPatch = cycPatch.neighbPatch();
 
             // Allocate buffers
-            label nReceiveFaces;
             labelList receiveFaces(patch.size());
             List<Type> receiveFacesInfo(patch.size());
 
             // Determine which faces changed
-            nReceiveFaces = getChangedPatchFaces
+            const label nReceiveFaces = getChangedPatchFaces
             (
                 nbrPatch,
                 0,
