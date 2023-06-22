@@ -60,6 +60,9 @@ class processorCyclicPointPatchField
         //- Local reference to processor patch
         const processorCyclicPointPatch& procPatch_;
 
+        //- Send buffer for non-blocking communication
+        mutable Field<Type> sendBuf_;
+
         //- Receive buffer for non-blocking communication
         mutable Field<Type> recvBuf_;
 

@@ -95,19 +95,19 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
 {
     if (Pstream::parRun())
     {
-        // Get internal field into correct order for opposite side
-        Field<Type> pf
+        // Get internal field into correct order for opposite side. Note use
+        // of member data buffer since using non-blocking. Could be optimised
+        // out if not using non-blocking...
+        sendBuf_ = this->patchInternalField
         (
-            this->patchInternalField
-            (
-                pField,
-                procPatch_.reverseMeshPoints()
-            )
+            pField,
+            procPatch_.reverseMeshPoints()
         );
 
         if (commsType == Pstream::commsTypes::nonBlocking)
         {
-            recvBuf_.resize_nocopy(pf.size());
+            recvBuf_.resize_nocopy(sendBuf_.size());
+
             UIPstream::read
             (
                 commsType,
@@ -122,8 +122,8 @@ void Foam::processorCyclicPointPatchField<Type>::initSwapAddSeparated
         (
             commsType,
             procPatch_.neighbProcNo(),
-            pf.cdata_bytes(),
-            pf.size_bytes(),
+            sendBuf_.cdata_bytes(),
+            sendBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
