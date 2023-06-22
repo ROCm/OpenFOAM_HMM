@@ -141,10 +141,6 @@ OptimisationSwitches
     // Min number of processors to change to tree communication
     nProcsSimpleSum 0;
 
-    // Min number processor to use non-blocking exchange (NBX) algorithm
-    // However, a zero value == disabled.
-    nonBlockingExchange 0;
-
     // MPI buffer size (bytes).
     // Can override with the MPI_BUFFER_SIZE env variable.
     // The default and minimum is (20000000).
@@ -152,21 +148,38 @@ OptimisationSwitches
 
     // Optional max size (bytes) for unstructured data exchanges. In some
     // phases of OpenFOAM it can send over very large data chunks
-    // (e.g. in parallel load balancing) and some Pstream implementations have
+    // (e.g. in parallel load balancing) and some MPI implementations have
     // problems with this. Setting this variable > 0 indicates that the
     // data exchange needs to be done in multiple passes, each of maxCommsSize.
     // This is not switched on by default since it requires an additional
     // global reduction, even if multi-pass is not needed)
     maxCommsSize    0;
 
-    // Optional (quite experimental) feature in lduMatrixUpdate
+    // Optional (experimental) feature in lduMatrixUpdate
     // to poll (processor) interfaces for individual readiness
     // instead of waiting for all to complete first.
+    //   -1 : wait for any requests to finish and dispatch when possible
+    //    0 : non-polling
+    //   >0 : number of times to poll for requests (and dispatch) before
+    //        reverting to non-polling (deprecated)
     nPollProcInterfaces 0;
 
+    // Min number of processors to use non-blocking exchange (NBX) algorithm
+    //   >0 : enabled
+    nbx.min         0;
+
     // Additional non-blocking exchange (NBX) tuning parameters (experimental)
-    // 0: none, 1: initial barrier
+    //    0 : none
+    //    1 : initial barrier
     nbx.tuning      0;
+
+    // Additional PstreamBuffers tuning parameters (experimental)
+    //   -1 : PEX with all-to-all for buffer sizes and point-to-point
+    //        for contents (legacy approach)
+    //    0 : hybrid PEX with NBX for buffer sizes and point-to-point
+    //        for contents (proposed new approach)
+    //    1 : full NBX for buffer sizes and contents (very experimental)
+    pbufs.tuning   -1;
 
 
     // =====
@@ -1024,6 +1037,8 @@ DebugSwitches
     zoneToPoint         0;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 DimensionedConstants
 {

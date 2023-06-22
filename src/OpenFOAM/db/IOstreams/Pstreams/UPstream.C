@@ -799,11 +799,11 @@ registerOptSwitch
 
 int Foam::UPstream::nProcsNonblockingExchange
 (
-    Foam::debug::optimisationSwitch("nonBlockingExchange", 0)
+    Foam::debug::optimisationSwitch("nbx.min", 0)
 );
 registerOptSwitch
 (
-    "nonBlockingExchange",
+    "nbx.min",
     int,
     Foam::UPstream::nProcsNonblockingExchange
 );

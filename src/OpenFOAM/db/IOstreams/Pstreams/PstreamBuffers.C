@@ -35,12 +35,12 @@ License
 
 int Foam::PstreamBuffers::algorithm
 (
-    // Not really the most creative name...
-    Foam::debug::optimisationSwitch("pbufs.algorithm", -1)
+    // Name may change in the future (JUN-2023)
+    Foam::debug::optimisationSwitch("pbufs.tuning", -1)
 );
 registerOptSwitch
 (
-    "pbufs.algorithm",
+    "pbufs.tuning",
     int,
     Foam::PstreamBuffers::algorithm
 );
@@ -48,9 +48,9 @@ registerOptSwitch
 
 // Simple enumerations
 // -------------------
-static constexpr int algorithm_PEX_allToAll = -1;  // OpenFOAM 2212 and earlier
-//static constexpr int algorithm_PEX_hybrid = 0;   // New default?
-static constexpr int algorithm_full_NBX = 1;       // Experimental
+static constexpr int algorithm_PEX_allToAll = -1;  // Traditional PEX
+//static constexpr int algorithm_PEX_hybrid = 0;   // Possible new default?
+static constexpr int algorithm_full_NBX = 1;       // Very experimental
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
