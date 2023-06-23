@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,8 +65,8 @@ Usage
         // Optional entries (runtime modifiable)
         patches     (<patch1> ... <patchN>); // (wall1 "(wall2|wall3)");
 
-        // Optional (inherited) entries
-        ...
+        // Optional entries
+        writeFields     true;
     }
     \endverbatim
 
@@ -76,6 +76,7 @@ Usage
       type         | Type name: wallShearStress            | word |  yes  | -
       libs         | Library name: fieldFunctionObjects    | word |  yes  | -
       patches    | Names of operand patches   | wordList | no | all wall patches
+      writeFields | Flag to write shear stress field       | bool |  no   | true
     \endtable
 
     The inherited entries are elaborated in:
@@ -86,6 +87,12 @@ Usage
     \verbatim
         <solver> -postProcess -func wallShearStress
     \endverbatim
+
+Note
+    The \c writeFields flag currently defaults to \c true
+    (for consistency with previous versions that did not have that flag)
+    but this is subject to change in the near future for consistency
+    with other function objects.
 
 See also
     - Foam::functionObject
@@ -98,8 +105,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_wallShearStress_H
-#define functionObjects_wallShearStress_H
+#ifndef Foam_functionObjects_wallShearStress_H
+#define Foam_functionObjects_wallShearStress_H
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
@@ -122,6 +129,12 @@ class wallShearStress
     public fvMeshFunctionObject,
     public writeFile
 {
+    // Private Data
+
+        //- Write the shear stress field ?
+        bool writeFields_;
+
+
 protected:
 
     // Protected Data
@@ -178,7 +191,8 @@ public:
         //- Calculate the wall shear-stress
         virtual bool execute();
 
-        //- Write the wall shear-stress
+        //- Report min/max and log to file,
+        //- write the wall shear-stress volume field.
         virtual bool write();
 };
 

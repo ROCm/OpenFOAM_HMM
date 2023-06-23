@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ Foam::functionObjects::wallShearStress::wallShearStress
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(mesh_, name, typeName, dict),
-    patchSet_()
+    writeFields_(true)  // May change in the future
 {
     read(dict);
 
@@ -124,6 +124,9 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
 {
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
+
+    writeFields_ = true;   // May change in the future
+    dict.readIfPresent("writeFields", writeFields_);
 
     const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
 
@@ -221,10 +224,13 @@ bool Foam::functionObjects::wallShearStress::write()
     const auto& wallShearStress =
         obr_.lookupObject<volVectorField>(scopedName(typeName));
 
-    Log << type() << " " << name() << " write:" << nl
-        << "    writing field " << wallShearStress.name() << endl;
+    Log << type() << ' ' << name() << " write:" << nl;
 
-    wallShearStress.write();
+    if (writeFields_)
+    {
+        Log << "    writing field " << wallShearStress.name() << endl;
+        wallShearStress.write();
+    }
 
     const fvPatchList& patches = mesh_.boundary();
 
@@ -234,10 +240,10 @@ bool Foam::functionObjects::wallShearStress::write()
 
         const vectorField& ssp = wallShearStress.boundaryField()[patchi];
 
-        vector minSsp = gMin(ssp);
-        vector maxSsp = gMax(ssp);
+        const vector minSsp = gMin(ssp);
+        const vector maxSsp = gMax(ssp);
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
             writeCurrentTime(file());
 

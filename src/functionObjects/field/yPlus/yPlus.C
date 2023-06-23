@@ -71,7 +71,8 @@ Foam::functionObjects::yPlus::yPlus
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
-    useWallFunction_(true)
+    useWallFunction_(true),
+    writeFields_(true)  // May change in the future
 {
     read(dict);
 
@@ -105,7 +106,11 @@ bool Foam::functionObjects::yPlus::read(const dictionary& dict)
 {
     if (fvMeshFunctionObject::read(dict) && writeFile::read(dict))
     {
-        useWallFunction_ = dict.getOrDefault("useWallFunction", true);
+        useWallFunction_ = true;
+        writeFields_ = true;   // May change in the future
+
+        dict.readIfPresent("useWallFunction", useWallFunction_);
+        dict.readIfPresent("writeFields", writeFields_);
 
         return true;
     }
@@ -144,19 +149,12 @@ bool Foam::functionObjects::yPlus::execute()
         {
             const fvPatch& patch = patches[patchi];
 
-            if
-            (
-                isA<nutWallFunctionFvPatchScalarField>(nutBf[patchi])
-             && useWallFunction_
-            )
-            {
-                const nutWallFunctionFvPatchScalarField& nutPf =
-                    dynamic_cast<const nutWallFunctionFvPatchScalarField&>
-                    (
-                        nutBf[patchi]
-                    );
+            const auto* nutWallPatch =
+                isA<nutWallFunctionFvPatchScalarField>(nutBf[patchi]);
 
-                yPlusBf[patchi] = nutPf.yPlus();
+            if (useWallFunction_ && nutWallPatch)
+            {
+                yPlusBf[patchi] = nutWallPatch->yPlus();
             }
             else if (isA<wallFvPatch>(patch))
             {
@@ -194,10 +192,13 @@ bool Foam::functionObjects::yPlus::write()
 {
     const auto& yPlus = obr_.lookupObject<volScalarField>(scopedName(typeName));
 
-    Log << type() << " " << name() << " write:" << nl
-        << "    writing field " << yPlus.name() << endl;
+    Log << type() << ' ' << name() << " write:" << nl;
 
-    yPlus.write();
+    if (writeFields_)
+    {
+        Log << "    writing field " << yPlus.name() << endl;
+        yPlus.write();
+    }
 
     const volScalarField::Boundary& yPlusBf = yPlus.boundaryField();
     const fvPatchList& patches = mesh_.boundary();
@@ -214,12 +215,8 @@ bool Foam::functionObjects::yPlus::write()
             const scalar maxYplus = gMax(yPlusp);
             const scalar avgYplus = gAverage(yPlusp);
 
-            if (Pstream::master())
+            if (UPstream::master())
             {
-                Log << "    patch " << patch.name()
-                    << " y+ : min = " << minYplus << ", max = " << maxYplus
-                    << ", average = " << avgYplus << nl;
-
                 writeCurrentTime(file());
                 file()
                     << token::TAB << patch.name()
@@ -228,6 +225,11 @@ bool Foam::functionObjects::yPlus::write()
                     << token::TAB << avgYplus
                     << endl;
             }
+
+            Log << "    patch " << patch.name()
+                << " y+ : min = " << minYplus
+                << ", max = " << maxYplus
+                << ", average = " << avgYplus << endl;
         }
     }
 
