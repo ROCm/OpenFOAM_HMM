@@ -32,11 +32,16 @@ License
 #include "Time.H"
 #include "PrecisionAdaptor.H"
 #include "OFstream.H"
+#include <cstdio>
 #include <limits>
 
 // Probably not needed, but in case we pickup a ptscotch.h ...
+#ifndef MPICH_SKIP_MPICXX
 #define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
 #define OMPI_SKIP_MPICXX
+#endif
 
 #include "scotch.h"
 

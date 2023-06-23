@@ -40,10 +40,19 @@ Description
 #include "IOstreams.H"
 #include "StringStream.H"
 #include "Random.H"
+
+// Include MPI without any C++ bindings
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
 #include <mpi.h>
 
 using namespace Foam;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void printRequests(const UList<MPI_Request>& requests)
 {

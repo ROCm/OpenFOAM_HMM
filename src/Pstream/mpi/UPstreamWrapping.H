@@ -39,6 +39,14 @@ SourceFiles
 #define Foam_UPstreamWrapping_H
 
 #include "UPstream.H"
+
+// Include MPI without any C++ bindings
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
 #include <mpi.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

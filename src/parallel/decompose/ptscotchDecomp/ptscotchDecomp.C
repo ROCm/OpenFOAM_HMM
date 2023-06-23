@@ -32,12 +32,20 @@ License
 #include "Time.H"
 #include "PrecisionAdaptor.H"
 #include "OFstream.H"
+#include <cstdio>
 #include <limits>
+
+// Include MPI without any C++ bindings
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
 
 // Avoid too many warnings from mpi.h
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 
-#include <cstdio>
 #include <mpi.h>
 #include "ptscotch.h"
 
