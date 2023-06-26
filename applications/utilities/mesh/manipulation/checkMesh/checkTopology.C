@@ -855,7 +855,7 @@ Foam::label Foam::checkTopology
 
         for (const polyPatch& pp : patches)
         {
-            if (!isA<processorPolyPatch>(pp))
+            if (!UPstream::parRun() || !isA<processorPolyPatch>(pp))
             {
                 checkPatch
                 (
@@ -873,12 +873,19 @@ Foam::label Foam::checkTopology
 
         // All non-processor boundary patches
         {
+            const label nGlobalPatches
+            (
+                UPstream::parRun()
+              ? patches.nNonProcessor()
+              : patches.size()
+            );
+
             labelList faceLabels
             (
                 identity
                 (
                     (
-                        patches.range(patches.nNonProcessor()-1).end_value()
+                        patches.range(nGlobalPatches-1).end_value()
                       - patches.start()
                     ),
                     patches.start()
