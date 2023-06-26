@@ -173,8 +173,8 @@ fi
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
 [ -n "$DYLD_LIBRARY_PATH" ] || unset DYLD_LIBRARY_PATH
 
-# Remove any shadow env variables
-unset FOAM_DYLD_LIBRARY_PATH FOAM_LD_LIBRARY_PATH
+# Remove shadow env variables
+unset FOAM_LD_LIBRARY_PATH
 
 #------------------------------------------------------------------------------
 # Cleanup aliases and functions
