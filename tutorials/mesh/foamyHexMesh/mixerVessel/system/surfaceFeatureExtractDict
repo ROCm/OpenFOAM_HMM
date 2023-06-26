@@ -93,7 +93,7 @@ rotating.stl
 
     includedAngle       120;
 
-    baffles (MRF);
+    baffles (rotating);
 
     // Write options
     writeObj            yes;
