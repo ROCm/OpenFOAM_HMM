@@ -5,17 +5,22 @@ It is likely incomplete...
 
 ## Contributors (alphabetical by surname)
 
+- Horacio Aguerre
+- Yu Ankun
 - Tetsuo Aoyagi
 - Akira Azami
 - William Bainbridge
 - Gabriel Barajas
 - Kutalmis Bercin
+- Julius Bergmann
 - Ivor Clifford
 - Greg Collecutt
 - Jonathan Cranford
+- Santiago Marquez Damian
 - Sergio Ferraris
 - Matej Forman
 - Marian Fuchs
+- Gabriel Gerlero
 - Pawan Ghildiyal
 - Chris Greenshields
 - Bernhard Gschaider
@@ -50,8 +55,11 @@ It is likely incomplete...
 - Gavin Tabor
 - Zeljko Tukovic
 - Eugene De Villiers
+- Louis Vittoz
+- Vuko Vukcevic
 - Yi Wang
 - Norbert Weber
+- Volker Weissmann
 - Henry Weller
 - Niklas Wikstrom
 - Guanyang Xue
