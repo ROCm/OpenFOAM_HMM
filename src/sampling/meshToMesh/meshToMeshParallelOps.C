@@ -212,27 +212,46 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
                     }
                 }
 
-                // convert dynamicList to labelList
-                forAll(sendMap, proci)
-                {
-                    sendMap[proci].transfer(dynSendMap[proci]);
-                }
-
-                // debug printing
                 if (debug)
                 {
                     Pout<< "Of my " << tgt.nCells()
                         << " target cells I need to send to:" << nl
                         << "\tproc\tcells" << endl;
-                    forAll(sendMap, proci)
+                    forAll(dynSendMap, proci)
                     {
                         Pout<< '\t' << proci << '\t'
-                            << sendMap[proci].size() << endl;
+                            << dynSendMap[proci].size() << endl;
                     }
+                }
+
+                // Convert DynamicList -> List
+                forAll(sendMap, proci)
+                {
+                    sendMap[proci].transfer(dynSendMap[proci]);
                 }
             }
 
-            return autoPtr<mapDistribute>::New(std::move(sendMap));
+
+            labelList recvSizes;
+            Pstream::exchangeSizes(sendMap, recvSizes, UPstream::worldComm);
+
+            // Uses linear receive order
+            labelListList constructMap(UPstream::nProcs());
+
+            label constructSize = 0;
+            forAll(constructMap, proci)
+            {
+                const label len = recvSizes[proci];
+                constructMap[proci] = identity(len, constructSize);
+                constructSize += len;
+            }
+
+            return autoPtr<mapDistribute>::New
+            (
+                constructSize,
+                std::move(sendMap),
+                std::move(constructMap)
+            );
             break;
         }
     }
