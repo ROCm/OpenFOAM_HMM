@@ -474,7 +474,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
 
     scalarField TcNbr;
-    scalarField TpNbr;  // only if verbose_
+    scalarField TpNbr;
     scalarField KDeltaNbr;
 
     if (mpp.sameWorld())
@@ -492,10 +492,7 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
 
         // Swap to obtain full local values of neighbour K*delta
         TcNbr = nbrField.patchInternalField();
-        if (verbose_)
-        {
-            TpNbr = nbrField;
-        }
+        TpNbr = nbrField;
         KDeltaNbr = nbrField.kappa(nbrField)*nbrPatch.deltaCoeffs();
     }
     else
@@ -503,17 +500,11 @@ void turbulentTemperatureRadCoupledMixedFvPatchScalarField::updateCoeffs()
         // Different world so use my region,patch. Distribution below will
         // do the reordering.
         TcNbr = patchInternalField();
-        if (verbose_)
-        {
-            TpNbr = Tp;
-        }
+        TpNbr = Tp;
         KDeltaNbr = KDelta;
     }
     distribute(this->internalField().name() + "_value", TcNbr);
-    if (verbose_)
-    {
-        distribute(this->internalField().name() + "_patchValue", TpNbr);
-    }
+    distribute(this->internalField().name() + "_patchValue", TpNbr);
     distribute(this->internalField().name() + "_weights", KDeltaNbr);
 
     scalarField KDeltaC(this->size(), GREAT);
