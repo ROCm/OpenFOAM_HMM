@@ -31,14 +31,8 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(coupledFvPatch, 0);
+    defineTypeName(coupledFvPatch);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::coupledFvPatch::~coupledFvPatch()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

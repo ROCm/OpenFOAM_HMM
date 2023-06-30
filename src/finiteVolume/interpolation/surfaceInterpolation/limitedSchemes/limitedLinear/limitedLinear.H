@@ -97,7 +97,7 @@ public:
             faceFlux, phiP, phiN, gradcP, gradcN, d
         );
 
-        return max(min(twoByk_*r, 1), 0);
+        return clamp(twoByk_*r, zero_one{});
     }
 };
 

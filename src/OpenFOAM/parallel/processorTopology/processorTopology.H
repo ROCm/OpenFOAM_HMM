@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,8 @@ SourceFiles
 
 #include "labelList.H"
 #include "lduSchedule.H"
+#include "Map.H"
+#include "UPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,47 +67,40 @@ class processorTopology
 {
     // Private Data
 
-        //- The processor to processor connection (adjacency) table
-        labelListList procNeighbours_;
+        //- Map from neighbour proc to patch index
+        //- (processor-local information!)
+        Map<label> procPatchMap_;
+
+        //- The neighbour processor connections (ascending order) associated
+        //- with the local rank.
+        //  Possibly demand-driven data.
+        mutable labelList procNeighbours_;
+
+        //- The complete processor to processor connection adjacency table.
+        //- Globally synchronized information.
+        //  Likely demand-driven data.
+        mutable labelListList procAdjacencyTable_;
 
         //- Order in which the patches should be initialised/evaluated
         //- corresponding to the schedule
         lduSchedule patchSchedule_;
 
-        //- Local map from neighbour proc to patchi. Different per processor!
-        //  -1 or patchi for connection to procID
-        labelList procPatchMap_;
+        //- The communicator used during creation of the topology
+        label comm_;
 
 
-    // Private Member Functions
+    // Private Methods Functions
 
-        //- From neighbour processor to index in our local boundary.
-        //  Local information (so not same over all processors)
-        ///const labelList& procPatchMap() const noexcept
-        ///{
-        ///    return procPatchMap_;
-        ///}
-
-        //- Which \em local boundary is attached to specified processor
-        //  Local information (so not same over all processors)
-        //  \return -1 if not currently connected to specified processor.
-        label procToLocalPatch(const label proci) const
-        {
-            return
-            (
-                proci >= 0 && proci < procPatchMap_.size()
-              ? procPatchMap_[proci]
-              : static_cast<label>(-1)
-            );
-        }
-
+        // Could expose as public...
+        // //- Map of neighbour processor to \em local boundary patch index.
+        // const Map<label>& procPatchMap() const noexcept
+        // {
+        //     return procPatchMap_;
+        // }
 
 public:
 
     // Generated Methods
-
-        //- Default construct (empty)
-        processorTopology() = default;
 
         //- Copy construct
         processorTopology(const processorTopology&) = default;
@@ -118,6 +113,12 @@ public:
 
         //- Move assignment
         processorTopology& operator=(processorTopology&&) = default;
+
+
+    // Constructors
+
+        //- Default construct (empty)
+        processorTopology();
 
 
     // Static Functions
@@ -135,17 +136,24 @@ public:
 
     // Member Functions
 
-        //- The number of processors used by the topology
-        label nProcs() const noexcept
-        {
-            return procNeighbours_.size();
-        }
+        //- The communicator used during creation of the topology
+        label comm() const noexcept { return comm_; }
 
-        //- The processor to processor connection topology
-        //- (like an adjacency list). Globally synchronized information
-        const labelListList& procNeighbours() const noexcept
+        //- The neighbour processor connections (ascending order) associated
+        //- with the \em local rank.
+        const labelList& procNeighbours() const;
+
+        //- The complete processor to processor connection adjacency table.
+        //- Globally synchronized information.
+        //  Likely demand-driven data.
+        const labelListList& procAdjacency() const;
+
+        //- Which \em local boundary is attached to specified neighbour
+        //- processor.
+        //  \return -1 if not currently connected to specified processor.
+        label procPatchLookup(const label proci) const
         {
-            return procNeighbours_;
+            return procPatchMap_.lookup(proci, -1);
         }
 
         //- Order in which the patches should be initialised/evaluated
@@ -153,14 +161,6 @@ public:
         const lduSchedule& patchSchedule() const noexcept
         {
             return patchSchedule_;
-        }
-
-        //- Which \em local boundary is attached to specified processor
-        //  Local information (so not same over all processors)
-        //  \return -1 if not currently connected to specified processor.
-        label procPatchLookup(const label proci) const
-        {
-            return procToLocalPatch(proci);
         }
 };
 

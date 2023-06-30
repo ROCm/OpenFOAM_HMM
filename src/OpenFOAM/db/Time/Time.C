@@ -279,7 +279,7 @@ void Foam::Time::setControls()
             *this,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -397,6 +397,12 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     if (runTimeModifiable_)
     {
         // Monitor all files that controlDict depends on
+        // Files might have been set during token reading so only on master
+        // processor. Broadcast names to all processors
+        // (even although they are only checked on master)
+        // so that the watched states are synchronised
+
+        Pstream::broadcast(controlDict_.files(), UPstream::worldComm);
         fileHandler().addWatches(controlDict_, controlDict_.files());
     }
 
@@ -440,7 +446,7 @@ Foam::Time::Time
             *this,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
 
@@ -459,6 +465,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)
@@ -506,7 +513,7 @@ Foam::Time::Time
             *this,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
 
@@ -525,6 +532,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     // Functions
@@ -589,7 +597,7 @@ Foam::Time::Time
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dict
     ),
@@ -609,6 +617,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)
@@ -666,7 +675,7 @@ Foam::Time::Time
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
 
@@ -683,6 +692,7 @@ Foam::Time::Time
     writeStreamOption_(IOstreamOption::ASCII),
     graphFormat_("raw"),
     runTimeModifiable_(false),
+    cacheTemporaryObjects_(true),
     functionObjects_(*this, false)
 {
     if (enableFunctionObjects)
@@ -885,6 +895,11 @@ bool Foam::Time::run() const
                 addProfiling(fo, "functionObjects.end()");
                 functionObjects_.end();
             }
+
+            if (cacheTemporaryObjects_)
+            {
+                cacheTemporaryObjects_ = checkCacheTemporaryObjects();
+            }
         }
     }
 
@@ -914,6 +929,11 @@ bool Foam::Time::run() const
             if (functionObjects_.filesModified())
             {
                 const_cast<Time&>(*this).readModifiedObjects();
+            }
+
+            if (cacheTemporaryObjects_)
+            {
+                cacheTemporaryObjects_ = checkCacheTemporaryObjects();
             }
         }
 
@@ -1006,7 +1026,7 @@ void Foam::Time::setTime(const instant& inst, const label newIndex)
             *this,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

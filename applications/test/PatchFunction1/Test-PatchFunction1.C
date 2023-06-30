@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedVector(Zero)

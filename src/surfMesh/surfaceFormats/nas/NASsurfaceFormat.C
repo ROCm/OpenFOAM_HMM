@@ -236,7 +236,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
             // Convert groupId into zoneId
             const auto iterZone = zoneLookup.cfind(groupId);
-            if (iterZone.found())
+            if (iterZone.good())
             {
                 if (zoneId != *iterZone)
                 {
@@ -270,7 +270,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
             // Convert groupId into zoneId
             const auto iterZone = zoneLookup.cfind(groupId);
-            if (iterZone.found())
+            if (iterZone.good())
             {
                 if (zoneId != *iterZone)
                 {
@@ -411,7 +411,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         const label zoneId  = iter.val();
 
         const auto iterName = nameLookup.cfind(groupId);
-        if (iterName.found())
+        if (iterName.good())
         {
             names[zoneId] = *iterName;
         }

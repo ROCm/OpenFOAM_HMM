@@ -67,26 +67,28 @@ Foam::InterfaceForce<CloudType>::~InterfaceForce()
 template<class CloudType>
 void Foam::InterfaceForce<CloudType>::cacheFields(const bool store)
 {
-    static word fName("gradAlpha");
+    static word resultName("gradAlpha");
 
-    bool fieldExists =
-        this->mesh().template foundObject<volVectorField>(fName);
+    volVectorField* resultPtr =
+        this->mesh().template getObjectPtr<volVectorField>(resultName);
 
     if (store)
     {
-        if (!fieldExists)
+        if (!resultPtr)
         {
             const volScalarField& alpha = this->mesh().template
                 lookupObject<volScalarField>(alphaName_);
 
-            volVectorField* gradInterForcePtr =
-                new volVectorField(fName, fvc::grad(alpha*(1-alpha)));
+            resultPtr = new volVectorField
+            (
+                resultName,
+                fvc::grad(alpha*(1-alpha))
+            );
 
-            gradInterForcePtr->store();
+            resultPtr->store();
         }
 
-        const volVectorField& gradInterForce = this->mesh().template
-            lookupObject<volVectorField>(fName);
+        const volVectorField& gradInterForce = *resultPtr;
 
         gradInterForceInterpPtr_.reset
         (
@@ -101,12 +103,9 @@ void Foam::InterfaceForce<CloudType>::cacheFields(const bool store)
     {
         gradInterForceInterpPtr_.clear();
 
-        if (fieldExists)
+        if (resultPtr)
         {
-            volVectorField& gradInterForce =
-                this->mesh().template lookupObjectRef<volVectorField>(fName);
-
-            gradInterForce.checkOut();
+            resultPtr->checkOut();
         }
     }
 }

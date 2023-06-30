@@ -54,7 +54,7 @@ surfaceNormalFixedValueFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF, dict, false),
+    fixedValueFvPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     refValue_("refValue", dict, p.size()),
     ramp_(Function1<scalar>::NewIfPresent("ramp", dict, word::null, &db()))
 {
@@ -171,7 +171,7 @@ void Foam::surfaceNormalFixedValueFvPatchVectorField::updateCoeffs()
 
 void Foam::surfaceNormalFixedValueFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     refValue_.writeEntry("refValue", os);
     if (ramp_)
     {

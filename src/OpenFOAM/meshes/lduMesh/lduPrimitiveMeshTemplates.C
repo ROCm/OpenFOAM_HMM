@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,38 +38,51 @@ Foam::lduSchedule Foam::lduPrimitiveMesh::nonBlockingSchedule
 {
     lduSchedule schedule(2*interfaces.size());
 
-    // 1. All non-processor patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     label patchEvali = 0;
+    label numProcPatches = 0;
+
+    //
+    // 1. Schedule non-processor patches
+    //
 
     forAll(interfaces, patchi)
     {
-        if (interfaces.set(patchi) && !isA<ProcPatch>(interfaces[patchi]))
+        if (interfaces.set(patchi))
         {
-            schedule[patchEvali++].setInitEvaluate(patchi);
-            schedule[patchEvali++].setEvaluate(patchi);
+            if (isA<ProcPatch>(interfaces[patchi]))
+            {
+                ++numProcPatches;
+            }
+            else
+            {
+                schedule[patchEvali++].setInitEvaluate(patchi);
+                schedule[patchEvali++].setEvaluate(patchi);
+            }
         }
     }
 
-    // 2. All processor patches
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(interfaces, patchi)
+    //
+    // 2. Schedule processor patches
+    //
+
+    if (numProcPatches)
     {
-        if (interfaces.set(patchi) && isA<ProcPatch>(interfaces[patchi]))
+        forAll(interfaces, patchi)
         {
-            schedule[patchEvali++].setInitEvaluate(patchi);
+            if (interfaces.set(patchi) && isA<ProcPatch>(interfaces[patchi]))
+            {
+                schedule[patchEvali].setInitEvaluate(patchi);
+                schedule[patchEvali + numProcPatches].setEvaluate(patchi);
+                ++patchEvali;
+            }
         }
     }
 
-    forAll(interfaces, patchi)
-    {
-        if (interfaces.set(patchi) && isA<ProcPatch>(interfaces[patchi]))
-        {
-            schedule[patchEvali++].setEvaluate(patchi);
-        }
-    }
+    // Caution:
+    // The schedule is only valid for a subset of its range
+    // (where interfaces are defined) but must retain the full list length
+    // for later (external) bookkeeping
 
     return schedule;
 }

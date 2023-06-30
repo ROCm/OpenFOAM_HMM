@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,56 @@ License
 
 #include "mixedFaPatchField.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::mixedFaPatchField<Type>::readMixedEntries
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = faPatchFieldBase::patch();
+
+
+    // If there is a 'refValue', also require all others
+    const auto* hasValue = dict.findEntry("refValue", keyType::LITERAL);
+
+    if (!hasValue && IOobjectOption::isReadOptional(readOpt))
+    {
+        return false;
+    }
+
+    const auto* hasGrad = dict.findEntry("refGradient", keyType::LITERAL);
+    const auto* hasFrac = dict.findEntry("valueFraction", keyType::LITERAL);
+
+    // Combined error message on failure
+    if (!hasValue || !hasGrad || !hasFrac)
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entries:";
+
+        if (!hasValue) FatalIOError << " 'refValue'";
+        if (!hasGrad)  FatalIOError << " 'refGradient'";
+        if (!hasFrac)  FatalIOError << " 'valueFraction'";
+
+        FatalIOError
+            << " : missing for patch " << p.name()
+            << " : in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    // Everything verified - can assign
+    refValue_.assign(*hasValue, p.size());
+    refGrad_.assign(*hasGrad, p.size());
+    valueFraction_.assign(*hasFrac, p.size());
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::mixedFaPatchField<Type>::mixedFaPatchField
@@ -46,6 +96,47 @@ Foam::mixedFaPatchField<Type>::mixedFaPatchField
 template<class Type>
 Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const Foam::zero
+)
+:
+    faPatchField<Type>(p, iF),
+    refValue_(p.size(), Zero),
+    refGrad_(p.size(), Zero),
+    valueFraction_(p.size(), Zero)
+{}
+
+
+template<class Type>
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
+(
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption requireMixed
+)
+:
+    // The "value" entry is not required
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    refValue_(p.size()),
+    refGrad_(p.size()),
+    valueFraction_(p.size())
+{
+    if (!readMixedEntries(dict, requireMixed))
+    {
+        // Not read (eg, optional and missing): no evaluate possible/need
+        return;
+    }
+
+    // Could also check/clamp fraction to 0-1 range
+    evaluate();
+}
+
+
+template<class Type>
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
+(
     const mixedFaPatchField<Type>& ptf,
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -57,23 +148,6 @@ Foam::mixedFaPatchField<Type>::mixedFaPatchField
     refGrad_(ptf.refGrad_, mapper),
     valueFraction_(ptf.valueFraction_, mapper)
 {}
-
-
-template<class Type>
-Foam::mixedFaPatchField<Type>::mixedFaPatchField
-(
-    const faPatch& p,
-    const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
-)
-:
-    faPatchField<Type>(p, iF),
-    refValue_("refValue", dict, p.size()),
-    refGrad_("refGradient", dict, p.size()),
-    valueFraction_("valueFraction", dict, p.size())
-{
-    evaluate();
-}
 
 
 template<class Type>
@@ -127,8 +201,7 @@ void Foam::mixedFaPatchField<Type>::rmap
 {
     faPatchField<Type>::rmap(ptf, addr);
 
-    const mixedFaPatchField<Type>& mptf =
-        refCast<const mixedFaPatchField<Type>>(ptf);
+    const auto& mptf = refCast<const mixedFaPatchField<Type>>(ptf);
 
     refValue_.rmap(mptf.refValue_, addr);
     refGrad_.rmap(mptf.refGrad_, addr);
@@ -146,12 +219,11 @@ void Foam::mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 
     Field<Type>::operator=
     (
-        valueFraction_*refValue_
-      +
-        (1.0 - valueFraction_)*
+        lerp
         (
-            this->patchInternalField()
-          + refGrad_/this->patch().deltaCoeffs()
+            this->patchInternalField() + refGrad_/this->patch().deltaCoeffs(),
+            refValue_,
+            valueFraction_
         )
     );
 
@@ -162,11 +234,12 @@ void Foam::mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::mixedFaPatchField<Type>::snGrad() const
 {
-    return
+    return lerp
+    (
+        refGrad_,
+        (refValue_ - this->patchInternalField())*this->patch().deltaCoeffs(),
         valueFraction_
-       *(refValue_ - this->patchInternalField())
-       *this->patch().deltaCoeffs()
-      + (1.0 - valueFraction_)*refGrad_;
+    );
 }
 
 
@@ -186,9 +259,12 @@ Foam::tmp<Foam::Field<Type>> Foam::mixedFaPatchField<Type>::valueBoundaryCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return
-         valueFraction_*refValue_
-       + (1.0 - valueFraction_)*refGrad_/this->patch().deltaCoeffs();
+    return lerp
+    (
+        refGrad_/this->patch().deltaCoeffs(),
+        refValue_,
+        valueFraction_
+    );
 }
 
 
@@ -204,9 +280,12 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::mixedFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
-    return
-        valueFraction_*this->patch().deltaCoeffs()*refValue_
-      + (1.0 - valueFraction_)*refGrad_;
+    return lerp
+    (
+        refGrad_,
+        this->patch().deltaCoeffs()*refValue_,
+        valueFraction_
+    );
 }
 
 
@@ -217,7 +296,7 @@ void Foam::mixedFaPatchField<Type>::write(Ostream& os) const
     refValue_.writeEntry("refValue", os);
     refGrad_.writeEntry("refGradient", os);
     valueFraction_.writeEntry("valueFraction", os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

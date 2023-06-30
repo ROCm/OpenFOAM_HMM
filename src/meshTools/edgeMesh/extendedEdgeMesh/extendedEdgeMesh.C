@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -400,7 +400,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh()
 {}
 
 
-Foam::extendedEdgeMesh::extendedEdgeMesh(class one::minus)
+Foam::extendedEdgeMesh::extendedEdgeMesh(std::nullptr_t)
 :
     edgeMesh(),
     concaveStart_(-1),
@@ -486,7 +486,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const boolList& surfBaffleRegions
 )
 :
-    extendedEdgeMesh(one::minus{})
+    extendedEdgeMesh(nullptr)
 {
     // Extract and reorder the data from surfaceFeatures
     const triSurface& surf = sFeat.surface();
@@ -549,7 +549,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const labelUList& featurePoints
 )
 :
-    extendedEdgeMesh(one::minus{})
+    extendedEdgeMesh(nullptr)
 {
     sortPointsAndEdges
     (
@@ -2109,7 +2109,7 @@ void Foam::extendedEdgeMesh::sortedOrder
     label nConvex = 0;
     label nConcave = 0;
     label nMixed = 0;
-    label nNonFeat = 0;
+    // label nNonFeat = 0;
 
     forAll(pointStat, pointI)
     {
@@ -2128,7 +2128,7 @@ void Foam::extendedEdgeMesh::sortedOrder
             break;
 
             case extendedEdgeMesh::NONFEATURE:
-                nNonFeat++;
+                // ++nNonFeat;
             break;
 
             default:
@@ -2179,7 +2179,7 @@ void Foam::extendedEdgeMesh::sortedOrder
     label nInternal = 0;
     label nFlat = 0;
     label nOpen = 0;
-    label nMultiple = 0;
+    // label nMultiple = 0;
 
     forAll(edgeStat, edgeI)
     {
@@ -2202,7 +2202,7 @@ void Foam::extendedEdgeMesh::sortedOrder
             break;
 
             case extendedEdgeMesh::MULTIPLE:
-                nMultiple++;
+                // ++nMultiple;
             break;
 
             case extendedEdgeMesh::NONE:

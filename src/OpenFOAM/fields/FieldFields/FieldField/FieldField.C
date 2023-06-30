@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -278,6 +278,63 @@ void FieldField<Field, Type>::replace
     forAll(*this, i)
     {
         this->operator[](i).replace(d, s);
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::clamp_min
+(
+    const Type& lower
+)
+{
+    for (auto& ff : *this)
+    {
+        ff.clamp_min(lower);
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::clamp_max
+(
+    const Type& upper
+)
+{
+    for (auto& ff : *this)
+    {
+        ff.clamp_max(upper);
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::clamp_range
+(
+    const Type& lower,
+    const Type& upper
+)
+{
+    // Note: no checks for bad/invalid clamping ranges
+
+    for (auto& ff : *this)
+    {
+        ff.clamp_range(lower, upper);
+    }
+}
+
+
+template<template<class> class Field, class Type>
+void FieldField<Field, Type>::clamp_range
+(
+    const MinMax<Type>& range
+)
+{
+    // Note: no checks for bad/invalid clamping ranges
+
+    for (auto& ff : *this)
+    {
+        ff.clamp_range(range.min(), range.max());
     }
 }
 

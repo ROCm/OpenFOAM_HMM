@@ -208,7 +208,7 @@ void Foam::directionMixedFvPatchField<Type>::write(Ostream& os) const
     refValue_.writeEntry("refValue", os);
     refGrad_.writeEntry("refGradient", os);
     valueFraction_.writeEntry("valueFraction", os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

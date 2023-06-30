@@ -89,7 +89,7 @@ void Foam::cellTable::setEntry
     dict.add(keyWord, value);
 
     iterator iter = find(id);
-    if (iter.found())
+    if (iter.good())
     {
         iter().merge(dict);
     }
@@ -190,7 +190,7 @@ Foam::word Foam::cellTable::name(const label id) const
     word theName("cellTable_" + Foam::name(id));
 
     const_iterator iter = cfind(id);
-    if (iter.found())
+    if (iter.good())
     {
         iter().readIfPresent("Label", theName);
     }
@@ -301,7 +301,7 @@ void Foam::cellTable::setName(const label id)
 {
     iterator iter = find(id);
 
-    if (!iter.found() || !iter().found("Label"))
+    if (!iter.good() || !iter().found("Label"))
     {
         setName(id, "cellTable_" + Foam::name(id));
     }
@@ -327,7 +327,7 @@ void Foam::cellTable::readDict
             registry,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -360,7 +360,7 @@ void Foam::cellTable::writeDict
             registry,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -448,7 +448,7 @@ void Foam::cellTable::addCellZones
     forAll(tableIds, celli)
     {
         const auto iter = typeToZone.cfind(tableIds[celli]);
-        if (iter.found())
+        if (iter.good())
         {
             zoneCells[*iter].append(celli);
         }

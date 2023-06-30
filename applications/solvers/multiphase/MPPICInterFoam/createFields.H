@@ -64,8 +64,7 @@ volScalarField mu
         mesh,
         IOobject::READ_IF_PRESENT
     ),
-    mixture.mu(),
-    calculatedFvPatchScalarField::typeName
+    mixture.mu()
 );
 
 
@@ -139,7 +138,7 @@ volScalarField alphac
     ),
     mesh,
     dimensionedScalar(dimless, Zero),
-    zeroGradientFvPatchScalarField::typeName
+    fvPatchFieldBase::zeroGradientType()
 );
 alphac.oldTime();
 

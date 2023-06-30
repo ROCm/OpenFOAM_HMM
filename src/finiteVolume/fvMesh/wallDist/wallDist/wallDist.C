@@ -49,7 +49,8 @@ void Foam::wallDist::constructn() const
             (
                 "n" & patchTypeName_,
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb(),
+                IOobjectOption::NO_REGISTER
             ),
             mesh(),
             dimensionedVector(dimless, Zero),
@@ -115,7 +116,8 @@ Foam::wallDist::wallDist
         (
             "y" & patchTypeName_,
             mesh.time().timeName(),
-            mesh
+            mesh.thisDb(),
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         dimensionedScalar("y" & patchTypeName_, dimLength, SMALL),
@@ -176,7 +178,7 @@ bool Foam::wallDist::movePoints()
 {
     if
     (
-        (updateInterval_ != 0)
+        (updateInterval_ > 0)
      && ((mesh_.time().timeIndex() % updateInterval_) == 0)
     )
     {

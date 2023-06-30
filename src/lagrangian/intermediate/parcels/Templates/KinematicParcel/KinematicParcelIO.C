@@ -120,84 +120,84 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
 {
-    const bool valid = c.size();
+    const bool readOnProc = c.size();
 
     ParcelType::readFields(c);
 
     IOField<label> active
     (
         c.fieldIOobject("active", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, active);
 
     IOField<label> typeId
     (
         c.fieldIOobject("typeId", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, typeId);
 
     IOField<scalar> nParticle
     (
         c.fieldIOobject("nParticle", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, nParticle);
 
     IOField<scalar> d
     (
         c.fieldIOobject("d", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, d);
 
     IOField<scalar> dTarget
     (
         c.fieldIOobject("dTarget", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, dTarget);
 
     IOField<vector> U
     (
         c.fieldIOobject("U", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, U);
 
     IOField<scalar> rho
     (
         c.fieldIOobject("rho", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, rho);
 
     IOField<scalar> age
     (
         c.fieldIOobject("age", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, age);
 
     IOField<scalar> tTurb
     (
         c.fieldIOobject("tTurb", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, tTurb);
 
     IOField<vector> UTurb
     (
         c.fieldIOobject("UTurb", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, UTurb);
 
     IOField<vector> UCorrect
     (
         c.fieldIOobject("UCorrect", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, UCorrect);
 
@@ -229,7 +229,7 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
     ParcelType::writeFields(c);
 
     const label np = c.size();
-    const bool valid = np;
+    const bool writeOnProc = c.size();
 
     IOField<label> active(c.fieldIOobject("active", IOobject::NO_READ), np);
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::NO_READ), np);
@@ -266,17 +266,17 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
         ++i;
     }
 
-    active.write(valid);
-    typeId.write(valid);
-    nParticle.write(valid);
-    d.write(valid);
-    dTarget.write(valid);
-    U.write(valid);
-    rho.write(valid);
-    age.write(valid);
-    tTurb.write(valid);
-    UTurb.write(valid);
-    UCorrect.write(valid);
+    active.write(writeOnProc);
+    typeId.write(writeOnProc);
+    nParticle.write(writeOnProc);
+    d.write(writeOnProc);
+    dTarget.write(writeOnProc);
+    U.write(writeOnProc);
+    rho.write(writeOnProc);
+    age.write(writeOnProc);
+    tTurb.write(writeOnProc);
+    UTurb.write(writeOnProc);
+    UCorrect.write(writeOnProc);
 }
 
 

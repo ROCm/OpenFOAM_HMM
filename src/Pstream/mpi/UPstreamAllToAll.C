@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,9 +26,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Pstream.H"
+#include "Map.H"
 #include "UPstreamWrapping.H"
 
-#include <mpi.h>
 #include <cinttypes>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,7 +46,49 @@ void Foam::UPstream::allToAll                                                 \
     (                                                                         \
         sendData, recvData, TaggedType, comm                                  \
     );                                                                        \
+}
+
+
+Pstream_CommonRoutines(int32_t, MPI_INT32_T);
+Pstream_CommonRoutines(int64_t, MPI_INT64_T);
+// Future?
+// Pstream_CommonRoutines(uint32_t, MPI_UINT32_T);
+// Pstream_CommonRoutines(uint64_t, MPI_UINT64_T);
+
+#undef Pstream_CommonRoutines
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#undef  Pstream_CommonRoutines
+#define Pstream_CommonRoutines(Native, TaggedType)                            \
+void Foam::UPstream::allToAllConsensus                                        \
+(                                                                             \
+    const UList<Native>& sendData,                                            \
+    UList<Native>& recvData,                                                  \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
+{                                                                             \
+    PstreamDetail::allToAllConsensus                                          \
+    (                                                                         \
+        sendData, recvData, TaggedType, tag, comm                             \
+    );                                                                        \
 }                                                                             \
+                                                                              \
+void Foam::UPstream::allToAllConsensus                                        \
+(                                                                             \
+    const Map<Native>& sendData,                                              \
+    Map<Native>& recvData,                                                    \
+    const int tag,                                                            \
+    const label comm                                                          \
+)                                                                             \
+{                                                                             \
+    PstreamDetail::allToAllConsensus                                          \
+    (                                                                         \
+        sendData, recvData, TaggedType, tag, comm                             \
+    );                                                                        \
+}
 
 
 Pstream_CommonRoutines(int32_t, MPI_INT32_T);

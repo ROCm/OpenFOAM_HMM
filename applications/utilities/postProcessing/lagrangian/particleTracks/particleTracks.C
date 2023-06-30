@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         "The writer format "
         "(default: vtk or 'setFormat' from dictionary)"
     );
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -286,7 +286,7 @@ int main(int argc, char *argv[])
         trackSampler.createTrackField(localTimes, allTrackTimes);
 
         // Create the track fields
-        ///trackSampler.setTrackFields(obr, labelFields);
+        trackSampler.setTrackFields(obr, labelFields);
         trackSampler.setTrackFields(obr, scalarFields);
         trackSampler.setTrackFields(obr, vectorFields);
         trackSampler.setTrackFields(obr, sphericalTensorFields);
@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
         /// Currently unused
         /// List<vectorField> dirs(nTracks);
         /// const auto Uiter = vectorFields.cfind(UName);
-        /// if (Uiter.found())
+        /// if (Uiter.good())
         /// {
         ///     const auto& UTracks = *Uiter;
         ///     forAll(UTracks, tracki)
@@ -382,7 +382,7 @@ int main(int argc, char *argv[])
             writer.setTrackTimes(times);
             writer.nFields(nFields);
 
-            ///writeTrackFields(writer, labelFields);
+            writeTrackFields(writer, labelFields);
             writeTrackFields(writer, scalarFields);
             writeTrackFields(writer, vectorFields);
             writeTrackFields(writer, sphericalTensorFields);

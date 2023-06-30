@@ -272,7 +272,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 
         tmp<DimensionedField<Type, volMesh>> tsu;
 
-        if (iter1.found())
+        if (iter1.good())
         {
             const auto& valueExpr = iter1.val();
 
@@ -357,7 +357,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
                 }
             }
         }
-        else if (iter2.found() && iter2.val()->good())
+        else if (iter2.good() && iter2.val()->good())
         {
             const dimensioned<Type> SuValue
             (
@@ -400,7 +400,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
 
         tmp<DimensionedField<scalar, volMesh>> tsp;
 
-        if (iter1.found())
+        if (iter1.good())
         {
             const auto& valueExpr = iter1.val();
 
@@ -483,7 +483,7 @@ void Foam::fv::SemiImplicitSource<Type>::addSup
                 }
             }
         }
-        else if (iter2.found() && iter2.val()->good())
+        else if (iter2.good() && iter2.val()->good())
         {
             const dimensioned<scalar> SpValue
             (

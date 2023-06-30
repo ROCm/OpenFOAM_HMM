@@ -59,6 +59,9 @@ class mapDistributePolyMesh;
 Istream& operator>>(Istream&, mapDistributePolyMesh&);
 Ostream& operator<<(Ostream&, const mapDistributePolyMesh&);
 
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<mapDistributePolyMesh>&);
+
 
 /*---------------------------------------------------------------------------*\
                      Class mapDistributePolyMesh Declaration
@@ -308,8 +311,9 @@ public:
 
     // IOstream Operators
 
-        //- Info proxy to print summary information to a stream
-        InfoProxy<mapDistributePolyMesh> info() const
+        //- Return info proxy,
+        //- used to print summary information to a stream
+        InfoProxy<mapDistributePolyMesh> info() const noexcept
         {
             return *this;
         }
@@ -349,12 +353,6 @@ public:
             NotImplemented;
         }
 };
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<mapDistributePolyMesh>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

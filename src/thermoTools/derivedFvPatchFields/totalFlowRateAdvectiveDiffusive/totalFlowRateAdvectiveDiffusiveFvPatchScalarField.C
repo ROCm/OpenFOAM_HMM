@@ -71,14 +71,7 @@ totalFlowRateAdvectiveDiffusiveFvPatchScalarField
     refGrad() = 0.0;
     valueFraction() = 0.0;
 
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            Field<scalar>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(refValue());
     }
@@ -158,7 +151,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
 
     const label patchi = patch().index();
 
-    const compressible::turbulenceModel& turbModel =
+    const auto& turbModel =
         db().lookupObject<compressible::turbulenceModel>
         (
             IOobject::groupName
@@ -168,8 +161,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::updateCoeffs()
             )
         );
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const scalarField alphap(turbModel.alphaEff(patchi));
 
@@ -207,7 +199,7 @@ void Foam::totalFlowRateAdvectiveDiffusiveFvPatchScalarField::write
     os.writeEntry("phi", phiName_);
     os.writeEntry("rho", rhoName_);
     os.writeEntry("massFluxFraction", massFluxFraction_);
-    this->writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

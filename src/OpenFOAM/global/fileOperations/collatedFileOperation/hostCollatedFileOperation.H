@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,25 +40,33 @@ Description
     FOAM_IORANKS environment variable (also when running non-parallel), e.g.
     when decomposing into 4:
 
+    \verbatim
         FOAM_IORANKS='(0 2)' decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='0,2'   decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='0 2'   decomposePar -fileHandler hostCollated
+    \endverbatim
 
     will generate
 
-        processors4_0-1/
-            containing data for processors 0 to 1
-        processors4_2-3/
-            containing data for processors 2 to 3
+    \verbatim
+        processors4_0-1/  : containing data for processors 0 to 1
+        processors4_2-3/  : containing data for processors 2 to 3
+    \endverbatim
+
+Environment
+    - \c FOAM_ENV : list of io-ranks as plain space or comma separated
+      list or as an OpenFOAM formatted list. Eg, '(0 4 8)'
 
 See also
-    collatedFileOperation
+    Foam::collatedFileOperation
 
 SourceFiles
     hostCollatedFileOperation.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fileOperations_hostCollatedFileOperation_H
-#define fileOperations_hostCollatedFileOperation_H
+#ifndef Foam_fileOperations_hostCollatedFileOperation_H
+#define Foam_fileOperations_hostCollatedFileOperation_H
 
 #include "collatedFileOperation.H"
 
@@ -80,7 +88,7 @@ class hostCollatedFileOperation
     // Private Data
 
         //- Communicator allocated/managed by us
-        label managedComm_;
+        mutable label managedComm_;
 
 
     // Private Member Functions
@@ -88,8 +96,6 @@ class hostCollatedFileOperation
         //- Any initialisation steps after constructing
         void init(bool verbose);
 
-        //- Get the list of processors part of this set
-        static labelList subRanks(const label n);
 
 public:
 
@@ -100,35 +106,26 @@ public:
     // Constructors
 
         //- Default construct
-        explicit hostCollatedFileOperation(const bool verbose);
+        explicit hostCollatedFileOperation(bool verbose = false);
+
+        //- Construct from communicator with specified io-ranks
+        explicit hostCollatedFileOperation
+        (
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
+            bool verbose = false
+        );
 
 
     //- Destructor
     virtual ~hostCollatedFileOperation();
-};
 
 
-/*---------------------------------------------------------------------------*\
-            Class hostCollatedFileOperationInitialise Declaration
-\*---------------------------------------------------------------------------*/
+    // Member Functions
 
-class hostCollatedFileOperationInitialise
-:
-    public collatedFileOperationInitialise
-{
-public:
-
-    // Constructors
-
-        //- Construct from components
-        hostCollatedFileOperationInitialise(int& argc, char**& argv)
-        :
-            collatedFileOperationInitialise(argc, argv)
-        {}
-
-
-    //- Destructor
-    virtual ~hostCollatedFileOperationInitialise() = default;
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const;
 };
 
 

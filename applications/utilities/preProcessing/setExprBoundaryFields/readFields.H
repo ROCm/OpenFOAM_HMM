@@ -121,15 +121,14 @@ class readFieldsHandler
                 (
                     fieldName,
                     mesh_.time().timeName(),
-                    mesh_,
+                    mesh_.thisDb(),
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 );
 
                 const bool ok =
                 (
-                    io.typeHeaderOk<regIOobject>(false) // Preload header info
-                 && io.hasHeaderClass()                 // Extra safety
+                    io.typeHeaderOk<regIOobject>(false)
                  &&
                     (
                         loadField<scalar>(io)

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,8 @@ void Foam::GAMGProcAgglomeration::printStats
     {
         if (agglom.hasMeshLevel(levelI))
         {
-            os  << agglom.meshLevel(levelI).info() << endl;
+            os  << "Level " << levelI << " mesh:"
+                << agglom.meshLevel(levelI).info() << endl;
         }
         else
         {
@@ -380,7 +381,21 @@ Foam::autoPtr<Foam::GAMGProcAgglomeration> Foam::GAMGProcAgglomeration::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::GAMGProcAgglomeration::~GAMGProcAgglomeration()
-{}
+{
+    clearCommunicators();
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::GAMGProcAgglomeration::clearCommunicators()
+{
+    forAllReverse(comms_, i)
+    {
+        UPstream::freeCommunicator(comms_[i]);
+    }
+    comms_.clear();
+}
 
 
 // ************************************************************************* //

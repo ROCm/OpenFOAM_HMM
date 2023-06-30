@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,15 +92,20 @@ protected:
 
     // Protected Data
 
-        int toProcNo_;
+        //- Destination rank for the data
+        const int toProcNo_;
 
-        DynamicList<char>& sendBuf_;
-
+        //- Message tag for communication
         const int tag_;
 
-        const label comm_;
+        //- The communicator index
+        const int comm_;
 
+        //- Call bufferIPCsend on termination (in the destructor)
         const bool sendAtDestruct_;
+
+        //- Reference to the send buffer data
+        DynamicList<char>& sendBuf_;
 
 
     // Protected Constructors
@@ -110,7 +115,7 @@ protected:
         //- and IO format
         UOPstreamBase
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int toProcNo,
             DynamicList<char>& sendBuf,
             const int tag = UPstream::msgType(),
@@ -122,6 +127,12 @@ protected:
         //- Construct given buffers
         UOPstreamBase(const int toProcNo, PstreamBuffers& buffers);
 
+        //- Construct for externally obtained buffers
+        UOPstreamBase
+        (
+            DynamicList<char>& sendBuf,
+            IOstreamOption::streamFormat fmt
+        );
 
 public:
 
@@ -298,7 +309,7 @@ public:
         //- and IO format
         UOPstream
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int toProcNo,
             DynamicList<char>& sendBuf,
             const int tag = UPstream::msgType(),
@@ -309,6 +320,14 @@ public:
 
         //- Construct given buffers
         UOPstream(const int toProcNo, PstreamBuffers& buffers);
+
+        //- Construct for writing into a standalone buffer.
+        //- Data transfer is handled externally by the caller.
+        explicit UOPstream
+        (
+            DynamicList<char>& sendBuf,
+            IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
+        );
 
 
     //- Destructor, usually sends buffer on destruct.
@@ -332,8 +351,95 @@ public:
             const char* buf,
             const std::streamsize bufSize,
             const int tag = UPstream::msgType(),
-            const label comm = UPstream::worldComm
+            const label comm = UPstream::worldComm,
+            //! [out] request information (for non-blocking)
+            UPstream::Request* req = nullptr,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
         );
+
+        //- Write buffer contents (non-blocking) to given processor
+        //  \return True on success
+        inline static bool write
+        (
+            //! [out] request information
+            UPstream::Request& req,
+            const int toProcNo,
+            const char* buf,
+            const std::streamsize bufSize,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
+        )
+        {
+            return UOPstream::write
+            (
+                UPstream::commsTypes::nonBlocking,
+                toProcNo,
+                buf,
+                bufSize,
+                tag,
+                comm,
+               &req,
+                sendMode
+            );
+        }
+
+        //- Write UList contents to given processor.
+        //  Only valid for contiguous data types.
+        //  \return True on success
+        template<class Type>
+        inline static bool write
+        (
+            const UPstream::commsTypes commsType,
+            const int toProcNo,
+            const UList<Type>& buffer,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            //! [out] request information (for non-blocking)
+            UPstream::Request* req = nullptr,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
+        )
+        {
+            return UOPstream::write
+            (
+                commsType,
+                toProcNo,
+                buffer.cdata_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
+                req,
+                sendMode
+            );
+        }
+
+        //- Write UList contents (non-blocking) to given processor.
+        //  Only valid for contiguous data types.
+        //  \return True on success
+        template<class Type>
+        inline static bool write
+        (
+            //! [out] request information
+            UPstream::Request& req,
+            const int toProcNo,
+            const UList<Type>& buffer,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const UPstream::sendModes sendMode = UPstream::sendModes::normal
+        )
+        {
+            return UOPstream::write
+            (
+                UPstream::commsTypes::nonBlocking,
+                toProcNo,
+                buffer.cdata_bytes(),
+                buffer.size_bytes(),
+                tag,
+                comm,
+               &req,
+                sendMode
+            );
+        }
 };
 
 
@@ -364,10 +470,10 @@ public:
         //- and IO format
         UOPBstream
         (
-            const commsTypes commsType,     //!< ignored
+            const UPstream::commsTypes,     //!< irrelevant
             const int toProcNo,             //!< normally UPstream::masterNo()
             DynamicList<char>& sendBuf,
-            const int tag = UPstream::msgType(),  //!< ignored
+            const int tag = UPstream::msgType(),  //!< irrelevant
             const label comm = UPstream::worldComm,
             const bool sendAtDestruct = true,
             IOstreamOption::streamFormat fmt = IOstreamOption::BINARY
@@ -390,11 +496,9 @@ public:
         //  \return True on success
         static bool write
         (
-            const commsTypes commsType,     //!< ignored
-            const int rootProcNo,           //!< normally UPstream::masterNo()
+            const int rootProcNo,  //!< normally UPstream::masterNo()
             const char* buf,
             const std::streamsize bufSize,
-            const int tag = UPstream::msgType(),  //!< ignored
             const label comm = UPstream::worldComm
         );
 };

@@ -112,7 +112,7 @@ void Foam::electrostaticDepositionFvPatchScalarField::writeFilmFields() const
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false // do not register
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(dimLength)
@@ -172,20 +172,10 @@ electrostaticDepositionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     h_("h", dict, p.size()),
-    qcum_
-    (
-        dict.found("qCumulative")
-      ? scalarField("qCumulative", dict, p.size())
-      : scalarField(p.size(), 0)
-    ),
-    Vfilm_
-    (
-        dict.found("Vfilm")
-      ? scalarField("Vfilm", dict, p.size())
-      : scalarField(p.size(), 0)
-    ),
+    qcum_("qCumulative", dict, p.size(), IOobjectOption::LAZY_READ),
+    Vfilm_("Vfilm", dict, p.size(), IOobjectOption::LAZY_READ),
     Ceffptr_
     (
         PatchFunction1<scalar>::New(p.patch(), "CoulombicEfficiency", dict)
@@ -216,16 +206,9 @@ electrostaticDepositionFvPatchScalarField
     timei_(-1),
     master_(-1)
 {
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchScalarField::operator=(patchInternalField());
+        this->extrapolateInternal();  // Zero-gradient patch values
     }
 
     // If flow is multiphase
@@ -543,7 +526,7 @@ void Foam::electrostaticDepositionFvPatchScalarField::updateCoeffs()
 
 void Foam::electrostaticDepositionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     h_.writeEntry("h", os);
 
@@ -574,7 +557,7 @@ void Foam::electrostaticDepositionFvPatchScalarField::write(Ostream& os) const
     qcum_.writeEntry("qCumulative", os);
     Vfilm_.writeEntry("Vfilm", os);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

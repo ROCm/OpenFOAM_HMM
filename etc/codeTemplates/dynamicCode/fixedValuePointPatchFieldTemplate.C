@@ -125,10 +125,10 @@ ${typeName}FixedValuePointPatch${FieldType}
     const pointPatch& p,
     const DimensionedField<${TemplateType}, pointMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
-    parent_bctype(p, iF, dict, valueRequired)
+    parent_bctype(p, iF, dict, requireValue)
 {
     if (${verbose:-false})
     {

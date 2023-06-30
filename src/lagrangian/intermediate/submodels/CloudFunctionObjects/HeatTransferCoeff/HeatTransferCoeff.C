@@ -64,25 +64,28 @@ void Foam::HeatTransferCoeff<CloudType>::postEvolve
     const auto& tc =
         static_cast<const ThermoCloud<KinematicCloud<Cloud<parcelType>>>&>(c);
 
-    if (!c.template foundObject<IOField<scalar>>("htc"))
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("htc");
+
+    if (!resultPtr)
     {
-        auto* htcPtr =
-            new IOField<scalar>
+        resultPtr = new IOField<scalar>
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "htc",
-                    c.time().timeName(),
-                    c,
-                    IOobject::NO_READ
-                )
-            );
+                "htc",
+                c.time().timeName(),
+                c,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            )
+        );
 
-        htcPtr->store();
+        resultPtr->store();
     }
+    auto& htc = *resultPtr;
 
-    auto& htc = c.template lookupObjectRef<IOField<scalar>>("htc");
-    htc.setSize(c.size());
+    htc.resize(c.size());
 
     const auto& heatTransfer = tc.heatTransfer();
     typename parcelType::trackingData& nctd =

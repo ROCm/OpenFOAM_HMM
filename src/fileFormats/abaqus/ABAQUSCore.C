@@ -459,7 +459,7 @@ Foam::fileFormats::ABAQUSCore::readHelper::readSurfaceElements
         }
 
         const auto faceIdIter = abqToFoamFaceMap.cfind(elemTypes_[index]);
-        if (!faceIdIter.found())
+        if (!faceIdIter.good())
         {
             Info<< "Abaqus reader: reject non-solid shape: " << nl;
         }

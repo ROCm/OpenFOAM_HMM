@@ -143,7 +143,8 @@ void Foam::functionObjects::fieldAverage::restoreWindowFieldsType
             obr().time().timeName(obr().time().startTime().value()),
             obr(),
             IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         );
 
         if (io.typeHeaderOk<Type>(true))

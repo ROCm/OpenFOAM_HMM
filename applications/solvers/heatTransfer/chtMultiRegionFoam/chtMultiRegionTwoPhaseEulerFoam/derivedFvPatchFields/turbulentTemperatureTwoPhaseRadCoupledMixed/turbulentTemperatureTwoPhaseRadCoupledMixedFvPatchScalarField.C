@@ -88,26 +88,29 @@ kappa
 
         case mtLookup:
         {
-            if (mesh.foundObject<volScalarField>(kappaName_))
             {
-                return patch().lookupPatchField<volScalarField, scalar>
-                (
-                    kappaName_
-                );
+                const auto* ptr =
+                    mesh.cfindObject<volScalarField>(kappaName_);
+
+                if (ptr)
+                {
+                    return patch().patchField(*ptr);
+                }
             }
-            else if (mesh.foundObject<volSymmTensorField>(kappaName_))
             {
-                const symmTensorField& KWall =
-                    patch().lookupPatchField<volSymmTensorField, scalar>
-                    (
-                        kappaName_
-                    );
+                const auto* ptr =
+                    mesh.cfindObject<volSymmTensorField>(kappaName_);
 
-                const vectorField n(patch().nf());
+                if (ptr)
+                {
+                    const symmTensorField& KWall = patch().patchField(*ptr);
 
-                return n & KWall & n;
+                    const vectorField n(patch().nf());
+
+                    return n & KWall & n;
+                }
             }
-            else
+
             {
                 FatalErrorInFunction
                     << "Did not find field " << kappaName_
@@ -117,9 +120,6 @@ kappa
                     << " or volSymmTensorField."
                     << exit(FatalError);
             }
-
-
-
             break;
         }
 
@@ -131,10 +131,8 @@ kappa
                 mesh.lookupObject<phaseSystem>("phaseProperties")
             );
 
-            tmp<scalarField> kappaEff
-            (
-                new scalarField(patch().size(), 0.0)
-            );
+            auto tkappaEff = tmp<scalarField>::New(patch().size(), Zero);
+            auto& kappaEff = tkappaEff.ref();
 
             forAll(fluid.phases(), phasei)
             {
@@ -142,10 +140,10 @@ kappa
 
                 const fvPatchScalarField& alpha = phase.boundaryField()[patchi];
 
-                kappaEff.ref() += alpha*phase.kappaEff(patchi)();
+                kappaEff += alpha*phase.kappaEff(patchi)();
             }
 
-            return kappaEff;
+            return tkappaEff;
 
             break;
         }
@@ -161,8 +159,10 @@ kappa
         }
     }
 
-    return scalarField(0);
+    // Return zero-sized (not nullptr)
+    return tmp<scalarField>::New();
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -243,14 +243,12 @@ turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField
             << exit(FatalError);
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
 
-    if (dict.found("refValue"))
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
+
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
@@ -308,12 +306,11 @@ updateCoeffs()
 
     scalarField& Tp = *this;
 
-    const turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField&
-        nbrField = refCast
-            <const turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField>
-            (
-                nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
-            );
+    const auto& nbrField =
+        refCast
+        <
+            const turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField
+        >(nbrPatch.lookupPatchField<volScalarField>(TnbrName_));
 
     // Swap to obtain full local values of neighbour internal field
     scalarField TcNbr(nbrField.patchInternalField());
@@ -330,13 +327,13 @@ updateCoeffs()
     scalarField qr(Tp.size(), 0.0);
     if (qrName_ != "none")
     {
-        qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
+        qr = patch().lookupPatchField<volScalarField>(qrName_);
     }
 
     scalarField qrNbr(Tp.size(), 0.0);
     if (qrNbrName_ != "none")
     {
-        qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
+        qrNbr = nbrPatch.lookupPatchField<volScalarField>(qrNbrName_);
         mpp.distribute(qrNbr);
     }
 
@@ -486,7 +483,7 @@ void turbulentTemperatureTwoPhaseRadCoupledMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntry("kappaMethod", KMethodTypeNames_[method_]);
     os.writeEntryIfDifferent<word>("kappa","none", kappaName_);
 

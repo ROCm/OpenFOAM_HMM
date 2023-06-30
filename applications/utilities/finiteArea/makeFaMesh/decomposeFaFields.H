@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -16,10 +16,10 @@ Description
 \*---------------------------------------------------------------------------*/
 
 // Embed do-while to support early termination
-if (doDecompose && Pstream::parRun())
+if (doDecompose && UPstream::parRun())
 do
 {
-    faMeshReconstructor reconstructor(aMesh, IOobjectOption::READ_IF_PRESENT);
+    faMeshReconstructor reconstructor(aMesh, IOobjectOption::LAZY_READ);
 
     if (!reconstructor.good())
     {
@@ -57,27 +57,26 @@ do
         std::unique_ptr<faMeshSubset> subsetter;
         IOobjectList objects(0);
 
+        refPtr<fileOperation> newHandler(fileOperation::NewUncollated());
+
         const bool oldDistributed = fileHandler().distributed();
-        auto oldHandler = fileHandler(fileOperation::NewUncollated());
+        auto oldHandler = fileOperation::fileHandler(newHandler);
         fileHandler().distributed(true);
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
-            haveMeshOnProc.set(Pstream::myProcNo());
+            haveMeshOnProc.set(UPstream::myProcNo());
             subsetter.reset(new faMeshSubset(serialMesh));
 
-            const bool oldParRun = Pstream::parRun(false);
+            const bool oldParRun = UPstream::parRun(false);
 
             objects = IOobjectList(serialMesh.time(), runTime.timeName());
 
-            Pstream::parRun(oldParRun);
+            UPstream::parRun(oldParRun);
         }
 
-        // Restore old settings
-        if (oldHandler)
-        {
-            fileHandler(std::move(oldHandler));
-        }
+        // Restore settings
+        (void) fileOperation::fileHandler(oldHandler);
         fileHandler().distributed(oldDistributed);
 
         areaFieldsCache.readAllFields

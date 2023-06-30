@@ -804,7 +804,7 @@ Foam::surfaceFeatures::surfaceFeatures
     {
         const auto iter = dynFeatEdges.cfind(surfEdges[eI]);
 
-        if (iter.found())
+        if (iter.good())
         {
             allEdgeStat[eI] = edgeStat[iter.val()];
         }

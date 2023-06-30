@@ -208,7 +208,7 @@ public:
             const fvMesh& mesh = this->mesh();
             tmp<surfaceScalarField> tUflux = faceFlux_;
 
-            if (faceFlux_.dimensions() == dimDensity*dimVelocity*dimArea)
+            if (faceFlux_.dimensions() == dimMass/dimTime)
             {
                 // Currently assume that the density field
                 // corresponding to the mass-flux is named "rho"
@@ -218,7 +218,7 @@ public:
 
                 tUflux = faceFlux_/fvc::interpolate(rho);
             }
-            else if (faceFlux_.dimensions() != dimVelocity*dimArea)
+            else if (faceFlux_.dimensions() != dimVolume/dimTime)
             {
                 FatalErrorInFunction
                     << "dimensions of faceFlux are not correct"
@@ -235,7 +235,7 @@ public:
                 ),
                 mesh,
                 dimensionedScalar(dimless, Zero),
-                extrapolatedCalculatedFvPatchScalarField::typeName
+                fvPatchFieldBase::extrapolatedCalculatedType()
             );
 
             scalarField sumPhi
@@ -253,14 +253,10 @@ public:
                 (
                     vf.name() + "BlendingFactor",
                     scalar(1)
-                  - max
+                  - clamp
                     (
-                        min
-                        (
-                            (fvc::interpolate(Co) - Co1_)/(Co2_ - Co1_),
-                            scalar(1)
-                        ),
-                        scalar(0)
+                        (fvc::interpolate(Co) - Co1_)/(Co2_ - Co1_),
+                        zero_one{}
                     )
                 )
             );
@@ -346,10 +342,7 @@ public:
             }
             else
             {
-                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-                (
-                    nullptr
-                );
+                return nullptr;
             }
         }
 };

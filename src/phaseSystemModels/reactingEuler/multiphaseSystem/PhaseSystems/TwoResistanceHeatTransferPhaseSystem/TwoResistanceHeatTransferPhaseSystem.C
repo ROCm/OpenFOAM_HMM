@@ -297,8 +297,8 @@ correctInterfaceThermo()
         );
 
         // Limit the H[12] to avoid /0
-        H1.max(SMALL);
-        H2.max(SMALL);
+        H1.clamp_min(SMALL);
+        H2.clamp_min(SMALL);
 
         Tf = (H1*T1 + H2*T2 + dmdt*L)/(H1 + H2);
 

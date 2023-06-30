@@ -94,7 +94,7 @@ activePressureForceBaffleVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF, dict, false),
+    fixedValueFvPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     pName_(dict.getOrDefault<word>("p", "p")),
     cyclicPatchName_(dict.lookup("cyclicPatch")),
     cyclicPatchLabel_(p.patch().boundaryMesh().findPatchID(cyclicPatchName_)),
@@ -299,27 +299,18 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
         if (mag(valueDiff) > mag(minThresholdValue_) || baffleActivated_)
         {
             openFraction_ =
-                max
+            (
+                openFraction_
+              + min
                 (
-                    min
-                    (
-                        openFraction_
-                      + min
-                        (
-                          this->db().time().deltaT().value()/openingTime_,
-                          maxOpenFractionDelta_
-                        ),
-                        1 - 1e-6
-                    ),
-                    1e-6
-                );
+                    this->db().time().deltaT().value()/openingTime_,
+                    maxOpenFractionDelta_
+                )
+            );
 
-             baffleActivated_ = true;
+            baffleActivated_ = true;
         }
-        else
-        {
-            openFraction_ = max(min(1 - 1e-6, openFraction_), 1e-6);
-        }
+        openFraction_ = clamp(openFraction_, scalar(1e-6), scalar(1 - 1e-6));
 
         if (Pstream::master())
         {
@@ -380,7 +371,7 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
 void Foam::activePressureForceBaffleVelocityFvPatchVectorField::
 write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntry("cyclicPatch", cyclicPatchName_);
     os.writeEntry("openingTime", openingTime_);
@@ -389,7 +380,7 @@ write(Ostream& os) const
     os.writeEntry("minThresholdValue", minThresholdValue_);
     os.writeEntry("forceBased", fBased_);
     os.writeEntry("opening", opening_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

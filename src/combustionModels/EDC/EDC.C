@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -108,14 +108,17 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
             {
                 const scalar nu = mu[i]/(rho[i] + SMALL);
 
-                const scalar Da =
-                    max(min(sqrt(nu/(epsilon[i] + SMALL))/tc[i], 10), 1e-10);
+                const scalar Da = clamp
+                (
+                    sqrt(nu/(epsilon[i] + SMALL))/tc[i],
+                    scalar(1e-10), scalar(10)
+                );
 
                 const scalar ReT = sqr(k[i])/(nu*epsilon[i] + SMALL);
                 const scalar CtauI = min(C1_/(Da*sqrt(ReT + 1)), 2.1377);
 
                 const scalar CgammaI =
-                    max(min(C2_*sqrt(Da*(ReT + 1)), 5), 0.4082);
+                    clamp(C2_*sqrt(Da*(ReT + 1)), scalar(0.4082), scalar(5));
 
                 const scalar gammaL =
                     CgammaI*pow025(nu*epsilon[i]/(sqr(k[i]) + SMALL));
@@ -140,6 +143,9 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
                         );
                 }
             }
+
+            // Evaluate bcs
+            kappa_.correctBoundaryConditions();
         }
         else
         {
@@ -168,6 +174,9 @@ void Foam::combustionModels::EDC<ReactionThermo>::correct()
                         );
                 }
             }
+
+            // Evaluate bcs
+            kappa_.correctBoundaryConditions();
         }
 
         Info<< "Chemistry time solved max/min : "
@@ -201,7 +210,7 @@ Foam::combustionModels::EDC<ReactionThermo>::Qdot() const
                 this->mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh(),
             dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

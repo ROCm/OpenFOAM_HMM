@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynamicCodeContext_H
-#define dynamicCodeContext_H
+#ifndef Foam_dynamicCodeContext_H
+#define Foam_dynamicCodeContext_H
 
 #include "dictionary.H"
 #include "SHA1.H"

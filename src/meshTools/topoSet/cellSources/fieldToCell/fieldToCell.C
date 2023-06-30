@@ -186,8 +186,8 @@ void Foam::fieldToCell::applyToSet
         mesh().time().timeName(),
         mesh(),
         IOobject::MUST_READ,
-        IOobject::AUTO_WRITE,
-        false
+        IOobject::NO_WRITE,
+        IOobject::NO_REGISTER
     );
 
     // Note: should check for volScalarField but that introduces dependency

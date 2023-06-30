@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,13 +24,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-     Finite-Area scalar matrix member functions and operators
-
 \*---------------------------------------------------------------------------*/
 
 #include "faScalarMatrix.H"
-#include "zeroGradientFaPatchFields.H"
+#include "extrapolatedCalculatedFaPatchFields.H"
+#include "profiling.H"
 #include "PrecisionAdaptor.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -136,24 +134,14 @@ Foam::tmp<Foam::scalarField> Foam::faMatrix<Foam::scalar>::residual() const
 template<>
 Foam::tmp<Foam::areaScalarField> Foam::faMatrix<Foam::scalar>::H() const
 {
-    tmp<areaScalarField> tHphi
+    auto tHphi = areaScalarField::New
     (
-        new areaScalarField
-        (
-            IOobject
-            (
-                "H("+psi_.name()+')',
-                psi_.instance(),
-                psi_.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi_.mesh(),
-            dimensions_/dimArea,
-            zeroGradientFaPatchScalarField::typeName
-        )
+        "H(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions_/dimArea,
+        faPatchFieldBase::extrapolatedCalculatedType()
     );
-    areaScalarField& Hphi = tHphi.ref();
+    auto& Hphi = tHphi.ref();
 
     Hphi.primitiveFieldRef() = (lduMatrix::H(psi_.primitiveField()) + source_);
     addBoundarySource(Hphi.primitiveFieldRef());

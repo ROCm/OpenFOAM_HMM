@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,7 +93,7 @@ typedef HashSet<label, Hash<label>> labelHashSet;
 template<class Key, class Hash=Foam::Hash<Key>>
 class HashSet
 :
-    public HashTable<zero::null, Key, Hash>
+    public HashTable<Foam::zero, Key, Hash>
 {
     // Private Member Functions
 
@@ -113,7 +113,7 @@ public:
     typedef HashSet<Key, Hash> this_type;
 
     //- The template instance used for the parent HashTable
-    typedef HashTable<zero::null, Key, Hash> parent_type;
+    typedef HashTable<Foam::zero, Key, Hash> parent_type;
 
     //- An iterator, returning reference to the key
     using iterator = typename parent_type::key_iterator;
@@ -176,11 +176,11 @@ public:
 
     // Member Functions
 
-        //- Same as found() - return true if key exists in the set.
+        //- Same as contains() - return true if key exists in the set.
         //  Method name compatibility with bitSet and boolList.
         bool test(const Key& key) const
         {
-            return this->found(key);
+            return this->contains(key);
         }
 
 
@@ -197,7 +197,7 @@ public:
         //- Same as insert (no value to overwrite)
         bool set(const Key& key)
         {
-            return insert(key);
+            return this->parent_type::emplace(key);
         }
 
         //- Unset the specified key - same as erase
@@ -206,6 +206,16 @@ public:
         {
             return this->parent_type::erase(key);
         }
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashSet<Key, Hash>& source);
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashSet<Key, Hash>&& source);
 
 
     // Convenience
@@ -322,11 +332,11 @@ public:
 
     // Member Operators
 
-        //- Return true if the entry exists, same as found()
+        //- Return true if the entry exists, same as contains()
         //  \note this allows use of HashSet as a predicate test
         inline bool operator()(const Key& key) const noexcept;
 
-        //- Return true if the entry exists, same as found().
+        //- Return true if the entry exists, same as contains().
         inline bool operator[](const Key& key) const noexcept;
 
         //- Copy assign
@@ -370,7 +380,7 @@ public:
         //- Add entries to this HashSet
         this_type& operator|=(const this_type& rhs);
 
-        //- Only retain entries found in both HashSets
+        //- Only retain entries contained in both HashSets
         inline this_type& operator&=(const this_type& rhs);
 
         //- Only retain unique entries (xor)

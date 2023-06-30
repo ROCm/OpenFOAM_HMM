@@ -69,7 +69,7 @@ Foam::displacementLayeredMotionMotionSolver::getCylindrical
 {
     auto iter = cylSystems_.cfind(cellZoneI);
 
-    if (iter.found())
+    if (iter.good())
     {
         return *(iter.val());
     }
@@ -242,7 +242,7 @@ Foam::displacementLayeredMotionMotionSolver::faceZoneEvaluate
 
     if (type == "fixedValue")
     {
-        fld = vectorField("value", dict, meshPoints.size());
+        fld.assign("value", dict, meshPoints.size());
     }
     else if (type == "timeVaryingUniformFixedValue")
     {
@@ -345,7 +345,7 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
                     mesh(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 pointDisplacement_  // to inherit the boundary conditions
             )
@@ -438,7 +438,7 @@ void Foam::displacementLayeredMotionMotionSolver::cellZoneSolve
                 mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pointMesh::New(mesh()),
             dimensionedScalar(dimLength, Zero)

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +29,39 @@ License
 #include "fixedGradientFvPatchField.H"
 #include "dictionary.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::fixedGradientFvPatchField<Type>::readGradientEntry
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = fvPatchFieldBase::patch();
+
+
+    const auto* eptr = dict.findEntry("gradient", keyType::LITERAL);
+
+    if (eptr)
+    {
+        gradient_.assign(*eptr, p.size());
+        return true;
+    }
+
+    if (IOobjectOption::isReadRequired(readOpt))
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entry 'gradient' : missing for patch " << p.name()
+            << " in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -47,13 +81,24 @@ Foam::fixedGradientFvPatchField<Type>::fixedGradientFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption requireGrad
 )
 :
-    fvPatchField<Type>(p, iF, dict, false),
-    gradient_("gradient", dict, p.size())
+    fvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    gradient_(p.size())
 {
-    evaluate();
+    if (readGradientEntry(dict, requireGrad))
+    {
+        evaluate();
+    }
+    else
+    {
+        // Not read (eg, optional and missing):
+        // - treat as zero-gradient, do not evaluate
+        fvPatchField<Type>::extrapolateInternal();
+        gradient_ = Zero;
+    }
 }
 
 

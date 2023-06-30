@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,7 +133,7 @@ Foam::label Foam::mappedPatchBase::getWorldCommunicator() const
 {
     if (sameWorld())
     {
-        return UPstream::worldComm;
+        return UPstream::commWorld();
     }
 
     const Time& runTime = patch_.boundaryMesh().mesh().time();
@@ -187,8 +187,7 @@ void Foam::mappedPatchBase::collectSamples
     const label myRank = Pstream::myProcNo(myComm);
     const label nProcs = Pstream::nProcs(myComm);
 
-    const label oldWarnComm(Pstream::warnComm);
-    Pstream::warnComm = myComm;
+    const label oldWarnComm = UPstream::commWarn(myComm);
 
     if (debug & 2)
     {
@@ -241,17 +240,15 @@ void Foam::mappedPatchBase::collectSamples
     {
         labelList procToWorldIndex
         (
-            UPstream::listGatherValues<label>(mySampleWorld, myComm)
+            UPstream::allGatherValues<label>(mySampleWorld, myComm)
         );
         labelList nPerProc
         (
-            UPstream::listGatherValues<label>(patch_.size(), myComm)
+            UPstream::allGatherValues<label>(patch_.size(), myComm)
         );
 
-        Pstream::broadcasts(myComm, procToWorldIndex, nPerProc);
-
-        patchFaceWorlds.setSize(patchFaces.size());
-        patchFaceProcs.setSize(patchFaces.size());
+        patchFaceWorlds.resize(patchFaces.size());
+        patchFaceProcs.resize(patchFaces.size());
 
         label sampleI = 0;
         forAll(nPerProc, proci)
@@ -265,7 +262,8 @@ void Foam::mappedPatchBase::collectSamples
         }
     }
 
-    Pstream::warnComm = oldWarnComm;
+    // Restore communicator settings
+    UPstream::commWarn(oldWarnComm);
 }
 
 
@@ -591,8 +589,7 @@ void Foam::mappedPatchBase::findSamples
     const label myRank = Pstream::myProcNo(myComm);
     const label nProcs = Pstream::nProcs(myComm);
 
-    const label oldWarnComm(Pstream::warnComm);
-    Pstream::warnComm = myComm;
+    const label oldWarnComm = UPstream::commWarn(myComm);
 
     wordList samplePatches(nProcs);
     {
@@ -711,7 +708,8 @@ void Foam::mappedPatchBase::findSamples
         }
     }
 
-    Pstream::warnComm = oldWarnComm;
+    // Return communicator settings
+    UPstream::commWarn(oldWarnComm);
 }
 
 
@@ -1105,9 +1103,6 @@ void Foam::mappedPatchBase::calcAMI() const
     // Pre-calculate surface (if any)
     const auto& surf = surfPtr();
 
-    const label oldWorldComm(Pstream::worldComm);
-    const label oldWarnComm(Pstream::warnComm);
-
     // Check if running locally
     if (sampleWorld_.empty() || sameWorld())
     {
@@ -1143,13 +1138,14 @@ void Foam::mappedPatchBase::calcAMI() const
         // weights.
 
         // Change to use inter-world communicator
-        Pstream::worldComm = myComm;
-        Pstream::warnComm = Pstream::worldComm;
+        const label oldWarnComm = UPstream::commWarn(myComm);
+        const label oldWorldComm = UPstream::commWorld(myComm);
 
         AMIPtr_->calculate(patch_, nbrPatch0, surf);
 
-        Pstream::warnComm = oldWarnComm;
-        Pstream::worldComm = oldWorldComm;
+        // Restore communicator settings
+        UPstream::commWarn(oldWarnComm);
+        UPstream::commWorld(oldWorldComm);
     }
     else
     {
@@ -1162,8 +1158,8 @@ void Foam::mappedPatchBase::calcAMI() const
         );
 
         // Change to use inter-world communicator
-        Pstream::worldComm = myComm;
-        Pstream::warnComm = Pstream::worldComm;
+        const label oldWarnComm = UPstream::commWarn(myComm);
+        const label oldWorldComm = UPstream::commWorld(myComm);
 
         if (masterWorld())
         {
@@ -1182,8 +1178,9 @@ void Foam::mappedPatchBase::calcAMI() const
         // Now the AMI addressing/weights will be from src side (on masterWorld
         // processors) to tgt side (on other processors)
 
-        Pstream::warnComm = oldWarnComm;
-        Pstream::worldComm = oldWorldComm;
+        // Restore communicator settings
+        UPstream::commWarn(oldWarnComm);
+        UPstream::commWorld(oldWorldComm);
     }
 }
 
@@ -1571,7 +1568,7 @@ void Foam::mappedPatchBase::clearOut()
 {
     mapPtr_.reset(nullptr);
     surfPtr_.reset(nullptr);
-    AMIPtr_->upToDate() = false;
+    AMIPtr_->upToDate(false);
 }
 
 

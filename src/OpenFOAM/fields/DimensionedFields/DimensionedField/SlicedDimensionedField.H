@@ -67,11 +67,11 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField
         )
         :
-            DimensionedField<Type, GeoMesh>(io, mesh, ds, Field<Type>())
+            DimensionedField<Type, GeoMesh>(io, mesh, dims, Field<Type>())
         {
             // Set internalField to the slice of the complete field
             UList<Type>::shallowCopy

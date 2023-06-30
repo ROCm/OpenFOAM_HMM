@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
     PstreamGather.C
     PstreamCombineGather.C
     PstreamGatherList.C
+    PstreamExchangeConsensus.C
     PstreamExchange.C
 
 \*---------------------------------------------------------------------------*/
@@ -62,36 +63,6 @@ class Pstream
 :
     public UPstream
 {
-   // Private Static Functions
-
-        //- Exchange contiguous data. Sends sendBufs, receives into recvBufs.
-        //  Data provided and received as container.
-        template<class Container, class T>
-        static void exchangeContainer
-        (
-            const UList<Container>& sendBufs,
-            const labelUList& recvSizes,  //!< Num of recv elements (not bytes)
-            List<Container>& recvBufs,
-            const int tag,
-            const label comm,
-            const bool wait               //!< Wait for requests to complete
-        );
-
-        //- Exchange contiguous data. Sends sendBufs, receives into recvBufs.
-        //  Data provided and received as pointers.
-        template<class T>
-        static void exchangeBuf
-        (
-            const labelUList& sendSizes,  //!< Num of send elements (not bytes)
-            const UList<const char*>& sendBufs,
-            const labelUList& recvSizes,  //!< Num of recv elements (not bytes)
-            List<char*>& recvBufs,
-            const int tag,
-            const label comm,
-            const bool wait               //!< Wait for requests to complete
-        );
-
-
 protected:
 
     // Protected Data
@@ -102,13 +73,13 @@ protected:
 
 public:
 
-    // Declare name of the class and its debug switch
+    //- Declare name of the class and its debug switch
     ClassName("Pstream");
 
 
     // Constructors
 
-        //- Construct for given commsTypes, with optional buffer size
+        //- Construct for given communication type, with optional buffer size
         explicit Pstream
         (
             const UPstream::commsTypes commsType,
@@ -133,6 +104,7 @@ public:
 
         //- Broadcast content (contiguous or non-contiguous)
         //- to all processes in communicator.
+        //  For \b non-parallel : do nothing.
         template<class Type>
         static void broadcast
         (
@@ -141,6 +113,7 @@ public:
         );
 
         //- Broadcast multiple items to all processes in communicator.
+        //  For \b non-parallel : do nothing.
         template<class Type, class... Args>
         static void broadcasts(const label comm, Type& arg1, Args&&... args);
 
@@ -495,60 +468,166 @@ public:
             );
 
 
-        // Exchange
+    // Exchange
 
-            //- Helper: exchange sizes of sendData for specified
-            //- set of send/receive processes.
-            template<class Container>
-            static void exchangeSizes
-            (
-                const labelUList& sendProcs,
-                const labelUList& recvProcs,
-                const Container& sendData,
-                labelList& sizes,
-                const label tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm
-            );
+        //- Helper: exchange sizes of sendBufs for specified send/recv ranks
+        template<class Container>
+        static void exchangeSizes
+        (
+            const labelUList& sendProcs,
+            const labelUList& recvProcs,
+            const Container& sendBufs,
+            labelList& sizes,
+            const label tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
 
-            //- Helper: exchange sizes of sendData.
-            //- The sendData is the data per processor (in the communicator).
-            //  Returns sizes of sendData on the sending processor.
-            template<class Container>
-            static void exchangeSizes
-            (
-                const Container& sendData,
-                labelList& sizes,
-                const label comm = UPstream::worldComm
-            );
+        //- Helper: exchange sizes of sendBufs for specified neighbour ranks
+        template<class Container>
+        static void exchangeSizes
+        (
+            const labelUList& neighProcs,
+            const Container& sendBufs,
+            labelList& sizes,
+            const label tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- Helper: exchange sizes of sendBufs.
+        //- The sendBufs is the data per processor (in the communicator).
+        //  Returns sizes of sendBufs on the sending processor.
+        //  \n
+        //  For \b non-parallel : copy sizes from sendBufs directly.
+        template<class Container>
+        static void exchangeSizes
+        (
+            const Container& sendBufs,
+            labelList& recvSizes,
+            const label comm = UPstream::worldComm
+        );
+
+        //- Exchange the \b non-zero sizes of sendBufs entries (sparse map)
+        //- with other ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //
+        //  Since the recvData map always cleared before receipt and sizes
+        //  of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
+        //
+        //  For \b non-parallel : copy size of rank (if it exists and non-empty)
+        //  from sendBufs to recvSizes.
+        //
+        //  \note The message tag is adjusted internally to improve uniqueness
+        template<class Container>
+        static void exchangeSizes
+        (
+            const Map<Container>& sendBufs,
+            Map<label>& recvSizes,
+            const label tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm
+        );
+
+        //- Helper: exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs using predetermined receive
+        //- sizing.
+        //  If wait=true will wait for all transfers to finish.
+        template<class Container, class Type>
+        static void exchange
+        (
+            const UList<Container>& sendBufs,
+            const labelUList& recvSizes,
+            List<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
+
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
+        //  Data provided and received as container.
+        //
+        // No internal guards or resizing.
+        template<class Container, class Type>
+        static void exchange
+        (
+            const Map<Container>& sendBufs,
+            const Map<label>& recvSizes,  //!< Num of recv elements (not bytes)
+            Map<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
+
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
+        //- Determines sizes to receive.
+        //  If wait=true will wait for all transfers to finish.
+        template<class Container, class Type>
+        static void exchange
+        (
+            const UList<Container>& sendBufs,
+            List<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
+
+        //- Exchange \em contiguous data.
+        //- Sends sendBufs, receives into recvBufs.
+        //- Determines sizes to receive.
+        //  If wait=true will wait for all transfers to finish.
+        template<class Container, class Type>
+        static void exchange
+        (
+            const Map<Container>& sendBufs,
+            Map<Container>& recvBufs,
+            const int tag = UPstream::msgType(),
+            const label comm = UPstream::worldComm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
 
 
-            //- Helper: exchange contiguous data.
-            //- Sends sendData, receives into recvData.
-            //  If wait=true will wait for all transfers to finish.
-            template<class Container, class T>
-            static void exchange
-            (
-                const UList<Container>& sendData,
-                const labelUList& recvSizes,
-                List<Container>& recvData,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm,
-                const bool wait = true  //!< Wait for requests to complete
-            );
+    // Non-blocking exchange
 
-            //- Exchange contiguous data.
-            //- Sends sendData, receives into recvData.
-            //- Determines sizes to receive.
-            //  If wait=true will wait for all transfers to finish.
-            template<class Container, class T>
-            static void exchange
-            (
-                const UList<Container>& sendData,
-                List<Container>& recvData,
-                const int tag = UPstream::msgType(),
-                const label comm = UPstream::worldComm,
-                const bool wait = true  //!< Wait for requests to complete
-            );
+        //- Exchange \em contiguous data using non-blocking consensus
+        //- Sends sendData, receives into recvData.
+        //
+        //  Each entry of the recvBufs list is cleared before receipt.
+        //  For \b non-parallel : copy own rank from sendBufs to recvBufs.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        template<class Container, class Type>
+        static void exchangeConsensus
+        (
+            const UList<Container>& sendBufs,
+            List<Container>& recvBufs,
+            const int tag,
+            const label comm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
+
+        //- Exchange \em contiguous data using non-blocking consensus
+        //- Sends sendData, receives into recvData.
+        //
+        //  Each \em entry of the recvBufs map is cleared before receipt,
+        //  but the map itself if not cleared. This allows the map to preserve
+        //  allocated space (eg DynamicList entries) between calls.
+        //
+        //  For \b non-parallel : copy own rank (if it exists and non-empty)
+        //  from sendBufs to recvBufs.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        template<class Container, class Type>
+        static void exchangeConsensus
+        (
+            const Map<Container>& sendBufs,
+            Map<Container>& recvBufs,
+            const int tag,
+            const label comm,
+            const bool wait = true  //!< Wait for requests to complete
+        );
 };
 
 

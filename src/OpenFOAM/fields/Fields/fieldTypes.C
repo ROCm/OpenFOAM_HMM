@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,29 @@ const Foam::wordList Foam::fieldTypes::basic
     "symmTensorField",          //< symmTensorIOField
     "tensorField"               //< tensorIOField
 });
+
+
+// Commonly used patch field types
+
+const Foam::word Foam::fieldTypes::emptyType
+(
+    Foam::fieldTypes::emptyTypeName_()
+);
+
+const Foam::word Foam::fieldTypes::calculatedType
+(
+    Foam::fieldTypes::calculatedTypeName_()
+);
+
+const Foam::word Foam::fieldTypes::extrapolatedCalculatedType
+(
+    Foam::fieldTypes::extrapolatedCalculatedTypeName_()
+);
+
+const Foam::word Foam::fieldTypes::zeroGradientType
+(
+    Foam::fieldTypes::zeroGradientTypeName_()
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

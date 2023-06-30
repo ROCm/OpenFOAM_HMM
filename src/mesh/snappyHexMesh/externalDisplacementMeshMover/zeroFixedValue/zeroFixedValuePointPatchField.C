@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2014 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,43 +28,35 @@ License
 
 #include "zeroFixedValuePointPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
 template<class Type>
-zeroFixedValuePointPatchField<Type>::
-zeroFixedValuePointPatchField
+Foam::zeroFixedValuePointPatchField<Type>::zeroFixedValuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF
 )
 :
-    fixedValuePointPatchField<Type>(p, iF)
+    // Field is zero
+    fixedValuePointPatchField<Type>(p, iF, Type(Zero))
 {}
 
 
 template<class Type>
-zeroFixedValuePointPatchField<Type>::
-zeroFixedValuePointPatchField
+Foam::zeroFixedValuePointPatchField<Type>::zeroFixedValuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedValuePointPatchField<Type>(p, iF, dict, false)
-{
-    fixedValuePointPatchField<Type>::operator=(Type(Zero));
-}
+    // Field is zero
+    fixedValuePointPatchField<Type>(p, iF, Type(Zero))
+{}
 
 
 template<class Type>
-zeroFixedValuePointPatchField<Type>::
-zeroFixedValuePointPatchField
+Foam::zeroFixedValuePointPatchField<Type>::zeroFixedValuePointPatchField
 (
     const zeroFixedValuePointPatchField<Type>& ptf,
     const pointPatch& p,
@@ -71,27 +64,26 @@ zeroFixedValuePointPatchField
     const pointPatchFieldMapper& mapper
 )
 :
-    fixedValuePointPatchField<Type>(ptf, p, iF, mapper)
-{
-    // For safety re-evaluate
-    fixedValuePointPatchField<Type>::operator=(Type(Zero));
-}
+    // Field is zero : no mapping needed
+    fixedValuePointPatchField<Type>(p, iF, Type(Zero))
+{}
 
 
 template<class Type>
-zeroFixedValuePointPatchField<Type>::
-zeroFixedValuePointPatchField
+Foam::zeroFixedValuePointPatchField<Type>::zeroFixedValuePointPatchField
 (
     const zeroFixedValuePointPatchField<Type>& ptf
 )
 :
     fixedValuePointPatchField<Type>(ptf)
-{}
+{
+    // Field is zero. For safety, re-assign
+    valuePointPatchField<Type>::operator=(Type(Zero));
+}
 
 
 template<class Type>
-zeroFixedValuePointPatchField<Type>::
-zeroFixedValuePointPatchField
+Foam::zeroFixedValuePointPatchField<Type>::zeroFixedValuePointPatchField
 (
     const zeroFixedValuePointPatchField<Type>& ptf,
     const DimensionedField<Type, pointMesh>& iF
@@ -99,13 +91,9 @@ zeroFixedValuePointPatchField
 :
     fixedValuePointPatchField<Type>(ptf, iF)
 {
-    // For safety re-evaluate
-    fixedValuePointPatchField<Type>::operator=(Type(Zero));
+    // Field is zero. For safety, re-assign
+    valuePointPatchField<Type>::operator=(Type(Zero));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

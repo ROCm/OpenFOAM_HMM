@@ -35,12 +35,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_floatScalar_H
-#define Foam_floatScalar_H
+#ifndef Foam_primitives_float_H
+#define Foam_primitives_float_H
 
 #include "scalarFwd.H"
 #include "doubleFloat.H"
 #include "direction.H"
+#include "pTraits.H"
 #include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

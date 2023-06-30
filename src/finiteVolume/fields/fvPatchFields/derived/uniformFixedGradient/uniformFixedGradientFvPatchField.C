@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,7 +38,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(p, iF),
-    uniformGradient_(nullptr)
+    refGradFunc_(nullptr)
 {}
 
 
@@ -51,7 +51,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(p, iF, fld),
-    uniformGradient_(nullptr)
+    refGradFunc_(nullptr)
 {}
 
 
@@ -63,14 +63,22 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchField<Type>(p, iF),
-    uniformGradient_
+    fixedGradientFvPatchField<Type>(p, iF),  // Bypass dictionary constructor
+    refGradFunc_
     (
         PatchFunction1<Type>::New(p.patch(), "uniformGradient", dict)
     )
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
-    this->evaluate();
+    fvPatchFieldBase::readDict(dict);
+
+    if (!this->readValueEntry(dict))
+    {
+        // Ensure field has initialised values
+        this->extrapolateInternal();
+
+        // Evaluate to assign a value
+        this->evaluate();
+    }
 }
 
 
@@ -84,7 +92,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf, p, iF, mapper),
-    uniformGradient_(ptf.uniformGradient_.clone())
+    refGradFunc_(ptf.refGradFunc_.clone())
 {}
 
 
@@ -95,7 +103,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf),
-    uniformGradient_(ptf.uniformGradient_.clone())
+    refGradFunc_(ptf.refGradFunc_.clone())
 {}
 
 
@@ -107,10 +115,10 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf, iF),
-    uniformGradient_(ptf.uniformGradient_.clone())
+    refGradFunc_(ptf.refGradFunc_.clone())
 {
     // Evaluate the profile if defined
-    if (ptf.uniformGradient_)
+    if (refGradFunc_)
     {
         this->evaluate();
     }
@@ -128,7 +136,15 @@ void Foam::uniformFixedGradientFvPatchField<Type>::updateCoeffs()
     }
 
     const scalar t = this->db().time().timeOutputValue();
-    this->gradient() = uniformGradient_->value(t);
+    // Extra safety on the evaluation
+    if (refGradFunc_)
+    {
+        this->gradient() = refGradFunc_->value(t);
+    }
+    else
+    {
+        this->gradient() = Zero;
+    }
 
     fixedGradientFvPatchField<Type>::updateCoeffs();
 }
@@ -138,8 +154,11 @@ template<class Type>
 void Foam::uniformFixedGradientFvPatchField<Type>::write(Ostream& os) const
 {
     fixedGradientFvPatchField<Type>::write(os);
-    uniformGradient_->writeData(os);
-    this->writeEntry("value", os);
+    if (refGradFunc_)
+    {
+        refGradFunc_->writeData(os);
+    }
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -38,7 +38,7 @@ binField1
     fields                  (forceCoeff);
     patches                 (body);
     decomposePatchValues    yes;
-    CofR                    ${..forceCoeffs1.CofR};
+    CofR                    ${../forceCoeffs1/CofR};
     cellZones               (porousZone);
 
     binData

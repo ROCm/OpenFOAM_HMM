@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -359,10 +359,10 @@ public:
 
         //- The offset where this patch starts in the boundary face list
         //  The value is the same as  patch.start() - mesh.nInternalFaces()
-        label offset() const;
+        label offset() const noexcept;
 
         //- Return start label of this patch in the polyMesh face list
-        label start() const
+        label start() const noexcept
         {
             return start_;
         }
@@ -374,7 +374,7 @@ public:
         }
 
         //- Return boundaryMesh reference
-        const polyBoundaryMesh& boundaryMesh() const;
+        const polyBoundaryMesh& boundaryMesh() const noexcept;
 
         //- Return true if this patch is geometrically coupled (i.e. faces and
         //  points correspondence)
@@ -399,18 +399,30 @@ public:
             return UIndirectList<T>(internalValues, faceCells());
         }
 
-        //- Slice List to patch, using the number of patch faces
+        //- This patch slice from the complete list, which has size
+        //- mesh::nFaces(), using the number of patch faces.
         template<class T>
-        const typename List<T>::subList patchSlice(const UList<T>& l) const
+        const typename List<T>::subList
+        patchSlice(const UList<T>& values) const
         {
-            return typename List<T>::subList(l, this->size(), start_);
+            return typename List<T>::subList(values, this->size(), start_);
         }
 
-        //- Slice Field to patch, using the number of patch faces
+        //- This patch slice from the list of boundary values, which has size
+        //- mesh::nBoundaryFaces(), using the number of patch faces.
         template<class T>
-        const typename Field<T>::subField patchSlice(const Field<T>& l) const
+        const typename List<T>::subList
+        boundarySlice(const List<T>& values) const
         {
-            return typename Field<T>::subField(l, this->size(), start_);
+            return typename List<T>::subList(values, this->size(), offset());
+        }
+
+        //- Slice Field to patch, using the number of patch faces.
+        template<class T>
+        const typename Field<T>::subField
+        patchSlice(const Field<T>& values) const
+        {
+            return typename Field<T>::subField(values, this->size(), start_);
         }
 
 

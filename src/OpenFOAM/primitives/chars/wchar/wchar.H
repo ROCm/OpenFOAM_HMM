@@ -38,8 +38,8 @@ See also
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wchar_H
-#define wchar_H
+#ifndef Foam_primitives_wchar_H
+#define Foam_primitives_wchar_H
 
 #include <cwchar>
 #include <string>

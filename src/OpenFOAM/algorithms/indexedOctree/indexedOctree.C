@@ -55,7 +55,7 @@ void Foam::indexedOctree<Type>::divide
         {
             if (shapes_.overlaps(index, subBbs))
             {
-                contains.append(index);
+                contains.push_back(index);
             }
         }
 
@@ -117,7 +117,7 @@ Foam::indexedOctree<Type>::divide
             {
                 // Append to contents
                 contentIndex = contents.size();
-                contents.append(std::move(subIndices));
+                contents.push_back(std::move(subIndices));
             }
 
             nod.subNodes_[octant] = contentPlusOctant(contentIndex, octant);
@@ -171,7 +171,7 @@ void Foam::indexedOctree<Type>::splitNodes
                     node subNode(divide(bb, contents, contentI));
                     subNode.parent_ = nodeI;
                     label sz = nodes.size();
-                    nodes.append(subNode);
+                    nodes.push_back(subNode);
                     nodes[nodeI].subNodes_[octant] = nodePlusOctant(sz, octant);
                 }
             }
@@ -2172,11 +2172,11 @@ Foam::indexedOctree<Type>::indexedOctree
     // Start off with one node with all shapes in it.
     DynamicList<node> nodes(label(shapes.size() / maxLeafRatio));
     DynamicList<labelList> contents(label(shapes.size() / maxLeafRatio));
-    contents.append(identity(shapes.size()));
+    contents.push_back(identity(shapes.size()));
 
     // Create topnode.
     node topNode(divide(bb, contents, 0));
-    nodes.append(topNode);
+    nodes.push_back(topNode);
 
 
     // Now have all contents at level 1. Create levels by splitting levels

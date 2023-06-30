@@ -86,11 +86,8 @@ int main(int argc, char *argv[])
 
         forAll(fEdges, i)
         {
-            changedEdges.append(fEdges[i]);
-            changedInfo.append
-            (
-                patchEdgeFaceRegions(labelPair(globalFacei, globalFacei))
-            );
+            changedEdges.push_back(fEdges[i]);
+            changedInfo.emplace_back(labelPair(globalFacei, globalFacei));
         }
     }
 

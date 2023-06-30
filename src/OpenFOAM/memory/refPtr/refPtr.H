@@ -63,6 +63,7 @@ class refPtr
         enum refType
         {
             PTR,        //!< A managed pointer (not ref-counted)
+            REF_Types,  //!< Magic value (ptr: less-than, ref: greater than)
             CREF,       //!< A const reference to an object
             REF         //!< A non-const reference to an object
         };
@@ -175,13 +176,13 @@ public:
         bool good() const noexcept { return bool(ptr_); }
 
         //- If the stored/referenced content is const
-        bool is_const() const noexcept { return (type_ == CREF); }
+        inline bool is_const() const noexcept;
 
         //- True if this is a managed pointer (not a reference)
-        bool is_pointer() const noexcept { return (type_ == PTR); }
+        inline bool is_pointer() const noexcept;
 
         //- True if this is a reference (not a pointer)
-        bool is_reference() const noexcept { return (type_ != PTR); }
+        inline bool is_reference() const noexcept;
 
         //- True if this is a non-null managed pointer
         inline bool movable() const noexcept;

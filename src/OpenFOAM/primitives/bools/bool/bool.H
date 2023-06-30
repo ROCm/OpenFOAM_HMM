@@ -35,17 +35,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef bool_H
-#define bool_H
+#ifndef Foam_primitives_bool_H
+#define Foam_primitives_bool_H
+
+#include "pTraits.H"
+#include "direction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class Istream;
-class Ostream;
 
 // IOstream Operators
 
@@ -58,18 +57,12 @@ Ostream& operator<<(Ostream& os, const bool b);
 //- Read bool from stream using Foam::Switch(Istream&)
 bool readBool(Istream& is);
 
-} // End namespace Foam
 
+/*---------------------------------------------------------------------------*\
+                         Specialization pTraits<bool>
+\*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "pTraits.H"
-#include "direction.H"
-
-namespace Foam
-{
-
-// Template specialisation for pTraits<bool>
+//- Template specialisation for pTraits\<bool\>
 template<>
 class pTraits<bool>
 {
@@ -121,16 +114,10 @@ public:
     // Member Functions
 
         //- Return the value
-        operator bool() const noexcept
-        {
-            return p_;
-        }
+        operator bool() const noexcept { return p_; }
 
         //- Access the value
-        operator bool&() noexcept
-        {
-            return p_;
-        }
+        operator bool&() noexcept { return p_; }
 };
 
 

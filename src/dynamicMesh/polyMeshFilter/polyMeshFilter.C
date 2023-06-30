@@ -82,7 +82,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::polyMeshFilter::copyMesh(const fvMesh& mesh)
             mesh.time(),
             IOobject::READ_IF_PRESENT,  // read fv* if present
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         true // parallel sync

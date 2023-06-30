@@ -29,18 +29,12 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-makeTemplatePatchTypeField(vector, fixedNormalSlip);
-makeTemplatePatchTypeField(tensor, fixedNormalSlip);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makePatchFieldType(vector, fixedNormalSlip);
+    makePatchFieldType(tensor, fixedNormalSlip);
+}
 
 // ************************************************************************* //

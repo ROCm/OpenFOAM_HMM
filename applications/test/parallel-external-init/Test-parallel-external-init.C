@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,12 +38,20 @@ Description
 #include "vector.H"
 #include "IOstreams.H"
 #include "Pstream.H"
-
-#include <mpi.h>
 #include <iostream>
+
+// Include MPI without any C++ bindings
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
+#include <mpi.h>
 
 using namespace Foam;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 bool startMPI()
 {
@@ -51,11 +59,6 @@ bool startMPI()
 
     int nprocs[3];
     int rank[3];
-
-    int group_nprocs[3];
-    int group_rank[3];
-
-    MPI_Group mpiGroup;
 
     MPI_Init(nullptr, nullptr);
 
@@ -65,62 +68,27 @@ bool startMPI()
     const bool isMaster = (rank[worldComm] == 0);
     const string prefix = '[' + Foam::name(rank[worldComm]) + "] ";
 
-    MPI_Comm_group(MPI_COMM_WORLD, &mpiGroup);
-    MPI_Group_size(mpiGroup, &group_nprocs[worldComm]);
-    MPI_Group_rank(mpiGroup, &group_rank[worldComm]);
-
-
     if (isMaster && nprocs[worldComm])
     {
         std::cout
-            << nl << "Using MPI with " << nprocs[worldComm]
-            << " procs, group:"
-            << group_nprocs[worldComm] << nl
-            << "World group: " << Foam::name(mpiGroup) << nl
+            << nl << "Using MPI with "
+            << nprocs[worldComm] << " procs" << nl
             << nl;
     }
 
     MPI_Comm worldMpiComm;
-
     MPI_Comm_dup(MPI_COMM_WORLD, &worldMpiComm);
-
-    MPI_Comm_group(MPI_COMM_WORLD, &mpiGroup);
-
-    if (isMaster && nprocs[worldComm])
-    {
-        std::cout
-            << "dup comm group: " << Foam::name(mpiGroup) << nl;
-    }
-
     MPI_Comm_free(&worldMpiComm);
-
-    // May be a bad idea
-    MPI_Group_free(&mpiGroup);
 
     MPI_Comm_size(MPI_COMM_SELF, &nprocs[selfComm]);
     MPI_Comm_rank(MPI_COMM_SELF, &rank[selfComm]);
-
-    MPI_Comm_group(MPI_COMM_SELF, &mpiGroup);
-    MPI_Group_size(mpiGroup, &group_nprocs[selfComm]);
-    MPI_Group_rank(mpiGroup, &group_rank[selfComm]);
-
-    if (isMaster && nprocs[worldComm])
-    {
-        std::cout
-            << nl
-            << "Self group: " << Foam::name(mpiGroup) << nl;
-    }
-
-    // Should be a bad idea
-    MPI_Group_free(&mpiGroup);
 
     // if (nprocs && isMaster)
     {
         std::cout
             << prefix
-            << "Self: " << rank[selfComm] << " from " << nprocs[selfComm]
-            << " procs, group:"
-            << group_nprocs[selfComm] << nl;
+            << "Self: " << rank[selfComm]
+            << " from " << nprocs[selfComm] << " procs" << nl;
     }
 
     if (isMaster)
@@ -161,19 +129,10 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noCheckProcessorDirectories();
-    argList::addBoolOption("verbose", "Set debug level");
+    argList::addVerboseOption("Set UPstream::debug level");
 
-    // Need to capture manually, since we need values before proper startup
-    int nVerbose = 0;
-    for (int argi = 1; argi < argc; ++argi)
-    {
-        if (strcmp(argv[argi], "-verbose") == 0)
-        {
-            ++nVerbose;
-        }
-    }
-
-    UPstream::debug = nVerbose;
+    // Check -verbose before initialisation
+    UPstream::debug = argList::verbose(argc, argv);
 
     startMPI();
 

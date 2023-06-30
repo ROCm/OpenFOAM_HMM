@@ -53,23 +53,16 @@ Foam::turbulentInletFvPatchField<Type>::turbulentInletFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF, dict, false),
+    fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     ranGen_(label(0)),
     fluctuationScale_(dict.get<Type>("fluctuationScale")),
     referenceField_("referenceField", dict, p.size()),
     alpha_(dict.getOrDefault<scalar>("alpha", 0.1)),
     curTimeIndex_(-1)
 {
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fixedValueFvPatchField<Type>::operator==
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fixedValueFvPatchField<Type>::operator==(referenceField_);
+        fvPatchField<Type>::operator=(referenceField_);
     }
 }
 
@@ -201,7 +194,7 @@ void Foam::turbulentInletFvPatchField<Type>::write(Ostream& os) const
     os.writeEntry("fluctuationScale", fluctuationScale_);
     referenceField_.writeEntry("referenceField", os);
     os.writeEntry("alpha", alpha_);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

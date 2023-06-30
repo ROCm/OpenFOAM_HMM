@@ -50,7 +50,7 @@ Foam::lagrangianFieldDecomposer::decomposeField
             procMesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         // Mapping internal field values
         Field<Type>(field, particleIndices_)
@@ -77,7 +77,7 @@ Foam::lagrangianFieldDecomposer::decomposeFieldField
             procMesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         // Mapping internal field values
         Field<Field<Type>>(field, particleIndices_)

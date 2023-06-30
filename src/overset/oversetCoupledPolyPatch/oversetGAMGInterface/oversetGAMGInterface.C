@@ -88,7 +88,7 @@ Foam::oversetGAMGInterface::oversetGAMGInterface
         {
             const auto iter = masterToCoarseFace.cfind(curMaster);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Already have coarse face
                 dynFaceRestrictAddressing.append(iter.val());

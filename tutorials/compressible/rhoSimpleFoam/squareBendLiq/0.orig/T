@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -38,29 +38,34 @@ boundaryField
         value           uniform 350;
 
         // For general testing purposes:
-        type            exprFixedValue;
+        type            uniformFixedValue;
 
-        functions<scalar>
+        uniformValue
         {
-            trigger
+            type        expression;
+
+            functions<scalar>
             {
-                type     functionObjectTrigger;
-                triggers (2 4);
-                defaultValue true;
+                trigger
+                {
+                    type     functionObjectTrigger;
+                    triggers (2 4);
+                    defaultValue true;
+                }
             }
+
+            variables
+            (
+                "Tcrit = 500"
+                "par1 = mag(internalField(U))/snGrad(T)"
+            );
+
+            expression
+            #{
+                Tcrit
+              + par1*internalField(T) * max((Tcrit-T)/(Tcrit)*deltaT()/time(),0)
+            #};
         }
-
-        variables
-        (
-            "Tcrit = 500"
-            "par1 = mag(internalField(U))/snGrad(T)"
-        );
-
-        valueExpr
-        #{
-            Tcrit
-          + par1*internalField(T) * max((Tcrit-T)/(Tcrit)*deltaT()/time(),0)
-        #};
     }
 }
 

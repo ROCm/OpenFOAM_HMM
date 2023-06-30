@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mixedFaPatchFields_H
-#define mixedFaPatchFields_H
+#ifndef Foam_mixedFaPatchFields_H
+#define Foam_mixedFaPatchFields_H
 
 #include "mixedFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(mixed)
+makeFaPatchTypeFieldTypedefs(mixed);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -63,7 +63,7 @@ void Foam::domainDecomposition::addInterProcFace
 
     const auto patchiter = nbrToInterPatch[ownerProc].cfind(nbrProc);
 
-    if (patchiter.found())
+    if (patchiter.good())
     {
         // Existing interproc patch. Add to both sides.
         const label toNbrProcPatchi = *patchiter;

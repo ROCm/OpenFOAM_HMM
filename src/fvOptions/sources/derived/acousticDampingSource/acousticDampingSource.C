@@ -98,8 +98,9 @@ Foam::fv::acousticDampingSource::acousticDampingSource
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("blend0", dimless, 1.0),
-            zeroGradientFvPatchField<vector>::typeName
+            scalar(1),
+            dimless,
+            fvPatchFieldBase::zeroGradientType()
         )
     ),
     frequency_("frequency", dimless/dimTime, 0),

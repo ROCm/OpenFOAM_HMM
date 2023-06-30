@@ -36,7 +36,7 @@ Foam::slipFaPatchField<Type>::slipFaPatchField
     const DimensionedField<Type, areaMesh>& iF
 )
 :
-   basicSymmetryFaPatchField<Type>(p, iF)
+    basicSymmetryFaPatchField<Type>(p, iF)
 {}
 
 

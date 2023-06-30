@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ Note
         forAllConstIters(table, iter)
         {
             Info<< "val:" << *iter << nl
-                << "key:" << iter.key() << nl;
+                << "key:" << iter.key() << nl
                 << "val:" << iter.val() << nl;
         }
     \endcode
@@ -132,7 +132,7 @@ public:
         //- with an additional linked-list entry for hash collisions
         typedef typename std::conditional
         <
-            std::is_same<zero::null, typename std::remove_cv<T>::type>::value,
+            std::is_same<Foam::zero, typename std::remove_cv<T>::type>::value,
             Detail::HashTableSingle<Key>,
             Detail::HashTablePair<Key, T>
         >::type node_type;
@@ -206,23 +206,22 @@ private:
         template<class... Args>
         bool setEntry(const bool overwrite, const Key& key, Args&&... args);
 
+        //- Insert node (low-level). The node must not previously exist!
+        void insert_node(node_type* entry);
+
+        //- Low-level entry erasure using iterator internals.
+        //  This invalidates the iterator until the next ++ operation.
+        //  \return True if the corresponding entry existed and was removed
+        bool iterator_erase(iterator& iter);
+
+        //- Unlink node from iterator (low-level).
+        node_type* iterator_extract(iterator& iter);
+
         //- Read hash table
         Istream& readTable(Istream& is);
 
         //- Write hash table
         Ostream& writeTable(Ostream& os) const;
-
-
-protected:
-
-        //- Internally used base for iterator and const_iterator
-        template<bool Const> class Iterator;
-
-        //- An iterator with const access to HashTable internals.
-        friend class Iterator<true>;
-
-        //- An iterator with non-const access to HashTable internals.
-        friend class Iterator<false>;
 
 
 public:
@@ -257,14 +256,14 @@ public:
 
     // Access
 
-        //- The size of the underlying table
-        inline label capacity() const noexcept;
+        //- True if the hash table is empty
+        bool empty() const noexcept { return !size_; }
 
         //- The number of elements in table
-        inline label size() const noexcept;
+        label size() const noexcept { return size_; }
 
-        //- True if the hash table is empty
-        inline bool empty() const noexcept;
+        //- The size of the underlying table
+        label capacity() const noexcept { return capacity_; }
 
         //- Find and return a hashed entry. FatalError if it does not exist.
         inline T& at(const Key& key);
@@ -272,8 +271,8 @@ public:
         //- Find and return a hashed entry. FatalError if it does not exist.
         inline const T& at(const Key& key) const;
 
-        //- True if hashed key is found in table
-        inline bool found(const Key& key) const;
+        //- True if hashed key is contained (found) in table
+        inline bool contains(const Key& key) const;
 
         //- Find and return an iterator set at the hashed entry
         //  If not found iterator = end()
@@ -544,13 +543,25 @@ public:
         //- Transfer contents into this table.
         void transfer(HashTable<T, Key, Hash>& rhs);
 
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashTable<T, Key, Hash>& source);
+
+        //- Attempts to extract entries from source parameter and insert them
+        //- into \c this, does not overwrite existing entries.
+        //- The source will contains any items that could not be merged.
+        void merge(HashTable<T, Key, Hash>&& source);
+
 
     // Member Operators
 
         //- Find and return a hashed entry. FatalError if it does not exist.
+        //  Same as at().
         inline T& operator[](const Key& key);
 
         //- Find and return a hashed entry. FatalError if it does not exist.
+        //  Same as at().
         inline const T& operator[](const Key& key) const;
 
         //- Return existing entry or create a new entry.
@@ -585,6 +596,15 @@ public:
 protected:
 
     // Iterators and helpers
+
+        //- Internally used base for iterator and const_iterator
+        template<bool Const> class Iterator;
+
+        //- Allow iterator access to HashTable internals.
+        friend class Iterator<true>;
+
+        //- Allow iterator access to HashTable internals.
+        friend class Iterator<false>;
 
         //- The iterator base for HashTable (internal use only).
         //  Note: data and functions are protected, to allow reuse by iterator
@@ -714,11 +734,6 @@ protected:
                 return (entry_ != iter.entry_);
             }
         };
-
-        //- Low-level entry erasure using iterator internals.
-        //  This invalidates the iterator until the next ++ operation.
-        //  \return True if the corresponding entry existed and was removed
-        bool iterator_erase(node_type*& entry, label& index);
 
 public:
 
@@ -908,13 +923,13 @@ public:
             reference operator*() const  { return this->key(); }
             reference operator()() const { return this->key(); }
 
-            inline key_iterator_base& operator++()
+            key_iterator_base& operator++()
             {
                 this->increment();
                 return *this;
             }
 
-            inline key_iterator_base operator++(int)
+            key_iterator_base operator++(int)
             {
                 key_iterator_base iter(*this);
                 this->increment();
@@ -981,6 +996,12 @@ public:
             Ostream&,
             const HashTable<T, Key, Hash>& tbl
         );
+
+
+    // Housekeeping
+
+        //- Same as contains()
+        bool found(const Key& key) const { return this->contains(key); }
 };
 
 

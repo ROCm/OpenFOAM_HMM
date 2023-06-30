@@ -67,7 +67,8 @@ Foam::volScalarField& Foam::functionObjects::energyTransport::transportedField()
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_
         );
@@ -121,7 +122,7 @@ Foam::functionObjects::energyTransport::rho() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         rho_
@@ -158,7 +159,7 @@ Foam::functionObjects::energyTransport::Cp() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         Cp_
@@ -189,7 +190,7 @@ Foam::functionObjects::energyTransport::kappa() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         kappa_
@@ -232,7 +233,7 @@ Foam::functionObjects::energyTransport::energyTransport
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimEnergy/dimTemperature/dimVolume, Zero)

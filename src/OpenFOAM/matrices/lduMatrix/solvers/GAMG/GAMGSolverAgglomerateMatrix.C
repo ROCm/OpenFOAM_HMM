@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -298,7 +299,7 @@ void Foam::GAMGSolver::gatherMatrices
     List<List<label>>& otherRanks
 ) const
 {
-    if (debug)
+    if (debug & 2)
     {
         Pout<< "GAMGSolver::gatherMatrices :"
             << " collecting matrices from procs:" << procIDs

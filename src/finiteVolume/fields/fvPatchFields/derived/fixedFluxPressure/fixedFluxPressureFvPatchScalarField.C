@@ -52,22 +52,15 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     curTimeIndex_(-1)
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
-    if (dict.found("value") && dict.found("gradient"))
+    fvPatchFieldBase::readDict(dict);
+
+    if (!this->readGradientEntry(dict) || !this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        gradient() = scalarField("gradient", dict, p.size());
-    }
-    else
-    {
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        extrapolateInternal();
+        gradient() = Zero;
     }
 }
 
@@ -86,7 +79,7 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
     patchType() = ptf.patchType();
 
     // Map gradient. Set unmapped values and overwrite with mapped ptf
-    gradient() = 0.0;
+    gradient() = Zero;
     gradient().map(ptf.gradient(), mapper);
 
     // Evaluate the value field from the gradient if the internal field is valid
@@ -173,8 +166,8 @@ void Foam::fixedFluxPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::fixedFluxPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fixedGradientFvPatchScalarField::write(os);
-    writeEntry("value", os);
+    fixedGradientFvPatchField<scalar>::write(os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -52,7 +52,7 @@ Foam::skewCorrectionVectors::skewCorrectionVectors(const fvMesh& mesh)
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimless

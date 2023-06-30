@@ -95,9 +95,9 @@ Foam::TurbulenceModel<Alpha, Rho, BasicTurbulenceModel, TransportModel>::New
             IOobject::groupName(propertiesName, alphaRhoPhi.group()),
             U.time().constant(),
             U.db(),
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false // Do not register
+            IOobject::NO_REGISTER
         )
     );
 

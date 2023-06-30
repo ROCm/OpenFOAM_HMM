@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -608,10 +608,9 @@ Foam::distributedTriSurfaceMesh::distributeSegments
         }
 
         // Convert dynamicList to labelList
-        sendMap.setSize(Pstream::nProcs());
+        sendMap.resize_nocopy(Pstream::nProcs());
         forAll(sendMap, proci)
         {
-            dynSendMap[proci].shrink();
             sendMap[proci].transfer(dynSendMap[proci]);
         }
 
@@ -875,14 +874,9 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
 
 
     // Pack into distribution map
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    autoPtr<mapDistribute> mapPtr(new mapDistribute(std::move(sendMap)));
-
+    auto mapPtr = autoPtr<mapDistribute>::New(std::move(sendMap));
 
     // Send over queries
-    // ~~~~~~~~~~~~~~~~~
-
     mapPtr().distribute(triangleIndex);
 
     return mapPtr;
@@ -1119,10 +1113,9 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         }
 
         // Convert dynamicList to labelList
-        sendMap.setSize(Pstream::nProcs());
+        sendMap.resize_nocopy(Pstream::nProcs());
         forAll(sendMap, proci)
         {
-            dynSendMap[proci].shrink();
             sendMap[proci].transfer(dynSendMap[proci]);
         }
 
@@ -1369,7 +1362,7 @@ void Foam::distributedTriSurfaceMesh::surfaceSide
                     for (const edge& e : edges)
                     {
                         auto iter = edgeToFaces.find(e);
-                        if (iter.found())
+                        if (iter.good())
                         {
                             if (iter().second() == -1)
                             {
@@ -2606,11 +2599,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
             searchableSurface::instance(),
             searchableSurface::local(),
             searchableSurface::db(),
-            (
-                searchableSurface::isReadRequired()
-              ? IOobject::READ_IF_PRESENT
-              : searchableSurface::readOpt()
-            ),
+            IOobjectOption::lazierRead(searchableSurface::readOpt()),
             searchableSurface::writeOpt(),
             searchableSurface::registerObject()
         ),
@@ -2719,11 +2708,7 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
             searchableSurface::instance(),
             searchableSurface::local(),
             searchableSurface::db(),
-            (
-                searchableSurface::isReadRequired()
-              ? IOobject::READ_IF_PRESENT
-              : searchableSurface::readOpt()
-            ),
+            IOobjectOption::lazierRead(searchableSurface::readOpt()),
             searchableSurface::writeOpt(),
             searchableSurface::registerObject()
         ),
@@ -3312,7 +3297,7 @@ void Foam::distributedTriSurfaceMesh::findNearest
         // Work array - whether processor bb overlaps the bounding sphere.
         boolList procBbOverlaps(Pstream::nProcs());
 
-        label nFound = 0;
+        // label nFound = 0;
 
         forAll(nearestInfo, samplei)
         {
@@ -3320,10 +3305,10 @@ void Foam::distributedTriSurfaceMesh::findNearest
             const nearestAndDist& ni = nearestInfo[samplei];
             const pointIndexHit& info = ni.first();
 
-            if (info.hit())
-            {
-                nFound++;
-            }
+            // if (info.hit())
+            // {
+            //     nFound++;
+            // }
 
             scalar d2 =
             (
@@ -4206,7 +4191,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
         labelListList sendMap(Pstream::nProcs());
         {
             // 1. Count
-            labelList nSend(Pstream::nProcs(), 0);
+            labelList nSend(Pstream::nProcs(), Zero);
             forAll(samples, samplei)
             {
                 // Find the processors this sample overlaps.
@@ -4232,9 +4217,9 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
 
             forAll(nSend, proci)
             {
-                sendMap[proci].setSize(nSend[proci]);
+                sendMap[proci].resize_nocopy(nSend[proci]);
+                nSend[proci] = 0;
             }
-            nSend = 0;
 
             // 2. Fill
             forAll(samples, samplei)
@@ -4244,8 +4229,7 @@ void Foam::distributedTriSurfaceMesh::getVolumeType
                 {
                     if (contains(procBb_[proci], samples[samplei]))
                     {
-                        labelList& procSend = sendMap[proci];
-                        procSend[nSend[proci]++] = samplei;
+                        sendMap[proci][nSend[proci]++] = samplei;
                     }
                 }
             }
@@ -4533,7 +4517,7 @@ Foam::distributedTriSurfaceMesh::localQueries
     // cheap we do a multi-pass algorithm to save some memory temporarily.
 
     // 1. Count
-    labelList nSend(Pstream::nProcs(), 0);
+    labelList nSend(Pstream::nProcs(), Zero);
 
     forAll(info, i)
     {
@@ -4548,7 +4532,7 @@ Foam::distributedTriSurfaceMesh::localQueries
     labelListList sendMap(Pstream::nProcs());
     forAll(nSend, proci)
     {
-        sendMap[proci].setSize(nSend[proci]);
+        sendMap[proci].resize_nocopy(nSend[proci]);
         nSend[proci] = 0;
     }
 
@@ -4568,65 +4552,11 @@ Foam::distributedTriSurfaceMesh::localQueries
     }
 
 
-    // Send over how many i need to receive
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList sendSizes(Pstream::nProcs());
-    sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
-    forAll(sendMap, proci)
-    {
-        sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
-    }
-    Pstream::allGatherList(sendSizes);
-
-
-    // Determine receive map
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList constructMap(Pstream::nProcs());
-
-    // My local segments first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label segmenti = constructMap[Pstream::myProcNo()].size();
-    forAll(constructMap, proci)
-    {
-        if (proci != Pstream::myProcNo())
-        {
-            // What i need to receive is what other processor is sending to me.
-            label nRecv = sendSizes[proci][Pstream::myProcNo()];
-            constructMap[proci].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; i++)
-            {
-                constructMap[proci][i] = segmenti++;
-            }
-        }
-    }
-
-
     // Pack into distribution map
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    autoPtr<mapDistribute> mapPtr
-    (
-        new mapDistribute
-        (
-            segmenti, // size after construction
-            std::move(sendMap),
-            std::move(constructMap)
-        )
-    );
-    const mapDistribute& map = mapPtr();
-
+    auto mapPtr = autoPtr<mapDistribute>::New(std::move(sendMap));
 
     // Send over queries
-    // ~~~~~~~~~~~~~~~~~
-
-    map.distribute(triangleIndex);
+    mapPtr().distribute(triangleIndex);
 
     return mapPtr;
 }
@@ -4778,13 +4708,6 @@ void Foam::distributedTriSurfaceMesh::distribute
     }
 
 
-    // Send over how many faces/points i need to receive
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    labelList faceRecvSizes;
-    Pstream::exchangeSizes(faceSendMap, faceRecvSizes);
-
-
     // Exchange surfaces
     // ~~~~~~~~~~~~~~~~~
 
@@ -4829,61 +4752,55 @@ void Foam::distributedTriSurfaceMesh::distribute
     // Send all
     // ~~~~~~~~
 
-    PstreamBuffers pBufs(Pstream::defaultCommsType);
+    PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
     forAll(faceSendMap, proci)
     {
-        if (proci != Pstream::myProcNo())
+        if (proci != Pstream::myProcNo() && !faceSendMap[proci].empty())
         {
-            if (faceSendMap[proci].size() > 0)
-            {
-                UOPstream str(proci, pBufs);
+            UOPstream os(proci, pBufs);
 
-                labelList pointMap;
-                triSurface subSurface
+            labelList pointMap;
+            triSurface subSurface
+            (
+                subsetMesh
                 (
-                    subsetMesh
-                    (
-                        *this,
-                        faceSendMap[proci],
-                        pointMap
-                    )
-                );
-                str << subSurface;
-            }
+                    *this,
+                    faceSendMap[proci],
+                    pointMap
+                )
+            );
+            os << subSurface;
         }
     }
 
-    pBufs.finishedSends();   // no-op for blocking
+    pBufs.finishedSends();
 
 
     // Receive and merge all
     // ~~~~~~~~~~~~~~~~~~~~~
 
-    forAll(faceRecvSizes, proci)
+    for (const int proci : pBufs.allProcs())
     {
-        if (proci != Pstream::myProcNo())
+        if (proci != Pstream::myProcNo() && pBufs.recvDataCount(proci))
         {
-            if (faceRecvSizes[proci] > 0)
-            {
-                UIPstream str(proci, pBufs);
+            UIPstream is(proci, pBufs);
 
-                // Receive
-                triSurface subSurface(str);
+            // Receive
+            triSurface subSurface(is);
 
-                // Merge into allSurf
-                merge
-                (
-                    mergeDist_,
-                    subSurface,
-                    subSurface.points(),
+            // Merge into allSurf
+            merge
+            (
+                mergeDist_,
+                subSurface,
+                subSurface.points(),
 
-                    allTris,
-                    allPoints,
-                    faceConstructMap[proci],
-                    pointConstructMap[proci]
-                );
-            }
+                allTris,
+                allPoints,
+                faceConstructMap[proci],
+                pointConstructMap[proci]
+            );
         }
     }
 
@@ -4994,14 +4911,14 @@ void Foam::distributedTriSurfaceMesh::distribute
 bool Foam::distributedTriSurfaceMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     if (debug)
     {
         Pout<< "distributedTriSurfaceMesh::writeObject :"
             << " surface " << searchableSurface::name()
-            << " writing surface valid:" << valid << endl;
+            << " writing surface:" << writeOnProc << endl;
     }
 
     // Make sure dictionary goes to same directory as surface

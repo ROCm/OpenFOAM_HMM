@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,15 @@ inline Foam::DiagTensor<Cmpt>::DiagTensor
 
 
 template<class Cmpt>
+inline Foam::DiagTensor<Cmpt>::DiagTensor(const SphericalTensor<Cmpt>& st)
+{
+    this->v_[XX] = st.ii();
+    this->v_[YY] = st.ii();
+    this->v_[ZZ] = st.ii();
+}
+
+
+template<class Cmpt>
 inline Foam::DiagTensor<Cmpt>::DiagTensor
 (
     const Cmpt& vxx,
@@ -68,6 +77,20 @@ inline Foam::DiagTensor<Cmpt>::DiagTensor(Istream& is)
 :
     VectorSpace<DiagTensor<Cmpt>, Cmpt, 3>(is)
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Cmpt>
+inline Foam::scalar Foam::DiagTensor<Cmpt>::diagSqr() const
+{
+    return
+    (
+        Foam::magSqr(this->xx())
+      + Foam::magSqr(this->yy())
+      + Foam::magSqr(this->zz())
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -135,6 +158,33 @@ template<class Cmpt>
 inline DiagTensor<Cmpt> diag(const SymmTensor<Cmpt>& st)
 {
     return DiagTensor<Cmpt>(st.xx(), st.yy(), st.zz());
+}
+
+
+template<class Cmpt>
+inline Foam::scalar magSqr(const DiagTensor<Cmpt>& t)
+{
+    return t.diagSqr();
+}
+
+
+//- Linear interpolation of diagonal tensors a and b by factor t
+template<class Cmpt>
+inline DiagTensor<Cmpt> lerp
+(
+    const DiagTensor<Cmpt>& a,
+    const DiagTensor<Cmpt>& b,
+    const scalar t
+)
+{
+    const scalar onet = (1-t);
+
+    return DiagTensor<Cmpt>
+    (
+        onet*a.xx() + t*b.xx(),
+        onet*a.yy() + t*b.yy(),
+        onet*a.zz() + t*b.zz()
+    );
 }
 
 

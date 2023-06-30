@@ -99,18 +99,6 @@ Foam::DLListBase::crend() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::DLListBase::size() const noexcept
-{
-    return size_;
-}
-
-
-inline bool Foam::DLListBase::empty() const noexcept
-{
-    return !size_;
-}
-
-
 inline Foam::DLListBase::link*
 Foam::DLListBase::front()
 {

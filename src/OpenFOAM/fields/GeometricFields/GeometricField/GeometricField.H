@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -134,7 +134,6 @@ private:
         //- Read the field - create the field dictionary on-the-fly
         void readFields();
 
-
 public:
 
     //- Runtime type information
@@ -156,7 +155,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
@@ -167,7 +166,32 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
+            const wordList& wantedPatchTypes,
+            const wordList& actualPatchTypes = wordList()
+        );
+
+        //- Construct given IOobject, mesh, dimensions, initial field value
+        //- and given patch type.
+        //  This assigns both dimensions and values.
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Construct given IOobject, mesh, dimensions, initial field value
+        //- and given patch types.
+        //  This assigns both dimensions and values.
+        GeometricField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
             const wordList& wantedPatchTypes,
             const wordList& actualPatchTypes = wordList()
         );
@@ -238,7 +262,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
@@ -248,7 +272,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             Field<Type>&& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
@@ -258,7 +282,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField,
             const PtrList<PatchField<Type>>& ptfl
         );
@@ -268,7 +292,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             Field<Type>&& iField,
             const PtrList<PatchField<Type>>& ptfl
         );
@@ -278,7 +302,7 @@ public:
         (
             const IOobject& io,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const tmp<Field<Type>>& tiField,
             const PtrList<PatchField<Type>>& ptfl
         );
@@ -388,7 +412,7 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
 
@@ -400,7 +424,7 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
         );
@@ -413,9 +437,36 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             Field<Type>&& iField,
             const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Return tmp field from name, mesh, dimensions, initial field value
+        //- and patch type.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
+            const word& patchFieldType = PatchField<Type>::calculatedType()
+        );
+
+        //- Return tmp field from name, mesh, dimensioned\<Type\>
+        //- and patch types.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
+            const wordList& patchFieldTypes,
+            const wordList& actualPatchTypes = wordList()
         );
 
         //- Return tmp field from name, mesh, dimensioned\<Type\>
@@ -450,6 +501,16 @@ public:
         (
             const word& newName,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
+        );
+
+        //- Rename tmp field and reset patch field type
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<GeometricField<Type, PatchField, GeoMesh>> New
+        (
+            const word& newName,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
+            const word& patchFieldType
         );
 
         //- Rename tmp field and reset patch field types and return
@@ -599,9 +660,9 @@ public:
         //  alpha is read from controlDict
         void relax();
 
-        //- Select the final iteration parameters if `final' is true
-        //  by returning the field name + "Final"
-        //  otherwise the standard parameters by returning the field name
+        //- Select the final iteration parameters if \c final is true
+        //- by returning the field name + "Final"
+        //- otherwise the standard parameters by returning the field name
         word select(bool final) const;
 
         //- Helper function to write the min and max to an Ostream
@@ -630,31 +691,38 @@ public:
             const dimensioned<cmptType>& ds
         );
 
-        //- Use the minimum of the field and specified value
-        //  This sets the \em ceiling on the field values
-        void min(const dimensioned<Type>& dt);
+        //- Impose lower (floor) clamp on the field values (in-place)
+        void clamp_min(const Type& lower);
 
-        //- Use the maximum of the field and specified value
-        //  This sets the \em floor on the field values
-        void max(const dimensioned<Type>& dt);
+        //- Impose upper (ceiling) clamp on the field values (in-place)
+        void clamp_max(const Type& upper);
 
-        //- Clip the field to be bounded within the specified range
-        void clip(const dimensioned<MinMax<Type>>& range);
+        //- Impose lower (floor) clamp on the field values (in-place)
+        //  No dimension checking
+        void clamp_min(const dimensioned<Type>& lower);
 
-        //- Clip the field to be bounded within the specified range
-        void clip
+        //- Impose upper (ceiling) clamp on the field values (in-place)
+        //  No dimension checking
+        void clamp_max(const dimensioned<Type>& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not. No dimension checking.
+        void clamp_range(const dimensioned<MinMax<Type>>& range);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const Type& lower, const Type& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const MinMax<Type>& range);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not. No dimension checking.
+        void clamp_range
         (
-            const dimensioned<Type>& minVal,
-            const dimensioned<Type>& maxVal
-        );
-
-        //- Deprecated(2019-01) identical to clip()
-        //  \deprecated(2019-01) identical to clip()
-        FOAM_DEPRECATED_FOR(2019-01, "clip() method")
-        void maxMin
-        (
-            const dimensioned<Type>& minVal,
-            const dimensioned<Type>& maxVal
+            const dimensioned<Type>& lower,
+            const dimensioned<Type>& upper
         );
 
 
@@ -691,7 +759,7 @@ public:
         void operator/=(const dimensioned<scalar>&);
 
 
-    // Ostream operators
+    // Ostream Operators
 
         friend Ostream& operator<< <Type, PatchField, GeoMesh>
         (
@@ -704,6 +772,41 @@ public:
             Ostream&,
             const tmp<GeometricField<Type, PatchField, GeoMesh>>&
         );
+
+
+    // Housekeeping
+
+        //- Clamp field values (in-place) to the specified range.
+        //  \deprecated(2023-01) prefer clamp_range() naming
+        void clip(const dimensioned<MinMax<Type>>& range)
+        {
+            this->clamp_range(range);
+        }
+
+        //- Clamp field values (in-place) to the specified range.
+        //  \deprecated(2023-01) prefer clamp_range() naming
+        void clip(const dimensioned<Type>& lo, const dimensioned<Type>& hi)
+        {
+            this->clamp_range(lo.value(), hi.value());
+        }
+
+        //- Use minimum of the field and specified value. ie, clamp_max().
+        //  This sets the \em ceiling on the field values
+        //  \deprecated(2023-01) prefer clamp_max()
+        void min(const dimensioned<Type>& upper) { this->clamp_max(upper); }
+
+        //- Use maximum of the field and specified value. ie, clamp_min().
+        //  This sets the \em floor on the field values
+        //  \deprecated(2023-01) prefer clamp_min()
+        void max(const dimensioned<Type>& lower) { this->clamp_min(lower); }
+
+        //- Deprecated(2019-01) identical to clamp_range()
+        //  \deprecated(2019-01) identical to clamp_range()
+        FOAM_DEPRECATED_FOR(2019-01, "clamp_range() method")
+        void maxMin(const dimensioned<Type>& lo, const dimensioned<Type>& hi)
+        {
+            return this->clamp_range(lo.value(), hi.value());
+        }
 };
 
 

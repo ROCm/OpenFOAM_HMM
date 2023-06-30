@@ -57,10 +57,7 @@ Foam::fixedMeanOutletInletFvPatchField<Type>::fixedMeanOutletInletFvPatchField
 {
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
-    fvPatchField<Type>::operator=
-    (
-        Field<Type>("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     this->refValue() = *this;
     this->refGrad() = Zero;
@@ -144,7 +141,7 @@ void Foam::fixedMeanOutletInletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     meanValue_->writeData(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

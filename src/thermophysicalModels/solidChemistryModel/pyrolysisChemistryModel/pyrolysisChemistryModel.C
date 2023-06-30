@@ -465,7 +465,7 @@ calculate()
             this->mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->solidThermo().rho()
     );
@@ -537,7 +537,7 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::solve
             this->mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->solidThermo().rho()
     );
@@ -632,7 +632,7 @@ Foam::pyrolysisChemistryModel<CompType, SolidThermo, GasThermo>::gasHs
                 this->mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh_,
             dimensionedScalar(dimEnergy/dimMass, Zero)

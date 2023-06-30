@@ -77,8 +77,7 @@ SRFFreestreamVelocityFvPatchVectorField
     UInf_(dict.get<vector>("UInf"))
 {
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
-
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -152,7 +151,7 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
     }
 
     // Set the inlet-outlet choice based on the direction of the freestream
-    valueFraction() = 1.0 - pos0(refValue() & patch().Sf());
+    valueFraction() = neg(refValue() & patch().Sf());
 
     mixedFvPatchField<vector>::updateCoeffs();
 }
@@ -160,11 +159,11 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::SRFFreestreamVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("relative", relative_);
     os.writeEntry("UInf", UInf_);
     os.writeEntry("phi", this->phiName_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

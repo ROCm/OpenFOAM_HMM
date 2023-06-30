@@ -49,8 +49,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef emptyFvPatchField_H
-#define emptyFvPatchField_H
+#ifndef Foam_emptyFvPatchField_H
+#define Foam_emptyFvPatchField_H
 
 #include "fvPatchField.H"
 #include "emptyFvPatch.H"
@@ -69,11 +69,10 @@ class emptyFvPatchField
 :
     public fvPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName(emptyFvPatch::typeName_());
+    TypeName(emptyFvPatch::typeName_());  // fieldTypes::emptyTypeName_()
 
 
     // Constructors

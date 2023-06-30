@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::surfacePatchList
-
-Description
-    A List of surfacePatch.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfacePatchList_H
-#define surfacePatchList_H
+#ifndef Foam_surfacePatchList_H
+#define Foam_surfacePatchList_H
 
 #include "surfacePatch.H"
 #include "List.H"
@@ -41,14 +35,8 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef List<surfacePatch> surfacePatchList;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef List<surfacePatch> surfacePatchList;  //!< List of surfacePatch
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

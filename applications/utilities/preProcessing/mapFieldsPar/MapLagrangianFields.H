@@ -81,7 +81,7 @@ void MapLagrangianFields
                     meshTarget,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 addParticles.size()
             );
@@ -123,7 +123,7 @@ void MapLagrangianFields
                     meshTarget,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 min(fieldSource.size(), addParticles.size()) // handle 0 size
             );
@@ -172,7 +172,7 @@ void MapLagrangianFields
                     meshTarget,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 min(fieldSource.size(), addParticles.size()) // handle 0 size
             );

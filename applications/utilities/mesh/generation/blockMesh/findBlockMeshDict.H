@@ -73,7 +73,7 @@ autoPtr<IOdictionary> meshDictPtr;
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (!meshDictIO.typeHeaderOk<IOdictionary>(true))

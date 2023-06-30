@@ -83,8 +83,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef freestreamFvPatchField_H
-#define freestreamFvPatchField_H
+#ifndef Foam_freestreamFvPatchField_H
+#define Foam_freestreamFvPatchField_H
 
 #include "inletOutletFvPatchField.H"
 
@@ -102,7 +102,7 @@ class freestreamFvPatchField
 :
     public inletOutletFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- BC to supply the freestream value
         tmp<fvPatchField<Type>> freestreamBCPtr_;
@@ -175,36 +175,30 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Mapping functions
+        //- Same as refValue()
+        const Field<Type>& freestreamValue() const { return this->refValue(); }
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap(const fvPatchFieldMapper& mapper);
+        //- Same as refValue()
+        Field<Type>& freestreamValue() { return this->refValue(); }
 
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<Type>& ptf,
-                const labelList& addr
-            );
+
+    // Mapping Functions
+
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap(const fvPatchFieldMapper& mapper);
+
+        //- Reverse map the given fvPatchField onto this fvPatchField
+        virtual void rmap
+        (
+            const fvPatchField<Type>& ptf,
+            const labelList& addr
+        );
 
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
-
-        // Return defining fields
-
-            const Field<Type>& freestreamValue() const
-            {
-                return this->refValue();
-            }
-
-            Field<Type>& freestreamValue()
-            {
-                return this->refValue();
-            }
-
 
         //- Write
         virtual void write(Ostream&) const;

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,12 +35,13 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynamicCode_H
-#define dynamicCode_H
+#ifndef Foam_dynamicCode_H
+#define Foam_dynamicCode_H
 
-#include "Tuple2.H"
-#include "HashTable.H"
+#include "fileName.H"
 #include "DynamicList.H"
+#include "HashTable.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,12 +60,6 @@ class SHA1Digest;
 
 class dynamicCode
 {
-public:
-
-    typedef Tuple2<fileName, string> fileAndContent;
-
-private:
-
     // Private Data
 
         //- Root for dynamic code compilation
@@ -86,22 +81,13 @@ private:
         DynamicList<fileName> copyFiles_;
 
         //- Direct contents for files
-        DynamicList<fileAndContent> createFiles_;
+        DynamicList<Tuple2<fileName, std::string>> createFiles_;
 
         //- Variables to use during filtering
         HashTable<string> filterVars_;
 
         //- Contents for Make/options
         std::string makeOptions_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        dynamicCode(const dynamicCode&) = delete;
-
-        //- No copy assignment
-        void operator=(const dynamicCode&) = delete;
 
 
 protected:
@@ -167,10 +153,19 @@ public:
         static int allowSystemOperations;
 
 
-    // Static Member functions
+    // Static Member Functions
 
         //- Check security for creating dynamic code
         static void checkSecurity(const char* title, const dictionary&);
+
+
+    // Generated Methods
+
+        //- No copy construct
+        dynamicCode(const dynamicCode&) = delete;
+
+        //- No copy assignment
+        void operator=(const dynamicCode&) = delete;
 
 
     // Constructors
@@ -184,33 +179,21 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the code-name
-        const word& codeName() const
-        {
-            return codeName_;
-        }
+        const word& codeName() const noexcept { return codeName_; }
 
         //- Return the code-dirname
-        const word& codeDirName() const
-        {
-            return codeDirName_;
-        }
+        const word& codeDirName() const noexcept { return codeDirName_; }
 
         //- Root for dynamic code compilation
         //  Expanded from \<case\>/dynamicCode
-        const fileName& codeRoot() const
-        {
-            return codeRoot_;
-        }
+        const fileName& codeRoot() const noexcept { return codeRoot_; }
 
         //- Subdirectory name for loading libraries
         //  Expanded from platforms/\$WM_OPTIONS/lib
-        fileName libSubDir() const
-        {
-            return libSubDir_;
-        }
+        const fileName& libSubDir() const noexcept { return libSubDir_; }
 
         //- Path for specified code name
         //  Corresponds to codeRoot()/codeDirName()
@@ -255,7 +238,7 @@ public:
         void addCopyFile(const fileName& name);
 
         //- Add a file to create with its contents. Will not be filtered
-        void addCreateFile(const fileName& name, const string& contents);
+        void addCreateFile(const fileName& name, const std::string& contents);
 
         //- Define filter variables for code, codeInclude, SHA1sum
         void setFilterContext(const dynamicCodeContext&);
@@ -278,6 +261,18 @@ public:
 
         //- Compile a libso
         bool wmakeLibso() const;
+
+
+    // Synchronisation
+
+        //- Wait for libPath() file to appear on sub-ranks.
+        //  Returns immediately if non-parallel or
+        //  IOobject::fileModificationSkew is not set
+        static void waitForFile
+        (
+            const fileName& file,
+            const dictionary& contextDict
+        );
 
 
     // Convenience

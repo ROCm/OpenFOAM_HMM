@@ -28,15 +28,6 @@ License
 
 #include "calculatedPointPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::pointPatchField<Type>::calculatedType()
-{
-    return Foam::calculatedPointPatchField<Type>::typeName;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>

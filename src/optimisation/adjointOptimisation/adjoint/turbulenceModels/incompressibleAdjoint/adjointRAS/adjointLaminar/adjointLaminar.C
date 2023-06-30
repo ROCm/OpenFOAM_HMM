@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------------
     Copyright (C) 2007-2019 PCOpt/NTUA
     Copyright (C) 2013-2019 FOSS GP
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,7 +92,7 @@ tmp<volSymmTensorField> adjointLaminar::devReff
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-           -nu()*dev(twoSymm(fvc::grad(U)))
+           -nu()*devTwoSymm(fvc::grad(U))
         )
     );
 }

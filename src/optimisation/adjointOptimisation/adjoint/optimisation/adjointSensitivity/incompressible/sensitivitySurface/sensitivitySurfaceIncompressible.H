@@ -36,7 +36,7 @@ Description
         The computation of the sensitivity derivatives  follows the (E-)SI
         formulation of
 
-            Kavvadias, I. S., Papoutsis-Kiachagias, E. M., 
+            Kavvadias, I. S., Papoutsis-Kiachagias, E. M.,
             Giannakoglou, K. C. (2015).
             On the proper treatment of grid sensitivities in continuous adjoint
             methods for shape optimization.
@@ -45,7 +45,7 @@ Description
 
         whereas their smoothing based on the computation of the 'Sobolev
         gradient' is derived from
-    
+
             Vassberg J. C., Jameson A. (2006).
             Aerodynamic Shape Optimization Part I: Theoretical Background.
             VKI Lecture Series, Introduction to Optimization and
@@ -119,7 +119,7 @@ protected:
         //- Write geometric info for use by external programs
         bool writeGeometricInfo_;
 
-        //- Smooth sensitivity derivatives based on the computation of the 
+        //- Smooth sensitivity derivatives based on the computation of the
         //- 'Sobolev gradient'
         bool smoothSensitivities_;
 
@@ -142,7 +142,7 @@ protected:
         //- Set suffix name for sensitivity fields
         void setSuffixName();
 
-        //- Smooth sensitivity derivatives based on the computation of the 
+        //- Smooth sensitivity derivatives based on the computation of the
         //- 'Sobolev gradient'
         void smoothSensitivities();
 

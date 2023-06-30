@@ -40,6 +40,14 @@ namespace Foam
     defineTypeNameAndDebug(advancingFrontAMI, 0);
 }
 
+
+const Foam::Enum<Foam::advancingFrontAMI::areaNormalisationMode>
+Foam::advancingFrontAMI::areaNormalisationModeNames_
+{
+    { areaNormalisationMode::project, "project" },
+    { areaNormalisationMode::mag, "mag" },
+};
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::advancingFrontAMI::checkPatches() const
@@ -384,16 +392,38 @@ void Foam::advancingFrontAMI::triangulatePatch
 
         const DynamicList<face>& triFaces = tris[facei];
         magSf[facei] = 0;
-        for (const face& f : triFaces)
+
+        switch (areaNormalisationMode_)
         {
-            magSf[facei] +=
-                triPointRef
-                (
-                    points[f[0]],
-                    points[f[1]],
-                    points[f[2]]
-                ).areaNormal()
-              & faceNormals[facei];
+            case areaNormalisationMode::project:
+            {
+                for (const face& f : triFaces)
+                {
+                    magSf[facei] +=
+                        triPointRef
+                        (
+                            points[f[0]],
+                            points[f[1]],
+                            points[f[2]]
+                        ).areaNormal()
+                      & faceNormals[facei];
+                }
+                break;
+            }
+            case areaNormalisationMode::mag:
+            {
+                for (const face& f : triFaces)
+                {
+                    magSf[facei] +=
+                        triPointRef
+                        (
+                            points[f[0]],
+                            points[f[1]],
+                            points[f[2]]
+                        ).mag();
+                }
+                break;
+            }
         }
     }
 }
@@ -447,8 +477,25 @@ Foam::advancingFrontAMI::advancingFrontAMI
             dict,
             faceAreaIntersect::tmMesh
         )
+    ),
+    areaNormalisationMode_
+    (
+        areaNormalisationModeNames_.getOrDefault
+        (
+            "areaNormalisationMode",
+            dict,
+            areaNormalisationMode::project
+        )
     )
-{}
+{
+    DebugInfo
+        << "AMI: maxDistance2:" << maxDistance2_
+        << " minCosAngle:" << minCosAngle_
+        << " triMode:" << faceAreaIntersect::triangulationModeNames_[triMode_]
+        << " areaNormalisationMode:"
+        << areaNormalisationModeNames_[areaNormalisationMode_]
+        << endl;
+}
 
 
 Foam::advancingFrontAMI::advancingFrontAMI
@@ -470,7 +517,8 @@ Foam::advancingFrontAMI::advancingFrontAMI
     extendedTgtFaceIDs_(),
     extendedTgtMapPtr_(nullptr),
     srcNonOverlap_(),
-    triMode_(triMode)
+    triMode_(triMode),
+    areaNormalisationMode_(areaNormalisationMode::project)
 {}
 
 
@@ -487,7 +535,8 @@ Foam::advancingFrontAMI::advancingFrontAMI(const advancingFrontAMI& ami)
     extendedTgtFaceIDs_(),
     extendedTgtMapPtr_(nullptr),
     srcNonOverlap_(),
-    triMode_(ami.triMode_)
+    triMode_(ami.triMode_),
+    areaNormalisationMode_(ami.areaNormalisationMode_)
 {}
 
 

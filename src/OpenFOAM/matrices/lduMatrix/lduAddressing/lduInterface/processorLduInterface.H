@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,29 +57,36 @@ class processorLduInterface
 
         //- Send buffer.
         //  Only sized and used when compressed or non-blocking comms used.
-        mutable List<char> sendBuf_;
+        mutable List<char> byteSendBuf_;
 
         //- Receive buffer.
         //  Only sized and used when compressed or non-blocking comms used.
-        mutable List<char> receiveBuf_;
+        mutable List<char> byteRecvBuf_;
 
 
     // Private Member Functions
 
         //- Increase buffer size if required
-        static void resizeBuf(List<char>& buf, const label len);
+        //  Uses the nocopy variant since it will be overwritten
+        static void resizeBuf(List<char>& buf, const label len)
+        {
+            if (buf.size() < len)
+            {
+                buf.resize_nocopy(len);
+            }
+        }
 
 
 public:
 
     //- Runtime type information
-    TypeName("processorLduInterface");
+    TypeNameNoDebug("processorLduInterface");
 
 
     // Constructors
 
         //- Default construct
-        processorLduInterface() = default;
+        processorLduInterface() noexcept = default;
 
 
     //- Destructor
@@ -112,7 +119,7 @@ public:
             template<class Type>
             void send
             (
-                const Pstream::commsTypes commsType,
+                const UPstream::commsTypes commsType,
                 const UList<Type>& f
             ) const;
 
@@ -120,7 +127,7 @@ public:
             template<class Type>
             void receive
             (
-                const Pstream::commsTypes commsType,
+                const UPstream::commsTypes commsType,
                 UList<Type>& f
             ) const;
 
@@ -128,7 +135,7 @@ public:
             template<class Type>
             tmp<Field<Type>> receive
             (
-                const Pstream::commsTypes commsType,
+                const UPstream::commsTypes commsType,
                 const label size
             ) const;
 
@@ -137,7 +144,7 @@ public:
             template<class Type>
             void compressedSend
             (
-                const Pstream::commsTypes commsType,
+                const UPstream::commsTypes commsType,
                 const UList<Type>& f
             ) const;
 
@@ -145,7 +152,7 @@ public:
             template<class Type>
             void compressedReceive
             (
-                const Pstream::commsTypes commsType,
+                const UPstream::commsTypes commsType,
                 UList<Type>& f
             ) const;
 
@@ -153,7 +160,7 @@ public:
             template<class Type>
             tmp<Field<Type>> compressedReceive
             (
-                const Pstream::commsTypes commsType,
+                const UPstream::commsTypes commsType,
                 const label size
             ) const;
 };

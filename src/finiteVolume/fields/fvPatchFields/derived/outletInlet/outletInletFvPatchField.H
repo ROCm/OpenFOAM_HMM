@@ -38,6 +38,7 @@ Usage
         Property     | Description             | Required    | Default value
         phi          | Flux field name         | no          | phi
         outletValue  | Outlet value for reverse flow | yes   |
+        value        | initial field value     | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -57,7 +58,7 @@ Usage
 Note
     Sign conventions:
     - Positive flux (out of domain): apply the "outletValue" fixed-value
-    - Negative flux (into of domain): apply zero-gradient condition
+    - Negative flux (into domain): apply zero-gradient condition
 
 See also
     Foam::mixedFvPatchField
@@ -69,8 +70,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef outletInletFvPatchField_H
-#define outletInletFvPatchField_H
+#ifndef Foam_outletInletFvPatchField_H
+#define Foam_outletInletFvPatchField_H
 
 #include "mixedFvPatchField.H"
 
@@ -88,12 +89,11 @@ class outletInletFvPatchField
 :
     public mixedFvPatchField<Type>
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
-        //- Name of flux field
+        //- Name of flux field (default: phi)
         word phiName_;
 
 

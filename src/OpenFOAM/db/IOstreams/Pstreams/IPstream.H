@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,11 +56,6 @@ class IPstream
     public Pstream,
     public UIPstream
 {
-    // Private Data
-
-        //- Receive index into Pstream::transferBuf_
-        label transferBufPosition_;
-
 public:
 
     // Constructors
@@ -69,7 +64,7 @@ public:
         //- and optional buffer size, read format
         IPstream
         (
-            const commsTypes commsType,
+            const UPstream::commsTypes commsType,
             const int fromProcNo,
             const label bufSize = 0,
             const int tag = UPstream::msgType(),
@@ -90,11 +85,6 @@ class IPBstream
     public Pstream,
     public UIPBstream
 {
-    // Private Data
-
-        //- Receive index into Pstream::transferBuf_
-        label transferBufPosition_;
-
 public:
 
     // Constructors
@@ -102,7 +92,7 @@ public:
         //- Construct for broadcast root, optional buffer size, read format
         IPBstream
         (
-            const commsTypes commsType,     //!< ignored
+            const UPstream::commsTypes,     //!< ignored
             const int rootProcNo,           //!< normally UPstream::masterNo()
             const label bufSize = 0,
             const int tag = UPstream::msgType(),  //!< ignored

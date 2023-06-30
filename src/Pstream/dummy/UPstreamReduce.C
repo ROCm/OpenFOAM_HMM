@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -139,10 +139,33 @@ void Foam::reduce                                                             \
     const sumOp<Native>&,                                                     \
     const int tag,                                                            \
     const label comm,                                                         \
+    UPstream::Request& req                                                    \
+)                                                                             \
+{}                                                                            \
+                                                                              \
+/* Deprecated: prefer version with UPstream::Request */                       \
+void Foam::reduce                                                             \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const sumOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm,                                                         \
     label& requestID                                                          \
 )                                                                             \
 {}                                                                            \
                                                                               \
+void Foam::reduce                                                             \
+(                                                                             \
+    Native& value,                                                            \
+    const sumOp<Native>&,                                                     \
+    const int tag,                                                            \
+    const label comm,                                                         \
+    UPstream::Request& req                                                    \
+)                                                                             \
+{}                                                                            \
+                                                                              \
+/* Deprecated: prefer version with UPstream::Request */                       \
 void Foam::reduce                                                             \
 (                                                                             \
     Native& value,                                                            \

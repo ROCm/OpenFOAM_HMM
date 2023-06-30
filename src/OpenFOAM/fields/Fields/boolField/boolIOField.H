@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::boolIOField
-
-Description
-    A boolField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef boolIOField_H
-#define boolIOField_H
+#ifndef Foam_boolIOField_H
+#define Foam_boolIOField_H
 
 #include "boolField.H"
 #include "IOField.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of bool
     typedef IOField<bool> boolIOField;
 }
 

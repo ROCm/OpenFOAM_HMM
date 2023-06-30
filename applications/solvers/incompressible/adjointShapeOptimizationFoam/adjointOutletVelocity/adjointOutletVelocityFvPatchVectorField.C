@@ -90,11 +90,8 @@ void Foam::adjointOutletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvsPatchField<scalar>& phiap =
-        patch().lookupPatchField<surfaceScalarField, scalar>("phia");
-
-    const fvPatchField<vector>& Up =
-        patch().lookupPatchField<volVectorField, vector>("U");
+    const auto& phiap = patch().lookupPatchField<surfaceScalarField>("phia");
+    const auto& Up = patch().lookupPatchField<volVectorField>("U");
 
     scalarField Un(mag(patch().nf() & Up));
     vectorField UtHat((Up - patch().nf()*Un)/(Un + SMALL));
@@ -110,8 +107,8 @@ void Foam::adjointOutletVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::adjointOutletVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::write(os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

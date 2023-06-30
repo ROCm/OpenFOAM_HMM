@@ -28,7 +28,6 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "string.H"
 #include "macros.H"
 #include "IOstreams.H"
 #include "List.H"

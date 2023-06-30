@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 DLR
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,8 +43,12 @@ Foam::zoneDistribute::zoneDistribute(const fvMesh& mesh)
     MeshObject<fvMesh, Foam::TopologicalMeshObject, zoneDistribute>(mesh),
     stencil_(zoneCPCStencil::New(mesh)),
     globalNumbering_(stencil_.globalNumbering()),
-    send_(UPstream::nProcs())
-{}
+    send_(UPstream::nProcs()),
+    pBufs_(UPstream::commsTypes::nonBlocking)
+{
+    // Don't clear storage on persistent buffer
+    pBufs_.allowClearRecv(false);
+}
 
 
 // * * * * * * * * * * * * * * * * Selectors  * * * * * * * * * * * * * * //
@@ -108,27 +112,29 @@ void Foam::zoneDistribute::setUpCommforZone
         // Stream the send data into PstreamBuffers,
         // which we also use to track the current topology.
 
-        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
+        pBufs_.clear();
 
-        for (const int proci : UPstream::allProcs())
+        for (const int proci : pBufs_.allProcs())
         {
-            if (proci != UPstream::myProcNo() && !needed[proci].empty())
+            const auto& indices = needed[proci];
+
+            if (proci != UPstream::myProcNo() && !indices.empty())
             {
                 // Serialize as List
-                UOPstream toProc(proci, pBufs);
-                toProc << needed[proci].sortedToc();
+                UOPstream toProc(proci, pBufs_);
+                toProc << indices.sortedToc();
             }
         }
 
-        pBufs.finishedSends(sendConnections_, sendProcs_, recvProcs_);
+        pBufs_.finishedSends(sendConnections_, sendProcs_, recvProcs_);
 
-        for (const int proci : pBufs.allProcs())
+        for (const int proci : pBufs_.allProcs())
         {
             send_[proci].clear();
 
-            if (proci != UPstream::myProcNo() && pBufs.recvDataCount(proci))
+            if (proci != UPstream::myProcNo() && pBufs_.recvDataCount(proci))
             {
-                UIPstream fromProc(proci, pBufs);
+                UIPstream fromProc(proci, pBufs_);
                 fromProc >> send_[proci];
             }
         }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,6 @@ namespace Foam
 {
 
 // Forward Declarations
-
 class bitSet;
 class dictionary;
 class globalIndex;
@@ -97,6 +96,9 @@ class mapDistributeBase;
 
 Istream& operator>>(Istream&, mapDistributeBase&);
 Ostream& operator<<(Ostream&, const mapDistributeBase&);
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<mapDistributeBase>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -954,9 +956,71 @@ public:
             void receive(PstreamBuffers& pBufs, List<T>& field) const;
 
 
-            //- Debug: print layout. Can only be used on maps with sorted
-            //  storage (local data first, then non-local data)
-            void printLayout(Ostream& os) const;
+        // Low-level. Non-blocking. TBD: receive map is usually contiguous
+        // - receive into slices
+
+            //- Start all sends and receives (always non-blocking)
+            template<class T, class negateOp>
+            static void send
+            (
+                const labelListList& subMap,
+                const bool subHasFlip,
+                const labelListList& constructMap,
+                const bool constructHasFlip,
+                const UList<T>& field,
+                labelRange& requests,
+                PtrList<List<T>>& sendFields,
+                PtrList<List<T>>& recvFields,
+                const negateOp& negOp,
+                const int tag,
+                const label comm
+            );
+
+            //- Start all sends and receives (always non-blocking)
+            template<class T>
+            void send
+            (
+                const UList<T>& field,
+                labelRange& requests,
+                PtrList<List<T>>& sendFields,
+                PtrList<List<T>>& recvFields,
+                const int tag = UPstream::msgType()
+            ) const;
+
+            //- Wait for requests to finish and consume
+            template<class T, class CombineOp, class negateOp>
+            static void receive
+            (
+                const label constructSize,
+                const labelListList& constructMap,
+                const bool constructHasFlip,
+                const UPtrList<List<T>>& sendFields,
+                const UPtrList<List<T>>& recvFields,
+                const labelRange& requests,
+                List<T>& field,
+                const CombineOp& cop,
+                const negateOp& negOp,
+                const int tag,
+                const label comm
+            );
+
+            //- Wait for requests to finish and consume
+            template<class T>
+            void receive
+            (
+                const labelRange& requests,
+                const UPtrList<List<T>>& sendFields,
+                const UPtrList<List<T>>& recvFields,
+                List<T>& field,
+                const int tag = UPstream::msgType()
+            ) const;
+
+
+    // Other
+
+        //- Debug: print layout. Can only be used on maps with sorted
+        //  storage (local data first, then non-local data)
+        void printLayout(Ostream& os) const;
 
 
     // Member Operators
@@ -970,8 +1034,9 @@ public:
 
     // IOstream Operators
 
-        //- Info proxy to print summary information to a stream
-        InfoProxy<mapDistributeBase> info() const
+        //- Return info proxy,
+        //- used to print summary information to a stream
+        InfoProxy<mapDistributeBase> info() const noexcept
         {
             return *this;
         }
@@ -1016,12 +1081,6 @@ public:
             const int tag = UPstream::msgType()
         );
 };
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<mapDistributeBase>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

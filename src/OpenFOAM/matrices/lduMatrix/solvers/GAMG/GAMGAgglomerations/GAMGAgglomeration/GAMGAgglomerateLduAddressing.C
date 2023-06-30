@@ -684,7 +684,7 @@ void Foam::GAMGAgglomeration::calculateRegionMaster
         const label coarsei = procAgglomMap[proci];
 
         auto iter = agglomToMaster.find(coarsei);
-        if (iter.found())
+        if (iter.good())
         {
             iter.val() = min(iter.val(), proci);
         }

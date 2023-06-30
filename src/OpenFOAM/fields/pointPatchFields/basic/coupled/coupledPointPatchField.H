@@ -78,7 +78,7 @@ public:
             const dictionary& dict
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         coupledPointPatchField
         (
             const coupledPointPatchField<Type>&,

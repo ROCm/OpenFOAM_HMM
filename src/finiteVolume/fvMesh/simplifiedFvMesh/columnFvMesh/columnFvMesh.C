@@ -68,7 +68,7 @@ bool Foam::simplifiedMeshes::columnFvMeshInfo::setPatchEntries
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     const wordHashSet constraintPatches(polyPatch::constraintTypes());
@@ -213,7 +213,7 @@ void Foam::simplifiedMeshes::columnFvMeshInfo::initialise(const Time& runTime)
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         scalar dxi = 0;

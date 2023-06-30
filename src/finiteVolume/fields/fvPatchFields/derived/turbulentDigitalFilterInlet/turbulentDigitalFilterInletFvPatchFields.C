@@ -36,8 +36,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makeTemplatePatchTypeField(scalar, turbulentDigitalFilterInlet);
-makeTemplatePatchTypeField(vector, turbulentDigitalFilterInlet);
+makePatchFieldType(scalar, turbulentDigitalFilterInlet);
+makePatchFieldType(vector, turbulentDigitalFilterInlet);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

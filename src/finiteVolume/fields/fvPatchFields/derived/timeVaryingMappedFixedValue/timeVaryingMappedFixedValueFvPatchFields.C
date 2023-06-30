@@ -25,21 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "timeVaryingMappedFixedValueFvPatchFields.H"
+#include "timeVaryingMappedFixedValueFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-makePatchFields(timeVaryingMappedFixedValue);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    makePatchTypeFieldTypedefs(timeVaryingMappedFixedValue);
+    makePatchFields(timeVaryingMappedFixedValue);
+}
 
 // ************************************************************************* //

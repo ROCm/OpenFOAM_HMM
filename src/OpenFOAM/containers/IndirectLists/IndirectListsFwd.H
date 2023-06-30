@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IndirectListsFwd_H
-#define IndirectListsFwd_H
+#ifndef Foam_IndirectListsFwd_H
+#define Foam_IndirectListsFwd_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

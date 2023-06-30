@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
         << IndirectList<label>::subset_if(test6, evenNonZero) << nl
         << endl;
 
-    test6.append(identity(13, 12));
+    test6.push_back(identity(13, 12));
 
     Info<< "Randomized: " << flatOutput(test6) << endl;
     inplaceUniqueSort(test6);

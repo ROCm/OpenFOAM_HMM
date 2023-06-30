@@ -37,14 +37,14 @@ SourceFiles
 #ifndef PointIntegrateData_H
 #define PointIntegrateData_H
 
+#include "UList.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 template<class DataType> class PointIntegrateData;
 
 template<class DataType>

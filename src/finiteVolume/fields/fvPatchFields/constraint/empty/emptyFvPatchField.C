@@ -55,6 +55,7 @@ Foam::emptyFvPatchField<Type>::emptyFvPatchField
     if (!isType<emptyFvPatch>(p))
     {
         FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()

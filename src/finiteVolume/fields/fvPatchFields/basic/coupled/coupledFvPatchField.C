@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,11 +75,11 @@ Foam::coupledFvPatchField<Type>::coupledFvPatchField
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     LduInterfaceField<Type>(refCast<const lduInterface>(p, dict)),
-    fvPatchField<Type>(p, iF, dict, valueRequired)
+    fvPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
@@ -139,8 +140,12 @@ void Foam::coupledFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 
     Field<Type>::operator=
     (
-        this->patch().weights()*this->patchInternalField()
-      + (1.0 - this->patch().weights())*this->patchNeighbourField()
+        lerp
+        (
+            this->patchNeighbourField(),
+            this->patchInternalField(),
+            this->patch().weights()
+        )
     );
 
     fvPatchField<Type>::evaluate();
@@ -213,7 +218,7 @@ template<class Type>
 void Foam::coupledFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

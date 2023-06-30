@@ -23,18 +23,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
-SourceFiles
-    emptyFaPatchFields.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef emptyFaPatchFields_H
-#define emptyFaPatchFields_H
+#ifndef Foam_emptyFaPatchFields_H
+#define Foam_emptyFaPatchFields_H
 
 #include "emptyFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(empty)
+makeFaPatchTypeFieldTypedefs(empty);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -471,7 +471,7 @@ void Foam::sampledCuttingPlane::createGeometry()
                 mesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimLength, Zero)
@@ -494,7 +494,7 @@ void Foam::sampledCuttingPlane::createGeometry()
                 mesh.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pointMesh::New(mesh),
             dimensionedScalar(dimLength, Zero)

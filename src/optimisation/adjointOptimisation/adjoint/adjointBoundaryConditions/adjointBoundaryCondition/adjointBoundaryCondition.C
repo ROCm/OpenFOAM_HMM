@@ -172,11 +172,11 @@ adjointBoundaryCondition<Type>::computePatchGrad(word name)
 template<class Type>
 bool adjointBoundaryCondition<Type>::addATCUaGradUTerm()
 {
-    if (!addATCUaGradUTerm_)
+    if (!addATCUaGradUTerm_.good())
     {
-        addATCUaGradUTerm_.reset(new bool(isA<ATCUaGradU>(getATC())));
+        addATCUaGradUTerm_ = bool(isA<ATCUaGradU>(getATC()));
     }
-    return addATCUaGradUTerm_();
+    return addATCUaGradUTerm_;
 }
 
 
@@ -202,7 +202,7 @@ adjointBoundaryCondition<Type>::adjointBoundaryCondition
             adjointBC.patch_
         )
     ),
-    addATCUaGradUTerm_(adjointBC.addATCUaGradUTerm_)
+    addATCUaGradUTerm_(Switch::INVALID)
 {}
 
 
@@ -221,7 +221,7 @@ adjointBoundaryCondition<Type>::adjointBoundaryCondition
     adjointSolverName_(solverName),
     simulationType_("incompressible"),
     boundaryContrPtr_(nullptr),
-    addATCUaGradUTerm_(nullptr)
+    addATCUaGradUTerm_(Switch::INVALID)
 {
     // Set the boundaryContribution pointer
     setBoundaryContributionPtr();

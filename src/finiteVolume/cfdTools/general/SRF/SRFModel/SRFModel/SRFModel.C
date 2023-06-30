@@ -216,7 +216,7 @@ Foam::tmp<Foam::volVectorField> Foam::SRF::SRFModel::Uabs() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             Usrf
         )

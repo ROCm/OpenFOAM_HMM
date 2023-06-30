@@ -46,8 +46,8 @@ MarshakRadiationFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     TName_("T")
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 0.0;
 }
 
@@ -77,20 +77,14 @@ MarshakRadiationFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     TName_(dict.getOrDefault<word>("T", "T"))
 {
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        refValue() = scalarField("value", dict, p.size());
-    }
-    else
-    {
-        refValue() = 0.0;
+        fvPatchScalarField::operator=(Zero);
     }
 
-    // zero gradient
-    refGrad() = 0.0;
-
+    refValue() = *this;
+    refGrad() = Zero;  // zero gradient
     valueFraction() = 1.0;
-
     fvPatchScalarField::operator=(refValue());
 }
 
@@ -133,15 +127,13 @@ void Foam::radiation::MarshakRadiationFvPatchScalarField::updateCoeffs()
     UPstream::msgType() = oldTag+1;
 
     // Temperature field
-    const scalarField& Tp =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
+    const auto& Tp = patch().lookupPatchField<volScalarField>(TName_);
 
     // Re-calc reference value
     refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Tp);
 
     // Diffusion coefficient - created by radiation model's ::updateCoeffs()
-    const scalarField& gamma =
-        patch().lookupPatchField<volScalarField, scalar>("gammaRad");
+    const auto& gamma = patch().lookupPatchField<volScalarField>("gammaRad");
 
     const boundaryRadiationProperties& boundaryRadiation =
         boundaryRadiationProperties::New(internalField().mesh());
@@ -170,7 +162,7 @@ void Foam::radiation::MarshakRadiationFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
 }
 

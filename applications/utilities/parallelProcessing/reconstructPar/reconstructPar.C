@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
     #include "addAllRegionOptions.H"
 
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
     argList::addOption
     (
         "fields",
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
     }
 
     // Warn fileHandler of number of processors
-    const_cast<fileOperation&>(fileHandler()).setNProcs(nProcs);
+    const_cast<fileOperation&>(fileHandler()).nProcs(nProcs);
 
     // Create the processor databases
     PtrList<Time> databases(nProcs);
@@ -780,7 +780,7 @@ int main(int argc, char *argv[])
                                 procMesh,
                                 IOobject::READ_IF_PRESENT,
                                 IOobject::NO_WRITE,
-                                false
+                                IOobject::NO_REGISTER
                             )
                         )
                     );
@@ -822,7 +822,7 @@ int main(int argc, char *argv[])
                         mesh,
                         IOobject::NO_READ,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     ),
                     cellMaps,
                     pointMaps,
@@ -853,7 +853,7 @@ int main(int argc, char *argv[])
                                 procMesh,
                                 IOobject::READ_IF_PRESENT,
                                 IOobject::NO_WRITE,
-                                false
+                                IOobject::NO_REGISTER
                             )
                         )
                     );
@@ -895,7 +895,7 @@ int main(int argc, char *argv[])
                         mesh,
                         IOobject::NO_READ,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     ),
                     cellMaps,
                     pointMaps,

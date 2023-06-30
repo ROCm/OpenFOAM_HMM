@@ -61,10 +61,37 @@ class processorFaPatchField
     public processorLduInterfaceField,
     public coupledFaPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the processor patch
         const processorFaPatch& procPatch_;
+
+
+        // Sending and receiving
+
+            //- Current (non-blocking) send request
+            mutable label sendRequest_;
+
+            //- Current (non-blocking) recv request
+            mutable label recvRequest_;
+
+            //- Send buffer.
+            mutable Field<Type> sendBuf_;
+
+            //- Receive buffer.
+            mutable Field<Type> recvBuf_;
+
+            //- Scalar send buffer
+            mutable solveScalarField scalarSendBuf_;
+
+            //- Scalar recv buffer
+            mutable solveScalarField scalarRecvBuf_;
+
+
+    // Private Member Functions
+
+        //- Receive and send requests have both completed
+        virtual bool all_ready() const;
 
 
 public:
@@ -143,30 +170,30 @@ public:
     ~processorFaPatchField() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+    // Coupling
 
-            //- Return true if running parallel
-            virtual bool coupled() const
-            {
-                return Pstream::parRun();
-            }
+        //- The patch field is coupled if running in parallel
+        virtual bool coupled() const { return UPstream::parRun(); }
 
-            //- Return neighbour field given internal field
-            tmp<Field<Type>> patchNeighbourField() const;
+        //- Are all (receive) data available?
+        virtual bool ready() const;
+
+        //- Return neighbour field given internal field
+        tmp<Field<Type>> patchNeighbourField() const;
 
 
-        // Evaluation functions
+    // Evaluation
 
-            //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const Pstream::commsTypes commsType);
+        //- Initialise the evaluation of the patch field
+        virtual void initEvaluate(const Pstream::commsTypes commsType);
 
-            //- Evaluate the patch field
-            virtual void evaluate(const Pstream::commsTypes commsType);
+        //- Evaluate the patch field
+        virtual void evaluate(const Pstream::commsTypes commsType);
 
-            //- Return patch-normal gradient
-            virtual tmp<Field<Type>> snGrad() const;
+        //- Return patch-normal gradient
+        virtual tmp<Field<Type>> snGrad() const;
 
 
         // Coupled interface functionality
@@ -221,43 +248,44 @@ public:
                 const Pstream::commsTypes commsType
             ) const;
 
-        //- Processor coupled interface functions
 
-            //- Return communicator used for comms
-            virtual label comm() const
-            {
-                return UPstream::worldComm;
-            }
+    // Processor coupled interface functions
 
-            //- Return processor number
-            virtual int myProcNo() const
-            {
-                return procPatch_.myProcNo();
-            }
+        //- Return communicator used for communication
+        virtual label comm() const
+        {
+            return procPatch_.comm();
+        }
 
-            //- Return neighbour processor number
-            virtual int neighbProcNo() const
-            {
-                return procPatch_.neighbProcNo();
-            }
+        //- Return processor number
+        virtual int myProcNo() const
+        {
+            return procPatch_.myProcNo();
+        }
 
-            //- Does the patch field perform the transformation
-            virtual bool doTransform() const
-            {
-                return !(procPatch_.parallel() || pTraits<Type>::rank == 0);
-            }
+        //- Return neighbour processor number
+        virtual int neighbProcNo() const
+        {
+            return procPatch_.neighbProcNo();
+        }
 
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
-            {
-                return procPatch_.forwardT();
-            }
+        //- Does the patch field perform the transformation
+        virtual bool doTransform() const
+        {
+            return (pTraits<Type>::rank && !procPatch_.parallel());
+        }
 
-            //- Return rank of component for transform
-            virtual int rank() const
-            {
-                return pTraits<Type>::rank;
-            }
+        //- Return face transformation tensor
+        virtual const tensorField& forwardT() const
+        {
+            return procPatch_.forwardT();
+        }
+
+        //- Return rank of component for transform
+        virtual int rank() const
+        {
+            return pTraits<Type>::rank;
+        }
 };
 
 

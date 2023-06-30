@@ -102,6 +102,7 @@ Foam::processorCyclicFvPatchField<Type>::processorCyclicFvPatchField
     if (!isType<processorCyclicFvPatch>(this->patch()))
     {
         FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()

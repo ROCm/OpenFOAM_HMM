@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ void ShihQuadraticKE::correctNonlinearStress(const volTensorField& gradU)
        *(
            Cbeta1_*dev(innerSqr(S))
          + Cbeta2_*twoSymm(S&W)
-         + Cbeta3_*dev(symm(W&W))
+         + Cbeta3_*devSymm(W&W)
         );
 }
 
@@ -274,6 +274,8 @@ void ShihQuadraticKE::correct()
 
     // Update epsilon and G at the wall
     epsilon_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    epsilon_.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn

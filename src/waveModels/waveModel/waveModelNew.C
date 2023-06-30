@@ -45,7 +45,7 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false                   // Not registering
+            IOobject::NO_REGISTER
         )
     );
 

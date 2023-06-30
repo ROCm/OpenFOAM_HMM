@@ -85,7 +85,7 @@ standardRadiation::standardRadiation
         ),
         film.regionMesh(),
         dimensionedScalar(dimMass/pow3(dimTime), Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     beta_(coeffDict_.get<scalar>("beta")),
     kappaBar_(coeffDict_.get<scalar>("kappaBar"))

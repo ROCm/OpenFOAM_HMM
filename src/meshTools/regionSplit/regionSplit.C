@@ -633,7 +633,7 @@ Foam::regionSplit::reduceRegionsImpl
                             // Record the minimum value seen
 
                             auto fnd = updateLookup.find(sent);
-                            if (!fnd.found())
+                            if (!fnd.good())
                             {
                                 updateLookup.insert(sent, recv);
                             }

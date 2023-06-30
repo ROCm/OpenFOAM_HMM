@@ -229,13 +229,13 @@ Foam::label Foam::pointZoneSet::maxSize(const polyMesh& mesh) const
 bool Foam::pointZoneSet::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Write shadow pointSet
     word oldTypeName = typeName;
     const_cast<word&>(type()) = pointSet::typeName;
-    bool ok = pointSet::writeObject(streamOpt, valid);
+    bool ok = pointSet::writeObject(streamOpt, writeOnProc);
     const_cast<word&>(type()) = oldTypeName;
 
     // Modify pointZone
@@ -265,7 +265,7 @@ bool Foam::pointZoneSet::writeObject
     }
     pointZones.clearAddressing();
 
-    return ok && pointZones.write(valid);
+    return ok && pointZones.write(writeOnProc);
 }
 
 

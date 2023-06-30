@@ -80,11 +80,11 @@ void Foam::inverseVolumeDiffusivity::correct()
             mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimless,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     V.primitiveFieldRef() = mesh().V();

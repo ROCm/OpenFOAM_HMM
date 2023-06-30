@@ -70,18 +70,6 @@ inline IteratorType Foam::SLListBase::iterator_last() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::SLListBase::size() const noexcept
-{
-    return size_;
-}
-
-
-inline bool Foam::SLListBase::empty() const noexcept
-{
-    return !size_;
-}
-
-
 inline Foam::SLListBase::link*
 Foam::SLListBase::front()
 {

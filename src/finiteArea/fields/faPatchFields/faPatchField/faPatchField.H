@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,8 @@ SourceFiles
 
 #include "faPatch.H"
 #include "DimensionedField.H"
+#include "fieldTypes.H"
+#include "scalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,13 +60,14 @@ namespace Foam
 {
 
 // Forward Declarations
-class objectRegistry;
 class dictionary;
+class objectRegistry;
 class faPatchFieldMapper;
 class areaMesh;
 
 template<class Type> class faPatchField;
 template<class Type> class calculatedFaPatchField;
+template<class Type> class zeroGradientFaPatchField;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const faPatchField<Type>&);
@@ -106,6 +109,10 @@ protected:
             updated_ = state;
         }
 
+        //- Set matrix manipulated state. Currently a no-op for faPatchField.
+        void setManipulated(bool state) noexcept
+        {}
+
 
 public:
 
@@ -138,12 +145,57 @@ public:
     virtual ~faPatchFieldBase() = default;
 
 
+    // Static Member Functions
+
+        //- The type name for \c empty patch fields
+        static const word& emptyType() noexcept
+        {
+            return Foam::fieldTypes::emptyType;
+        }
+
+        //- The type name for \c calculated patch fields
+        static const word& calculatedType() noexcept
+        {
+            return Foam::fieldTypes::calculatedType;
+        }
+
+        //- The type name for \c extrapolatedCalculated patch fields
+        //- combines \c zero-gradient and \c calculated
+        static const word& extrapolatedCalculatedType() noexcept
+        {
+            return Foam::fieldTypes::extrapolatedCalculatedType;
+        }
+
+        //- The type name for \c zeroGradient patch fields
+        static const word& zeroGradientType() noexcept
+        {
+            return Foam::fieldTypes::zeroGradientType;
+        }
+
+
     // Member Functions
+
+    // Attributes
+
+        //- True if the patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
+
+        //- True if the patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
+
 
     // Access
 
         //- The associated objectRegistry
-        /// const objectRegistry& db() const;
+        const objectRegistry& db() const;
 
         //- Return the patch
         const faPatch& patch() const noexcept
@@ -172,6 +224,13 @@ public:
             return updated_;
         }
 
+        //- True if the matrix has already been manipulated.
+        //- Currently ignored (always false) for faPatchField
+        bool manipulatedMatrix() const noexcept
+        {
+            return false;
+        }
+
 
     // Check
 
@@ -194,6 +253,28 @@ class faPatchField
 
         //- Reference to internal field
         const DimensionedField<Type, areaMesh>& internalField_;
+
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
+
+        //- Assign the patch field from the internal field
+        void extrapolateInternal();
 
 
 public:
@@ -259,21 +340,39 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
-        //- Construct from patch and internal field and patch field
+        //- Construct from patch, internal field and value
         faPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const Field<Type>&
+            const Type& value
         );
 
-        //- Construct from patch, internal field and dictionary
+        //- Construct from patch, internal field and patch field
         faPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const Field<Type>& pfld
+        );
+
+        //- Construct from patch, internal field and patch field
+        faPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            Field<Type>&& pfld
+        );
+
+        //- Construct from patch, internal field and dictionary.
+        //  \note older versions have always treated "value" as optional
+        faPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const dictionary& dict,
+            //! The "value" entry (default: optional)
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping the given faPatchField onto a new patch
@@ -355,10 +454,10 @@ public:
 
         //- Return a pointer to a new calculatedFaPatchField created on
         //- freestore without setting patchField values
-        template<class Type2>
+        template<class AnyType>
         static tmp<faPatchField<Type>> NewCalculatedType
         (
-            const faPatchField<Type2>&
+            const faPatchField<AnyType>& pf
         );
 
 
@@ -368,47 +467,19 @@ public:
 
     // Member Functions
 
-        //- The type name for calculated patch fields
-        static const word& calculatedType();
+    // Access
 
-        //- The type name for zeroGradient patch fields
-        static const word& zeroGradientType();
+        //- Return const-reference to the dimensioned internal field
+        const DimensionedField<Type, areaMesh>& internalField() const noexcept
+        {
+            return internalField_;
+        }
 
-
-        // Attributes
-
-            //- True if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return false;
-            }
-
-            //- True if this patch field is coupled
-            virtual bool coupled() const
-            {
-                return false;
-            }
-
-
-        // Access
-
-            //- Return local objectRegistry
-            const objectRegistry& db() const;
-
-            //- Return dimensioned internal field reference
-            const DimensionedField<Type, areaMesh>&
-            internalField() const noexcept
-            {
-                return internalField_;
-            }
-
-            //- Return internal field reference
-            const Field<Type>& primitiveField() const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the internal field values
+        const Field<Type>& primitiveField() const noexcept
+        {
+            return internalField_;
+        }
 
 
         // Mapping
@@ -432,8 +503,12 @@ public:
             //- Return patch-normal gradient
             virtual tmp<Field<Type>> snGrad() const;
 
-            //- Return internal field next to patch as patch field
+            //- Return internal field next to patch
             virtual tmp<Field<Type>> patchInternalField() const;
+
+            //- Extract internal field next to patch
+            //  \param [out] pfld The extracted patch field.
+            virtual void patchInternalField(Field<Type>& pfld) const;
 
             //- Return patchField on the opposite patch of a coupled patch
             virtual tmp<Field<Type>> patchNeighbourField() const
@@ -454,7 +529,7 @@ public:
             )
             {}
 
-            //- Evaluate the patch field, sets Updated to false
+            //- Evaluate the patch field, sets updated() to false
             virtual void evaluate
             (
                 const Pstream::commsTypes commsType =
@@ -500,16 +575,13 @@ public:
             }
 
 
-        // IO
+    // Other
 
-            //- Write
-            virtual void write(Ostream&) const;
+        //- Write
+        virtual void write(Ostream& os) const;
 
-
-        // Check
-
-            //- Check faPatchField<Type> against given faPatchField<Type>
-            void check(const faPatchField<Type>&) const;
+        //- Check against given patch field
+        void check(const faPatchField<Type>&) const;
 
 
     // Member Operators
@@ -556,97 +628,13 @@ public:
 
 #ifdef NoRepository
     #include "faPatchField.C"
+    #include "faPatchFieldNew.C"
     #include "calculatedFaPatchField.H"
     #include "zeroGradientFaPatchField.H"
 #endif
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Runtime selection macros
-
-#define addToFaPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField) \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    PatchTypeField, typePatchTypeField, patch                                 \
-);                                                                            \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    PatchTypeField,                                                           \
-    typePatchTypeField,                                                       \
-    patchMapper                                                               \
-);                                                                            \
-                                                                              \
-addToRunTimeSelectionTable                                                    \
-(                                                                             \
-    PatchTypeField, typePatchTypeField, dictionary                            \
-);
-
-
-#define makeFaPatchTypeFieldTypeName(typePatchTypeField)                      \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);
-
-
-#define makeFaPatchFieldsTypeName(typePatchField)                             \
-                                                                              \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchScalarField);             \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchVectorField);             \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchSphericalTensorField);    \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchSymmTensorField);         \
-makeFaPatchTypeFieldTypeName(typePatchField##FaPatchTensorField);
-
-
-#define makeFaPatchTypeField(PatchTypeField, typePatchTypeField)              \
-                                                                              \
-defineTypeNameAndDebug(typePatchTypeField, 0);                                \
-                                                                              \
-addToFaPatchFieldRunTimeSelection                                             \
-(                                                                             \
-    PatchTypeField, typePatchTypeField                                        \
-);
-
-#define makeTemplateFaPatchTypeField(PatchTypeField, typePatchTypeField)      \
-                                                                              \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);                   \
-                                                                              \
-addToFaPatchFieldRunTimeSelection                                             \
-(                                                                             \
-    PatchTypeField, typePatchTypeField                                        \
-);
-
-
-#define makeFaPatchFields(type)                                               \
-                                                                              \
-makeTemplateFaPatchTypeField(faPatchScalarField, type##FaPatchScalarField);   \
-makeTemplateFaPatchTypeField(faPatchVectorField, type##FaPatchVectorField);   \
-makeTemplateFaPatchTypeField                                                  \
-(                                                                             \
-    faPatchSphericalTensorField,                                              \
-    type##FaPatchSphericalTensorField                                         \
-);                                                                            \
-makeTemplateFaPatchTypeField                                                  \
-(                                                                             \
-    faPatchSymmTensorField,                                                   \
-    type##FaPatchSymmTensorField                                              \
-);                                                                            \
-makeTemplateFaPatchTypeField                                                  \
-(                                                                             \
-    faPatchTensorField,                                                       \
-    type##FaPatchTensorField                                                  \
-);
-
-
-#define makeFaPatchTypeFieldTypedefs(type)                                    \
-                                                                              \
-typedef type##FaPatchField<scalar> type##FaPatchScalarField;                  \
-typedef type##FaPatchField<vector> type##FaPatchVectorField;                  \
-typedef type##FaPatchField<sphericalTensor>                                   \
-     type##FaPatchSphericalTensorField;                                       \
-typedef type##FaPatchField<symmTensor> type##FaPatchSymmTensorField;          \
-typedef type##FaPatchField<tensor> type##FaPatchTensorField;
-
+#include "faPatchFieldMacros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

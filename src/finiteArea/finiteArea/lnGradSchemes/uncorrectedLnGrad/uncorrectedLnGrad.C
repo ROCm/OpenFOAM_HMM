@@ -49,7 +49,7 @@ uncorrectedLnGrad<Type>::correction
 ) const
 {
     NotImplemented;
-    return tmp<GeometricField<Type, faePatchField, edgeMesh>>(nullptr);
+    return nullptr;
 }
 
 

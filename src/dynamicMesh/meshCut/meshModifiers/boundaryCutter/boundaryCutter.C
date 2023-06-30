@@ -102,7 +102,7 @@ Foam::face Foam::boundaryCutter::addEdgeCutsToFace
 
         const auto fnd = edgeToAddedPoints.cfind(edgeI);
 
-        if (fnd.found())
+        if (fnd.good())
         {
             // edge has been cut. Introduce new vertices. Check order.
             const labelList& addedPoints = fnd();
@@ -231,7 +231,7 @@ bool Foam::boundaryCutter::splitFace
 
         const auto fnd = edgeToAddedPoints.cfind(edgeI);
 
-        if (fnd.found())
+        if (fnd.good())
         {
             nSplitEdges++;
             nTotalSplits += fnd().size();
@@ -467,7 +467,7 @@ void Foam::boundaryCutter::setRefinement
 
             auto fnd = edgeToAddedPoints.find(edgeI);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 labelList& addedPoints = fnd();
 

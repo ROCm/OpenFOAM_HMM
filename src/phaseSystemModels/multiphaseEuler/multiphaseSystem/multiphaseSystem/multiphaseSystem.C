@@ -92,7 +92,7 @@ void Foam::multiphaseSystem::solveAlphas()
 
             const auto cAlpha = cAlphas_.cfind(interfacePair(phase, phase2));
 
-            if (cAlpha.found())
+            if (cAlpha.good())
             {
                 surfaceScalarField phic
                 (
@@ -279,7 +279,7 @@ void Foam::multiphaseSystem::correctContactAngle
             const auto tp =
                 acap.thetaProps().cfind(interfacePair(phase1, phase2));
 
-            if (!tp.found())
+            if (!tp.good())
             {
                 FatalErrorInFunction
                     << "Cannot find interface " << interfacePair(phase1, phase2)
@@ -560,7 +560,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::Cvm
 
         auto iterCvm = Cvms_.cfind(interfacePair(phase, phase2));
 
-        if (iterCvm.found())
+        if (iterCvm.good())
         {
             tCvm.ref() += iterCvm()*phase2.rho()*phase2;
         }
@@ -568,7 +568,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseSystem::Cvm
         {
             iterCvm = Cvms_.cfind(interfacePair(phase2, phase));
 
-            if (iterCvm.found())
+            if (iterCvm.good())
             {
                 tCvm.ref() += iterCvm()*phase.rho()*phase2;
             }
@@ -613,7 +613,7 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseSystem::Svm
 
         auto Cvm = Cvms_.cfind(interfacePair(phase, phase2));
 
-        if (Cvm.found())
+        if (Cvm.good())
         {
             tSvm.ref() += Cvm()*phase2.rho()*phase2*phase2.DDtU();
         }
@@ -621,7 +621,7 @@ Foam::tmp<Foam::volVectorField> Foam::multiphaseSystem::Svm
         {
             Cvm = Cvms_.cfind(interfacePair(phase2, phase));
 
-            if (Cvm.found())
+            if (Cvm.good())
             {
                 tSvm.ref() += Cvm()*phase.rho()*phase2*phase2.DDtU();
             }
@@ -786,7 +786,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::multiphaseSystem::surfaceTension
 
         const auto sigma = sigmas_.cfind(interfacePair(phase1, phase2));
 
-        if (sigma.found())
+        if (sigma.good())
         {
             tSurfaceTension.ref() +=
                 dimensionedScalar("sigma", dimSigma_, *sigma)

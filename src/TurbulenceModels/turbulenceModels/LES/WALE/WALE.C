@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ tmp<volSymmTensorField> WALE<BasicTurbulenceModel>::Sd
     const volTensorField& gradU
 ) const
 {
-    return dev(symm(gradU & gradU));
+    return devSymm(gradU & gradU);
 }
 
 

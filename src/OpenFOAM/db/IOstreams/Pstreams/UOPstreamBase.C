@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +117,7 @@ inline void Foam::UOPstreamBase::putChar(const char c)
     {
         sendBuf_.setCapacity(1000);
     }
-    sendBuf_.append(c);
+    sendBuf_.push_back(c);
 }
 
 
@@ -133,7 +133,7 @@ inline void Foam::UOPstreamBase::putString(const std::string& str)
 
 Foam::UOPstreamBase::UOPstreamBase
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int toProcNo,
     DynamicList<char>& sendBuf,
     const int tag,
@@ -145,10 +145,10 @@ Foam::UOPstreamBase::UOPstreamBase
     UPstream(commsType),
     Ostream(fmt),
     toProcNo_(toProcNo),
-    sendBuf_(sendBuf),
     tag_(tag),
     comm_(comm),
-    sendAtDestruct_(sendAtDestruct)
+    sendAtDestruct_(sendAtDestruct),
+    sendBuf_(sendBuf)
 {
     setOpened();
     setGood();
@@ -160,11 +160,31 @@ Foam::UOPstreamBase::UOPstreamBase(const int toProcNo, PstreamBuffers& buffers)
     UPstream(buffers.commsType()),
     Ostream(buffers.format()),
     toProcNo_(toProcNo),
-    sendBuf_(buffers.sendBuf_[toProcNo]),
     tag_(buffers.tag()),
     comm_(buffers.comm()),
-    sendAtDestruct_(buffers.commsType() != UPstream::commsTypes::nonBlocking)
+    sendAtDestruct_(buffers.commsType() != UPstream::commsTypes::nonBlocking),
+    sendBuf_(buffers.accessSendBuffer(toProcNo))
 {
+    setOpened();
+    setGood();
+}
+
+
+Foam::UOPstreamBase::UOPstreamBase
+(
+    DynamicList<char>& sendBuf,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UPstream(UPstream::commsTypes::nonBlocking), // placeholder
+    Ostream(fmt),
+    toProcNo_(UPstream::masterNo()),        // placeholder
+    tag_(UPstream::msgType()),              // placeholder
+    comm_(UPstream::commSelf()),            // placeholder
+    sendAtDestruct_(false),   // Never sendAtDestruct!!
+    sendBuf_(sendBuf)
+{
+    sendBuf_.clear();  // Overwrite into buffer
     setOpened();
     setGood();
 }
@@ -394,8 +414,8 @@ void Foam::UOPstreamBase::rewind()
 
 void Foam::UOPstreamBase::print(Ostream& os) const
 {
-    os  << "Writing from processor " << toProcNo_
-        << " to processor " << myProcNo() << " in communicator " << comm_
+    os  << "Writing to processor " << toProcNo_
+        << " from processor " << myProcNo() << " in communicator " << comm_
         << " and tag " << tag_ << Foam::endl;
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "uncollatedFileOperation.H"
+#include "fileOperationInitialise.H"
 #include "Time.H"
 #include "Fstream.H"
 #include "addToRunTimeSelectionTable.H"
 #include "decomposedBlockData.H"
 #include "dummyISstream.H"
-#include "unthreadedInitialise.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -41,13 +41,24 @@ namespace Foam
 namespace fileOperations
 {
     defineTypeNameAndDebug(uncollatedFileOperation, 0);
-    addToRunTimeSelectionTable(fileOperation, uncollatedFileOperation, word);
+    addToRunTimeSelectionTable
+    (
+        fileOperation,
+        uncollatedFileOperation,
+        word
+    );
+    addToRunTimeSelectionTable
+    (
+        fileOperation,
+        uncollatedFileOperation,
+        comm
+    );
 
-    // Mark as not needing threaded mpi
+    // Threaded MPI: not required
     addNamedToRunTimeSelectionTable
     (
         fileOperationInitialise,
-        unthreadedInitialise,
+        fileOperationInitialise_unthreaded,
         word,
         uncollated
     );
@@ -159,7 +170,7 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePathInfo
         }
     }
 
-    return fileName::null;
+    return fileName();
 }
 
 
@@ -172,6 +183,37 @@ Foam::fileOperations::uncollatedFileOperation::lookupProcessorsPath
     // No additional parallel synchronisation
     return fileOperation::lookupAndCacheProcessorsPath(fName, false);
 }
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Construction helper: self/world/local communicator and IO ranks
+static Tuple2<label, labelList> getCommPattern()
+{
+    // Default is COMM_SELF (only involves itself)
+    Tuple2<label, labelList> commAndIORanks
+    (
+        UPstream::commSelf(),
+        fileOperation::getGlobalIORanks()
+    );
+
+    if (UPstream::parRun() && commAndIORanks.second().size() > 1)
+    {
+        // Multiple masters: ranks for my IO range
+        commAndIORanks.first() = UPstream::allocateCommunicator
+        (
+            UPstream::worldComm,
+            fileOperation::subRanks(commAndIORanks.second())
+        );
+    }
+
+    return commAndIORanks;
+}
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -193,10 +235,34 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
     bool verbose
 )
 :
-    fileOperation(UPstream::worldComm),
-    managedComm_(-1)  // worldComm is externally managed
+    fileOperation
+    (
+        getCommPattern()
+    ),
+    managedComm_(getManagedComm(comm_))  // Possibly locally allocated
 {
     init(verbose);
+}
+
+
+Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
+(
+    const Tuple2<label, labelList>& commAndIORanks,
+    const bool distributedRoots,
+    bool verbose
+)
+:
+    fileOperation(commAndIORanks, distributedRoots),
+    managedComm_(-1)  // Externally managed
+{
+    init(verbose);
+}
+
+
+void Foam::fileOperations::uncollatedFileOperation::storeComm() const
+{
+    // From externally -> locally managed
+    managedComm_ = getManagedComm(comm_);
 }
 
 
@@ -204,10 +270,10 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 
 Foam::fileOperations::uncollatedFileOperation::~uncollatedFileOperation()
 {
-    if (UPstream::isUserComm(managedComm_))
-    {
-        UPstream::freeCommunicator(managedComm_);
-    }
+    // Wait for any outstanding file operations
+    flush();
+
+    UPstream::freeCommunicator(managedComm_);
 }
 
 
@@ -548,10 +614,10 @@ Foam::fileOperations::uncollatedFileOperation::readStream
     regIOobject& io,
     const fileName& fName,
     const word& typeName,
-    const bool valid
+    const bool readOnProc
 ) const
 {
-    if (!valid)
+    if (!readOnProc)
     {
         return autoPtr<ISstream>(new dummyISstream());
     }
@@ -718,7 +784,7 @@ Foam::fileOperations::uncollatedFileOperation::NewOFstream
 (
     const fileName& pathName,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return autoPtr<OSstream>(new OFstream(pathName, streamOpt));
@@ -731,7 +797,7 @@ Foam::fileOperations::uncollatedFileOperation::NewOFstream
     IOstreamOption::atomicType atomic,
     const fileName& pathName,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return autoPtr<OSstream>(new OFstream(atomic, pathName, streamOpt));

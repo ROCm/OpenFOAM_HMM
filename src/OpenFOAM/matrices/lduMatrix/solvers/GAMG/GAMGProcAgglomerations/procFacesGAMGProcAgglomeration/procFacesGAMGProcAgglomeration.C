@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,10 +149,10 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     const lduMesh& mesh
 ) const
 {
-    label singleCellMeshComm = UPstream::allocateCommunicator
+    UPstream::communicator singleCellMeshComm
     (
         mesh.comm(),
-        labelList(1, Zero)   // only processor 0
+        labelRange(1)  // Processor 0 only
     );
 
     scalarField faceWeights;
@@ -160,14 +160,14 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     (
         singleCellMesh
         (
-            singleCellMeshComm,
+            singleCellMeshComm.comm(),
             mesh,
             faceWeights
         )
     );
 
-    tmp<labelField> tfineToCoarse(new labelField(0));
-    labelField& fineToCoarse = tfineToCoarse.ref();
+    auto tfineToCoarse = tmp<labelField>::New();
+    auto& fineToCoarse = tfineToCoarse.ref();
 
     if (singleCellMeshPtr)
     {
@@ -197,7 +197,6 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
     }
 
     Pstream::broadcast(fineToCoarse, mesh.comm());
-    UPstream::freeCommunicator(singleCellMeshComm);
 
     return tfineToCoarse;
 }
@@ -231,15 +230,7 @@ Foam::procFacesGAMGProcAgglomeration::procFacesGAMGProcAgglomeration
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::procFacesGAMGProcAgglomeration::~procFacesGAMGProcAgglomeration()
-{
-    forAllReverse(comms_, i)
-    {
-        if (comms_[i] != -1)
-        {
-            UPstream::freeCommunicator(comms_[i]);
-        }
-    }
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -292,9 +283,8 @@ bool Foam::procFacesGAMGProcAgglomeration::agglomerate()
                         agglomProcIDs
                     );
 
-                    // Allocate a communicator for the processor-agglomerated
-                    // matrix
-                    comms_.append
+                    // Communicator for the processor-agglomerated matrix
+                    comms_.push_back
                     (
                         UPstream::allocateCommunicator
                         (
@@ -302,7 +292,6 @@ bool Foam::procFacesGAMGProcAgglomeration::agglomerate()
                             masterProcs
                         )
                     );
-
 
                     // Use processor agglomeration maps to do the actual
                     // collecting.
@@ -312,7 +301,7 @@ bool Foam::procFacesGAMGProcAgglomeration::agglomerate()
                         procAgglomMap,
                         masterProcs,
                         agglomProcIDs,
-                        comms_.last()
+                        comms_.back()
                     );
                 }
             }

@@ -79,7 +79,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
                 mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
       : coeffDict(),
@@ -101,7 +101,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         pointMesh::New(mesh),
         dimensionedScalar(dimless, Zero)
@@ -219,7 +219,7 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
         coeffDict().readIfPresent("g", g);
     }
 
-    // const scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);
+    // const scalar ramp = clamp((this->db().time().value() - 5)/10, 0, 1);
     const scalar ramp = 1.0;
 
     if (test_)
@@ -298,7 +298,7 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
 bool Foam::sixDoFRigidBodyMotionSolver::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     IOdictionary dict
@@ -311,12 +311,12 @@ bool Foam::sixDoFRigidBodyMotionSolver::writeObject
             mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
     motion_.state().write(dict);
-    return dict.regIOobject::write();
+    return dict.regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

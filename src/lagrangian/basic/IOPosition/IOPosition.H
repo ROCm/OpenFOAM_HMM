@@ -84,14 +84,14 @@ public:
         );
 
 
-    // Member functions
+    // Member Functions
 
         //- Inherit readData from regIOobject
         using regIOobject::readData;
 
         virtual void readData(Istream&, CloudType&);
 
-        virtual bool write(const bool valid = true) const;
+        virtual bool write(const bool writeOnProc = true) const;
 
         virtual bool writeData(Ostream& os) const;
 };

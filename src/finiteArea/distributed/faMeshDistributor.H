@@ -45,6 +45,7 @@ SourceFiles
 #include "mapDistributePolyMesh.H"
 #include "areaFieldsFwd.H"
 #include "edgeFieldsFwd.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,8 +78,14 @@ class faMeshDistributor
         //- Patch edge mappers
         mutable PtrList<mapDistributeBase> patchEdgeMaps_;
 
-        //- Do I need to write (eg, master only for reconstruct)
-        bool isWriteProc_;
+        //- Storage for dummy handler (when using bool control)
+        refPtr<fileOperation> dummyHandler_;
+
+        //- Write control via a file handler
+        refPtr<fileOperation>& writeHandler_;
+
+        //- Write control as a bool
+        Switch isWriteProc_;
 
 
     // Private Member Functions
@@ -88,6 +95,9 @@ class faMeshDistributor
 
         //- Construct per-patch edge mapping
         void createPatchMaps() const;
+
+        //- Debug: check addressing
+        void checkAddressing() const;
 
         static mapDistributePolyMesh createReconstructMap
         (
@@ -99,12 +109,6 @@ class faMeshDistributor
             const labelUList& boundaryProcAddr
         );
 
-        //- No copy construct
-        faMeshDistributor(const faMeshDistributor&) = delete;
-
-        //- No copy assignment
-        void operator=(const faMeshDistributor&) = delete;
-
 
 public:
 
@@ -112,15 +116,33 @@ public:
     static int verbose_;
 
 
+    // Generated Methods
+
+        //- No copy construct
+        faMeshDistributor(const faMeshDistributor&) = delete;
+
+        //- No copy assignment
+        void operator=(const faMeshDistributor&) = delete;
+
+
     // Constructors
 
-        //- Construct from components
+        //- Construct from components, using bool to control writing
         faMeshDistributor
         (
             const faMesh& srcMesh,
             const faMesh& tgtMesh,
             const mapDistributePolyMesh& faDistMap,
-            const bool isWriteProc = false
+            const bool isWriteProc
+        );
+
+        //- Construct from components, using file handler to control writing
+        faMeshDistributor
+        (
+            const faMesh& srcMesh,
+            const faMesh& tgtMesh,
+            const mapDistributePolyMesh& faDistMap,
+            refPtr<fileOperation>& writeHandler
         );
 
 
@@ -147,21 +169,6 @@ public:
 
 
     // Member Functions
-
-        //- Get status of write enabled (on this proc)
-        bool isWriteProc() const noexcept
-        {
-            return isWriteProc_;
-        }
-
-        //- Change status of write enabled (on this proc)
-        bool isWriteProc(const bool on) noexcept
-        {
-            bool old(isWriteProc_);
-            isWriteProc_ = on;
-            return old;
-        }
-
 
     // Field Mapping
 

@@ -353,9 +353,9 @@ void testSparseData(const polyMesh& mesh, Random& rndGen)
 
             const auto iter = sparseData.cfind(e);
 
-            if (iter.found())
+            if (iter.good())
             {
-                const point& sparsePt = iter();
+                const point& sparsePt = iter.val();
                 const point& fullPt = fullData[meshEdgeI];
 
                 if (fullPt != sparsePt)

@@ -116,7 +116,7 @@ void Foam::pointConstraints::makePatchPatchAddressing()
 
                 label constraintI = -1;
 
-                if (iter.found())
+                if (iter.good())
                 {
                     constraintI = iter.val();
                 }
@@ -174,7 +174,7 @@ void Foam::pointConstraints::makePatchPatchAddressing()
 
                     const auto iter = cpPointMap.cfind(ppp);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         // Can just copy (instead of apply) constraint
                         // will already be consistent across multiple patches.
@@ -225,7 +225,7 @@ void Foam::pointConstraints::makePatchPatchAddressing()
 
                 label constraintI = -1;
 
-                if (iter.found())
+                if (iter.good())
                 {
                     //Pout<< indent << "on meshpoint:" << meshPointi
                     //    << " coupled:" << coupledPointi

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +41,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoSingleLayer_H
-#define thermoSingleLayer_H
+#ifndef Foam_thermoSingleLayer_H
+#define Foam_thermoSingleLayer_H
 
 #include "kinematicSingleLayer.H"
 #include "SLGThermo.H"
@@ -69,7 +70,7 @@ class thermoSingleLayer
 :
     public kinematicSingleLayer
 {
-    // Private member functions
+    // Private Member Functions
 
         //- No copy construct
         thermoSingleLayer(const thermoSingleLayer&) = delete;
@@ -83,7 +84,17 @@ class thermoSingleLayer
 
 protected:
 
-    // Protected data
+    // Protected Data
+
+        //- Enumerated limiter type
+        enum limitType : unsigned
+        {
+            CLAMP_NONE = 0,     //!< No limit
+            CLAMP_MIN = 0x1,    //!< Clamp minimum value
+            CLAMP_MAX = 0x2,    //!< Clamp maximum value
+            CLAMP_RANGE = (CLAMP_MIN | CLAMP_MAX)  //!< Clamp min/max
+        };
+
 
         // Thermo properties
 
@@ -184,14 +195,14 @@ protected:
 
         // Limits
 
-            //- Minimum temperature limit (optional)
-            scalar Tmin_;
+            //- Limiting type
+            limitType withTbounds_;
 
-            //- Maximum temperature limit (optional)
-            scalar Tmax_;
+            //- Temperature limits (optional)
+            scalarMinMax Tbounds_;
 
 
-    // Protected member functions
+    // Protected Member Functions
 
         //- Read control parameters from dictionary
         virtual bool read();

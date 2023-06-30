@@ -49,7 +49,7 @@ bool Foam::OFstreamCollator::writeFile
     const fileName& fName,
     const string& masterData,
     const labelUList& recvSizes,
-    const PtrList<SubList<char>>& slaveData,    // optional slave data
+    const UPtrList<SubList<char>>& slaveData,    // optional slave data
     IOstreamOption streamOpt,
     IOstreamOption::atomicType atomic,
     IOstreamOption::appendType append,
@@ -295,7 +295,7 @@ Foam::OFstreamCollator::OFstreamCollator(const off_t maxBufferSize)
         UPstream::allocateCommunicator
         (
             localComm_,
-            identity(UPstream::nProcs(localComm_))
+            labelRange(UPstream::nProcs(localComm_))
         )
     )
 {}
@@ -315,7 +315,7 @@ Foam::OFstreamCollator::OFstreamCollator
         UPstream::allocateCommunicator
         (
             localComm_,
-            identity(UPstream::nProcs(localComm_))
+            labelRange(UPstream::nProcs(localComm_))
         )
     )
 {}
@@ -335,10 +335,7 @@ Foam::OFstreamCollator::~OFstreamCollator()
         thread_.reset(nullptr);
     }
 
-    if (threadComm_ != -1)
-    {
-        UPstream::freeCommunicator(threadComm_);
-    }
+    UPstream::freeCommunicator(threadComm_);
 }
 
 

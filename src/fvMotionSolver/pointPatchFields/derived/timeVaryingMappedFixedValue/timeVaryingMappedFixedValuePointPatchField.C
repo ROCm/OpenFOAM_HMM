@@ -64,7 +64,7 @@ timeVaryingMappedFixedValuePointPatchField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchField<Type>(p, iF, dict, false),
+    fixedValuePointPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     setAverage_(dict.getOrDefault("setAverage", false)),
     perturb_(dict.getOrDefault("perturb", 1e-5)),
     fieldTableName_(iF.name()),
@@ -101,14 +101,7 @@ timeVaryingMappedFixedValuePointPatchField
         fieldTableName_
     );
 
-    if (dict.found("value"))
-    {
-        fixedValuePointPatchField<Type>::operator==
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         // Note: use evaluate to do updateCoeffs followed by a reset
         //       of the pointPatchField::updated_ flag. This is

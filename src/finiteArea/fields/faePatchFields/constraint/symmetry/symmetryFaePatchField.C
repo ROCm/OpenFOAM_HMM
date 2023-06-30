@@ -71,7 +71,7 @@ Foam::symmetryFaePatchField<Type>::symmetryFaePatchField
     const dictionary& dict
 )
 :
-    faePatchField<Type>(p, iF, dict)
+    faePatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
     if (!isType<symmetryFaPatch>(p))
     {

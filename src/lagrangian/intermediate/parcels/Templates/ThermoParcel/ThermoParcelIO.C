@@ -90,14 +90,14 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::ThermoParcel<ParcelType>::readFields(CloudType& c)
 {
-    const bool valid = c.size();
+    const bool readOnProc = c.size();
 
     ParcelType::readFields(c);
 
-    IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ), valid);
+    IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ), readOnProc);
     c.checkFieldIOobject(c, T);
 
-    IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::MUST_READ), valid);
+    IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::MUST_READ), readOnProc);
     c.checkFieldIOobject(c, Cp);
 
 
@@ -119,7 +119,7 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
     ParcelType::writeFields(c);
 
     const label np = c.size();
-    const bool valid = np;
+    const bool writeOnProc = c.size();
 
     IOField<scalar> T(c.fieldIOobject("T", IOobject::NO_READ), np);
     IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::NO_READ), np);
@@ -133,8 +133,8 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
         ++i;
     }
 
-    T.write(valid);
-    Cp.write(valid);
+    T.write(writeOnProc);
+    Cp.write(writeOnProc);
 }
 
 

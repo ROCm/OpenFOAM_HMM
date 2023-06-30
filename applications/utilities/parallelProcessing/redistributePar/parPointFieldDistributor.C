@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,7 +48,33 @@ Foam::parPointFieldDistributor::parPointFieldDistributor
     tgtMeshRef_(nullptr),
     distMapRef_(nullptr),
     patchPointMaps_(),
+    dummyHandler_(fileOperation::null()),
+    writeHandler_(dummyHandler_),
     isWriteProc_(isWriteProc)
+{
+    if (savePoints)
+    {
+        saveMeshPoints();
+    }
+}
+
+
+Foam::parPointFieldDistributor::parPointFieldDistributor
+(
+    const pointMesh& srcMesh,
+    const bool savePoints,
+    refPtr<fileOperation>& writeHandler
+)
+:
+    srcMesh_(srcMesh),
+    nOldPoints_(srcMesh.size()),
+    patchMeshPoints_(),
+    tgtMeshRef_(nullptr),
+    distMapRef_(nullptr),
+    patchPointMaps_(),
+    dummyHandler_(nullptr),
+    writeHandler_(writeHandler),
+    isWriteProc_(Switch::INVALID)
 {
     if (savePoints)
     {
@@ -72,7 +98,35 @@ Foam::parPointFieldDistributor::parPointFieldDistributor
     tgtMeshRef_(tgtMesh),
     distMapRef_(distMap),
     patchPointMaps_(),
+    dummyHandler_(fileOperation::null()),
+    writeHandler_(dummyHandler_),
     isWriteProc_(isWriteProc)
+{
+    if (savePoints)
+    {
+        saveMeshPoints();
+    }
+}
+
+
+Foam::parPointFieldDistributor::parPointFieldDistributor
+(
+    const pointMesh& srcMesh,
+    const pointMesh& tgtMesh,
+    const mapDistributePolyMesh& distMap,
+    const bool savePoints,
+    refPtr<fileOperation>& writeHandler
+)
+:
+    srcMesh_(srcMesh),
+    nOldPoints_(srcMesh.size()),
+    patchMeshPoints_(),
+    tgtMeshRef_(tgtMesh),
+    distMapRef_(distMap),
+    patchPointMaps_(),
+    dummyHandler_(nullptr),
+    writeHandler_(writeHandler),
+    isWriteProc_(Switch::INVALID)
 {
     if (savePoints)
     {

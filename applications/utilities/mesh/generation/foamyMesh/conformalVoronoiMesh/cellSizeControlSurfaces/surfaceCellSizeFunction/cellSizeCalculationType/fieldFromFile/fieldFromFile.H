@@ -38,7 +38,7 @@ SourceFiles
 
 #include "cellSizeCalculationType.H"
 #include "triSurfaceFields.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

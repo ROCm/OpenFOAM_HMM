@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,46 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volMesh.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::fvPatchField<Type>::readValueEntry
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = fvPatchFieldBase::patch();
+
+
+    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+    if (eptr)
+    {
+        Field<Type>::assign(*eptr, p.size());
+        return true;
+    }
+
+    if (IOobjectOption::isReadRequired(readOpt))
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entry 'value' : missing for patch " << p.name()
+            << " in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
+template<class Type>
+void Foam::fvPatchField<Type>::extrapolateInternal()
+{
+    fvPatchFieldBase::patch().patchInternalField(internalField_, *this);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -42,6 +82,20 @@ Foam::fvPatchField<Type>::fvPatchField
 )
 :
     fvPatchFieldBase(p),
+    Field<Type>(p.size()),
+    internalField_(iF)
+{}
+
+
+template<class Type>
+Foam::fvPatchField<Type>::fvPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, volMesh>& iF,
+    const word& patchType
+)
+:
+    fvPatchFieldBase(p, patchType),
     Field<Type>(p.size()),
     internalField_(iF)
 {}
@@ -66,11 +120,11 @@ Foam::fvPatchField<Type>::fvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const word& patchType
+    const Field<Type>& pfld
 )
 :
-    fvPatchFieldBase(p, patchType),
-    Field<Type>(p.size()),
+    fvPatchFieldBase(p),
+    Field<Type>(pfld),
     internalField_(iF)
 {}
 
@@ -80,11 +134,11 @@ Foam::fvPatchField<Type>::fvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
-    const Field<Type>& f
+    Field<Type>&& pfld
 )
 :
     fvPatchFieldBase(p),
-    Field<Type>(f),
+    Field<Type>(std::move(pfld)),
     internalField_(iF)
 {}
 
@@ -95,29 +149,14 @@ Foam::fvPatchField<Type>::fvPatchField
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     fvPatchFieldBase(p, dict),
     Field<Type>(p.size()),
     internalField_(iF)
 {
-    if (valueRequired)
-    {
-        const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-        if (hasValue)
-        {
-            Field<Type>::assign(*hasValue, p.size());
-        }
-        else
-        {
-            FatalIOErrorInFunction(dict)
-                << "Essential entry 'value' missing on patch "
-                << p.name() << endl
-                << exit(FatalIOError);
-        }
-    }
+    readValueEntry(dict, requireValue);
 }
 
 
@@ -137,7 +176,7 @@ Foam::fvPatchField<Type>::fvPatchField
     // For unmapped faces set to internal field value (zero-gradient)
     if (notNull(iF) && mapper.hasUnmapped())
     {
-        fvPatchField<Type>::operator=(this->patchInternalField());
+        this->extrapolateInternal();
     }
     this->map(ptf, mapper);
 }
@@ -193,9 +232,9 @@ Foam::fvPatchField<Type>::patchInternalField() const
 
 
 template<class Type>
-void Foam::fvPatchField<Type>::patchInternalField(Field<Type>& pif) const
+void Foam::fvPatchField<Type>::patchInternalField(Field<Type>& pfld) const
 {
-    patch().patchInternalField(internalField_, pif);
+    patch().patchInternalField(internalField_, pfld);
 }
 
 
@@ -209,7 +248,7 @@ void Foam::fvPatchField<Type>::autoMap
 
     if (!this->size() && !mapper.distributed())
     {
-        f.setSize(mapper.size());
+        f.resize_nocopy(mapper.size());
         if (f.size())
         {
             f = this->patchInternalField();
@@ -551,9 +590,5 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvPatchField<Type>& ptf)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "fvPatchFieldNew.C"
 
 // ************************************************************************* //

@@ -23,18 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::cellIndList
-
-Description
-    An IndirectList of cells.
-
-Typedef
-    Foam::cellUIndList
-
-Description
-    A UIndirectList of cells.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_cellIndList_H
@@ -48,7 +36,10 @@ Description
 
 namespace Foam
 {
+    //! IndirectList of cell
     typedef IndirectList<cell>  cellIndList;
+
+    //! UIndirectList of cell
     typedef UIndirectList<cell> cellUIndList;
 }
 

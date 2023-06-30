@@ -100,8 +100,8 @@ void Foam::adaptiveSolver::solve
     // If the error is small increase the step-size
     if (err > pow(maxScale_/safeScale_, -1.0/alphaInc_))
     {
-        dxTry =
-            min(max(safeScale_*pow(err, -alphaInc_), minScale_), maxScale_)*dx;
+        scalar scale = safeScale_*pow(err, -alphaInc_);
+        dxTry = clamp(scale, minScale_, maxScale_)*dx;
     }
     else
     {

@@ -36,16 +36,15 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Bezier_H
-#define Bezier_H
+#ifndef Foam_Bezier_H
+#define Foam_Bezier_H
 
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
 #include "pointFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "volPointInterpolation.H"
-#include "PrimitivePatchInterpolation.H"
-#include "PrimitivePatch.H"
+#include "primitivePatchInterpolation.H"
 #include "deltaBoundary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

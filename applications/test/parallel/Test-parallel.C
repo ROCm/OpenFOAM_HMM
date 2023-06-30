@@ -67,54 +67,24 @@ void testMapDistribute()
     labelList nSend(Pstream::nProcs(), Zero);
     forAll(complexData, i)
     {
-        const label procI = complexData[i].first();
-        nSend[procI]++;
+        const label proci = complexData[i].first();
+        nSend[proci]++;
     }
 
     // Collect items to be sent
     labelListList sendMap(Pstream::nProcs());
-    forAll(sendMap, procI)
+    forAll(sendMap, proci)
     {
-        sendMap[procI].setSize(nSend[procI]);
+        sendMap[proci].resize_nocopy(nSend[proci]);
+        nSend[proci] = 0;
     }
-    nSend = 0;
     forAll(complexData, i)
     {
-        const label procI = complexData[i].first();
-        sendMap[procI][nSend[procI]++] = i;
+        const label proci = complexData[i].first();
+        sendMap[proci][nSend[proci]++] = i;
     }
 
-    // Sync how many to send
-    labelList nRecv;
-    Pstream::exchangeSizes(sendMap, nRecv);
-
-    // Collect items to be received
-    labelListList recvMap(Pstream::nProcs());
-    forAll(recvMap, procI)
-    {
-        recvMap[procI].setSize(nRecv[procI]);
-    }
-
-    label constructSize = 0;
-    // Construct with my own elements first
-    forAll(recvMap[Pstream::myProcNo()], i)
-    {
-        recvMap[Pstream::myProcNo()][i] = constructSize++;
-    }
-    // Construct from other processors
-    forAll(recvMap, procI)
-    {
-        if (procI != Pstream::myProcNo())
-        {
-            forAll(recvMap[procI], i)
-            {
-                recvMap[procI][i] = constructSize++;
-            }
-        }
-    }
-
-    // Construct distribute map (destructively)
-    mapDistribute map(constructSize, std::move(sendMap), std::move(recvMap));
+    mapDistribute map(std::move(sendMap));
 
     // Distribute complexData
     map.distribute(complexData);

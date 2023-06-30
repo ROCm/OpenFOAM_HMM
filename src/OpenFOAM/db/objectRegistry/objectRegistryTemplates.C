@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -546,9 +546,9 @@ const Type& Foam::objectRegistry::lookupObject
 {
     const_iterator iter = cfind(name);
 
-    if (iter.found())
+    if (iter.good())
     {
-        const Type* ptr = dynamic_cast<const Type*>(iter());
+        const Type* ptr = dynamic_cast<const Type*>(iter.val());
 
         if (ptr)
         {
@@ -592,6 +592,52 @@ Type& Foam::objectRegistry::lookupObjectRef
     // The above will already fail if things didn't work
 
     return const_cast<Type&>(ref);
+}
+
+
+template<class Type>
+bool Foam::objectRegistry::cacheTemporaryObject(Type& obj) const
+{
+    bool ok = false;
+
+    readCacheTemporaryObjects();
+
+    if (cacheTemporaryObjects_.size())
+    {
+        temporaryObjects_.insert(obj.name());
+
+        auto iter = cacheTemporaryObjects_.find(obj.name());
+
+        // Cache object if is in the cacheTemporaryObjects list
+        // and hasn't been cached yet
+        if (iter.good() && iter.val().first() == false)
+        {
+            iter.val().first() = true;
+            iter.val().second() = true;
+
+            Type* cachedPtr = obj.db().template getObjectPtr<Type>(obj.name());
+
+            // Remove any name collisions from the cache
+            if (cachedPtr && cachedPtr != &obj && cachedPtr->ownedByRegistry())
+            {
+                deleteCachedObject(cachedPtr);
+            }
+
+            if (debug)
+            {
+                Info<< "Caching " << obj.name()
+                    << " of type " << obj.type() << endl;
+            }
+
+            obj.release();
+            obj.checkOut();
+            regIOobject::store(new Type(std::move(obj)));
+
+            ok = true;
+        }
+    }
+
+    return ok;
 }
 
 

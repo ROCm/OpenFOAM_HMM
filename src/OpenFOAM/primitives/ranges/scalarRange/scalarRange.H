@@ -56,7 +56,6 @@ namespace Foam
 
 // Forward Declarations
 class scalarRange;
-class Ostream;
 template<class T> class MinMax;
 
 Ostream& operator<<(Ostream& os, const scalarRange& range);
@@ -68,7 +67,7 @@ Ostream& operator<<(Ostream& os, const scalarRange& range);
 
 class scalarRange
 {
-    //- Enumeration defining type of range test to use
+    //- The type of range test to use
     enum testType
     {
         NONE = 0,   //!< Empty or invalid (inverse) range. Never matches.
@@ -189,17 +188,15 @@ public:
         //- True if range is non-empty.
         inline bool good() const noexcept;
 
-        //- True if range is non-empty.
-        bool valid() const noexcept { return good(); }
-
         //- True if the range bounds represent a single value.
         inline bool single() const noexcept;
 
         //- The min value of the range.
-        inline scalar min() const noexcept;
+        scalar min() const noexcept { return min_; }
 
         //- The max value of the range.
-        inline scalar max() const noexcept;
+        scalar max() const noexcept { return max_; }
+
 
         //- A representative (average) value for the range.
         //  For GE, LE bounds it is the min/max value, respectively.
@@ -209,14 +206,13 @@ public:
         inline bool contains(const scalar val) const;
 
         //- True if the value is matched by the condition
-        inline bool match(const scalar val) const;
+        bool match(const scalar value) const { return contains(value); }
 
 
     // Member Operators
 
         //- For use as a predicate, same as contains(), match()
-        bool operator()(const scalar val) const { return match(val); }
-
+        bool operator()(const scalar value) const { return contains(value); }
 
         inline constexpr bool operator==(const scalarRange& rhs) const noexcept;
         inline constexpr bool operator!=(const scalarRange& rhs) const noexcept;
@@ -226,6 +222,12 @@ public:
 
         //- Print information about the range.
         friend Ostream& operator<<(Ostream& os, const scalarRange& range);
+
+
+    // Housekeeping
+
+        //- Same as good() or !empty()
+        bool valid() const noexcept { return good(); }
 };
 
 

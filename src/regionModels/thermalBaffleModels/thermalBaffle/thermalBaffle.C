@@ -83,7 +83,7 @@ void thermalBaffle::solveEnergy()
                 regionMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             regionMesh(),
             dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

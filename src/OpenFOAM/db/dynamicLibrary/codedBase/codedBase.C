@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,7 +103,7 @@ Foam::codedBase::codeDict
     const word& dictName
 )
 {
-    IOdictionary* dictptr = obr.getObjectPtr<IOdictionary>(dictName);
+    auto* dictptr = obr.getObjectPtr<IOdictionary>(dictName);
 
     if (!dictptr)
     {
@@ -114,8 +114,9 @@ Foam::codedBase::codeDict
                 dictName,
                 obr.time().system(),
                 obr,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE
+                IOobject::READ_MODIFIED,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         );
 
@@ -212,27 +213,31 @@ void Foam::codedBase::createLibrary
     const dynamicCodeContext& context
 ) const
 {
-    bool create =
-        Pstream::master()
-     || (IOobject::fileModificationSkew <= 0);   // not NFS
+    // No library?
+    // The overall master should compile it (so only it needs a compiler) and
+    // - see if it appears at the other processors
+    // - or copy it across if it does not
 
-    if (create)
+    // Indicates NFS filesystem
+    const bool isNFS = (IOobject::fileModificationSkew > 0);
+
+    if
+    (
+        (UPstream::master() || !isNFS)
+     && !dynCode.upToDate(context)
+    )
     {
-        // Write files for new library
-        if (!dynCode.upToDate(context))
+        // Filter with this context
+        dynCode.reset(context);
+
+        this->prepare(dynCode, context);
+
+        if (!dynCode.copyOrCreateFiles(true))
         {
-            // filter with this context
-            dynCode.reset(context);
-
-            this->prepare(dynCode, context);
-
-            if (!dynCode.copyOrCreateFiles(true))
-            {
-                FatalIOErrorInFunction(context.dict())
-                    << "Failed writing files for" << nl
-                    << dynCode.libRelPath() << nl
-                    << exit(FatalIOError);
-            }
+            FatalIOErrorInFunction(context.dict())
+                << "Failed writing files for" << nl
+                << dynCode.libRelPath() << nl
+                << exit(FatalIOError);
         }
 
         if (!dynCode.wmakeLibso())
@@ -243,97 +248,15 @@ void Foam::codedBase::createLibrary
         }
     }
 
-
-    // all processes must wait for compile to finish
-    if (IOobject::fileModificationSkew > 0)
+    if (isNFS)
     {
-        //- Since the library has only been compiled on the master the
-        //  other nodes need to pick this library up through NFS
-        //  We do this by just polling a few times using the
-        //  fileModificationSkew.
-
-        const fileName libPath = dynCode.libPath();
-
-        off_t mySize = Foam::fileSize(libPath);
-        off_t masterSize = mySize;
-        Pstream::broadcast(masterSize);
-
-        for
-        (
-            label iter = 0;
-            iter < IOobject::maxFileModificationPolls;
-            ++iter
-        )
-        {
-            DebugPout
-                << "on processor " << Pstream::myProcNo()
-                << " have masterSize:" << masterSize
-                << " and localSize:" << mySize
-                << endl;
-
-            if (mySize == masterSize)
-            {
-                break;
-            }
-            else if (mySize > masterSize)
-            {
-                FatalIOErrorInFunction(context.dict())
-                    << "Excessive size when reading (NFS mounted) library "
-                    << nl << libPath << nl
-                    << "on processor " << Pstream::myProcNo()
-                    << " detected size " << mySize
-                    << " whereas master size is " << masterSize
-                    << " bytes." << nl
-                    << "If your case is NFS mounted increase"
-                    << " fileModificationSkew or maxFileModificationPolls;"
-                    << nl << "If your case is not NFS mounted"
-                    << " (so distributed) set fileModificationSkew"
-                    << " to 0"
-                    << exit(FatalIOError);
-            }
-            else
-            {
-                DebugPout
-                    << "Local file " << libPath
-                    << " not of same size (" << mySize
-                    << ") as master ("
-                    << masterSize << "). Waiting for "
-                    << IOobject::fileModificationSkew
-                    << " seconds." << endl;
-
-                Foam::sleep(IOobject::fileModificationSkew);
-
-                // Recheck local size
-                mySize = Foam::fileSize(libPath);
-            }
-        }
-
-
-        // Finished doing iterations. Do final check
-        if (mySize != masterSize)
-        {
-            FatalIOErrorInFunction(context.dict())
-                << "Cannot read (NFS mounted) library " << nl
-                << libPath << nl
-                << "on processor " << Pstream::myProcNo()
-                << " detected size " << mySize
-                << " whereas master size is " << masterSize
-                << " bytes." << nl
-                << "If your case is NFS mounted increase"
-                << " fileModificationSkew or maxFileModificationPolls;"
-                << nl << "If your case is not NFS mounted"
-                << " (so distributed) set fileModificationSkew"
-                << " to 0"
-                << exit(FatalIOError);
-        }
-
-        DebugPout
-            << "on processor " << Pstream::myProcNo()
-            << " after waiting: have masterSize:" << masterSize
-            << " and localSize:" << mySize << endl;
+        // Wait for compile to finish before attempting filesystem polling
+        UPstream::barrier(UPstream::worldComm);
     }
 
-    Pstream::reduceOr(create);  // MPI barrier
+    // Broadcast distributed...
+
+    dynamicCode::waitForFile(dynCode.libPath(), context.dict());
 }
 
 
@@ -390,16 +313,19 @@ void Foam::codedBase::updateLibrary
     this->clearRedirect();
 
     // May need to unload old library
-    unloadLibrary
-    (
-        oldLibPath_,
-        dlLibraryTable::basename(oldLibPath_),
-        context
-    );
+    unloadLibrary(oldLibPath_, dlLibraryTable::basename(oldLibPath_), context);
 
     // Try loading an existing library (avoid compilation when possible)
-    if (!loadLibrary(libPath, dynCode.codeName(), context))
+    void* lib = loadLibrary(libPath, dynCode.codeName(), context);
+
+    if (returnReduceOr(lib == nullptr))
     {
+        if (lib)
+        {
+            // Ensure consistency
+            unloadLibrary(libPath, dlLibraryTable::basename(libPath), context);
+        }
+
         createLibrary(dynCode, context);
 
         loadLibrary(libPath, dynCode.codeName(), context);

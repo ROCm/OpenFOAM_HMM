@@ -38,7 +38,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(p, iF),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {}
 
 
@@ -51,25 +51,21 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(p, iF),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
-    if (dict.found("freestreamValue"))
+    if
+    (
+        freestreamValue().assign
+        (
+            "freestreamValue", dict, p.size(), IOobjectOption::LAZY_READ
+        )
+    )
     {
-        freestreamValue() =
-            Field<Type>("freestreamValue", dict, p.size());
-
-        if (dict.found("value"))
-        {
-            fvPatchField<Type>::operator=
-            (
-                Field<Type>("value", dict, p.size())
-            );
-        }
-        else
+        if (!this->readValueEntry(dict))
         {
             fvPatchField<Type>::operator=(freestreamValue());
         }
@@ -82,10 +78,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 
         // Force user to supply an initial value
         // - we do not know if the supplied BC has all dependencies available
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        this->readValueEntry(dict, IOobjectOption::MUST_READ);
     }
 }
 
@@ -100,7 +93,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(ptf, p, iF, mapper),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
     if (ptf.freestreamBCPtr_)
     {
@@ -117,7 +110,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(ptf),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
     if (ptf.freestreamBCPtr_)
     {
@@ -134,7 +127,7 @@ Foam::freestreamFvPatchField<Type>::freestreamFvPatchField
 )
 :
     inletOutletFvPatchField<Type>(ptf, iF),
-    freestreamBCPtr_()
+    freestreamBCPtr_(nullptr)
 {
     if (ptf.freestreamBCPtr_)
     {
@@ -167,7 +160,7 @@ void Foam::freestreamFvPatchField<Type>::rmap
 
     const auto& fsptf = refCast<const freestreamFvPatchField<Type>>(ptf);
 
-    if (fsptf.freestreamBCPtr_)
+    if (freestreamBCPtr_ && fsptf.freestreamBCPtr_)
     {
         freestreamBCPtr_->rmap(fsptf.freestreamBCPtr_(), addr);
     }
@@ -208,7 +201,7 @@ void Foam::freestreamFvPatchField<Type>::write(Ostream& os) const
     {
         freestreamValue().writeEntry("freestreamValue", os);
     }
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

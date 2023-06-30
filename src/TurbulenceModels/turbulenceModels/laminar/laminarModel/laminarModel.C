@@ -100,9 +100,9 @@ Foam::laminarModel<BasicTurbulenceModel>::New
             IOobject::groupName(propertiesName, alphaRhoPhi.group()),
             U.time().constant(),
             U.db(),
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false // Do not register
+            IOobject::NO_REGISTER
         )
     );
 
@@ -198,7 +198,7 @@ Foam::laminarModel<BasicTurbulenceModel>::nut() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(dimViscosity, Zero)
@@ -258,7 +258,7 @@ Foam::laminarModel<BasicTurbulenceModel>::k() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(sqr(this->U_.dimensions()), Zero)
@@ -279,7 +279,7 @@ Foam::laminarModel<BasicTurbulenceModel>::epsilon() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(sqr(this->U_.dimensions())/dimTime, Zero)
@@ -300,7 +300,7 @@ Foam::laminarModel<BasicTurbulenceModel>::omega() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(dimless/dimTime, Zero)
@@ -321,7 +321,7 @@ Foam::laminarModel<BasicTurbulenceModel>::R() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedSymmTensor(sqr(this->U_.dimensions()), Zero)

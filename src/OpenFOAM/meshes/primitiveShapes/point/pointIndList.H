@@ -23,18 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::pointIndList
-
-Description
-    An IndirectList of points.
-
-Typedef
-    Foam::pointUIndList
-
-Description
-    A UIndirectList of points.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_pointIndList_H
@@ -48,7 +36,10 @@ Description
 
 namespace Foam
 {
+    //! IndirectList of point
     typedef IndirectList<point>  pointIndList;
+
+    //! UIndirectList of point
     typedef UIndirectList<point> pointUIndList;
 }
 

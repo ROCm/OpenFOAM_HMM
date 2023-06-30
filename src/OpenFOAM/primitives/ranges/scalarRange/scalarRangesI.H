@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,17 +35,11 @@ inline Foam::scalarRanges::scalarRanges(const std::string& str, bool report)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::scalarRanges::contains(const scalar value) const
-{
-    return match(value);
-}
-
-
-inline bool Foam::scalarRanges::match(const scalar value) const
+inline bool Foam::scalarRanges::contains(const scalar val) const
 {
     for (const scalarRange& range : *this)
     {
-        if (range.match(value))
+        if (range.contains(val))
         {
             return true;
         }

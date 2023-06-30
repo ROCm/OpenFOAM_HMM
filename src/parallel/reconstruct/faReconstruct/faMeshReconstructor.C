@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "globalIndex.H"
 #include "globalMeshData.H"
 #include "edgeHashes.H"
+#include "ignoreFaPatch.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -335,7 +336,7 @@ void Foam::faMeshReconstructor::calcAddressing
 
             const auto fnd = globalEdgeMapping.cfind(globalEdge);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 faEdgeProcAddr_[edgei] = fnd.val();
             }
@@ -370,6 +371,12 @@ void Foam::faMeshReconstructor::calcAddressing
     forAll(singlePatchEdgeLabels_, patchi)
     {
         const faPatch& fap = procMesh_.boundary()[patchi];
+
+        if (isA<ignoreFaPatch>(fap))
+        {
+            // These are not real edges
+            continue;
+        }
 
         labelList& patchEdgeLabels = singlePatchEdgeLabels_[patchi];
         patchEdgeLabels = fap.edgeLabels();
@@ -409,7 +416,7 @@ void Foam::faMeshReconstructor::calcAddressing
                 const label globalEdgei = faEdgeProcAddr_[patchEdgei];
 
                 const auto fnd = remapGlobal.cfind(globalEdgei);
-                if (fnd.found())
+                if (fnd.good())
                 {
                     newEdgeProcAddr[edgei] = fnd.val();
                     ++edgei;
@@ -490,26 +497,37 @@ void Foam::faMeshReconstructor::createMesh()
 
     // Add in non-processor boundary patches
     faPatchList completePatches(singlePatchEdgeLabels_.size());
+    label nPatches = 0;
     forAll(completePatches, patchi)
     {
         const labelList& patchEdgeLabels = singlePatchEdgeLabels_[patchi];
 
         const faPatch& fap = procMesh_.boundary()[patchi];
 
+        if (isA<ignoreFaPatch>(fap))
+        {
+            // These are not real edges
+            continue;
+        }
+
         const label neiPolyPatchId = fap.ngbPolyPatchIndex();
 
         completePatches.set
         (
-            patchi,
+            nPatches,
             fap.clone
             (
                 completeMesh.boundary(),
                 patchEdgeLabels,
-                patchi,  // index
+                nPatches,  // index
                 neiPolyPatchId
             )
         );
+
+        ++nPatches;
     }
+
+    completePatches.resize(nPatches);
 
     // Serial mesh - no parallel communication
 
@@ -568,7 +586,7 @@ Foam::faMeshReconstructor::faMeshReconstructor
     // Use 'headerClassName' for checking
     bool fileOk
     (
-        (fvFaceProcAddr.readOpt() != IOobjectOption::NO_READ)
+        fvFaceProcAddr.isAnyRead()
      && fvFaceProcAddr.isHeaderClass<labelIOList>()
     );
 
@@ -672,7 +690,7 @@ void Foam::faMeshReconstructor::writeAddressing(const word& timeName) const
         procMesh_.thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false  // not registered
+        IOobject::NO_REGISTER
     );
 
     // boundaryProcAddressing
@@ -703,13 +721,14 @@ void Foam::faMeshReconstructor::writeMesh(const word& timeName) const
 {
     const faMesh& fullMesh = this->mesh();
 
-    const bool oldDistributed = fileHandler().distributed();
-    auto oldHandler = fileHandler(fileOperation::NewUncollated());
-    fileHandler().distributed(true);
+    refPtr<fileOperation> writeHandler(fileOperation::NewUncollated());
 
-    if (Pstream::master())
+    auto oldHandler = fileOperation::fileHandler(writeHandler);
+    const bool oldDistributed = fileHandler().distributed(true);
+
+    if (UPstream::master())
     {
-        const bool oldParRun = Pstream::parRun(false);
+        const bool oldParRun = UPstream::parRun(false);
 
         IOobject io(fullMesh.boundary());
 
@@ -718,15 +737,12 @@ void Foam::faMeshReconstructor::writeMesh(const word& timeName) const
 
         fullMesh.boundary().write();
 
-        Pstream::parRun(oldParRun);
+        UPstream::parRun(oldParRun);
     }
 
-    // Restore old settings
-    if (oldHandler)
-    {
-        fileHandler(std::move(oldHandler));
-    }
+    // Restore settings
     fileHandler().distributed(oldDistributed);
+    (void) fileOperation::fileHandler(oldHandler);
 }
 
 

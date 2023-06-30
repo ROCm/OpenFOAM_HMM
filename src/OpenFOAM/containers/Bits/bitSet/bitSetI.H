@@ -518,18 +518,6 @@ inline unsigned int Foam::bitSet::count(const bool on) const
 }
 
 
-inline bool Foam::bitSet::test(const label pos) const
-{
-    return get(pos);
-}
-
-
-inline bool Foam::bitSet::found(const label pos) const
-{
-    return get(pos);
-}
-
-
 inline Foam::labelList Foam::bitSet::sortedToc() const
 {
     return toc();

@@ -119,18 +119,19 @@ void Foam::setsToFaceZone::applyToSet
         {
             if (verbose_)
             {
+                Info<< "    Adding all faces from face set: "
+                    << faceSetName_ << "; orientation pointing ";
+
                 if (flip_)
                 {
-                    Info<< "    Adding all faces from faceSet " << faceSetName_
-                        << "; orientation pointing into cellSet "
-                        << cellSetName_ << " ..." << endl;
+                    Info<< "into";
                 }
                 else
                 {
-                    Info<< "    Adding all faces from faceSet " << faceSetName_
-                        << "; orientation pointing away from cellSet "
-                        << cellSetName_ << " ..." << endl;
+                    Info<< "away from";
                 }
+
+                Info<< " cell set: " << cellSetName_ << " ..." << endl;
             }
 
             // Load the sets
@@ -202,8 +203,8 @@ void Foam::setsToFaceZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Removing all faces from faceSet " << faceSetName_
-                    << " ..." << endl;
+                Info<< "    Removing all faces from face set: "
+                    << faceSetName_ << " ..." << endl;
             }
 
             // Load the set

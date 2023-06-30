@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +29,7 @@ License
 #include "sixDoFRigidBodyMotionAxisConstraint.H"
 #include "addToRunTimeSelectionTable.H"
 #include "sixDoFRigidBodyMotion.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -47,6 +49,42 @@ namespace sixDoFRigidBodyMotionConstraints
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::label Foam::sixDoFRigidBodyMotionConstraints::axis::rotationSector
+(
+    const vector& oldDir,
+    const vector& newDir
+) const
+{
+    const scalar thetaDir = (oldDir ^ newDir) & axis_;
+
+    if (equal(thetaDir, 0))
+    {
+        return 0;
+    }
+
+    return label(sign(thetaDir));
+}
+
+
+bool Foam::sixDoFRigidBodyMotionConstraints::axis::calcDir
+(
+    const vector& fm,
+    const bool rotationSector
+) const
+{
+    const scalar fmDir = axis_ & fm;
+
+    if (equal(fmDir, 0))
+    {
+        return rotationSector;
+    }
+
+    return (label(sign(fmDir)) == 1) ? true : false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::sixDoFRigidBodyMotionConstraints::axis::axis
@@ -57,16 +95,14 @@ Foam::sixDoFRigidBodyMotionConstraints::axis::axis
 )
 :
     sixDoFRigidBodyMotionConstraint(name, sDoFRBMCDict, motion),
-    axis_()
+    refQ_(),
+    axis_(),
+    maxCWThetaPtr_(),
+    maxCCWThetaPtr_(),
+    degrees_(false)
 {
     read(sDoFRBMCDict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sixDoFRigidBodyMotionConstraints::axis::~axis()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -83,7 +119,115 @@ void Foam::sixDoFRigidBodyMotionConstraints::axis::constrainRotation
     pointConstraint& pc
 ) const
 {
-    pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
+    if (!(maxCWThetaPtr_ && maxCCWThetaPtr_))
+    {
+        pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
+        return;
+    }
+
+
+    // Calculate principal directions of the body
+    const vector refDir
+    (
+        rotationTensor(vector(1, 0 ,0), axis_) & vector(0, 1, 0)
+    );
+    const vector oldDir
+    (
+        (refQ_ & refDir).removeCollinear(axis_).normalise()
+    );
+    const vector newDir
+    (
+        (motion().orientation() & refDir).removeCollinear(axis_).normalise()
+    );
+
+
+    // Find the index of the rotation sector that the body resides
+    const label rotationSectorIndex = rotationSector(oldDir, newDir);
+
+    if (!rotationSectorIndex)
+    {
+        // The body resides at the reference orientation
+        pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
+        return;
+    }
+
+    const bool rotationSector = (rotationSectorIndex == 1) ? true : false;
+
+
+    // Calculate the directions of total momentum and force acting on the body
+    const bool angularMomentumDir =
+        calcDir
+        (
+            motion().state().pi(),
+            rotationSector
+        );
+    const bool torqueDir = calcDir(motion().state().tau(), rotationSector);
+
+
+    // Calculate the rotation angle of the body wrt the reference orientation
+    const scalar theta = mag(acos(min(oldDir & newDir, scalar(1))));
+
+
+    // Calculate maximum clockwise and counterclockwise rotation angles
+    const scalar t = motion().time().timeOutputValue();
+    const scalar maxCWTheta =
+        degrees_
+      ? mag(degToRad(maxCWThetaPtr_->value(t)))
+      : mag(maxCWThetaPtr_->value(t));
+
+    const scalar maxCCWTheta =
+        degrees_
+      ? mag(degToRad(maxCCWThetaPtr_->value(t)))
+      : mag(maxCCWThetaPtr_->value(t));
+
+
+    // Apply the constraints according to various conditions
+    if
+    (
+        (rotationSector && (theta < maxCCWTheta))
+     || (!rotationSector && (theta < maxCWTheta))
+    )
+    {
+        pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
+    }
+    else
+    {
+        if (rotationSector == angularMomentumDir)
+        {
+            const scalar magPi = mag(motion().state().pi());
+
+            if (equal(magPi, scalar(0)) && rotationSector != torqueDir)
+            {
+                pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
+            }
+            else
+            {
+                // Constrain all rotational motions
+                pc.combine(pointConstraint(Tuple2<label, vector>(3, Zero)));
+            }
+        }
+        else
+        {
+            // If there is a difference between the directions of
+            // body rotation and of torque, release the body
+            pc.combine(pointConstraint(Tuple2<label, vector>(2, axis_)));
+        }
+    }
+
+
+    if (motion().report())
+    {
+        Info
+            << " old direction = " << oldDir << nl
+            << " new direction = " << newDir << nl
+            << " rotationSector = " << rotationSector << nl
+            << " theta = " << sign((oldDir ^ newDir) & axis_)*theta << nl
+            << " torque = " << motion().state().tau() << nl
+            << " torque dir = " << torqueDir << nl
+            << " angular momentum = " << motion().state().pi() << nl
+            << " angular momentum dir = " << angularMomentumDir << nl
+            << endl;
+    }
 }
 
 
@@ -92,21 +236,76 @@ bool Foam::sixDoFRigidBodyMotionConstraints::axis::read
     const dictionary& sDoFRBMCDict
 )
 {
-    sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict);
+    if (!sixDoFRigidBodyMotionConstraint::read(sDoFRBMCDict))
+    {
+        return false;
+    }
 
     sDoFRBMCCoeffs_.readEntry("axis", axis_);
 
-    scalar magFixedAxis(mag(axis_));
+    axis_.normalise();
 
-    if (magFixedAxis > VSMALL)
+    if (mag(axis_) < VSMALL)
     {
-        axis_ /= magFixedAxis;
+        FatalIOErrorInFunction(sDoFRBMCDict)
+            << "The entry 'axis' cannot have zero length: " << axis_
+            << exit(FatalIOError);
     }
-    else
+
+
+    if (sDoFRBMCCoeffs_.found("thetaUnits"))
     {
-        FatalErrorInFunction
-            << "axis has zero length"
-            << abort(FatalError);
+        const word thetaUnits(sDoFRBMCCoeffs_.getWord("thetaUnits"));
+
+        if (thetaUnits == "degrees")
+        {
+            degrees_ = true;
+        }
+        else if (thetaUnits == "radians")
+        {
+            degrees_ = false;
+        }
+        else
+        {
+            FatalIOErrorInFunction(sDoFRBMCCoeffs_)
+                << "The units of thetaUnits can be either degrees or radians"
+                << exit(FatalIOError);
+        }
+
+
+        maxCWThetaPtr_.reset
+        (
+            Function1<scalar>::New
+            (
+                "maxClockwiseTheta",
+                sDoFRBMCCoeffs_,
+                &motion().time()
+            )
+        );
+
+        maxCCWThetaPtr_.reset
+        (
+            Function1<scalar>::New
+            (
+                "maxCounterclockwiseTheta",
+                sDoFRBMCCoeffs_,
+                &motion().time()
+            )
+        );
+
+
+        refQ_ =
+            sDoFRBMCCoeffs_.getOrDefault<tensor>("referenceOrientation", I);
+
+        if (mag(mag(refQ_) - sqrt(3.0)) > ROOTSMALL)
+        {
+            FatalIOErrorInFunction(sDoFRBMCCoeffs_)
+                << "The entry 'referenceOrientation' " << refQ_
+                << " is not a rotation tensor. "
+                << "mag(referenceOrientation) - sqrt(3) = "
+                << mag(refQ_) - sqrt(3.0) << nl
+                << exit(FatalIOError);
+        }
     }
 
     return true;
@@ -119,6 +318,32 @@ void Foam::sixDoFRigidBodyMotionConstraints::axis::write
 ) const
 {
     os.writeEntry("axis", axis_);
+
+
+    if (maxCWThetaPtr_ && maxCCWThetaPtr_)
+    {
+        if (degrees_)
+        {
+            os.writeEntry("thetaUnits", "degrees");
+        }
+        else
+        {
+            os.writeEntry("thetaUnits", "radians");
+        }
+
+        if (maxCWThetaPtr_)
+        {
+            maxCWThetaPtr_->writeData(os);
+        }
+
+        if (maxCCWThetaPtr_)
+        {
+            maxCCWThetaPtr_->writeData(os);
+        }
+
+        os.writeEntry("referenceOrientation", refQ_);
+    }
 }
+
 
 // ************************************************************************* //

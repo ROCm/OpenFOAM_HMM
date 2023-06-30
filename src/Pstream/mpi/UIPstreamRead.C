@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,14 +31,164 @@ License
 #include "profilingPstream.H"
 #include "IOstreams.H"
 
-#include <mpi.h>
+// FUTURE? probe and receive message
+// - as of 2023-06 appears to be broken with INTELMPI + PMI-2 (slurm)
+//   and perhaps other places so currently avoid
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+// General blocking/non-blocking MPI receive, optionally with probed
+// message information.
+static Foam::label UPstream_mpi_receive
+(
+    const Foam::UPstream::commsTypes commsType,
+    char* buf,
+    const std::streamsize bufSize,
+    const int fromProcNo,
+    const int tag,
+    const Foam::label communicator,
+    Foam::UPstream::Request* req
+)
+{
+    using namespace Foam;
+
+    PstreamGlobals::reset_request(req);
+
+    if (UPstream::debug)
+    {
+        Pout<< "UIPstream::read : starting read from:" << fromProcNo
+            << " tag:" << tag << " comm:" << communicator
+            << " wanted size:" << label(bufSize)
+            << " commsType:" << UPstream::commsTypeNames[commsType]
+            << Foam::endl;
+    }
+    if (UPstream::warnComm >= 0 && communicator != UPstream::warnComm)
+    {
+        Pout<< "UIPstream::read : starting read from:" << fromProcNo
+            << " tag:" << tag << " comm:" << communicator
+            << " wanted size:" << label(bufSize)
+            << " commsType:" << UPstream::commsTypeNames[commsType]
+            << " warnComm:" << UPstream::warnComm
+            << Foam::endl;
+        error::printStack(Pout);
+    }
+
+    profilingPstream::beginTiming();
+
+    if
+    (
+        commsType == UPstream::commsTypes::blocking
+     || commsType == UPstream::commsTypes::scheduled
+    )
+    {
+        int returnCode = 0;
+        MPI_Status status;
+
+        {
+            returnCode = MPI_Recv
+            (
+                buf,
+                bufSize,
+                MPI_BYTE,
+                fromProcNo,
+                tag,
+                PstreamGlobals::MPICommunicators_[communicator],
+                &status
+            );
+        }
+
+        if (returnCode != MPI_SUCCESS)
+        {
+            FatalErrorInFunction
+                << "MPI_Recv cannot receive incoming message"
+                << Foam::abort(FatalError);
+            return 0;
+        }
+
+        profilingPstream::addGatherTime();
+
+        // Check size of message read
+
+        int messageSize;
+        MPI_Get_count(&status, MPI_BYTE, &messageSize);
+
+        if (UPstream::debug)
+        {
+            Pout<< "UIPstream::read : finished read from:" << fromProcNo
+                << " tag:" << tag << " read size:" << label(bufSize)
+                << " commsType:" << UPstream::commsTypeNames[commsType]
+                << Foam::endl;
+        }
+
+        if (messageSize > bufSize)
+        {
+            FatalErrorInFunction
+                << "buffer (" << label(bufSize)
+                << ") not large enough for incoming message ("
+                << messageSize << ')'
+                << Foam::abort(FatalError);
+        }
+
+        return messageSize;
+    }
+    else if (commsType == UPstream::commsTypes::nonBlocking)
+    {
+        int returnCode = 0;
+        MPI_Request request;
+
+        {
+            returnCode = MPI_Irecv
+            (
+                buf,
+                bufSize,
+                MPI_BYTE,
+                fromProcNo,
+                tag,
+                PstreamGlobals::MPICommunicators_[communicator],
+                &request
+            );
+        }
+
+        if (returnCode != MPI_SUCCESS)
+        {
+            FatalErrorInFunction
+                << "MPI_Irecv cannot start non-blocking receive"
+                << Foam::abort(FatalError);
+
+            return 0;
+        }
+
+        if (UPstream::debug)
+        {
+            Pout<< "UIPstream::read : started read from:" << fromProcNo
+                << " tag:" << tag << " read size:" << label(bufSize)
+                << " commsType:" << UPstream::commsTypeNames[commsType]
+                << " request:" <<
+                (req ? label(-1) : PstreamGlobals::outstandingRequests_.size())
+                << Foam::endl;
+        }
+
+        PstreamGlobals::push_request(request, req);
+        profilingPstream::addRequestTime();
+
+        // Assume the message will be completely received.
+        return bufSize;
+    }
+
+    FatalErrorInFunction
+        << "Unsupported communications type " << int(commsType)
+        << Foam::abort(FatalError);
+
+    return 0;
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::UIPstream::bufferIPCrecv()
 {
     // Called by constructor
-    if (debug)
+    if (UPstream::debug)
     {
         Pout<< "UIPstream IPC read buffer :"
             << " from:" << fromProcNo_
@@ -59,30 +209,31 @@ void Foam::UIPstream::bufferIPCrecv()
             fromProcNo_,
             tag_,
             PstreamGlobals::MPICommunicators_[comm_],
-            &status
+           &status
         );
+
         MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
-        // Assume these are from gathers ...
-        profilingPstream::addGatherTime();
+        profilingPstream::addProbeTime();
 
         recvBuf_.resize(messageSize_);
 
-        if (debug)
+        if (UPstream::debug)
         {
             Pout<< "UIPstream::UIPstream : probed size:"
                 << messageSize_ << Foam::endl;
         }
     }
 
-    messageSize_ = UIPstream::read
+    messageSize_ = UPstream_mpi_receive
     (
         commsType(),
-        fromProcNo_,
         recvBuf_.data(),
         recvBuf_.capacity(),
+        fromProcNo_,
         tag_,
-        comm_
+        comm_,
+        nullptr   // UPstream::Request
     );
 
     // Set addressed size. Leave actual allocated memory intact.
@@ -99,136 +250,25 @@ void Foam::UIPstream::bufferIPCrecv()
 
 Foam::label Foam::UIPstream::read
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     char* buf,
     const std::streamsize bufSize,
     const int tag,
-    const label communicator
+    const label communicator,
+    UPstream::Request* req
 )
 {
-    if (debug)
-    {
-        Pout<< "UIPstream::read : starting read from:" << fromProcNo
-            << " tag:" << tag << " comm:" << communicator
-            << " wanted size:" << label(bufSize)
-            << " commsType:" << UPstream::commsTypeNames[commsType]
-            << Foam::endl;
-    }
-    if (UPstream::warnComm != -1 && communicator != UPstream::warnComm)
-    {
-        Pout<< "UIPstream::read : starting read from:" << fromProcNo
-            << " tag:" << tag << " comm:" << communicator
-            << " wanted size:" << label(bufSize)
-            << " commsType:" << UPstream::commsTypeNames[commsType]
-            << " warnComm:" << UPstream::warnComm
-            << Foam::endl;
-        error::printStack(Pout);
-    }
-
-    profilingPstream::beginTiming();
-
-    if
+    return UPstream_mpi_receive
     (
-        commsType == commsTypes::blocking
-     || commsType == commsTypes::scheduled
-    )
-    {
-        MPI_Status status;
-
-        if
-        (
-            MPI_Recv
-            (
-                buf,
-                bufSize,
-                MPI_BYTE,
-                fromProcNo,
-                tag,
-                PstreamGlobals::MPICommunicators_[communicator],
-                &status
-            )
-        )
-        {
-            FatalErrorInFunction
-                << "MPI_Recv cannot receive incoming message"
-                << Foam::abort(FatalError);
-            return 0;
-        }
-
-        profilingPstream::addGatherTime();
-
-        // Check size of message read
-
-        int messageSize;
-        MPI_Get_count(&status, MPI_BYTE, &messageSize);
-
-        if (debug)
-        {
-            Pout<< "UIPstream::read : finished read from:" << fromProcNo
-                << " tag:" << tag << " read size:" << label(bufSize)
-                << " commsType:" << UPstream::commsTypeNames[commsType]
-                << Foam::endl;
-        }
-
-        if (messageSize > bufSize)
-        {
-            FatalErrorInFunction
-                << "buffer (" << label(bufSize)
-                << ") not large enough for incoming message ("
-                << messageSize << ')'
-                << Foam::abort(FatalError);
-        }
-
-        return messageSize;
-    }
-    else if (commsType == commsTypes::nonBlocking)
-    {
-        MPI_Request request;
-
-        if
-        (
-            MPI_Irecv
-            (
-                buf,
-                bufSize,
-                MPI_BYTE,
-                fromProcNo,
-                tag,
-                PstreamGlobals::MPICommunicators_[communicator],
-                &request
-            )
-        )
-        {
-            FatalErrorInFunction
-                << "MPI_Irecv cannot start non-blocking receive"
-                << Foam::abort(FatalError);
-
-            return 0;
-        }
-
-        profilingPstream::addWaitTime();
-
-        if (debug)
-        {
-            Pout<< "UIPstream::read : started read from:" << fromProcNo
-                << " tag:" << tag << " read size:" << label(bufSize)
-                << " commsType:" << UPstream::commsTypeNames[commsType]
-                << " request:" << PstreamGlobals::outstandingRequests_.size()
-                << Foam::endl;
-        }
-
-        PstreamGlobals::outstandingRequests_.push_back(request);
-
-        // Assume the message is completely received.
-        return bufSize;
-    }
-
-    FatalErrorInFunction
-        << "Unsupported communications type " << int(commsType)
-        << Foam::abort(FatalError);
-
-    return 0;
+        commsType,
+        buf,
+        bufSize,
+        fromProcNo,
+        tag,
+        communicator,
+        req
+    );
 }
 
 

@@ -91,7 +91,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::createAveragingWeights()
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false // do not register
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(dimless, Zero)
@@ -358,8 +358,8 @@ Foam::omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     omega_(),
     cornerWeights_()
 {
-    // apply zero-gradient condition on start-up
-    this->operator==(patchInternalField());
+    // Apply zero-gradient condition on start-up
+    this->extrapolateInternal();
 }
 
 
@@ -606,7 +606,7 @@ void Foam::omegaWallFunctionFvPatchScalarField::write
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

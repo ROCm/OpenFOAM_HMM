@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +30,20 @@ License
 
 namespace Foam
 {
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Zip together complexVector from real/imag vectors
+inline complexVector zip(const vector& realValue, const vector& imagValue)
+{
+    return complexVector
+    (
+        complex(realValue.x(), imagValue.x()),
+        complex(realValue.y(), imagValue.y()),
+        complex(realValue.z(), imagValue.z())
+    );
+}
+
 
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 

@@ -46,6 +46,7 @@ namespace Foam
 
 // Forward Declarations
 class Istream;
+class Ostream;
 
 /*---------------------------------------------------------------------------*\
                            Class pTraits Declaration
@@ -74,6 +75,14 @@ public:
             Base(is)
         {}
 };
+
+
+/*---------------------------------------------------------------------------*\
+                          Class zero_one Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Represents 0/1 range or concept. Used for tagged dispatch or clamping
+class zero_one {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

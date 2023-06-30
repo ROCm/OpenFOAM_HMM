@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -305,22 +305,43 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
 {
     // 1. Send all point info on processor patches.
 
-    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+    const globalMeshData& pData = mesh_.globalData();
+
+    // Which patches are processor patches
+    const labelList& procPatches = pData.processorPatches();
+
+    // Which processors this processor is connected to
+    const labelList& neighbourProcs = pData.topology().procNeighbours();
+
+    // Reset buffers
+    pBufs_.clear();
 
     DynamicList<Type> patchInfo;
     DynamicList<label> thisPoints;
     DynamicList<label> nbrPoints;
 
-    forAll(mesh_.globalData().processorPatches(), i)
+
+    // Reduce communication by only sending non-zero data,
+    // but with multiply-connected processor/processor
+    // (eg, processorCyclic) also need to send zero information
+    // to keep things synchronised
+
+    // If data needs to be sent (index corresponding to neighbourProcs)
+    List<bool> isActiveSend(neighbourProcs.size(), false);
+
+    for (const label patchi : procPatches)
     {
-        label patchi = mesh_.globalData().processorPatches()[i];
-        const processorPolyPatch& procPatch =
+        const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
+
+        const label nbrProci = procPatch.neighbProcNo();
 
         patchInfo.clear();
         patchInfo.reserve(procPatch.nPoints());
+
         thisPoints.clear();
         thisPoints.reserve(procPatch.nPoints());
+
         nbrPoints.clear();
         nbrPoints.reserve(procPatch.nPoints());
 
@@ -340,43 +361,72 @@ void Foam::PointEdgeWave<Type, TrackingData>::handleProcPatches()
         // Adapt for leaving domain
         leaveDomain(procPatch, thisPoints, patchInfo);
 
-        //if (debug)
-        //{
-        //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
-        //        << " communicating with " << procPatch.neighbProcNo()
-        //        << "  Sending:" << patchInfo.size() << endl;
-        //}
+        // Record if send is required (non-empty data)
+        if (!patchInfo.empty())
+        {
+            const label nbrIndex = neighbourProcs.find(nbrProci);
+            if (nbrIndex >= 0)  // Safety check (should be unnecessary)
+            {
+                isActiveSend[nbrIndex] = true;
+            }
+        }
 
-        UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
-        toNeighbour << nbrPoints << patchInfo;
+        // Send to neighbour
+        {
+            UOPstream toNbr(nbrProci, pBufs_);
+            toNbr << nbrPoints << patchInfo;
+
+            //if (debug & 2)
+            //{
+            //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
+            //        << "  send:" << patchInfo.size()
+            //        << " to proc:" << nbrProci << endl;
+            //}
+        }
     }
 
+    // Eliminate unnecessary sends
+    forAll(neighbourProcs, nbrIndex)
+    {
+        if (!isActiveSend[nbrIndex])
+        {
+            pBufs_.clearSend(neighbourProcs[nbrIndex]);
+        }
+    }
 
-    pBufs.finishedSends();
+    // Limit exchange to involved procs
+    pBufs_.finishedNeighbourSends(neighbourProcs);
+
 
     //
     // 2. Receive all point info on processor patches.
     //
 
-    forAll(mesh_.globalData().processorPatches(), i)
+    for (const label patchi : procPatches)
     {
-        label patchi = mesh_.globalData().processorPatches()[i];
-        const processorPolyPatch& procPatch =
+        const auto& procPatch =
             refCast<const processorPolyPatch>(mesh_.boundaryMesh()[patchi]);
 
-        List<Type> patchInfo;
-        labelList patchPoints;
+        const label nbrProci = procPatch.neighbProcNo();
 
+        if (!pBufs_.recvDataCount(nbrProci))
         {
-            UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
-            fromNeighbour >> patchPoints >> patchInfo;
+            // Nothing to receive
+            continue;
         }
 
-        //if (debug)
+        labelList patchPoints;
+        List<Type> patchInfo;
+        {
+            UIPstream is(nbrProci, pBufs_);
+            is >> patchPoints >> patchInfo;
+        }
+
+        //if (debug & 2)
         //{
         //    Pout<< "Processor patch " << patchi << ' ' << procPatch.name()
-        //        << " communicating with " << procPatch.neighbProcNo()
-        //        << "  Received:" << patchInfo.size() << endl;
+        //        << "  recv:" << patchInfo.size() << " from proc:"
+        //        << nbrProci << endl;
         //}
 
         // Apply transform to received data for non-parallel planes

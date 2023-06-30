@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,7 +131,7 @@ int main(int argc, char *argv[])
     flatList = labelUIndList(completeList, addresses);
     Info<< "List assign from UIndirectList: " << flatOutput(flatList) << nl;
 
-    flatList.append(labelUIndList(completeList, addresses));
+    flatList.push_back(labelUIndList(completeList, addresses));
     Info<< "List::append(UIndirectList): " << flatOutput(flatList) << nl;
 
 
@@ -138,7 +139,7 @@ int main(int argc, char *argv[])
     Info<< "DynamicList construct from UIndirectList: " << flatOutput(dynList)
         << nl;
 
-    dynList.append(labelUIndList(completeList, addresses));
+    flatList.push_back(labelUIndList(completeList, addresses));
     Info<< "DynamicList::append(UIndirectList): " << flatOutput(dynList) << nl;
 
     Info<< "\nEnd\n" << endl;

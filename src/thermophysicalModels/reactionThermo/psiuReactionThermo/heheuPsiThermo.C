@@ -478,7 +478,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::Tb() const
                 this->T_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->T_
         )
@@ -537,7 +537,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psiu() const
                 this->psi_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->psi_.mesh(),
             this->psi_.dimensions()
@@ -591,7 +591,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::psib() const
                 this->psi_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->psi_.mesh(),
             this->psi_.dimensions()
@@ -646,7 +646,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::muu() const
                 this->T_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->T_.mesh(),
             dimensionSet(1, -1, -1, 0, 0)
@@ -704,7 +704,7 @@ Foam::heheuPsiThermo<BasicPsiThermo, MixtureType>::mub() const
                 this->T_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->T_.mesh(),
             dimensionSet(1, -1, -1, 0, 0)

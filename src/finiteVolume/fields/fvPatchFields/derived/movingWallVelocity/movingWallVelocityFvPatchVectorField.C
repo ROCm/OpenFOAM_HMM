@@ -117,7 +117,7 @@ Foam::movingWallVelocityFvPatchVectorField::Uwall() const
 
     scalarField phip
     (
-        p.patchField<surfaceScalarField, scalar>(fvc::meshPhi(U))
+        p.patchField<surfaceScalarField>(fvc::meshPhi(U))
     );
 
     const vectorField n(p.nf());
@@ -149,8 +149,8 @@ void Foam::movingWallVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::movingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::write(os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

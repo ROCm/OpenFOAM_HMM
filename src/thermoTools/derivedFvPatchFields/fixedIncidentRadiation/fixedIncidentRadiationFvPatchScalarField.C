@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019,2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,20 +73,14 @@ fixedIncidentRadiationFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     temperatureCoupledBase(patch(), dict),
     qrIncident_("qrIncident", dict, p.size())
 {
-    if (dict.found("value") && dict.found("gradient"))
+    if (!this->readGradientEntry(dict) || !this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator=(Field<scalar>("value", dict, p.size()));
-        gradient() = Field<scalar>("gradient", dict, p.size());
-    }
-    else
-    {
-        // Still reading so cannot yet evaluate. Make up a value.
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        extrapolateInternal();
+        gradient() = Zero;
     }
 }
 
@@ -195,10 +189,10 @@ void Foam::radiation::fixedIncidentRadiationFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedGradientFvPatchScalarField::write(os);
+    fixedGradientFvPatchField<scalar>::write(os);
     temperatureCoupledBase::write(os);
     qrIncident_.writeEntry("qrIncident", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

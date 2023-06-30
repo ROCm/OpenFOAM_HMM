@@ -71,7 +71,7 @@ atmBoundaryLayerInletEpsilonFvPatchScalarField
 
     if (!initABL_)
     {
-        scalarField::operator=(scalarField("value", dict, p.size()));
+        this->readValueEntry(dict, IOobjectOption::MUST_READ);
     }
     else
     {
@@ -149,10 +149,10 @@ void atmBoundaryLayerInletEpsilonFvPatchScalarField::rmap
 
 void atmBoundaryLayerInletEpsilonFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     atmBoundaryLayer::write(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -68,18 +68,11 @@ phaseHydrostaticPressureFvPatchScalarField
     pRefValue_(dict.get<scalar>("pRefValue")),
     pRefPoint_(dict.lookup("pRefPoint"))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     this->refValue() = pRefValue_;
 
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchScalarField::operator=(this->refValue());
     }
@@ -142,18 +135,15 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& alphap =
-        patch().lookupPatchField<volScalarField, scalar>
-        (
-            phaseFraction_
-        );
+        patch().lookupPatchField<volScalarField>(phaseFraction_);
 
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(db().time());
 
     // scalar rhor = 1000;
-    // scalarField alphap1 = max(min(alphap, scalar(1)), scalar(0));
+    // scalarField alphap1 = clamp(alphap, zero_one{});
     // valueFraction() = alphap1/(alphap1 + rhor*(1.0 - alphap1));
-    valueFraction() = max(min(alphap, scalar(1)), scalar(0));
+    valueFraction() = clamp(alphap, zero_one{});
 
     refValue() =
         pRefValue_
@@ -165,12 +155,12 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::phaseHydrostaticPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("phaseFraction", "alpha", phaseFraction_);
     os.writeEntry("rho", rho_);
     os.writeEntry("pRefValue", pRefValue_);
     os.writeEntry("pRefPoint", pRefPoint_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 
@@ -183,7 +173,7 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::operator=
 {
     fvPatchScalarField::operator=
     (
-        valueFraction()*refValue() + (1 - valueFraction())*ptf
+        lerp(ptf, refValue(), valueFraction())
     );
 }
 

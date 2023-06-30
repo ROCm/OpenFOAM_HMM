@@ -52,10 +52,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class Istream;
-class Ostream;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- A word representation of uint32 value
@@ -120,6 +116,11 @@ inline bool read(const std::string& str, uint32_t& val)
 Istream& operator>>(Istream& is, uint32_t& val);
 Ostream& operator<<(Ostream& os, const uint32_t val);
 
+
+/*---------------------------------------------------------------------------*\
+                       Specialization pTraits<uint32_t>
+\*---------------------------------------------------------------------------*/
+
 //- Template specialization for pTraits<uint32_t>
 template<>
 class pTraits<uint32_t>
@@ -173,16 +174,10 @@ public:
     // Member Functions
 
         //- Return the value
-        operator uint32_t() const noexcept
-        {
-            return p_;
-        }
+        operator uint32_t() const noexcept { return p_; }
 
         //- Access the value
-        operator uint32_t&() noexcept
-        {
-            return p_;
-        }
+        operator uint32_t&() noexcept { return p_; }
 };
 
 

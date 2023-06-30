@@ -61,7 +61,7 @@ void Foam::fvMesh::makeSf() const
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         *this,
         dimArea,
@@ -98,7 +98,7 @@ void Foam::fvMesh::makeMagSf() const
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mag(Sf()) + dimensionedScalar("vs", dimArea, VSMALL)
     );
@@ -130,7 +130,7 @@ void Foam::fvMesh::makeC() const
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         *this,
         dimLength,
@@ -165,7 +165,7 @@ void Foam::fvMesh::makeCf() const
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         *this,
         dimLength,
@@ -192,7 +192,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V() const
                 *this,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this,
             dimVolume,
@@ -245,7 +245,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
                 *this,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                true
+                IOobject::REGISTER
             ),
             V0()
         );
@@ -326,6 +326,30 @@ const Foam::surfaceScalarField& Foam::fvMesh::magSf() const
 }
 
 
+Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::unitSf() const
+{
+    auto tunitVectors = tmp<surfaceVectorField>::New
+    (
+        IOobject
+        (
+            "unit(Sf)",
+            pointsInstance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
+        ),
+        *this,
+        dimless,
+        (this->Sf() / this->magSf())
+    );
+
+    tunitVectors.ref().oriented() = this->Sf().oriented();
+    return tunitVectors;
+}
+
+
 const Foam::volVectorField& Foam::fvMesh::C() const
 {
     if (!CPtr_)
@@ -364,7 +388,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::delta() const
                 *this,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             *this,
             dimLength

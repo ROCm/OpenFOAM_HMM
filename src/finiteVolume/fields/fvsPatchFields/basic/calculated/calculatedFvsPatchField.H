@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedFvsPatchField_H
-#define calculatedFvsPatchField_H
+#ifndef Foam_calculatedFvsPatchField_H
+#define Foam_calculatedFvsPatchField_H
 
 #include "fvsPatchField.H"
 
@@ -53,11 +53,10 @@ class calculatedFvsPatchField
 :
     public fvsPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("calculated");
+    TypeName("calculated");  // fieldTypes::calculatedTypeName_()
 
 
     // Constructors
@@ -77,7 +76,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         calculatedFvsPatchField
         (
             const calculatedFvsPatchField<Type>&,
@@ -121,17 +120,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 };
 
 

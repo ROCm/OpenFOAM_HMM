@@ -5,7 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,34 +24,58 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::edgeHashSet
+Class
+    Foam::EdgeMap
 
 Description
-    A HashSet for an edge.
-    The hashing on an edge is commutative.
+    Map from edge (expressed as its endpoints) to value.
+    Hashing (and ==) on an edge is symmetric.
+
+Note
+    For easier forward declaration it is implemented as a separate class
+    rather than a template alias.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeHashes_H
-#define edgeHashes_H
+#ifndef Foam_edgeHashes_H
+#define Foam_edgeHashes_H
 
 #include "edge.H"
-#include "EdgeMap.H"
 #include "HashSet.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    // Alternative:
-    // template<class T>
-    // using EdgeMap = HashTable<T, edge, Hash<edge>>;
 
-    //- A HashSet with edge for its key.
-    typedef HashSet<edge, Hash<edge>> edgeHashSet;
+// Typedefs
 
-}
+//! A HashSet with edge for its key. Hashing (and ==) on an edge is symmetric.
+typedef HashSet<edge, Hash<edge>> edgeHashSet;
+
+
+/*---------------------------------------------------------------------------*\
+                           Class EdgeMap Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class T>
+class EdgeMap
+:
+    public HashTable<T, edge, Hash<edge>>
+{
+public:
+
+    // Constructors
+
+        //- Inherit constructors from HashTable
+        using HashTable<T, edge, Hash<edge>>::HashTable;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

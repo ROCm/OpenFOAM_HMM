@@ -41,7 +41,7 @@ bool Foam::dlLibraryTable::open
 )
 {
     List<fileName> libNames;
-    dict.readIfPresent(libsEntry, libNames);
+    dict.readIfPresent(libsEntry, libNames, keyType::LITERAL);
 
     label nOpen = 0;
 

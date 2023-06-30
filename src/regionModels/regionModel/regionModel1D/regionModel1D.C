@@ -121,7 +121,7 @@ void Foam::regionModels::regionModel1D::initialise()
             } while (regionMesh().isInternalFace(facei));
 
             boundaryFaceOppositeFace_[localPyrolysisFacei] = facei;
-            //faceIDs.remove(); //remove boundary face.
+            //faceIDs.pop_back(); //remove boundary face.
 
             boundaryFaceFaces_[localPyrolysisFacei].transfer(faceIDs);
             boundaryFaceCells_[localPyrolysisFacei].transfer(cellIDs);

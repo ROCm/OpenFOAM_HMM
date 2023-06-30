@@ -51,8 +51,8 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     mixingLength_(0.0),
     kName_("undefined-k")
 {
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
@@ -84,10 +84,10 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 {
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
@@ -139,14 +139,14 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
 
     const scalar Cmu25 = pow(Cmu, 0.25);
 
-    const fvPatchScalarField& kp =
-        patch().lookupPatchField<volScalarField, scalar>(kName_);
+    const auto& kp =
+        patch().lookupPatchField<volScalarField>(kName_);
 
-    const fvsPatchScalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
+    const auto& phip =
+        patch().lookupPatchField<surfaceScalarField>(this->phiName_);
 
     this->refValue() = sqrt(kp)/(Cmu25*mixingLength_);
-    this->valueFraction() = 1.0 - pos0(phip);
+    this->valueFraction() = neg(phip);
 
     inletOutletFvPatchScalarField::updateCoeffs();
 }
@@ -157,11 +157,11 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("mixingLength", mixingLength_);
     os.writeEntry("phi", this->phiName_);
     os.writeEntry("k", kName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

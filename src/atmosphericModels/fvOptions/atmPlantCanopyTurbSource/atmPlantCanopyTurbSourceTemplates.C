@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,12 +71,12 @@ void Foam::fv::atmPlantCanopyTurbSource::atmPlantCanopyTurbSourceOmega
     const volScalarField::Internal& gamma =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":gamma")
+            IOobject::scopedName(turbPtr->type(), "gamma")
         );
     const volScalarField::Internal& beta =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":beta")
+            IOobject::scopedName(turbPtr->type(), "beta")
         );
 
     eqn -= fvm::Sp(alpha()*rho()*(gamma - beta)*calcPlantCanopyTerm(U), omega);

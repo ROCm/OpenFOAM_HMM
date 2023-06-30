@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,8 +53,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Function1Types_CSV_H
-#define Function1Types_CSV_H
+#ifndef Foam_Function1Types_CSV_H
+#define Foam_Function1Types_CSV_H
 
 #include "Function1.H"
 #include "TableBase.H"
@@ -111,13 +111,16 @@ class CSV
         void read();
 
         //- Read component values from the split string
-        Type readValue(const List<string>& strings) const;
+        Type readValue(const UList<string>& strings) const;
+
+
+public:
+
+    // Generated Methods
 
         //- No copy assignment
         void operator=(const CSV<Type>&) = delete;
 
-
-public:
 
     //- Declare type-name, virtual type (with debug switch)
     TypeName("csvFile");
@@ -159,14 +162,6 @@ public:
         //- Write coefficient entries in dictionary format
         virtual void writeEntries(Ostream& os) const;
 };
-
-
-// Template specialisations
-template<>
-label CSV<label>::readValue(const List<string>& strings) const;
-
-template<>
-scalar CSV<scalar>::readValue(const List<string>& strings) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

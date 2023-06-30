@@ -29,15 +29,6 @@ License
 #include "calculatedFvPatchField.H"
 #include "fvPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::fvPatchField<Type>::calculatedType()
-{
-    return Foam::calculatedFvPatchField<Type>::typeName;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -57,10 +48,10 @@ Foam::calculatedFvPatchField<Type>::calculatedFvPatchField
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
-    fvPatchField<Type>(p, iF, dict, valueRequired)
+    fvPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
@@ -220,7 +211,7 @@ template<class Type>
 void Foam::calculatedFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

@@ -199,7 +199,7 @@ void Foam::processorPolyPatch::initGeometry(PstreamBuffers& pBufs)
 {
     if (Pstream::parRun())
     {
-        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        if (neighbProcNo() >= pBufs.nProcs())
         {
             FatalErrorInFunction
                 << "On patch " << name()
@@ -244,9 +244,8 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
         // Calculate normals from areas and check
         forAll(faceNormals, facei)
         {
-            scalar magSf = mag(faceAreas()[facei]);
-            scalar nbrMagSf = mag(neighbFaceAreas_[facei]);
-            scalar avSf = (magSf + nbrMagSf)/2.0;
+            const scalar magSf = mag(faceAreas()[facei]);
+            const scalar nbrMagSf = mag(neighbFaceAreas_[facei]);
 
             // For small face area calculation the results of the area
             // calculation have been found to only be accurate to ~1e-20
@@ -260,6 +259,8 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
             }
             else if (mag(magSf - nbrMagSf) > matchTolerance()*sqr(tols[facei]))
             {
+                const scalar avgMagSf = 0.5*(magSf + nbrMagSf);
+
                 fileName nm
                 (
                     boundaryMesh().mesh().time().path()
@@ -295,7 +296,7 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
 
                 FatalErrorInFunction
                     << "face " << facei << " area does not match neighbour by "
-                    << 100*mag(magSf - nbrMagSf)/avSf
+                    << 100*mag(magSf - nbrMagSf)/avgMagSf
                     << "% -- possible face ordering problem." << endl
                     << "patch:" << name()
                     << " my area:" << magSf
@@ -362,7 +363,7 @@ void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
     if (Pstream::parRun())
     {
-        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        if (neighbProcNo() >= pBufs.nProcs())
         {
             FatalErrorInFunction
                 << "On patch " << name()

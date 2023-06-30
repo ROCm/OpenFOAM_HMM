@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -612,14 +612,18 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
             new volScalarField
             (
                 this->GName(),
-                nutl*(tgradUl() && dev(twoSymm(tgradUl())))
+                nutl*(tgradUl() && devTwoSymm(tgradUl()))
             )
         );
         tgradUl.clear();
 
         // Update k, epsilon and G at the wall
         kl.boundaryFieldRef().updateCoeffs();
+        // Push any changed cell values to coupled neighbours
+        kl.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
+
         epsilonl.boundaryFieldRef().updateCoeffs();
+        epsilonl.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
         Gc.ref().checkOut();
     }
@@ -632,14 +636,18 @@ void mixtureKEpsilon<BasicTurbulenceModel>::correct()
             new volScalarField
             (
                 this->GName(),
-                nutg*(tgradUg() && dev(twoSymm(tgradUg())))
+                nutg*(tgradUg() && devTwoSymm(tgradUg()))
             )
         );
         tgradUg.clear();
 
         // Update k, epsilon and G at the wall
         kg.boundaryFieldRef().updateCoeffs();
+        // Push any changed cell values to coupled neighbours
+        kg.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
         epsilong.boundaryFieldRef().updateCoeffs();
+        // Push any changed cell values to coupled neighbours
+        epsilong.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
         Gd.ref().checkOut();
     }

@@ -320,7 +320,7 @@ void Foam::meshRefinement::growSet
 //    if (!isMultiRegion[celli])
 //    {
 //        Map<FixedList<label, 3>>::iterator fnd = cellToRegions.find(celli);
-//        if (!fnd.found())
+//        if (!fnd.good())
 //        {
 //            cellToRegions.insert(celli, surface);
 //        }
@@ -431,7 +431,7 @@ void Foam::meshRefinement::growSet
 //                mesh_,
 //                IOobject::NO_READ,
 //                IOobject::NO_WRITE,
-//                false
+//                IOobject::NO_REGISTER
 //            ),
 //            mesh_,
 //            dimensionedScalar
@@ -741,7 +741,7 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar
@@ -893,15 +893,10 @@ Foam::label Foam::meshRefinement::markProximityRefinementWave
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
-            dimensionedScalar
-            (
-                "zero",
-                dimensionSet(0, 1, 0, 0, 0),
-                0.0
-            )
+            dimensionedScalar(dimLength, Zero)
         );
         distance.field() = smallGapDistance;
         distance.correctBoundaryConditions();
@@ -1772,8 +1767,8 @@ void Foam::meshRefinement::selectIntersectedFaces
 //        const edge& e = edges[edgei];
 //        const edge meshE = edge(mp[e[0]], mp[e[1]]);
 //
-//        EdgeMap<label>::const_iterator iter = edgeMap.find(meshE);
-//        if (iter.found())
+//        const auto iter = edgeMap.cfind(meshE);
+//        if (iter.good())
 //        {
 //            initialEdges.append(edgei);
 //            initialEdgesInfo.append
@@ -1781,7 +1776,7 @@ void Foam::meshRefinement::selectIntersectedFaces
 //                edgeTopoDistanceData<label, uindirectPrimitivePatch>
 //                (
 //                    0,          // distance
-//                    iter()      // globalFacei
+//                    iter.val()  // globalFacei
 //                )
 //            );
 //        }

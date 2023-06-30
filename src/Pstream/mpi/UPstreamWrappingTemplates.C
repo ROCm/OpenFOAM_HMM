@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "UPstreamWrapping.H"
 #include "profilingPstream.H"
 #include "PstreamGlobals.H"
+#include "Map.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -41,14 +42,14 @@ void Foam::PstreamDetail::broadcast0
     const label comm
 )
 {
-    if (!UPstream::parRun())
+    if (!UPstream::is_parallel(comm))
     {
         return;
     }
 
     profilingPstream::beginTiming();
 
-    // const int retval =
+    // const int returnCode =
     MPI_Bcast
     (
         values,
@@ -72,14 +73,14 @@ void Foam::PstreamDetail::reduce0
     const label comm
 )
 {
-    if (!UPstream::parRun())
+    if (!UPstream::is_parallel(comm))
     {
         return;
     }
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        Pout<< "** reducing:";
+        Pout<< "** MPI_Reduce (blocking):";
         if (count == 1)
         {
             Pout<< (*values);
@@ -95,7 +96,7 @@ void Foam::PstreamDetail::reduce0
 
     profilingPstream::beginTiming();
 
-    // const int retval =
+    // const int returnCode =
     MPI_Reduce
     (
         MPI_IN_PLACE,  // recv is also send
@@ -119,17 +120,23 @@ void Foam::PstreamDetail::allReduce
     MPI_Datatype datatype,
     MPI_Op optype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
-    if (!UPstream::parRun())
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_parallel(comm))
     {
         return;
     }
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Iallreduce (non-blocking):";
         }
@@ -150,15 +157,14 @@ void Foam::PstreamDetail::allReduce
         error::printStack(Pout);
     }
 
-    profilingPstream::beginTiming();
-
-    bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
-        handled = true;
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
         MPI_Request request;
+
         if
         (
             MPI_Iallreduce
@@ -179,16 +185,15 @@ void Foam::PstreamDetail::allReduce
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
-    }
-#endif
 
-    if (!handled)
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
+    }
+    else
+#endif
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Allreduce
@@ -207,9 +212,9 @@ void Foam::PstreamDetail::allReduce
                 << UList<Type>(values, count)
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addReduceTime();
+        profilingPstream::addReduceTime();
+    }
 }
 
 
@@ -220,14 +225,25 @@ void Foam::PstreamDetail::allToAll
     UList<Type>& recvData,
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
-    const label np = UPstream::nProcs(comm);
+    PstreamGlobals::reset_request(req, requestID);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
     {
-        if (requestID != nullptr)
+        return;
+    }
+
+    const label numProc = UPstream::nProcs(comm);
+
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
+    {
+        if (immediate)
         {
             Pout<< "** MPI_Ialltoall (non-blocking):";
         }
@@ -235,7 +251,7 @@ void Foam::PstreamDetail::allToAll
         {
             Pout<< "** MPI_Alltoall (blocking):";
         }
-        Pout<< " np:" << np
+        Pout<< " numProc:" << numProc
             << " sendData:" << sendData.size()
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
@@ -243,30 +259,32 @@ void Foam::PstreamDetail::allToAll
         error::printStack(Pout);
     }
 
-    if (sendData.size() != np || recvData.size() != np)
+    if
+    (
+        (sendData.size() != numProc || recvData.size() != numProc)
+    )
     {
         FatalErrorInFunction
-            << "Have " << np << " ranks, but size of sendData:"
+            << "Have " << numProc << " ranks, but size of sendData:"
             << sendData.size() << " or recvData:" << recvData.size()
             << " is different!"
             << Foam::abort(FatalError);
     }
 
-    if (!UPstream::parRun())
+    if (!UPstream::is_parallel(comm))
     {
         recvData.deepCopy(sendData);
         return;
     }
 
-    profilingPstream::beginTiming();
 
-    bool handled(false);
-
-    #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+    if (immediate)
     {
-        handled = true;
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
         MPI_Request request;
+
         if
         (
             MPI_Ialltoall
@@ -290,17 +308,14 @@ void Foam::PstreamDetail::allToAll
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
     }
+    else
 #endif
-
-
-    if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Alltoall
@@ -322,9 +337,9 @@ void Foam::PstreamDetail::allToAll
                 << " For " << sendData
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addAllToAllTime();
+        profilingPstream::addAllToAllTime();
+    }
 }
 
 
@@ -341,14 +356,25 @@ void Foam::PstreamDetail::allToAllv
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Ialltoallv (non-blocking):";
         }
@@ -379,7 +405,7 @@ void Foam::PstreamDetail::allToAllv
             << Foam::abort(FatalError);
     }
 
-    if (!UPstream::parRun())
+    if (!UPstream::is_parallel(comm))
     {
         if (recvCounts[0] != sendCounts[0])
         {
@@ -394,17 +420,16 @@ void Foam::PstreamDetail::allToAllv
             (sendData + sendOffsets[0]),
             recvCounts[0]*sizeof(Type)
         );
+
         return;
     }
 
-    profilingPstream::beginTiming();
-
-    bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
-        handled = true;
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
         MPI_Request request;
 
         if
@@ -431,16 +456,14 @@ void Foam::PstreamDetail::allToAllv
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
     }
+    else
 #endif
-
-    if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Alltoallv
@@ -463,6 +486,442 @@ void Foam::PstreamDetail::allToAllv
                 << " recvCounts " << recvCounts
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addAllToAllTime();
+    }
+
+}
+
+
+template<class Type>
+void Foam::PstreamDetail::allToAllConsensus
+(
+    const UList<Type>& sendData,
+    UList<Type>& recvData,
+    MPI_Datatype datatype,
+    const int tag,
+    const label comm
+)
+{
+    const bool initialBarrier = (UPstream::tuning_NBX_ > 0);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+
+    const label myProci = UPstream::myProcNo(comm);
+    const label numProc = UPstream::nProcs(comm);
+
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
+    {
+        Pout<< "** non-blocking consensus Alltoall (list):";
+        Pout<< " numProc:" << numProc
+            << " sendData:" << sendData.size()
+            << " with comm:" << comm
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+
+    if (sendData.size() != numProc || recvData.size() != numProc)
+    {
+        FatalErrorInFunction
+            << "Have " << numProc << " ranks, but size of sendData:"
+            << sendData.size() << " or recvData:" << recvData.size()
+            << " is different!"
+            << Foam::abort(FatalError);
+    }
+
+    // Initial: assign zero everywhere. Values of zero are never transmitted
+    const Type zeroValue = pTraits<Type>::zero;
+    recvData = zeroValue;
+
+    if (!UPstream::is_parallel(comm))
+    {
+        // deep copy
+        recvData.deepCopy(sendData);
+        return;
+    }
+
+
+    // Implementation description
+    // --------------------------
+    // "Scalable Communication Protocols for Dynamic Sparse Data Exchange",
+    // Hoeffler, Siebert, Lumsdaine
+    // May 2010 ACM SIGPLAN Notices 45(5):159-168
+    // https://doi.org/10.1145/1837853.1693476
+    //
+    // - http://unixer.de/publications/img/hoefler-dsde-protocols.pdf
+    //
+    // Algorithm NBX: Nonblocking consensus
+
+    // This specific specialization is largely just for integer data
+    // so we initialise the receiving data with zero and then
+    // do not send/recv them.
+    // This is because we are dealing with a flat list of entries to
+    // send and not a sparse Map etc.
+
+    DynamicList<MPI_Request> sendRequests(sendData.size());
+
+    profilingPstream::beginTiming();
+
+    // An initial barrier may help to avoid synchronisation problems
+    // caused elsewhere
+    if (initialBarrier)
+    {
+        MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
+    }
+
+
+    // Start nonblocking synchronous send to process dest
+    for (label proci = 0; proci < numProc; ++proci)
+    {
+        if (sendData[proci] == zeroValue)
+        {
+            // Do not send/recv empty data
+        }
+        else if (proci == myProci)
+        {
+            // Do myself
+            recvData[proci] = sendData[proci];
+        }
+        else
+        {
+            // Has data to send
+
+            MPI_Issend
+            (
+               &sendData[proci],
+                1,              // one element per rank
+                datatype,
+                proci,
+                tag,
+                PstreamGlobals::MPICommunicators_[comm],
+               &sendRequests.emplace_back()
+            );
+        }
+    }
+
+
+    // Probe and receive
+
+    MPI_Request barrierRequest;
+
+    for (bool barrier_active = false, done = false; !done; /*nil*/)
+    {
+        int flag = 0;
+        MPI_Status status;
+
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        MPI_Message message;
+        MPI_Improbe
+        (
+            MPI_ANY_SOURCE,
+            tag,
+            PstreamGlobals::MPICommunicators_[comm],
+           &flag,
+           &message,
+           &status
+        );
+#else
+        MPI_Iprobe
+        (
+            MPI_ANY_SOURCE,
+            tag,
+            PstreamGlobals::MPICommunicators_[comm],
+           &flag,
+           &status
+        );
+#endif
+
+        if (flag)
+        {
+            // Message found, receive into dest buffer location
+            const label proci = status.MPI_SOURCE;
+
+            int count = 0;
+            MPI_Get_count(&status, datatype, &count);
+
+            if (count != 1)
+            {
+                FatalErrorInFunction
+                    << "Incorrect message size from proc=" << proci
+                    << ". Expected 1 but had " << count << nl
+                    << exit(FatalError);
+            }
+
+            // Regular blocking receive [the data are small]
+
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+            // MPI-3 : eg, openmpi-1.7 (2013) and later
+            MPI_Mrecv
+            (
+               &recvData[proci],
+                count,          // count=1 (see above)
+                datatype,
+               &message,
+                MPI_STATUS_IGNORE
+            );
+#else
+            MPI_Recv
+            (
+               &recvData[proci],
+                count,          // count=1 (see above)
+                datatype,
+                proci,
+                tag,
+                PstreamGlobals::MPICommunicators_[comm],
+                MPI_STATUS_IGNORE
+            );
+#endif
+        }
+
+        if (barrier_active)
+        {
+            // Test barrier for completion
+            // - all received, or nothing to receive
+            MPI_Test(&barrierRequest, &flag, MPI_STATUS_IGNORE);
+
+            if (flag)
+            {
+                done = true;
+            }
+        }
+        else
+        {
+            // Check if all sends have arrived
+            MPI_Testall
+            (
+                sendRequests.size(),
+                sendRequests.data(),
+               &flag, MPI_STATUSES_IGNORE
+            );
+
+            if (flag)
+            {
+                MPI_Ibarrier
+                (
+                    PstreamGlobals::MPICommunicators_[comm],
+                   &barrierRequest
+                );
+                barrier_active = true;
+            }
+        }
+    }
+
+    profilingPstream::addAllToAllTime();
+}
+
+
+template<class Type>
+void Foam::PstreamDetail::allToAllConsensus
+(
+    const Map<Type>& sendBufs,
+    Map<Type>& recvBufs,
+    MPI_Datatype datatype,
+    const int tag,
+    const label comm
+)
+{
+    const bool initialBarrier = (UPstream::tuning_NBX_ > 0);
+
+    const label myProci = UPstream::myProcNo(comm);
+    const label numProc = UPstream::nProcs(comm);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
+    {
+        Pout<< "** non-blocking consensus Alltoall (map):";
+        Pout<< " numProc:" << numProc
+            << " sendData:" << sendBufs.size()
+            << " with comm:" << comm
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+
+    // Initial: clear out everything
+    const Type zeroValue = pTraits<Type>::zero;
+    recvBufs.clear();
+
+    if (!UPstream::is_parallel(comm))
+    {
+        // Do myself
+        const auto iter = sendBufs.find(myProci);
+        if (iter.good() && (iter.val() != zeroValue))
+        {
+            // Do myself: insert_or_assign
+            recvBufs(iter.key()) = iter.val();
+        }
+        return;
+    }
+
+
+    // Algorithm NBX: Nonblocking consensus
+    // Implementation like above, but sending map data.
+
+    DynamicList<MPI_Request> sendRequests(sendBufs.size());
+
+    profilingPstream::beginTiming();
+
+    // An initial barrier may help to avoid synchronisation problems
+    // caused elsewhere
+    if (initialBarrier)
+    {
+        MPI_Barrier(PstreamGlobals::MPICommunicators_[comm]);
+    }
+
+
+    // Start nonblocking synchronous send to process dest
+
+    // Same as forAllConstIters()
+    const auto endIter = sendBufs.cend();
+    for (auto iter = sendBufs.cbegin(); iter != endIter; ++iter)
+    {
+        const label proci = iter.key();
+        const auto& sendData = iter.val();
+
+        if (sendData == zeroValue)
+        {
+            // Do not send/recv empty/zero data
+        }
+        else if (proci == myProci)
+        {
+            // Do myself: insert_or_assign
+            recvBufs(proci) = sendData;
+        }
+        else
+        {
+            // Has data to send
+
+            MPI_Issend
+            (
+               &sendData,
+                1,              // one element per rank
+                datatype,
+                proci,
+                tag,
+                PstreamGlobals::MPICommunicators_[comm],
+               &sendRequests.emplace_back()
+            );
+        }
+    }
+
+
+    // Probe and receive
+
+    MPI_Request barrierRequest;
+
+    for (bool barrier_active = false, done = false; !done; /*nil*/)
+    {
+        int flag = 0;
+        MPI_Status status;
+
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        MPI_Message message;
+        MPI_Improbe
+        (
+            MPI_ANY_SOURCE,
+            tag,
+            PstreamGlobals::MPICommunicators_[comm],
+           &flag,
+           &message,
+           &status
+        );
+#else
+        MPI_Iprobe
+        (
+            MPI_ANY_SOURCE,
+            tag,
+            PstreamGlobals::MPICommunicators_[comm],
+           &flag,
+           &status
+        );
+#endif
+
+        if (flag)
+        {
+            // Message found, receive into dest buffer location
+
+            const label proci = status.MPI_SOURCE;
+            int count = 0;
+
+            MPI_Get_count(&status, datatype, &count);
+
+            if (count != 1)
+            {
+                FatalErrorInFunction
+                    << "Incorrect message size from proc=" << proci
+                    << ". Expected 1 but had " << count << nl
+                    << exit(FatalError);
+            }
+
+            auto& recvData = recvBufs(proci);
+
+            // Regular blocking receive [the data are small]
+
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+            // MPI-3 : eg, openmpi-1.7 (2013) and later
+            MPI_Mrecv
+            (
+               &recvData,
+                count,          // count=1 (see above)
+                datatype,
+               &message,
+                MPI_STATUS_IGNORE
+            );
+#else
+            MPI_Recv
+            (
+               &recvData,
+                count,          // count=1 (see above)
+                datatype,
+                proci,
+                tag,
+                PstreamGlobals::MPICommunicators_[comm],
+                MPI_STATUS_IGNORE
+            );
+#endif
+        }
+
+        if (barrier_active)
+        {
+            // Test barrier for completion
+            // - all received, or nothing to receive
+            MPI_Test(&barrierRequest, &flag, MPI_STATUS_IGNORE);
+
+            if (flag)
+            {
+                done = true;
+            }
+        }
+        else
+        {
+            // Check if all sends have arrived
+            MPI_Testall
+            (
+                sendRequests.size(),
+                sendRequests.data(),
+               &flag, MPI_STATUSES_IGNORE
+            );
+
+            if (flag)
+            {
+                MPI_Ibarrier
+                (
+                    PstreamGlobals::MPICommunicators_[comm],
+                   &barrierRequest
+                );
+                barrier_active = true;
+            }
+        }
     }
 
     profilingPstream::addAllToAllTime();
@@ -473,27 +932,38 @@ template<class Type>
 void Foam::PstreamDetail::gather
 (
     const Type* sendData,
-    int sendCount,
-
     Type* recvData,
-    int recvCount,
 
+    int count,
     MPI_Datatype datatype,
+
     const label comm,
+    UPstream::Request* req,
     label* requestID
 )
 {
-    if (!UPstream::parRun())
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm) || !count)
     {
-        std::memmove(recvData, sendData, recvCount*sizeof(Type));
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
+    {
+        if (recvData)
+        {
+            std::memmove(recvData, sendData, count*sizeof(Type));
+        }
         return;
     }
 
-    const label np = UPstream::nProcs(comm);
+    const label numProc = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Igather (non-blocking):";
         }
@@ -501,34 +971,29 @@ void Foam::PstreamDetail::gather
         {
             Pout<< "** MPI_Gather (blocking):";
         }
-        Pout<< " np:" << np
-            << " recvCount:" << recvCount
+        Pout<< " numProc:" << numProc
+            << " count:" << count
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
             << endl;
         error::printStack(Pout);
     }
 
-    profilingPstream::beginTiming();
-
-    bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
-        handled = true;
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
         MPI_Request request;
+
         if
         (
             MPI_Igather
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm],
                &request
             )
@@ -536,45 +1001,37 @@ void Foam::PstreamDetail::gather
         {
             FatalErrorInFunction
                 << "MPI_Igather [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
     }
+    else
 #endif
-
-    if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Gather
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm]
             )
         )
         {
             FatalErrorInFunction
                 << "MPI_Gather [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addGatherTime();
+        profilingPstream::addGatherTime();
+    }
 }
 
 
@@ -582,27 +1039,38 @@ template<class Type>
 void Foam::PstreamDetail::scatter
 (
     const Type* sendData,
-    int sendCount,
-
     Type* recvData,
-    int recvCount,
 
+    int count,
     MPI_Datatype datatype,
+
     const label comm,
+    UPstream::Request* req,
     label* requestID
 )
 {
-    if (!UPstream::parRun())
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm) || !count)
     {
-        std::memmove(recvData, sendData, recvCount*sizeof(Type));
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
+    {
+        if (recvData)
+        {
+            std::memmove(recvData, sendData, count*sizeof(Type));
+        }
         return;
     }
 
-    const label np = UPstream::nProcs(comm);
+    const label numProc = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Iscatter (non-blocking):";
         }
@@ -610,34 +1078,29 @@ void Foam::PstreamDetail::scatter
         {
             Pout<< "** MPI_Scatter (blocking):";
         }
-        Pout<< " np:" << np
-            << " recvCount:" << recvCount
+        Pout<< " numProc:" << numProc
+            << " count:" << count
             << " with comm:" << comm
             << " warnComm:" << UPstream::warnComm
             << endl;
         error::printStack(Pout);
     }
 
-    profilingPstream::beginTiming();
-
-    bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
-        handled = true;
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
         MPI_Request request;
+
         if
         (
             MPI_Iscatter
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm],
                &request
             )
@@ -645,45 +1108,37 @@ void Foam::PstreamDetail::scatter
         {
             FatalErrorInFunction
                 << "MPI_Iscatter [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
     }
+    else
 #endif
-
-    if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Scatter
             (
-                const_cast<Type*>(sendData),
-                sendCount,
-                datatype,
-                recvData,
-                recvCount,
-                datatype,
-                0,  // (root rank) == UPstream::masterNo()
+                const_cast<Type*>(sendData), count, datatype,
+                recvData, count, datatype,
+                0,  // root: UPstream::masterNo()
                 PstreamGlobals::MPICommunicators_[comm]
             )
         )
         {
             FatalErrorInFunction
-                << "MPI_Iscatter [comm: " << comm << "] failed."
-                << " sendCount " << sendCount
-                << " recvCount " << recvCount
+                << "MPI_Scatter [comm: " << comm << "] failed."
+                << " count:" << count << nl
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addScatterTime();
+        profilingPstream::addScatterTime();
+    }
 }
 
 
@@ -699,10 +1154,20 @@ void Foam::PstreamDetail::gatherv
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
-    if (!UPstream::parRun())
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
     {
         // recvCounts[0] may be invalid - use sendCount instead
         std::memmove(recvData, sendData, sendCount*sizeof(Type));
@@ -711,9 +1176,9 @@ void Foam::PstreamDetail::gatherv
 
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Igatherv (non-blocking):";
         }
@@ -746,21 +1211,20 @@ void Foam::PstreamDetail::gatherv
             << Foam::abort(FatalError);
     }
 
-    profilingPstream::beginTiming();
-
     // Ensure send/recv consistency on master
     if (UPstream::master(comm) && !recvCounts[0])
     {
         sendCount = 0;
     }
 
-    bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
-        handled = true;
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
         MPI_Request request;
+
         if
         (
             MPI_Igatherv
@@ -785,16 +1249,14 @@ void Foam::PstreamDetail::gatherv
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
     }
+    else
 #endif
-
-    if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Gatherv
@@ -817,9 +1279,9 @@ void Foam::PstreamDetail::gatherv
                 << " recvCounts " << recvCounts
                 << Foam::abort(FatalError);
         }
-    }
 
-    profilingPstream::addGatherTime();
+        profilingPstream::addGatherTime();
+    }
 }
 
 
@@ -835,10 +1297,20 @@ void Foam::PstreamDetail::scatterv
 
     MPI_Datatype datatype,
     const label comm,
+
+    UPstream::Request* req,
     label* requestID
 )
 {
-    if (!UPstream::parRun())
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_rank(comm))
+    {
+        return;
+    }
+    if (!UPstream::is_parallel(comm))
     {
         std::memmove(recvData, sendData, recvCount*sizeof(Type));
         return;
@@ -846,9 +1318,9 @@ void Foam::PstreamDetail::scatterv
 
     const label np = UPstream::nProcs(comm);
 
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
-        if (requestID != nullptr)
+        if (immediate)
         {
             Pout<< "** MPI_Iscatterv (non-blocking):";
         }
@@ -881,15 +1353,14 @@ void Foam::PstreamDetail::scatterv
             << Foam::abort(FatalError);
     }
 
-    profilingPstream::beginTiming();
-
-    bool handled(false);
 
 #if defined(MPI_VERSION) && (MPI_VERSION >= 3)
-    if (requestID != nullptr)
+    if (immediate)
     {
-        handled = true;
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
         MPI_Request request;
+
         if
         (
             MPI_Iscatterv
@@ -914,16 +1385,14 @@ void Foam::PstreamDetail::scatterv
                 << Foam::abort(FatalError);
         }
 
-        *requestID = PstreamGlobals::push_request(request);
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
     }
+    else
 #endif
-
-    if (!handled)
     {
-        if (requestID != nullptr)
-        {
-            *requestID = -1;
-        }
+        profilingPstream::beginTiming();
+
         if
         (
             MPI_Scatterv
@@ -946,9 +1415,102 @@ void Foam::PstreamDetail::scatterv
                 << " sendOffsets " << sendOffsets
                 << Foam::abort(FatalError);
         }
+
+        profilingPstream::addScatterTime();
+    }
+}
+
+
+template<class Type>
+void Foam::PstreamDetail::allGather
+(
+    Type* allData,
+    int count,
+
+    MPI_Datatype datatype,
+    const label comm,
+
+    UPstream::Request* req,
+    label* requestID
+)
+{
+    PstreamGlobals::reset_request(req, requestID);
+
+    const bool immediate = (req || requestID);
+
+    if (!UPstream::is_parallel(comm))
+    {
+        // Nothing to do - ignore
+        return;
     }
 
-    profilingPstream::addScatterTime();
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
+    {
+        if (immediate)
+        {
+            Pout<< "** MPI_Iallgather (non-blocking):";
+        }
+        else
+        {
+            Pout<< "** MPI_Allgather (blocking):";
+        }
+        Pout<< " numProc:" << UPstream::nProcs(comm)
+            << " with comm:" << comm
+            << " warnComm:" << UPstream::warnComm
+            << endl;
+        error::printStack(Pout);
+    }
+
+
+#if defined(MPI_VERSION) && (MPI_VERSION >= 3)
+    if (immediate)
+    {
+        // MPI-3 : eg, openmpi-1.7 (2013) and later
+        profilingPstream::beginTiming();
+        MPI_Request request;
+
+        if
+        (
+            MPI_Iallgather
+            (
+                MPI_IN_PLACE, count, datatype,
+                allData, count, datatype,
+                PstreamGlobals::MPICommunicators_[comm],
+               &request
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Iallgather [comm: " << comm << "] failed."
+                << Foam::abort(FatalError);
+        }
+
+        PstreamGlobals::push_request(request, req, requestID);
+        profilingPstream::addRequestTime();
+    }
+    else
+#endif
+    {
+        profilingPstream::beginTiming();
+
+        if
+        (
+            MPI_Allgather
+            (
+                MPI_IN_PLACE, count, datatype,
+                allData, count, datatype,
+                PstreamGlobals::MPICommunicators_[comm]
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Allgather [comm: " << comm << "] failed."
+                << Foam::abort(FatalError);
+        }
+
+        // Is actually gather/scatter but we can't split it apart
+        profilingPstream::addGatherTime();
+    }
 }
 
 

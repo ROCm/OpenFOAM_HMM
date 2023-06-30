@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -287,11 +287,11 @@ void Foam::ITstream::print(Ostream& os) const
     }
     else
     {
-        os  << toks.first().lineNumber();
+        os  << toks.front().lineNumber();
 
-        if (toks.first().lineNumber() < toks.last().lineNumber())
+        if (toks.front().lineNumber() < toks.back().lineNumber())
         {
-            os  << '-' << toks.last().lineNumber();
+            os  << '-' << toks.back().lineNumber();
         }
     }
     os  << ", ";
@@ -302,17 +302,22 @@ void Foam::ITstream::print(Ostream& os) const
 
 std::string Foam::ITstream::toString() const
 {
-    // NOTE: may wish to have special handling if there is a single token
-    // and it is already a string or word
+    const tokenList& toks = *this;
+    const label nToks = toks.size();
+
+    if (nToks == 1 && toks.front().isStringType())
+    {
+        // Already a string-type (WORD, STRING, ...). Just copy.
+        return toks.front().stringToken();
+    }
 
     OStringStream buf;
-    unsigned i = 0;
-    for (const token& tok : *this)
+    buf.precision(16);      // Some reasonably high precision
+    bool addSpace = false;  // Separate from previous token with a space
+    for (const token& tok : toks)
     {
-        if (i++)
-        {
-            buf << ' ';
-        }
+        if (addSpace) buf << token::SPACE;
+        addSpace = true;
         buf << tok;
     }
 
@@ -345,7 +350,7 @@ void Foam::ITstream::seek(label pos)
 
         if (nToks)
         {
-            lineNumber_ = toks.first().lineNumber();
+            lineNumber_ = toks.front().lineNumber();
         }
 
         setOpened();
@@ -358,7 +363,7 @@ void Foam::ITstream::seek(label pos)
 
         if (nToks)
         {
-            lineNumber_ = toks.last().lineNumber();
+            lineNumber_ = toks.back().lineNumber();
         }
 
         setEof();
@@ -461,7 +466,7 @@ Foam::Istream& Foam::ITstream::read(token& tok)
 
         if (nToks)
         {
-            tok.lineNumber(toks.last().lineNumber());
+            tok.lineNumber(toks.back().lineNumber());
         }
         else
         {

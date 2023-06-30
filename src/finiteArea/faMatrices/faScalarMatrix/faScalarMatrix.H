@@ -38,10 +38,11 @@ Author
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faScalarMatrix_H
-#define faScalarMatrix_H
+#ifndef Foam_faScalarMatrix_H
+#define Foam_faScalarMatrix_H
 
 #include "faMatrix.H"
+#include "faMatricesFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

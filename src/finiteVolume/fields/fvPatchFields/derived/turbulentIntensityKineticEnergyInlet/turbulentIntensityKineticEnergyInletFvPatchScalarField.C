@@ -45,8 +45,8 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
     intensity_(0.0),
     UName_("U")
 {
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
@@ -76,7 +76,7 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
     intensity_(dict.get<scalar>("intensity")),
     UName_(dict.getOrDefault<word>("U", "U"))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     this->phiName_ = dict.getOrDefault<word>("phi", "phi");
 
     if (intensity_ < 0 || intensity_ > 1)
@@ -91,10 +91,10 @@ turbulentIntensityKineticEnergyInletFvPatchScalarField
             << exit(FatalError);
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
@@ -133,14 +133,14 @@ updateCoeffs()
         return;
     }
 
-    const fvPatchVectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const auto& Up =
+        patch().lookupPatchField<volVectorField>(UName_);
 
-    const fvsPatchScalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
+    const auto& phip =
+        patch().lookupPatchField<surfaceScalarField>(this->phiName_);
 
     this->refValue() = 1.5*sqr(intensity_)*magSqr(Up);
-    this->valueFraction() = 1.0 - pos0(phip);
+    this->valueFraction() = neg(phip);
 
     inletOutletFvPatchScalarField::updateCoeffs();
 }
@@ -151,11 +151,11 @@ void Foam::turbulentIntensityKineticEnergyInletFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("intensity", intensity_);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", this->phiName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

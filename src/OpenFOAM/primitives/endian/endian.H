@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2019 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef foamEndian_H  // Prefixed with 'foam' to avoid any name clashes
-#define foamEndian_H
+#ifndef Foam_endian_H
+#define Foam_endian_H
 
 #include <cstdint>
 
@@ -75,10 +75,10 @@ public:
     // Public Methods
 
         //- Runtime check for big endian.
-        inline static bool isBig();
+        inline static bool isBig() noexcept;
 
         //- Runtime check for little endian.
-        inline static bool isLittle();
+        inline static bool isLittle() noexcept;
 
         //- Byte endian swapping for 32-bits
         inline static uint32_t swap32(uint32_t);

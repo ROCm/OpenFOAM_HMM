@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,53 +33,42 @@ License
 template<class Type>
 void Foam::faPatch::patchInternalField
 (
-    const UList<Type>& f,
-    const labelUList& edgeFaces,
+    const UList<Type>& internalData,
+    const labelUList& addressing,
     Field<Type>& pfld
 ) const
 {
-    pfld.resize(size());
+    const label len = this->size();
 
-    forAll(pfld, i)
+    pfld.resize_nocopy(len);
+
+    for (label i = 0; i < len; ++i)
     {
-        pfld[i] = f[edgeFaces[i]];
+        pfld[i] = internalData[addressing[i]];
     }
-}
-
-
-template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::faPatch::patchInternalField
-(
-    const UList<Type>& f
-) const
-{
-    auto tpfld = tmp<Field<Type>>::New(size());
-    patchInternalField(f, this->edgeFaces(), tpfld.ref());
-    return tpfld;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::faPatch::patchInternalField
-(
-    const UList<Type>& f,
-    const labelUList& edgeFaces
-) const
-{
-    auto tpfld = tmp<Field<Type>>::New(size());
-    patchInternalField(f, edgeFaces, tpfld.ref());
-    return tpfld;
 }
 
 
 template<class Type>
 void Foam::faPatch::patchInternalField
 (
-    const UList<Type>& f,
+    const UList<Type>& internalData,
     Field<Type>& pfld
 ) const
 {
-    patchInternalField(f, this->edgeFaces(), pfld);
+    patchInternalField(internalData, this->edgeFaces(), pfld);
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::faPatch::patchInternalField
+(
+    const UList<Type>& internalData
+) const
+{
+    auto tpfld = tmp<Field<Type>>::New();
+    patchInternalField(internalData, this->edgeFaces(), tpfld.ref());
+    return tpfld;
 }
 
 

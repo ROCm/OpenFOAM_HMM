@@ -225,7 +225,7 @@ void storeCellInZone
 {
     const auto zoneFnd = physToZone.cfind(regPhys);
 
-    if (zoneFnd.found())
+    if (zoneFnd.good())
     {
         // Existing zone for region
         zoneCells[zoneFnd()].append(celli);
@@ -592,7 +592,7 @@ void readCellsLegacy
             const auto regFnd = physToPatch.cfind(regPhys);
 
             label patchi = -1;
-            if (regFnd.found())
+            if (regFnd.good())
             {
                 // Existing patch for region
                 patchi = regFnd();
@@ -625,7 +625,7 @@ void readCellsLegacy
             const auto regFnd = physToPatch.cfind(regPhys);
 
             label patchi = -1;
-            if (regFnd.found())
+            if (regFnd.good())
             {
                 // Existing patch for region
                 patchi = regFnd();
@@ -934,7 +934,7 @@ void readCells
                 const auto regFnd = physToPatch.cfind(regPhys);
 
                 label patchi = -1;
-                if (regFnd.found())
+                if (regFnd.good())
                 {
                     // Existing patch for region
                     patchi = regFnd();
@@ -972,7 +972,7 @@ void readCells
                 const auto regFnd = physToPatch.cfind(regPhys);
 
                 label patchi = -1;
-                if (regFnd.found())
+                if (regFnd.good())
                 {
                     // Existing patch for region
                     patchi = regFnd();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -191,6 +191,17 @@ Foam::faPatch::~faPatch()
 const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const noexcept
 {
     return boundaryMesh_;
+}
+
+
+Foam::label Foam::faPatch::offset() const
+{
+    return max
+    (
+        0,
+        boundaryMesh().mesh().patchStarts()[index()]
+      - boundaryMesh().mesh().nInternalEdges()
+    );
 }
 
 
@@ -482,11 +493,15 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
     vectorField edgePN(edgeCentres() - edgeFaceCentres());
 
     // Do not allow any mag(val) < SMALL
-    for (vector& edgei : edgePN)
+    // sqrt(1/3) = 0.5773502691896257, but slightly rounded down
+    const vector minVector(vector::uniform(0.57735*SMALL));
+    const scalar minLenSqr(SMALL*SMALL);
+
+    for (vector& e : edgePN)
     {
-        if (mag(edgei) < SMALL)
+        if (e.magSqr() < minLenSqr)
         {
-            edgei = vector::uniform(SMALL);
+            e = minVector;
         }
     }
 

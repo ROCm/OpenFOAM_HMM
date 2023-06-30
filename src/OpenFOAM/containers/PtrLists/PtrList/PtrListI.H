@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,15 +29,6 @@ License
 #include "autoPtr.H"
 #include "refPtr.H"
 #include "tmp.H"
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class T>
-inline void Foam::PtrList<T>::free()
-{
-    (this->ptrs_).free(); // free old pointers
-}
-
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
@@ -96,16 +87,25 @@ inline Foam::PtrList<T>::PtrList
 template<class T>
 inline void Foam::PtrList<T>::clear()
 {
-    (this->ptrs_).free(); // free old pointers
+    (this->ptrs_).free();  // Free and nullify old pointers
     UPtrList<T>::clear();
 }
 
 
 template<class T>
-template<class... Args>
-inline void Foam::PtrList<T>::emplace_back(Args&&... args)
+inline void Foam::PtrList<T>::free()
 {
-    UPtrList<T>::push_back(new T(std::forward<Args>(args)...));
+    (this->ptrs_).free();  // Free and nullify old pointers
+}
+
+
+template<class T>
+template<class... Args>
+inline T& Foam::PtrList<T>::emplace_back(Args&&... args)
+{
+    T* ptr = new T(std::forward<Args>(args)...);
+    UPtrList<T>::push_back(ptr);
+    return *ptr;
 }
 
 
@@ -170,13 +170,21 @@ inline void Foam::PtrList<T>::push_back(PtrList<T>&& other)
 
 template<class T>
 template<class... Args>
-inline Foam::autoPtr<T> Foam::PtrList<T>::emplace
-(
-    const label i,
-    Args&&... args
-)
+inline T& Foam::PtrList<T>::emplace_set(const label i, Args&&... args)
 {
-    return set(i, new T(std::forward<Args>(args)...));
+    T* ptr = new T(std::forward<Args>(args)...);
+    (void)this->set(i, ptr);
+    return *ptr;
+}
+
+
+template<class T>
+template<class... Args>
+inline T& Foam::PtrList<T>::emplace(const label i, Args&&... args)
+{
+    T* ptr = new T(std::forward<Args>(args)...);
+    (void)this->set(i, ptr);
+    return *ptr;
 }
 
 
@@ -250,7 +258,12 @@ inline Foam::autoPtr<T> Foam::PtrList<T>::release(const label i)
 template<class T>
 inline void Foam::PtrList<T>::transfer(PtrList<T>& list)
 {
-    (this->ptrs_).free(); // free old pointers
+    if (this == &list)
+    {
+        return;  // Self-assignment is a no-op
+    }
+
+    (this->ptrs_).free();  // Free and nullify old pointers
     UPtrList<T>::transfer(list);
 }
 

@@ -345,7 +345,7 @@ void Foam::fvc::spreadSource
         ),
         mesh,
         dimensionedScalar(mDotOut.dimensions(), Zero),
-        zeroGradientFvPatchField<scalar>::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     // Smearing of source term field

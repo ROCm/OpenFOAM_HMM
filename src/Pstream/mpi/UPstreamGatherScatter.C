@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,26 +28,24 @@ License
 #include "Pstream.H"
 #include "UPstreamWrapping.H"
 
-#include <mpi.h>
 #include <cinttypes>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #undef  Pstream_CommonRoutines
 #define Pstream_CommonRoutines(Native, TaggedType)                            \
+                                                                              \
 void Foam::UPstream::mpiGather                                                \
 (                                                                             \
     const Native* sendData,                                                   \
-    int sendCount,                                                            \
-                                                                              \
     Native* recvData,                                                         \
-    int recvCount,                                                            \
+    int count,                                                                \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::gather                                                     \
     (                                                                         \
-        sendData, sendCount, recvData, recvCount,                             \
+        sendData, recvData, count,                                            \
         TaggedType, comm                                                      \
     );                                                                        \
 }                                                                             \
@@ -56,16 +54,29 @@ void Foam::UPstream::mpiGather                                                \
 void Foam::UPstream::mpiScatter                                               \
 (                                                                             \
     const Native* sendData,                                                   \
-    int sendCount,                                                            \
-                                                                              \
     Native* recvData,                                                         \
-    int recvCount,                                                            \
+    int count,                                                                \
     const label comm                                                          \
 )                                                                             \
 {                                                                             \
     PstreamDetail::scatter                                                    \
     (                                                                         \
-        sendData, sendCount, recvData, recvCount,                             \
+        sendData, recvData, count,                                            \
+        TaggedType, comm                                                      \
+    );                                                                        \
+}                                                                             \
+                                                                              \
+                                                                              \
+void Foam::UPstream::mpiAllGather                                             \
+(                                                                             \
+    Native* allData,                                                          \
+    int count,                                                                \
+    const label comm                                                          \
+)                                                                             \
+{                                                                             \
+    PstreamDetail::allGather                                                  \
+    (                                                                         \
+        allData, count,                                                       \
         TaggedType, comm                                                      \
     );                                                                        \
 }

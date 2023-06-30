@@ -407,9 +407,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const lduMatrix& ldum)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMatrix>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<lduMatrix>& iproxy
+)
 {
-    const lduMatrix& ldum = ip.t_;
+    const auto& ldum = *iproxy;
 
     Switch hasLow = ldum.hasLower();
     Switch hasDiag = ldum.hasDiag();

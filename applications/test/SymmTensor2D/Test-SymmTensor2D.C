@@ -325,7 +325,7 @@ void test_global_funcs(Type)
                      Type(13)
         )
     );
-    cmp("  Square of Frobenius norm = ", magSqr(sT), Type(17.999999999999996));
+    cmp("  Square of Frobenius norm = ", magSqr(sT), scalar(17.999999999999996));
     cmp
     (
         "  Outer-product of a Vector2D with itself = ",

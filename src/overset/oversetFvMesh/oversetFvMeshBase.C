@@ -372,8 +372,7 @@ Foam::scalar Foam::oversetFvMeshBase::cellAverage
     const cell& cFaces = mesh_.cells()[celli];
 
     scalar avg = 0.0;
-    label n = 0;
-    label nFront = 0;
+    label nTotal = 0;
     for (const label facei : cFaces)
     {
         if (mesh_.isInternalFace(facei))
@@ -382,38 +381,32 @@ Foam::scalar Foam::oversetFvMeshBase::cellAverage
             if (norm[nbrCelli] == -GREAT)
             {
                 // Invalid neighbour. Add to front
-                if (isFront.set(facei))
-                {
-                    nFront++;
-                }
+                isFront.set(facei);
             }
             else
             {
                 // Valid neighbour. Add to average
                 avg += norm[nbrCelli];
-                n++;
+                ++nTotal;
             }
         }
         else
         {
             if (nbrNorm[facei-mesh_.nInternalFaces()] == -GREAT)
             {
-                if (isFront.set(facei))
-                {
-                    nFront++;
-                }
+                isFront.set(facei);
             }
             else
             {
                 avg += nbrNorm[facei-mesh_.nInternalFaces()];
-                n++;
+                ++nTotal;
             }
         }
     }
 
-    if (n > 0)
+    if (nTotal)
     {
-        return avg/n;
+        return avg/nTotal;
     }
     else
     {
@@ -441,7 +434,7 @@ void Foam::oversetFvMeshBase::writeAgglomeration
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero)
@@ -496,7 +489,7 @@ void Foam::oversetFvMeshBase::writeAgglomeration
                     mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 mesh_,
                 dimensionedScalar(dimless, Zero)
@@ -633,11 +626,11 @@ bool Foam::oversetFvMeshBase::interpolateFields()
 bool Foam::oversetFvMeshBase::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // For postprocessing : write cellTypes and zoneID
-    bool ok = false;
+    bool ok = true;
     {
         const cellCellStencilObject& overlap = Stencil::New(mesh_);
 
@@ -652,11 +645,11 @@ bool Foam::oversetFvMeshBase::writeObject
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         forAll(volTypes.internalField(), cellI)
@@ -664,7 +657,7 @@ bool Foam::oversetFvMeshBase::writeObject
             volTypes[cellI] = cellTypes[cellI];
         }
         volTypes.correctBoundaryConditions();
-        volTypes.writeObject(streamOpt, valid);
+        volTypes.writeObject(streamOpt, writeOnProc);
     }
     {
         volScalarField volZoneID
@@ -676,11 +669,11 @@ bool Foam::oversetFvMeshBase::writeObject
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         const cellCellStencilObject& overlap = Stencil::New(mesh_);
@@ -691,7 +684,7 @@ bool Foam::oversetFvMeshBase::writeObject
             volZoneID[cellI] = zoneID[cellI];
         }
         volZoneID.correctBoundaryConditions();
-        volZoneID.writeObject(streamOpt, valid);
+        volZoneID.writeObject(streamOpt, writeOnProc);
     }
     if (debug)
     {
@@ -716,11 +709,12 @@ bool Foam::oversetFvMeshBase::writeObject
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
-            dimensionedScalar("minOne", dimless, scalar(-1)),
-            zeroGradientFvPatchScalarField::typeName
+            scalar(-1),
+            dimless,
+            fvPatchFieldBase::zeroGradientType()
         );
 
         forAll(cellStencil, cellI)
@@ -752,7 +746,7 @@ bool Foam::oversetFvMeshBase::writeObject
         (
             volDonorZoneID
         );
-        ok = volDonorZoneID.writeObject(streamOpt, valid);
+        ok = volDonorZoneID.writeObject(streamOpt, writeOnProc);
     }
 
     return ok;

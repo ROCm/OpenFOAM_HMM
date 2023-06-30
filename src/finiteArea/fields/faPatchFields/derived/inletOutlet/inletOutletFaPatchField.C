@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,8 +40,8 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
     mixedFaPatchField<Type>(p, iF),
     phiName_("phi")
 {
-    this->refValue() = pTraits<Type>::zero;
-    this->refGrad() = pTraits<Type>::zero;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 0.0;
 }
 
@@ -68,25 +68,19 @@ Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
     const dictionary& dict
 )
 :
-    mixedFaPatchField<Type>(p, iF),
+    // No reading of refValue, refGradient, valueFraction entries
+    mixedFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    this->refValue() = Field<Type>("inletValue", dict, p.size());
+    // Require inletValue (MUST_READ)
+    this->refValue().assign("inletValue", dict, p.size());
+    this->refGrad() = Zero;
+    this->valueFraction() = 0;
 
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        faPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
+        faPatchField<Type>::extrapolateInternal();
     }
-    else
-    {
-        faPatchField<Type>::operator=(this->refValue());
-    }
-
-    this->refGrad() = pTraits<Type>::zero;
-    this->valueFraction() = 0.0;
 }
 
 
@@ -124,12 +118,9 @@ void Foam::inletOutletFaPatchField<Type>::updateCoeffs()
     }
 
     const Field<scalar>& phip =
-        this->patch(). template lookupPatchField<edgeScalarField, scalar>
-        (
-            phiName_
-        );
+        this->patch().template lookupPatchField<edgeScalarField>(phiName_);
 
-    this->valueFraction() = 1.0 - pos(phip);
+    this->valueFraction() = neg(phip);
 
     mixedFaPatchField<Type>::updateCoeffs();
 }
@@ -141,7 +132,7 @@ void Foam::inletOutletFaPatchField<Type>::write(Ostream& os) const
     faPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->refValue().writeEntry("inletValue", os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

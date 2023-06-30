@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,14 +28,6 @@ License
 
 #include "calculatedFaePatchField.H"
 #include "faPatchFieldMapper.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::faePatchField<Type>::calculatedType()
-{
-    return Foam::calculatedFaePatchField<Type>::typeName;
-}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -68,10 +60,11 @@ Foam::calculatedFaePatchField<Type>::calculatedFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
 )
 :
-    faePatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    faePatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
@@ -134,7 +127,7 @@ template<class Type>
 void Foam::calculatedFaePatchField<Type>::write(Ostream& os) const
 {
     faePatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faePatchField<Type>::writeValueEntry(os);
 }
 
 

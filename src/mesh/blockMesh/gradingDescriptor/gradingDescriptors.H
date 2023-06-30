@@ -48,7 +48,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
 class gradingDescriptors;
 Istream& operator>>(Istream& is, gradingDescriptors& gd);
 

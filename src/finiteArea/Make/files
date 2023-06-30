@@ -24,6 +24,7 @@ $(faPatches)/constraint/processor/processorFaPatch.C
 $(faPatches)/constraint/wedge/wedgeFaPatch.C
 $(faPatches)/constraint/cyclic/cyclicFaPatch.C
 $(faPatches)/constraint/symmetry/symmetryFaPatch.C
+$(faPatches)/other/ignore/ignoreFaPatch.C
 
 distributed/faMeshDistributor.C
 distributed/faMeshDistributorNew.C
@@ -42,30 +43,35 @@ $(faPatchFields)/faPatchField/faPatchFieldBase.C
 $(faPatchFields)/faPatchField/faPatchFields.C
 
 basicFaPatchFields = $(faPatchFields)/basic
-$(basicFaPatchFields)/basicSymmetry/basicSymmetryFaPatchScalarField.C
+$(basicFaPatchFields)/basicSymmetry/basicSymmetryFaPatchFields.C
 $(basicFaPatchFields)/calculated/calculatedFaPatchFields.C
+$(basicFaPatchFields)/extrapolatedCalculated/extrapolatedCalculatedFaPatchFields.C
 $(basicFaPatchFields)/coupled/coupledFaPatchFields.C
 $(basicFaPatchFields)/zeroGradient/zeroGradientFaPatchFields.C
 $(basicFaPatchFields)/fixedValue/fixedValueFaPatchFields.C
 $(basicFaPatchFields)/fixedGradient/fixedGradientFaPatchFields.C
 $(basicFaPatchFields)/mixed/mixedFaPatchFields.C
+$(basicFaPatchFields)/sliced/slicedFaPatchFields.C
 $(basicFaPatchFields)/transform/transformFaPatchFields.C
-$(basicFaPatchFields)/transform/transformFaPatchScalarField.C
 
 constraintFaPatchFields = $(faPatchFields)/constraint
 $(constraintFaPatchFields)/empty/emptyFaPatchFields.C
 $(constraintFaPatchFields)/processor/processorFaPatchFields.C
 $(constraintFaPatchFields)/wedge/wedgeFaPatchFields.C
-$(constraintFaPatchFields)/wedge/wedgeFaPatchScalarField.C
 $(constraintFaPatchFields)/cyclic/cyclicFaPatchFields.C
 $(constraintFaPatchFields)/symmetry/symmetryFaPatchFields.C
 
 derivedFaPatchFields = $(faPatchFields)/derived
 $(derivedFaPatchFields)/fixedValueOutflow/fixedValueOutflowFaPatchFields.C
 $(derivedFaPatchFields)/inletOutlet/inletOutletFaPatchFields.C
+$(derivedFaPatchFields)/outletInlet/outletInletFaPatchFields.C
 $(derivedFaPatchFields)/slip/slipFaPatchFields.C
 $(derivedFaPatchFields)/edgeNormalFixedValue/edgeNormalFixedValueFaPatchVectorField.C
 $(derivedFaPatchFields)/timeVaryingUniformFixedValue/timeVaryingUniformFixedValueFaPatchFields.C
+$(derivedFaPatchFields)/uniformFixedGradient/uniformFixedGradientFaPatchFields.C
+$(derivedFaPatchFields)/uniformFixedValue/uniformFixedValueFaPatchFields.C
+$(derivedFaPatchFields)/uniformMixed/uniformMixedFaPatchFields.C
+$(derivedFaPatchFields)/ignore/ignoreFaPatchFields.C
 $(derivedFaPatchFields)/clampedPlate/clampedPlateFaPatchFields.C
 
 faePatchFields = fields/faePatchFields
@@ -76,6 +82,7 @@ basicFaePatchFields = $(faePatchFields)/basic
 $(basicFaePatchFields)/calculated/calculatedFaePatchFields.C
 $(basicFaePatchFields)/coupled/coupledFaePatchFields.C
 $(basicFaePatchFields)/fixedValue/fixedValueFaePatchFields.C
+$(basicFaePatchFields)/sliced/slicedFaePatchFields.C
 
 constraintFaePatchFields = $(faePatchFields)/constraint
 $(constraintFaePatchFields)/empty/emptyFaePatchFields.C

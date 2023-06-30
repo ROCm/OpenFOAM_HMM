@@ -80,7 +80,7 @@ Foam::wallLubricationModels::noWallLubrication::Fi() const
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedVector(dimF, Zero)
@@ -102,7 +102,7 @@ Foam::wallLubricationModels::noWallLubrication::F() const
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedVector(dimF, Zero)

@@ -39,12 +39,16 @@ SourceFiles
 #define PrimitivePatchInterpolation_H
 
 #include "scalarList.H"
+#include "faceList.H"
 #include "Field.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward Declarations
+template<class Patch> class PrimitivePatchInterpolation;
 
 /*---------------------------------------------------------------------------*\
                   Class PrimitivePatchInterpolation Declaration
@@ -62,10 +66,10 @@ class PrimitivePatchInterpolation
     // Demand-driven data
 
         //- Face-to-point weights
-        mutable scalarListList* faceToPointWeightsPtr_;
+        mutable std::unique_ptr<scalarListList> faceToPointWeightsPtr_;
 
         //- Face-to-edge weights
-        mutable scalarList* faceToEdgeWeightsPtr_;
+        mutable std::unique_ptr<scalarList> faceToEdgeWeightsPtr_;
 
 
     // Private Member Functions
@@ -105,7 +109,7 @@ public:
 
 
     //- Destructor
-    ~PrimitivePatchInterpolation();
+    ~PrimitivePatchInterpolation() = default;
 
 
     // Member Functions

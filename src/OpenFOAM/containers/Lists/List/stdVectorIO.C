@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const std::vector<T>& list)
     {
         os << *iter;
 
-        for (++iter; iter != last; ++iter)
+        while (++iter != last)
         {
             os << token::SPACE << *iter;
         }

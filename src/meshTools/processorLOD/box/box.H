@@ -49,7 +49,6 @@ Description
 
 namespace Foam
 {
-
 namespace processorLODs
 {
 
@@ -165,12 +164,6 @@ protected:
             const label nTgtElems
         );
 
-        //- Use the current list of send elements to create the mapDistribute
-        autoPtr<mapDistribute> createLODMap
-        (
-            List<labelList>& sendElems
-        ) const;
-
 
 public:
 
@@ -195,9 +188,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace processorLODs
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

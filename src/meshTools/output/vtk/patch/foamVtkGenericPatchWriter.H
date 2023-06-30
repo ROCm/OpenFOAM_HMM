@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,6 +159,10 @@ public:
         //- Write processor ids for each poly as CellData
         bool writeProcIDs()
         {
+            if (this->isPointData())
+            {
+                return vtk::fileWriter::writeProcIDs(nLocalPoints_);
+            }
             return vtk::polyWriter::writeProcIDs(nLocalPolys_);
         }
 };

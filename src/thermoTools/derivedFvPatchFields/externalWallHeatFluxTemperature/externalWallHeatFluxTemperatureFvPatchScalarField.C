@@ -136,8 +136,6 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         }
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
-
     if (qrName_ != "none")
     {
         if (dict.found("qrPrevious"))
@@ -150,12 +148,11 @@ externalWallHeatFluxTemperatureFvPatchScalarField
         }
     }
 
-    if (dict.found("refValue"))
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
+
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
@@ -317,11 +314,12 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
-        qr =
+        qr = lerp
+        (
+            qrPrevious_,
+            patch().lookupPatchField<volScalarField>(qrName_),
             qrRelaxation_
-           *patch().lookupPatchField<volScalarField, scalar>(qrName_)
-          + (1 - qrRelaxation_)*qrPrevious_;
-
+        );
         qrPrevious_ = qr;
     }
 
@@ -454,9 +452,8 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
         }
     }
 
-    valueFraction() =
-        relaxation_*valueFraction() + (1 - relaxation_)*valueFraction0;
-    refValue() = relaxation_*refValue() + (1 - relaxation_)*refValue0;
+    valueFraction() = lerp(valueFraction0, valueFraction(), relaxation_);
+    refValue() = lerp(refValue0, refValue(), relaxation_);
 
     mixedFvPatchScalarField::updateCoeffs();
 
@@ -476,7 +473,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("mode", operationModeNames[mode_]);
     temperatureCoupledBase::write(os);
@@ -537,7 +534,7 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
     refValue().writeEntry("refValue", os);
     refGrad().writeEntry("refGradient", os);
     valueFraction().writeEntry("valueFraction", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

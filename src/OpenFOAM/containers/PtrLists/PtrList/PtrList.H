@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,8 +78,6 @@ protected:
         template<class INew>
         void readIstream(Istream& is, const INew& inew);
 
-        //- Delete the allocated entries, but retain the list size.
-        inline void free();
 
 public:
 
@@ -142,16 +140,17 @@ public:
         //- Clear the PtrList. Delete allocated entries and set size to zero.
         inline void clear();
 
+        //- Free memory and nullify all entries. Does not change the list size.
+        inline void free();
+
         //- Adjust size of PtrList.
         //  New entries are initialized to nullptr, removed entries are deleted
         void resize(const label newLen);
 
-        //- Same as resize()
-        void setSize(const label newLen) { this->resize(newLen); }
-
-        //- Construct and append an element to the end of the list
+        //- Construct and append an element to the end of the list,
+        //- return reference to the new list element
         template<class... Args>
-        inline void emplace_back(Args&&... args);
+        inline T& emplace_back(Args&&... args);
 
         //- Append an element to the end of the list
         inline void push_back(T* ptr);
@@ -171,9 +170,15 @@ public:
         //- Move append another list to the end of this list.
         inline void push_back(PtrList<T>&& other);
 
-        //- Construct and set an element
+        //- Construct and set a new element at given position,
+        //- (discard old element at that location).
+        //- Return reference to the new list element.
         template<class... Args>
-        inline autoPtr<T> emplace(const label i, Args&&... args);
+        inline T& emplace_set(const label i, Args&&... args);
+
+        //- Same as emplace_set()
+        template<class... Args>
+        inline T& emplace(const label i, Args&&... args);
 
         //- Set element to given pointer and return old element (can be null)
         //  No-op if the new pointer value is identical to the current content.
@@ -210,7 +215,7 @@ public:
         inline void operator=(PtrList<T>&& list);
 
 
-    // IOstream operator
+    // IOstream Operators
 
         //- Read from Istream, discarding contents of existing list
         friend Istream& operator>> <T>(Istream& is, PtrList<T>& list);
@@ -218,14 +223,22 @@ public:
 
     // Housekeeping
 
+        //- Disallow push_back with autoPtr without std::move
+        void push_back(autoPtr<T>& ptr) = delete;
+
         //- Set element to given autoPtr and return old element
+        //FOAM_DEPRECATED_FOR(2022-10, "set(autoPtr&&))")
         autoPtr<T> set(const label i, autoPtr<T>& ptr)
         {
-            return this->set(i, std::move(ptr));
+            return this->set(i, ptr.release());
         }
 
+        //- Same as resize()
+        void setSize(const label newLen) { this->resize(newLen); }
+
         //- Move append an element to the end of the list
-        void append(autoPtr<T>& ptr) { this->push_back(std::move(ptr)); }
+        //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
+        void append(autoPtr<T>& ptr) { this->push_back(ptr.release()); }
 
         //- Append an element to the end of the list
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
@@ -235,12 +248,12 @@ public:
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
         void append(std::unique_ptr<T>&& ptr)
         {
-            this->push_back(std::move(ptr));
+            this->push_back(ptr.release());
         }
 
         //- Move append an element to the end of the list
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")
-        void append(autoPtr<T>&& ptr) { this->push_back(std::move(ptr)); }
+        void append(autoPtr<T>&& ptr) { this->push_back(ptr.release()); }
 
         //- Move or clone append a tmp to the end of the list
         //FOAM_DEPRECATED_FOR(2022-10, "push_back()")

@@ -186,15 +186,15 @@ Foam::lumpedPointDisplacementPointPatchVectorField::movement() const
     lumpedPointIOMovement* ptr =
         lumpedPointIOMovement::getMovementObject(obr);
 
-    if (ptr)
+    if (!ptr)
     {
-        return *ptr; // Already exists
+        // Create and register with this patch as the owner
+        ptr = lumpedPointIOMovement::New(obr, this->patch().index()).ptr();
+
+        objectRegistry::store(ptr);
     }
 
-    // Create and register with this patch as the owner
-    ptr = lumpedPointIOMovement::New(obr, this->patch().index()).ptr();
-
-    return objectRegistry::store(ptr);
+    return *ptr;
 }
 
 
@@ -446,7 +446,7 @@ const
         os.writeEntry("dataWritten", dataWritten_);
     }
 
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

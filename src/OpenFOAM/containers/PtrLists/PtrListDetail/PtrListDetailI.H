@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,20 @@ inline Foam::Detail::PtrListDetail<T>::PtrListDetail
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline const T* Foam::Detail::PtrListDetail<T>::get(const label i) const
+{
+    return (i >= 0 && i < this->size()) ? (*this)[i] : nullptr;
+}
+
+
+template<class T>
+inline T* Foam::Detail::PtrListDetail<T>::get(const label i)
+{
+    return (i >= 0 && i < this->size()) ? (*this)[i] : nullptr;
+}
+
+
+template<class T>
 inline void Foam::Detail::PtrListDetail<T>::setAddressableSize
 (
     const label n
@@ -112,7 +126,7 @@ inline void Foam::Detail::PtrListDetail<T>::resize(const label newLen)
 template<class T>
 inline void Foam::Detail::PtrListDetail<T>::checkNonNull() const
 {
-    const label idx = this->findNull();
+    const label idx = this->find_first_not();
 
     if (idx >= 0)
     {

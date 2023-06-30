@@ -1028,7 +1028,7 @@ int main(int argc, char *argv[])
                                 mesh,
                                 ppPtr(),
                                 patchDict.subOrEmptyDict("patchFields"),
-                                calculatedFvPatchScalarField::typeName,
+                                fvPatchFieldBase::calculatedType(),
                                 true
                             );
                         }
@@ -1079,7 +1079,7 @@ int main(int argc, char *argv[])
                                 mesh,
                                 ppPtr(),
                                 patchDict.subOrEmptyDict("patchFields"),
-                                calculatedFvPatchScalarField::typeName,
+                                fvPatchFieldBase::calculatedType(),
                                 true
                             );
                         }
@@ -1108,7 +1108,7 @@ int main(int argc, char *argv[])
                         mesh,
                         ppPtr(),
                         patchDict.subOrEmptyDict("patchFields"),
-                        calculatedFvPatchScalarField::typeName,
+                        fvPatchFieldBase::calculatedType(),
                         true
                     );
                 }

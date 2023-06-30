@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,21 +36,22 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduInterfaceField_H
-#define lduInterfaceField_H
+#ifndef Foam_lduInterfaceField_H
+#define Foam_lduInterfaceField_H
 
 #include "lduInterface.H"
+#include "lduAddressing.H"
 #include "primitiveFieldsFwd.H"
 #include "Pstream.H"
-#include "lduAddressing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class lduMatrix;
+class lduInterfaceField;
 
 /*---------------------------------------------------------------------------*\
                      Class lduInterfaceField Declaration
@@ -64,23 +65,23 @@ class lduInterfaceField
         const lduInterface& interface_;
 
         //- Update index used so that updateInterfaceMatrix is called only once
-        //  during the construction of the matrix
-        bool updatedMatrix_;
-
-
-    // Private Member Functions
-
-        //- No copy construct
-        lduInterfaceField(const lduInterfaceField&) = delete;
-
-        //- No copy assignment
-        void operator=(const lduInterfaceField&) = delete;
+        //- during the construction of the matrix
+        mutable bool updatedMatrix_;
 
 
 public:
 
     //- Runtime type information
     TypeName("lduInterfaceField");
+
+
+    // Generated Methods
+
+        //- No copy construct
+        lduInterfaceField(const lduInterfaceField&) = delete;
+
+        //- No copy assignment
+        void operator=(const lduInterfaceField&) = delete;
 
 
     // Constructors
@@ -99,40 +100,43 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Return the interface
+        const lduInterface& interface() const noexcept
+        {
+            return interface_;
+        }
 
-            //- Return the interface
-            const lduInterface& interface() const
-            {
-                return interface_;
-            }
+        //- Return the interface type
+        virtual const word& interfaceFieldType() const
+        {
+            return type();
+        }
 
-            //- Return the interface type
-            virtual const word& interfaceFieldType() const
-            {
-                return type();
-            }
+
+    // Coupled Interface
+
+        //- Are all (receive) data available?
+        virtual bool ready() const
+        {
+            return true;
+        }
+
+        //- Whether matrix has been updated
+        bool updatedMatrix() const noexcept
+        {
+            return updatedMatrix_;
+        }
+
+        //- Set matrix as update-to-date, return the previous value
+        bool updatedMatrix(bool flag) const noexcept
+        {
+            bool old(updatedMatrix_);
+            updatedMatrix_ = flag;
+            return old;
+        }
 
 
         // Coupled interface matrix update
-
-            //- Whether matrix has been updated
-            bool updatedMatrix() const
-            {
-                return updatedMatrix_;
-            }
-
-            //- Whether matrix has been updated
-            bool& updatedMatrix()
-            {
-                return updatedMatrix_;
-            }
-
-            //- Is all data available
-            virtual bool ready() const
-            {
-                return true;
-            }
 
             //- Initialise neighbour matrix update.
             //- Add/subtract coupled contributions to matrix
@@ -173,6 +177,16 @@ public:
                 const scalarField& coeffs,
                 const Field<Type>& vals
             ) const;
+
+
+    // Housekeeping
+
+        //- Adjust whether matrix has been updated.
+        //  \deprecated Prefer the updatedMatrix(bool) setter (JAN-2023)
+        bool& updatedMatrix() noexcept
+        {
+            return updatedMatrix_;
+        }
 };
 
 

@@ -197,7 +197,7 @@ int main(int argc, char *argv[])
                 mesh.thisDb(),
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             );
 
             const bool headOk = fieldHeader.typeHeaderOk<IOdictionary>(false);

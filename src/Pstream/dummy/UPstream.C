@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Pstream.H"
+#include "UPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +75,7 @@ void Foam::UPstream::abort()
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-void Foam::UPstream::allocatePstreamCommunicator
+void Foam::UPstream::allocateCommunicatorComponents
 (
     const label,
     const label
@@ -83,31 +83,24 @@ void Foam::UPstream::allocatePstreamCommunicator
 {}
 
 
-void Foam::UPstream::freePstreamCommunicator(const label)
+void Foam::UPstream::freeCommunicatorComponents(const label)
 {}
 
 
-Foam::label Foam::UPstream::nRequests() noexcept
+void Foam::UPstream::barrier(const label communicator, UPstream::Request* req)
+{}
+
+
+std::pair<int,int>
+Foam::UPstream::probeMessage
+(
+    const UPstream::commsTypes commsType,
+    const int fromProcNo,
+    const int tag,
+    const label communicator
+)
 {
-    return 0;
-}
-
-
-void Foam::UPstream::resetRequests(const label n)
-{}
-
-
-void Foam::UPstream::waitRequests(const label start)
-{}
-
-
-void Foam::UPstream::waitRequest(const label i)
-{}
-
-
-bool Foam::UPstream::finishedRequest(const label i)
-{
-    return true;
+    return std::pair<int,int>(-1, 0);
 }
 
 

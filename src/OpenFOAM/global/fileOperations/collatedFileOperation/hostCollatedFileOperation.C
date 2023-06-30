@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2021-2022 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 
 #include "hostCollatedFileOperation.H"
 #include "addToRunTimeSelectionTable.H"
-#include "bitSet.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -43,13 +42,18 @@ namespace fileOperations
         hostCollatedFileOperation,
         word
     );
+    addToRunTimeSelectionTable
+    (
+        fileOperation,
+        hostCollatedFileOperation,
+        comm
+    );
 
-    // Register initialisation routine. Signals need for threaded mpi and
-    // handles command line arguments
+    // Threaded MPI: depending on buffering
     addNamedToRunTimeSelectionTable
     (
         fileOperationInitialise,
-        hostCollatedFileOperationInitialise,
+        fileOperationInitialise_collated,
         word,
         hostCollated
     );
@@ -57,68 +61,40 @@ namespace fileOperations
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::labelList Foam::fileOperations::hostCollatedFileOperation::subRanks
-(
-    const label n
-)
+namespace Foam
 {
-    DynamicList<label> subRanks(64);
+// Construction helper: self/world/local communicator and IO ranks
+static Tuple2<label, labelList> getCommPattern()
+{
+    // Default is COMM_WORLD (single master)
+    Tuple2<label, labelList> commAndIORanks
+    (
+        UPstream::worldComm,
+        fileOperation::getGlobalIORanks()
+    );
 
-    labelList mainRanks(fileOperation::ioRanks());
-    if (!mainRanks.empty())
+    if (commAndIORanks.second().empty())
     {
-        if (!mainRanks.found(0))
-        {
-            FatalErrorInFunction
-                << "Rank 0 (master) should be in the IO ranks. Currently "
-                << mainRanks << nl
-                << exit(FatalError);
-        }
-
-        // The lowest numbered rank is the IO rank
-        const bitSet isIOrank(n, mainRanks);
-
-        for (label proci = Pstream::myProcNo(); proci >= 0; --proci)
-        {
-            if (isIOrank[proci])
-            {
-                // Found my master. Collect all processors with same master
-                subRanks.append(proci);
-                for
-                (
-                    label rank = proci+1;
-                    rank < n && !isIOrank[rank];
-                    ++rank
-                )
-                {
-                    subRanks.append(rank);
-                }
-                break;
-            }
-        }
+        // Default: one master per host
+        commAndIORanks.second() = fileOperation::getGlobalHostIORanks();
     }
-    else
+
+    if (UPstream::parRun() && commAndIORanks.second().size() > 1)
     {
-        // Normal operation: one lowest rank per hostname is the writer
-        const string myHostName(hostName());
-
-        stringList hosts(Pstream::nProcs());
-        hosts[Pstream::myProcNo()] = myHostName;
-        Pstream::allGatherList(hosts);
-
-        // Collect procs with same hostname
-        forAll(hosts, proci)
-        {
-            if (hosts[proci] == myHostName)
-            {
-                subRanks.append(proci);
-            }
-        }
+        // Multiple masters: ranks for my IO range
+        commAndIORanks.first() = UPstream::allocateCommunicator
+        (
+            UPstream::worldComm,
+            fileOperation::subRanks(commAndIORanks.second())
+        );
     }
-    return subRanks;
+
+    return commAndIORanks;
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -141,18 +117,39 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 :
     collatedFileOperation
     (
-        UPstream::allocateCommunicator
-        (
-            UPstream::worldComm,
-            subRanks(Pstream::nProcs())
-        ),
-        (Pstream::parRun() ? labelList() : ioRanks()), // processor dirs
-        typeName,
-        false // verbose
+        getCommPattern(),
+        false,  // distributedRoots
+        false   // verbose
     ),
-    managedComm_(comm_)
+    managedComm_(getManagedComm(comm_))  // Possibly locally allocated
 {
     init(verbose);
+}
+
+
+Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
+(
+    const Tuple2<label, labelList>& commAndIORanks,
+    const bool distributedRoots,
+    bool verbose
+)
+:
+    collatedFileOperation
+    (
+        commAndIORanks,
+        distributedRoots,
+        false   // verbose
+    ),
+    managedComm_(-1)  // Externally managed
+{
+    init(verbose);
+}
+
+
+void Foam::fileOperations::hostCollatedFileOperation::storeComm() const
+{
+    // From externally -> locally managed
+    managedComm_ = getManagedComm(comm_);
 }
 
 
@@ -160,10 +157,7 @@ Foam::fileOperations::hostCollatedFileOperation::hostCollatedFileOperation
 
 Foam::fileOperations::hostCollatedFileOperation::~hostCollatedFileOperation()
 {
-    if (UPstream::isUserComm(managedComm_))
-    {
-        UPstream::freeCommunicator(managedComm_);
-    }
+    UPstream::freeCommunicator(managedComm_);
 }
 
 

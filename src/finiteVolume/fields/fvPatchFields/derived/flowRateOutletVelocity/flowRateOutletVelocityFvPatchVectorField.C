@@ -41,10 +41,10 @@ flowRateOutletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    flowRate_(),
-    volumetric_(false),
+    flowRate_(nullptr),
     rhoName_("rho"),
-    rhoOutlet_(0.0)
+    rhoOutlet_(0),
+    volumetric_(false)
 {}
 
 
@@ -56,38 +56,36 @@ flowRateOutletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<vector>(p, iF, dict, false),
-    rhoOutlet_(dict.getOrDefault<scalar>("rhoOutlet", -VGREAT))
+    fixedValueFvPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
+    flowRate_(nullptr),
+    rhoName_("rho"),
+    rhoOutlet_(dict.getOrDefault<scalar>("rhoOutlet", -VGREAT)),
+    volumetric_(false)
 {
-    if (dict.found("volumetricFlowRate"))
+    flowRate_ =
+        Function1<scalar>::NewIfPresent("volumetricFlowRate", dict, &db());
+
+    if (flowRate_)
     {
         volumetric_ = true;
-        flowRate_ =
-            Function1<scalar>::New("volumetricFlowRate", dict, &db());
-        rhoName_ = "rho";
-    }
-    else if (dict.found("massFlowRate"))
-    {
-        volumetric_ = false;
-        flowRate_ = Function1<scalar>::New("massFlowRate", dict, &db());
-        rhoName_ = dict.getOrDefault<word>("rho", "rho");
     }
     else
+    {
+        dict.readIfPresent("rho", rhoName_);
+        flowRate_ =
+            Function1<scalar>::NewIfPresent("massFlowRate", dict, &db());
+    }
+
+    if (!flowRate_)
     {
         FatalIOErrorInFunction(dict)
             << "Please supply either 'volumetricFlowRate' or"
-            << " 'massFlowRate' and 'rho'" << exit(FatalIOError);
+            << " 'massFlowRate' (optional: with 'rho')" << nl
+            << exit(FatalIOError);
     }
 
-    // Value field require if mass based
-    if (dict.found("value"))
-    {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    // Value field required if mass based
+    if (!this->readValueEntry(dict))
     {
         evaluate(Pstream::commsTypes::blocking);
     }
@@ -105,9 +103,9 @@ flowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
-    rhoOutlet_(ptf.rhoOutlet_)
+    rhoOutlet_(ptf.rhoOutlet_),
+    volumetric_(ptf.volumetric_)
 {}
 
 
@@ -119,9 +117,9 @@ flowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
-    rhoOutlet_(ptf.rhoOutlet_)
+    rhoOutlet_(ptf.rhoOutlet_),
+    volumetric_(ptf.volumetric_)
 {}
 
 
@@ -134,9 +132,9 @@ flowRateOutletVelocityFvPatchVectorField
 :
     fixedValueFvPatchField<vector>(ptf, iF),
     flowRate_(ptf.flowRate_.clone()),
-    volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
-    rhoOutlet_(ptf.rhoOutlet_)
+    rhoOutlet_(ptf.rhoOutlet_),
+    volumetric_(ptf.volumetric_)
 {}
 
 
@@ -200,8 +198,8 @@ void Foam::flowRateOutletVelocityFvPatchVectorField::updateCoeffs()
         // Mass flow-rate
         if (db().foundObject<volScalarField>(rhoName_))
         {
-            const fvPatchField<scalar>& rhop =
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            const auto& rhop =
+                patch().lookupPatchField<volScalarField>(rhoName_);
 
             updateValues(rhop);
         }
@@ -233,7 +231,7 @@ void Foam::flowRateOutletVelocityFvPatchVectorField::write(Ostream& os) const
         os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
         os.writeEntryIfDifferent<scalar>("rhoOutlet", -VGREAT, rhoOutlet_);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

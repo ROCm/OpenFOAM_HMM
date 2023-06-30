@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,17 +90,20 @@ class faBoundaryMesh
         //- Read if IOobject flags set. Return true if read.
         bool readContents(const bool allowReadIfPresent);
 
-        //- No copy construct
-        faBoundaryMesh(const faBoundaryMesh&) = delete;
-
-        //- No copy assignment
-        void operator=(const faBoundaryMesh&) = delete;
-
 
 public:
 
     //- Runtime type information
     TypeName("faBoundaryMesh");
+
+
+    // Generated Methods
+
+        //- No copy construct
+        faBoundaryMesh(const faBoundaryMesh&) = delete;
+
+        //- No copy assignment
+        void operator=(const faBoundaryMesh&) = delete;
 
 
     // Constructors
@@ -127,6 +130,9 @@ public:
 
     // Member Functions
 
+        //- Clear the patch list and all demand-driven data
+        void clear();
+
         //- Return the mesh reference
         const faMesh& mesh() const noexcept
         {
@@ -145,6 +151,9 @@ public:
 
         //- The number of patches before the first processor patch.
         label nNonProcessor() const;
+
+        //- The number of processorFaPatch patches
+        label nProcessorPatches() const;
 
         //- Return a list of patch names
         wordList names() const;
@@ -244,7 +253,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
 

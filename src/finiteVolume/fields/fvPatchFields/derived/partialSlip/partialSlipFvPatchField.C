@@ -74,13 +74,10 @@ Foam::partialSlipFvPatchField<Type>::partialSlipFvPatchField
     valueFraction_("valueFraction", dict, p.size()),
     writeValue_(dict.getOrDefault("writeValue", false))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     // Backwards compatibility - leave refValue as zero unless specified
-    if (dict.found("refValue"))
-    {
-        refValue_ = Field<Type>("refValue", dict, p.size());
-    }
+    refValue_.assign("refValue", dict, p.size(), IOobjectOption::LAZY_READ);
 
     evaluate();
 }
@@ -153,8 +150,12 @@ Foam::partialSlipFvPatchField<Type>::snGrad() const
 
     return
     (
-        valueFraction_*refValue_
-      + (1.0 - valueFraction_)*transform(I - sqr(nHat), pif) - pif
+        lerp
+        (
+            transform(I - sqr(nHat), pif),
+            refValue_,
+            valueFraction_
+        ) - pif
     )*this->patch().deltaCoeffs();
 }
 
@@ -174,10 +175,12 @@ void Foam::partialSlipFvPatchField<Type>::evaluate
 
     Field<Type>::operator=
     (
-        valueFraction_*refValue_
-      +
-        (1.0 - valueFraction_)
-       *transform(I - sqr(nHat), this->patchInternalField())
+        lerp
+        (
+            transform(I - sqr(nHat), this->patchInternalField()),
+            refValue_,
+            valueFraction_
+        )
     );
 
     parent_bctype::evaluate();
@@ -188,12 +191,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::partialSlipFvPatchField<Type>::snGradTransformDiag() const
 {
-    const vectorField nHat(this->patch().nf());
-    vectorField diag(nHat.size());
-
-    diag.replace(vector::X, mag(nHat.component(vector::X)));
-    diag.replace(vector::Y, mag(nHat.component(vector::Y)));
-    diag.replace(vector::Z, mag(nHat.component(vector::Z)));
+    tmp<vectorField> diag(cmptMag(this->patch().nf()));
 
     return
         valueFraction_*pTraits<Type>::one
@@ -212,7 +210,7 @@ void Foam::partialSlipFvPatchField<Type>::write(Ostream& os) const
     if (writeValue_)
     {
         os.writeEntry("writeValue", "true");
-        this->writeEntry("value", os);
+        fvPatchField<Type>::writeValueEntry(os);
     }
 }
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +40,10 @@ SourceFiles
 #ifndef Foam_UPstream_H
 #define Foam_UPstream_H
 
+#include "wordList.H"
 #include "labelList.H"
 #include "DynamicList.H"
 #include "HashTable.H"
-#include "string.H"
 #include "Enum.H"
 #include "ListOps.H"
 
@@ -51,6 +51,12 @@ SourceFiles
 
 namespace Foam
 {
+
+//- Implementation details for UPstream/Pstream/MPI etc.
+namespace PstreamDetail {}
+
+// Forward Declarations
+template<class T> class Map;
 
 /*---------------------------------------------------------------------------*\
                           Class UPstream Declaration
@@ -63,7 +69,7 @@ public:
     //- Int ranges are used for MPI ranks (processes)
     typedef IntRange<int> rangeType;
 
-    //- Types of communications
+    //- Communications types
     enum class commsTypes : char
     {
         blocking,       //!< "blocking"    : (MPI_Bsend, MPI_Recv)
@@ -74,25 +80,36 @@ public:
     //- Enumerated names for the communication types
     static const Enum<commsTypes> commsTypeNames;
 
+    //- Different MPI-send modes (ignored for commsTypes::blocking)
+    enum class sendModes : char
+    {
+        normal,         //!< (MPI_Send, MPI_Isend)
+        sync            //!< (MPI_Ssend, MPI_Issend)
+    };
+
 
     // Public Classes
+
+        //- Wrapper for MPI_Request
+        class Request;  // Forward Declaration
 
         //- Structure for communicating between processors
         class commsStruct
         {
             // Private Data
 
-                //- The procID of the processor directly above
+                //- The procID of the processor \em directly above
                 label above_;
 
-                //- The procIDs of all processors directly below
+                //- The procIDs of processors \em directly below
                 labelList below_;
 
-                //- procIDs of all processors below (so not just directly below)
+                //- The procIDs of all processors below myProcNo,
+                //- not just directly below
                 labelList allBelow_;
 
-                //- procIDs of all processors not below.
-                //  Inverse set of allBelow_ without myProcNo.
+                //- The procIDs of all processors not below myProcNo
+                //  (inverse of allBelow_ without myProcNo)
                 labelList allNotBelow_;
 
 
@@ -100,22 +117,22 @@ public:
 
             // Constructors
 
-                //- Default construct. Above == -1
-                commsStruct() noexcept;
+                //- Default construct with above == -1
+                commsStruct() noexcept : above_(-1) {}
 
-                //- Construct from components
+                //- Move construct from components
                 commsStruct
                 (
                     const label above,
-                    const labelUList& below,
-                    const labelUList& allBelow,
-                    const labelUList& allNotBelow
+                    labelList&& below,
+                    labelList&& allBelow,
+                    labelList&& allNotBelow
                 );
 
-                //- Construct from components; construct allNotBelow_
+                //- Copy construct from below, allBelow components
                 commsStruct
                 (
-                    const label nProcs,
+                    const label numProcs,
                     const label myProcID,
                     const label above,
                     const labelUList& below,
@@ -125,29 +142,31 @@ public:
 
             // Member Functions
 
-                //- Reset to default constructed state
-                void clear();
+                //- Print un-directed graph in graphviz dot format
+                static void printGraph
+                (
+                    Ostream& os,
+                    const UList<UPstream::commsStruct>& comms,
+                    const label proci = 0  // starting node
+                );
 
-                //- The procID of the processor directly above
-                label above() const noexcept
-                {
-                    return above_;
-                }
 
-                //- The procIDs of all processors directly below
-                const labelList& below() const noexcept
-                {
-                    return below_;
-                }
+            // Access
+
+                //- The number of processors addressed by the structure
+                label nProcs() const;
+
+                //- The procID of the processor \em directly above
+                label above() const noexcept { return above_; }
+
+                //- The procIDs of the processors \em directly below
+                const labelList& below() const noexcept { return below_; }
 
                 //- The procIDs of all processors below
                 //- (so not just directly below)
-                const labelList& allBelow() const noexcept
-                {
-                    return allBelow_;
-                }
+                const labelList& allBelow() const noexcept { return allBelow_; }
 
-                //- The procIDs of all processors that are above.
+                //- The procIDs of all processors not below myProcNo.
                 //- The inverse set of allBelow without myProcNo.
                 const labelList& allNotBelow() const noexcept
                 {
@@ -155,32 +174,21 @@ public:
                 }
 
 
-            // Member Operators
+            // Edit
+
+                //- Reset to default constructed state
+                void reset();
+
+                //- Reset with automatic linear/tree selection
+                void reset(const label procID, const label numProcs);
+
+
+            // Member / Friend Operators
 
                 bool operator==(const commsStruct&) const;
                 bool operator!=(const commsStruct&) const;
 
-
-             // Ostream Operator
-
                 friend Ostream& operator<<(Ostream&, const commsStruct&);
-        };
-
-
-        //- combineReduce operator for lists. Used for counting.
-        struct listEq
-        {
-            template<class T>
-            void operator()(T& x, const T& y) const
-            {
-                forAll(y, i)
-                {
-                    if (y[i].size())
-                    {
-                        x[i] = y[i];
-                    }
-                }
-            }
         };
 
 
@@ -209,6 +217,12 @@ private:
         //- Per processor the world index (into allWorlds_)
         static labelList worldIDs_;
 
+        //- Intra-host communicator
+        static label intraHostComm_;
+
+        //- Inter-host communicator (between host leaders)
+        static label interHostComm_;
+
 
     // Communicator specific data
 
@@ -236,8 +250,11 @@ private:
         //- Set data for parallel running
         static void setParRun(const label nProcs, const bool haveThreads);
 
-        //- Allocate a communicator with index
-        static void allocatePstreamCommunicator
+        //- Initialise entries for new communicator. Return the index
+        static label getAvailableCommIndex(const label parentIndex);
+
+        //- Allocate MPI components of communicator with given index
+        static void allocateCommunicatorComponents
         (
             const label parentIndex,
             const label index
@@ -245,7 +262,11 @@ private:
 
         //- Free MPI components of communicator.
         //  Does not touch the first two communicators (SELF, WORLD)
-        static void freePstreamCommunicator(const label index);
+        static void freeCommunicatorComponents(const label index);
+
+        //- Allocate inter-host, intra-host communicators
+        //- with comm-world as parent
+        static bool allocateHostCommunicatorPairs();
 
 
 public:
@@ -264,14 +285,21 @@ public:
         //- Number of processors to change from linear to tree communication
         static int nProcsSimpleSum;
 
-        //- Default commsType
-        static commsTypes defaultCommsType;
+        //- Number of processors to change to nonBlocking consensual
+        //- exchange (NBX). Ignored for zero or negative values.
+        static int nProcsNonblockingExchange;
 
         //- Number of polling cycles in processor updates
         static int nPollProcInterfaces;
 
+        //- Default commsType
+        static commsTypes defaultCommsType;
+
         //- Optional maximum message size (bytes)
         static int maxCommsSize;
+
+        //- Tuning parameters for non-blocking exchange (NBX)
+        static int tuning_NBX_;
 
         //- MPI buffer-size (bytes)
         static const int mpiBufferSize;
@@ -279,33 +307,67 @@ public:
 
     // Standard Communicators
 
-        //- Default world communicator (all processors).
-        //- May differ from globalComm if local worlds are in use
+        //- Communicator for all ranks.
+        //- May differ from commGlobal() if local worlds are in use
         static label worldComm;
 
         //- Debugging: warn for use of any communicator differing from warnComm
         static label warnComm;
 
-        //- Communicator for all processors, irrespective of any local worlds
-        static constexpr label globalComm = 0;
+        //- Communicator for all ranks, irrespective of any local worlds
+        static constexpr label commGlobal() noexcept { return 0; }
 
-        //- A communicator within the current rank only
-        static constexpr label selfComm = 1;
+        //- Communicator within the current rank only
+        static constexpr label commSelf() noexcept { return 1; }
+
+        //- Communicator for all ranks (respecting any local worlds)
+        static label commWorld() noexcept { return worldComm; }
+
+        //- Set world communicator. Negative values are a no-op.
+        //  \returns old world communicator index
+        static label commWorld(const label communicator) noexcept
+        {
+            label old(worldComm);
+            if (communicator >= 0) worldComm = communicator;
+            return old;
+        }
+
+        //- Alter communicator debugging setting.
+        //- Warns for use of any communicator differing from specified.
+        //  \returns the previous warn index
+        static label commWarn(const label communicator) noexcept
+        {
+            label old(warnComm);
+            warnComm = communicator;
+            return old;
+        }
 
         //- Number of currently defined communicators
         static label nComms() noexcept { return parentComm_.size(); }
 
-        //- True if communicator appears to be user-allocated
-        static bool isUserComm(label communicator) noexcept
-        {
-            return (communicator > worldComm && communicator > selfComm);
-        }
+        //- Debugging: print the communication tree
+        static void printCommTree(const label communicator);
+
+
+    // Host Communicators
+
+        //- Demand-driven: Intra-host communicator (respects any local worlds)
+        static label commIntraHost();
+
+        //- Demand-driven: Inter-host communicator (respects any local worlds)
+        static label commInterHost();
+
+        //- Test for presence of any intra or inter host communicators
+        static bool hasHostComms();
+
+        //- Remove any existing intra and inter host communicators
+        static void clearHostComms();
 
 
     // Constructors
 
         //- Construct for given communication type
-        explicit UPstream(const commsTypes commsType)
+        explicit UPstream(const commsTypes commsType) noexcept
         :
             commsType_(commsType)
         {}
@@ -313,7 +375,21 @@ public:
 
     // Member Functions
 
-        //- Allocate a new communicator with subRanks of parent communicator
+        //- Allocate new communicator with contiguous sub-ranks
+        //- on the parent communicator.
+        static label allocateCommunicator
+        (
+            //! The parent communicator
+            const label parent,
+
+            //! The contiguous sub-ranks of parent to use
+            const labelRange& subRanks,
+
+            //! Call allocateCommunicatorComponents()
+            const bool withComponents = true
+        );
+
+        //- Allocate new communicator with sub-ranks on the parent communicator
         static label allocateCommunicator
         (
             //! The parent communicator
@@ -322,8 +398,8 @@ public:
             //! The sub-ranks of parent to use (ignore negative values)
             const labelUList& subRanks,
 
-            //! Call allocatePstreamCommunicator
-            const bool doPstream = true
+            //! Call allocateCommunicatorComponents()
+            const bool withComponents = true
         );
 
         //- Free a previously allocated communicator.
@@ -331,14 +407,24 @@ public:
         static void freeCommunicator
         (
             const label communicator,
-            const bool doPstream = true
+            const bool withComponents = true
         );
 
-        //- Free all communicators
-        static void freeCommunicators(const bool doPstream);
+        //- Allocate an inter-host communicator
+        static label allocateInterHostCommunicator
+        (
+            const label parentCommunicator = worldComm
+        );
+
+        //- Allocate an intra-host communicator
+        static label allocateIntraHostCommunicator
+        (
+            const label parentCommunicator = worldComm
+        );
 
 
-        //- Wrapper class for allocating/freeing communicators
+        //- Wrapper class for allocating/freeing communicators. Always invokes
+        //- allocateCommunicatorComponents() and freeCommunicatorComponents()
         class communicator
         {
             label comm_;
@@ -357,24 +443,34 @@ public:
             //- Move construct, takes ownership
             communicator(communicator&& c) : comm_(c.comm_) { c.comm_ = -1; }
 
-            //- Allocate a communicator based on given parent
+            //- Allocate communicator for contiguous sub-ranks on given parent
             communicator
             (
                 //! The parent communicator
-                const label parent,
+                const label parentComm,
 
-                //! The sub-ranks of parent to use (ignore negative values)
-                const labelUList& subRanks,
-
-                //! Call allocatePstreamCommunicator
-                const bool doPstream = true
+                //! The contiguous sub-ranks of parent to use
+                const labelRange& subRanks
             )
             :
-                comm_(allocateCommunicator(parent, subRanks, doPstream))
+                comm_(UPstream::allocateCommunicator(parentComm, subRanks))
             {}
 
-            //- Free allocated communicator and group
-            ~communicator() { freeCommunicator(comm_); }
+            //- Allocate communicator for sub-ranks on given parent
+            communicator
+            (
+                //! The parent communicator
+                const label parentComm,
+
+                //! The sub-ranks of parent to use (negative values ignored)
+                const labelUList& subRanks
+            )
+            :
+                comm_(UPstream::allocateCommunicator(parentComm, subRanks))
+            {}
+
+            //- Free allocated communicator
+            ~communicator() { UPstream::freeCommunicator(comm_); }
 
             //- True if communicator is non-negative (ie, was allocated)
             bool good() const noexcept { return (comm_ >= 0); }
@@ -382,20 +478,27 @@ public:
             //- The communicator label
             label comm() const noexcept { return comm_; }
 
-            //- Free allocated communicator and group
-            void reset() { freeCommunicator(comm_); comm_ = -1; }
+            //- Free allocated communicator
+            void reset() { UPstream::freeCommunicator(comm_); comm_ = -1; }
 
-            //- Allocate with subRanks of parent communicator
-            void reset(label parent, const labelUList& subRanks)
+            //- Allocate with contiguous sub-ranks of parent communicator
+            void reset(label parent, const labelRange& subRanks)
             {
-                freeCommunicator(comm_);
-                comm_ = allocateCommunicator(parent, subRanks);
+                UPstream::freeCommunicator(comm_);
+                comm_ = UPstream::allocateCommunicator(parent, subRanks);
             }
 
-            //- Take ownership, free allocated communicator and group.
+            //- Allocate with sub-ranks of parent communicator
+            void reset(label parent, const labelUList& subRanks)
+            {
+                UPstream::freeCommunicator(comm_);
+                comm_ = UPstream::allocateCommunicator(parent, subRanks);
+            }
+
+            //- Take ownership, free allocated communicator
             void reset(communicator&& c)
             {
-                if (comm_ != c.comm_) freeCommunicator(comm_);
+                if (comm_ != c.comm_) UPstream::freeCommunicator(comm_);
                 comm_ = c.comm_;
                 c.comm_ = -1;
             }
@@ -441,32 +544,194 @@ public:
         //      Fatal if MPI has already been finalized.
         static bool initNull();
 
+        //- Impose a synchronisation barrier (optionally non-blocking)
+        static void barrier
+        (
+            const label communicator,
+            UPstream::Request* req = nullptr
+        );
 
-        // Non-blocking comms
+        //- Probe for an incoming message.
+        //
+        //  \param commsType    Blocking or not
+        //  \param fromProcNo   The source rank (negative == ANY_SOURCE)
+        //  \param tag          The source message tag
+        //  \param communicator The communicator index
+        //
+        //  \returns source rank and message size (bytes)
+        //      and (-1, 0) on failure
+        static std::pair<int,int> probeMessage
+        (
+            const UPstream::commsTypes commsType,
+            const int fromProcNo,
+            const int tag = UPstream::msgType(),
+            const label communicator = worldComm
+        );
 
-            //- Number of outstanding requests
-            static label nRequests() noexcept;
 
-            //- Truncate outstanding requests to given length
-            static void resetRequests(const label n);
+    // Requests (non-blocking comms).
+    // Pending requests are usually handled as an internal (global) list,
+    // since this simplifies the overall tracking and provides a convenient
+    // wrapping to avoid exposing MPI-specific types, but can also handle
+    // with a wrapped UPstream::Request as well.
 
-            //- Wait until all requests (from start onwards) have finished.
-            //  A no-op if parRun() == false
-            static void waitRequests(const label start = 0);
+        //- Number of outstanding requests (on the internal list of requests)
+        static label nRequests() noexcept;
 
-            //- Wait until request i has finished.
-            //  A no-op if parRun() == false
-            //  or for placeholder (negative) request indices
-            static void waitRequest(const label i);
+        //- Truncate outstanding requests to given length, which is
+        //- expected to be in the range [0 to nRequests()].
+        //  A no-op for out-of-range values.
+        static void resetRequests(const label n);
 
-            //- Non-blocking comms: has request i finished?
-            //  A no-op and returns true if parRun() == false
-            //  or for placeholder (negative) request indices
-            static bool finishedRequest(const label i);
+        //- Transfer the (wrapped) MPI request to the internal global list.
+        //  A no-op for non-parallel. No special treatment for null requests.
+        static void addRequest(UPstream::Request& req);
 
-            static int allocateTag(const char* const msg = nullptr);
-            static void freeTag(const int tag, const char* const msg = nullptr);
+        //- Non-blocking comms: cancel and free outstanding request.
+        //- Corresponds to MPI_Cancel() + MPI_Request_free()
+        //  A no-op if parRun() == false
+        //  if there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        static void cancelRequest(const label i);
 
+        //- Non-blocking comms: cancel and free outstanding request.
+        //- Corresponds to MPI_Cancel() + MPI_Request_free()
+        //  A no-op if parRun() == false
+        static void cancelRequest(UPstream::Request& req);
+
+        //- Non-blocking comms: cancel and free outstanding requests.
+        //- Corresponds to MPI_Cancel() + MPI_Request_free()
+        //  A no-op if parRun() == false or list is empty
+        static void cancelRequests(UList<UPstream::Request>& requests);
+
+        //- Non-blocking comms: free outstanding request.
+        //- Corresponds to MPI_Request_free()
+        //  A no-op if parRun() == false
+        static void freeRequest(UPstream::Request& req);
+
+        //- Non-blocking comms: free outstanding requests.
+        //- Corresponds to MPI_Request_free()
+        //  A no-op if parRun() == false or list is empty
+        static void freeRequests(UList<UPstream::Request>& requests);
+
+        //- Wait until all requests (from position onwards) have finished.
+        //- Corresponds to MPI_Waitall()
+        //  A no-op if parRun() == false,
+        //  if the position is out-of-range [0 to nRequests()],
+        //  or the internal list of requests is empty.
+        //
+        //  If checking a trailing portion of the list, it will also trim
+        //  the list of outstanding requests as a side-effect.
+        //  This is a feature (not a bug) to conveniently manange the list.
+        //
+        //  \param pos starting position within the internal list of requests
+        //  \param len length of slice to check (negative = until the end)
+        static void waitRequests(const label pos, label len = -1);
+
+        //- Wait until all requests have finished.
+        //- Corresponds to MPI_Waitall()
+        //  A no-op if parRun() == false, or the list is empty.
+        static void waitRequests(UList<UPstream::Request>& requests);
+
+        //- Wait until any request (from position onwards) has finished.
+        //- Corresponds to MPI_Waitany()
+        //  A no-op and returns false if parRun() == false,
+        //  if the position is out-of-range [0 to nRequests()],
+        //  or the internal list of requests is empty.
+        //
+        //  \returns true if any pending request completed.
+        //  \returns false if all requests have already been handled.
+        //
+        //  \param pos starting position within the internal list of requests
+        //  \param len length of slice to check (negative = until the end)
+        static bool waitAnyRequest(const label pos, label len = -1);
+
+        //- Wait until some requests (from position onwards) have finished.
+        //- Corresponds to MPI_Waitsome()
+        //  A no-op and returns false if parRun() == false,
+        //  if the position is out-of-range [0 to nRequests],
+        //  or the internal list of requests is empty.
+        //
+        //  \returns true if some pending requests completed.
+        //  \returns false if all requests have already been handled
+        //
+        //  \param pos starting position within the internal list of requests
+        //  \param[out] indices the completed request indices relative to the
+        //      starting position. The is an optional parameter, which can be
+        //      used to recover the indices or simply to avoid reallocations
+        //      when calling within a loop.
+        static bool waitSomeRequests
+        (
+            const label pos,
+            DynamicList<int>* indices = nullptr
+        );
+
+        //- Wait until any request has finished and return its index.
+        //- Corresponds to MPI_Waitany()
+        //  Returns -1 if parRun() == false, or the list is empty,
+        //  or if all the requests have already been handled
+        static label waitAnyRequest(UList<UPstream::Request>& requests);
+
+        //- Wait until request i has finished.
+        //- Corresponds to MPI_Wait()
+        //  A no-op if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        static void waitRequest(const label i);
+
+        //- Wait until specified request has finished.
+        //- Corresponds to MPI_Wait()
+        //  A no-op if parRun() == false or for a null-request
+        static void waitRequest(UPstream::Request& req);
+
+        //- Non-blocking comms: has request i finished?
+        //- Corresponds to MPI_Test()
+        //  A no-op and returns true if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        static bool finishedRequest(const label i);
+
+        //- Non-blocking comms: has request finished?
+        //- Corresponds to MPI_Test()
+        //  A no-op and returns true if parRun() == false
+        //  or for a null-request
+        static bool finishedRequest(UPstream::Request& req);
+
+        //- Non-blocking comms: have all requests (from position onwards)
+        //- finished?
+        //- Corresponds to MPI_Testall()
+        //  A no-op and returns true if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the index is out-of-range (0 to nRequests)
+        //  or the addressed range is empty etc.
+        //
+        //  \param pos starting position within the internal list of requests
+        //  \param len length of slice to check (negative = until the end)
+        static bool finishedRequests(const label pos, label len = -1);
+
+        //- Non-blocking comms: have all requests finished?
+        //- Corresponds to MPI_Testall()
+        //  A no-op and returns true if parRun() == false or list is empty
+        static bool finishedRequests(UList<UPstream::Request>& requests);
+
+        //- Non-blocking comms: have both requests finished?
+        //- Corresponds to pair of MPI_Test()
+        //  A no-op and returns true if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the indices are out-of-range (0 to nRequests)
+        //  Each finished request parameter is set to -1 (ie, done).
+        static bool finishedRequestPair(label& req0, label& req1);
+
+        //- Non-blocking comms: wait for both requests to finish.
+        //- Corresponds to pair of MPI_Wait()
+        //  A no-op if parRun() == false,
+        //  if there are no pending requests,
+        //  or if the indices are out-of-range (0 to nRequests)
+        //  Each finished request parameter is set to -1 (ie, done).
+        static void waitRequestPair(label& req0, label& req1);
+
+
+    // General
 
         //- Set as parallel run on/off.
         //  \return the previous value
@@ -479,46 +744,57 @@ public:
 
         //- Test if this a parallel run
         //  Modify access is deprecated
-        static bool& parRun() noexcept
-        {
-            return parRun_;
-        }
+        static bool& parRun() noexcept { return parRun_; }
 
         //- Have support for threads
-        static bool haveThreads() noexcept
-        {
-            return haveThreads_;
-        }
+        static bool haveThreads() noexcept { return haveThreads_; }
 
-        //- Number of ranks in parallel run (for given communicator)
-        //- is 1 for serial run
+        //- Relative rank for the master process - is always 0.
+        static constexpr int masterNo() noexcept { return 0; }
+
+        //- Number of ranks in parallel run (for given communicator).
+        //- It is 1 for serial run
         static label nProcs(const label communicator = worldComm)
         {
             return procIDs_[communicator].size();
         }
 
-        //- Process index of the master (always 0)
-        static constexpr int masterNo() noexcept
+        //- Rank of this process in the communicator (starting from masterNo()).
+        //- Can be negative if the process is not a rank in the communicator
+        static int myProcNo(const label communicator = worldComm)
         {
-            return 0;
+            return myProcNo_[communicator];
         }
 
-        //- Am I the master rank
+        //- True if process corresponds to the master rank in the communicator
         static bool master(const label communicator = worldComm)
         {
             return myProcNo_[communicator] == masterNo();
         }
 
-        //- Is this process a sub-rank on the communicator
+        //- True if process corresponds to any rank (master or sub-rank)
+        //- in the given communicator
+        static bool is_rank(const label communicator = worldComm)
+        {
+            return myProcNo_[communicator] >= 0;
+        }
+
+        //- True if process corresponds to a sub-rank in the given communicator
         static bool is_subrank(const label communicator = worldComm)
         {
             return myProcNo_[communicator] > masterNo();
         }
 
-        //- Number of this process (starting from masterNo() = 0)
-        static int myProcNo(const label communicator = worldComm)
+        //- True if parallel algorithm or exchange is required.
+        //  This is when parRun() == true, the process corresponds to a rank
+        //  in the communicator and there is more than one rank in the
+        //  communicator
+        static bool is_parallel(const label communicator = worldComm)
         {
-            return myProcNo_[communicator];
+            return
+            (
+                parRun_ && is_rank(communicator) && nProcs(communicator) > 1
+            );
         }
 
         //- The parent communicator
@@ -527,39 +803,41 @@ public:
             return parentComm_(communicator);
         }
 
-        //- Process IDs within a given communicator
+        //- The list of ranks within a given communicator
         static List<int>& procID(const label communicator)
         {
             return procIDs_[communicator];
         }
 
 
-        // Worlds
+    // Worlds
 
-            //- All worlds
-            static const wordList& allWorlds() noexcept
-            {
-                return allWorlds_;
-            }
+        //- All worlds
+        static const wordList& allWorlds() noexcept
+        {
+            return allWorlds_;
+        }
 
-            //- The indices into allWorlds for all processes
-            static const labelList& worldIDs() noexcept
-            {
-                return worldIDs_;
-            }
+        //- The indices into allWorlds for all processes
+        static const labelList& worldIDs() noexcept
+        {
+            return worldIDs_;
+        }
 
-            //- My worldID
-            static label myWorldID()
-            {
-                return worldIDs_[myProcNo(globalComm)];
-            }
+        //- My worldID
+        static label myWorldID()
+        {
+            return worldIDs_[myProcNo(UPstream::commGlobal())];
+        }
 
-            //- My world
-            static const word& myWorld()
-            {
-                return allWorlds_[worldIDs_[myProcNo(globalComm)]];
-            }
+        //- My world
+        static const word& myWorld()
+        {
+            return allWorlds_[worldIDs_[myProcNo(UPstream::commGlobal())]];
+        }
 
+
+    // Rank addressing
 
         //- Range of process indices for all processes
         static rangeType allProcs(const label communicator = worldComm)
@@ -576,22 +854,17 @@ public:
         }
 
         //- Communication schedule for linear all-to-master (proc 0)
-        static const List<commsStruct>& linearCommunication
+        static const List<commsStruct>&
+        linearCommunication
         (
             const label communicator = worldComm
-        )
-        {
-            return linearCommunication_[communicator];
-        }
+        );
 
         //- Communication schedule for tree all-to-master (proc 0)
         static const List<commsStruct>& treeCommunication
         (
             const label communicator = worldComm
-        )
-        {
-            return treeCommunication_[communicator];
-        }
+        );
 
         //- Communication schedule for linear/tree all-to-master (proc 0).
         //- Chooses based on the value of UPstream::nProcsSimpleSum
@@ -603,8 +876,8 @@ public:
             return
             (
                 nProcs(communicator) < nProcsSimpleSum
-              ? linearCommunication_[communicator]
-              : treeCommunication_[communicator]
+              ? linearCommunication(communicator)
+              : treeCommunication(communicator)
             );
         }
 
@@ -644,6 +917,8 @@ public:
         //- Exchange integer data with all processors (in the communicator).
         //  \c sendData[proci] is the value to send to proci.
         //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
         static void allToAll
         (
             const UList<int32_t>& sendData,
@@ -654,10 +929,102 @@ public:
         //- Exchange integer data with all processors (in the communicator).
         //  \c sendData[proci] is the value to send to proci.
         //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
         static void allToAll
         (
             const UList<int64_t>& sendData,
             UList<int64_t>& recvData,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. The recvData list is always assigned zero before
+        //  receipt and values of zero are never transmitted.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
+        static void allToAllConsensus
+        (
+            const UList<int32_t>& sendData,
+            UList<int32_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. The recvData list is always assigned zero before
+        //  receipt and values of zero are never transmitted.
+        //  After return recvData contains the data from the other processors.
+        //  \n
+        //  For \b non-parallel : does a simple copy of sendData to recvData
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
+        static void allToAllConsensus
+        (
+            const UList<int64_t>& sendData,
+            UList<int64_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. Since the recvData map always cleared before
+        //  receipt and values of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
+        //  \n
+        //  For \b non-parallel : copy own rank (if it exists and non-zero)
+        //  from sendData to recvData.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
+        static void allToAllConsensus
+        (
+            const Map<int32_t>& sendData,
+            Map<int32_t>& recvData,
+            const int tag,
+            const label communicator = worldComm
+        );
+
+        //- Exchange \b non-zero integer data with all ranks in the communicator
+        //- using non-blocking consensus exchange.
+        //  The \c sendData[proci] is the (non-zero) value to send to proci.
+        //  After return recvData contains the non-zero values sent from the
+        //  other processors. Since the recvData map always cleared before
+        //  receipt and values of zero are never transmitted, a simple check
+        //  of its keys is sufficient to determine connectivity.
+        //  \n
+        //  For \b non-parallel : copy own rank (if it exists and non-zero)
+        //  from sendData to recvData.
+        //
+        //  \note The message tag should be chosen to be a unique value
+        //  since the implementation uses probing with ANY_SOURCE !!
+        //  An initial barrier may help to avoid synchronisation problems
+        //  caused elsewhere (See "nbx.tuning" opt switch)
+        static void allToAllConsensus
+        (
+            const Map<int64_t>& sendData,
+            Map<int64_t>& recvData,
+            const int tag,
             const label communicator = worldComm
         );
 
@@ -670,22 +1037,37 @@ public:
         /*! \brief Receive identically-sized \c Native data from all ranks */ \
         static void mpiGather                                                 \
         (                                                                     \
+            /*! On rank: individual value to send */                          \
             const Native* sendData,                                           \
-            int sendCount,                                                    \
-            char* recvData,                                                   \
-            int recvCount,                                                    \
+            /*! On master: receive buffer with all values */                  \
+            Native* recvData,                                                 \
+            /*! Number of send/recv data per rank. Globally consistent! */    \
+            int count,                                                        \
             const label communicator = worldComm                              \
         );                                                                    \
                                                                               \
         /*! \brief Send identically-sized \c Native data to all ranks */      \
         static void mpiScatter                                                \
         (                                                                     \
+            /*! On master: send buffer with all values */                     \
             const Native* sendData,                                           \
-            int sendCount,                                                    \
-            char* recvData,                                                   \
-            int recvCount,                                                    \
+            /*! On rank: individual value to receive */                       \
+            Native* recvData,                                                 \
+            /*! Number of send/recv data per rank. Globally consistent! */    \
+            int count,                                                        \
             const label communicator = worldComm                              \
         );                                                                    \
+                                                                              \
+        /*! \brief Gather/scatter identically-sized \c Native data */         \
+        /*! Send data from proc slot, receive into all slots */               \
+        static void mpiAllGather                                              \
+        (                                                                     \
+            /*! On all ranks: the base of the data locations */               \
+            Native* allData,                                                  \
+            /*! Number of send/recv data per rank. Globally consistent! */    \
+            int count,                                                        \
+            const label communicator = worldComm                              \
+        );
 
         Pstream_CommonRoutines(char);
 
@@ -728,9 +1110,19 @@ public:
 
     // Gather single, contiguous value(s)
 
+        //- Allgather individual values into list locations.
+        //  The returned list has size nProcs, identical on all ranks.
+        template<class T>
+        static List<T> allGatherValues
+        (
+            const T& localValue,
+            const label communicator = worldComm
+        );
+
         //- Gather individual values into list locations.
         //  On master list length == nProcs, otherwise zero length.
-        //  If called in non-parallel mode,
+        //  \n
+        //  For \b non-parallel :
         //  the returned list length is 1 with localValue.
         template<class T>
         static List<T> listGatherValues
@@ -741,7 +1133,8 @@ public:
 
         //- Scatter individual values from list locations.
         //  On master input list length == nProcs, ignored on other procs.
-        //  If called in non-parallel mode,
+        //  \n
+        //  For \b non-parallel :
         //  returns the first list element (or zero).
         template<class T>
         static T listScatterValues
@@ -753,28 +1146,31 @@ public:
 
     // Broadcast Functions
 
-        //- Broadcast buffer contents to all processes in communicator.
+        //- Broadcast buffer contents to all processes in given communicator.
         //- The sizes must match on all processes.
+        //  For \b non-parallel : do nothing.
         //  \return True on success
         static bool broadcast
         (
             char* buf,
             const std::streamsize bufSize,
-            const label communicator = worldComm,
+            const label communicator,
             const int rootProcNo = masterNo()
         );
 
 
     // Logical reductions
 
-        //- Logical (and) reduction (cf. MPI AllReduce)
+        //- Logical (and) reduction (MPI_AllReduce)
+        //  For \b non-parallel : do nothing
         static void reduceAnd
         (
             bool& value,
             const label communicator = worldComm
         );
 
-        //- Logical (or) reduction (cf. MPI AllReduce)
+        //- Logical (or) reduction (MPI_AllReduce)
+        //  For \b non-parallel : do nothing
         static void reduceOr
         (
             bool& value,
@@ -783,6 +1179,12 @@ public:
 
 
     // Housekeeping
+
+        //- Wait for all requests to finish.
+        //  \deprecated(2023-01) Probably not what you want.
+        //     Should normally be restricted to a particular starting request.
+        FOAM_DEPRECATED_FOR(2023-01, "waitRequests(int) method")
+        static void waitRequests() { waitRequests(0); }
 
         //- Process index of first sub-process
         //  \deprecated(2020-09) use subProcs() method instead
@@ -800,7 +1202,118 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+                      Class UPstream::Request Declaration
+\*---------------------------------------------------------------------------*/
+
+//- An opaque wrapper for MPI_Request with a vendor-independent
+//- representation independent of any \c <mpi.h> header
+//  The MPI standard states that MPI_Request is always an opaque object.
+//  Generally it is either an integer (eg, mpich) or a pointer (eg, openmpi).
+class UPstream::Request
+{
+public:
+
+    // Public Types
+
+        //- Storage for MPI_Request (as integer or pointer)
+        typedef std::intptr_t value_type;
+
+
+private:
+
+    // Private Data
+
+        //- The MPI_Request (as wrapped value)
+        value_type value_;
+
+public:
+
+    // Generated Methods
+
+        //- Copy construct
+        Request(const Request&) noexcept = default;
+
+        //- Move construct
+        Request(Request&&) noexcept = default;
+
+        //- Copy assignment
+        Request& operator=(const Request&) noexcept = default;
+
+        //- Move assignment
+        Request& operator=(Request&&) noexcept = default;
+
+
+    // Member Operators
+
+        //- Test for equality
+        bool operator==(const Request& rhs) const noexcept
+        {
+            return (value_ == rhs.value_);
+        }
+
+        //- Test for inequality
+        bool operator!=(const Request& rhs) const noexcept
+        {
+            return (value_ != rhs.value_);
+        }
+
+
+    // Constructors
+
+        //- Default construct as MPI_REQUEST_NULL
+        Request() noexcept;
+
+        //- Construct from MPI_Request (as pointer type)
+        explicit Request(const void* p) noexcept
+        :
+            value_(reinterpret_cast<value_type>(p))
+        {}
+
+        //- Construct from MPI_Request (as integer type)
+        explicit Request(value_type val) noexcept
+        :
+            value_(val)
+        {}
+
+
+    // Member Functions
+
+        //- Return raw value
+        value_type value() const noexcept { return value_; }
+
+        //- Return as pointer value
+        const void* pointer() const noexcept
+        {
+            return reinterpret_cast<const void*>(value_);
+        }
+
+        //- True if not equal to MPI_REQUEST_NULL
+        bool good() const noexcept;
+
+        //- Reset to default constructed value (MPI_REQUEST_NULL)
+        void reset() noexcept;
+
+        //- Same as calling UPstream::cancelRequest()
+        void cancel() { UPstream::cancelRequest(*this); }
+
+        //- Same as calling UPstream::freeRequest()
+        void free() { UPstream::freeRequest(*this); }
+
+        //- Same as calling UPstream::finishedRequest()
+        bool finished() { return UPstream::finishedRequest(*this); }
+
+        //- Same as calling UPstream::waitRequest()
+        void wait() { UPstream::waitRequest(*this); }
+};
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
 Ostream& operator<<(Ostream&, const UPstream::commsStruct&);
+
+
+// * * * * * * * * * * * * Template Specialisations  * * * * * * * * * * * * //
 
 // Template specialisation for access of commsStruct
 template<>

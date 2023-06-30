@@ -39,6 +39,7 @@ Description
 
 #include "boundaryAdjointContribution.H"
 #include "ATCModel.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,11 +74,10 @@ protected:
         //- to the adjoint boundary conditions
         autoPtr<boundaryAdjointContribution> boundaryContrPtr_;
 
-
-        //- Whether to add the extra term from the UaGradU formulation
-        //  autoPtr since ATCModel has not been allocated at the time
-        //  adjointBoundaryConditions are constructed
-        autoPtr<bool> addATCUaGradUTerm_;
+        //- Whether to add the extra term from the UaGradU formulation.
+        //  As a Switch with delayed evaluation since ATCModel
+        //  has not been allocated at the time of construction
+        Switch addATCUaGradUTerm_;
 
 
     // Protected Member Functions

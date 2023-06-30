@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,14 @@ void Foam::porosityModels::DarcyForchheimer::calcTransformModelData()
     }
 
 
-    if (debug && mesh_.time().writeTime())
+    if
+    (
+        debug
+     && (
+            mesh_.time().writeTime()
+         || mesh_.time().timeIndex() == mesh_.time().startTimeIndex()
+        )
+    )
     {
         volTensorField Dout
         (

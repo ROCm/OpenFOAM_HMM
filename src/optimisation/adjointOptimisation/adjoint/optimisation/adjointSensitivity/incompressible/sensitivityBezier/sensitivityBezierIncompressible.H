@@ -25,7 +25,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-
 Class
     Foam::incompressible::sensitivityBezier
 
@@ -37,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sensitivityBezierIncompressible_H
-#define sensitivityBezierIncompressible_H
+#ifndef Foam_sensitivityBezierIncompressible_H
+#define Foam_sensitivityBezierIncompressible_H
 
 #include "primitiveFieldsFwd.H"
 #include "volFieldsFwd.H"
@@ -46,8 +45,7 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "volPointInterpolation.H"
 #include "SIBaseIncompressible.H"
-#include "PrimitivePatchInterpolation.H"
-#include "PrimitivePatch.H"
+#include "primitivePatchInterpolation.H"
 #include "deltaBoundary.H"
 #include "Bezier.H"
 

@@ -76,7 +76,7 @@ reconstruct
                 IOobject::NO_WRITE
             ),
             inv(surfaceSum(SfHat*mesh.Sf()))&surfaceSum(SfHat*ssf),
-            extrapolatedCalculatedFvPatchField<GradType>::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 

@@ -57,7 +57,7 @@ forAll(allSpeciesRhoN, rN)
             ),
             mesh,
             dimless/dimVolume,
-            "zeroGradient"
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     allSpeciesRhoN[rN].primitiveFieldRef() = 0;
@@ -78,7 +78,7 @@ volScalarField totalRhoN
     ),
     mesh,
     dimless/dimVolume,
-    "zeroGradient"
+    fvPatchFieldBase::zeroGradientType()
 );
 totalRhoN.primitiveFieldRef() = 0;
 totalRhoN.correctBoundaryConditions();
@@ -112,7 +112,7 @@ forAll(allSpeciesRhoM, rM)
             ),
             mesh,
             dimMass/dimVolume,
-            "zeroGradient"
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     allSpeciesRhoM[rM].primitiveFieldRef() = 0;
@@ -133,7 +133,7 @@ volScalarField totalRhoM
     ),
     mesh,
     dimMass/dimVolume,
-    "zeroGradient"
+    fvPatchFieldBase::zeroGradientType()
 );
 totalRhoM.primitiveFieldRef() = 0;
 totalRhoM.correctBoundaryConditions();
@@ -167,7 +167,7 @@ forAll(allSpeciesVelocity, v)
             ),
             mesh,
             dimVelocity,
-            "zeroGradient"
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     allSpeciesVelocity[v].primitiveFieldRef() = Zero;
@@ -188,7 +188,7 @@ Info << "    Creating total velocity field" << endl;
 //     ),
 //     mesh,
 //     dimVelocity,
-//     "zeroGradient"
+//     fvPatchFieldBase::zeroGradientType()
 // );
 // totalVelocity.primitiveFieldRef() = Zero;
 // totalVelocity.correctBoundaryConditions();
@@ -237,7 +237,7 @@ forAll(allSpeciesTemperature, t)
             ),
             mesh,
             dimTemperature,
-            "zeroGradient"
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     allSpeciesTemperature[t].primitiveFieldRef() = 0;
@@ -258,7 +258,7 @@ volScalarField totalTemperature
     ),
     mesh,
     dimTemperature,
-    "zeroGradient"
+    fvPatchFieldBase::zeroGradientType()
 );
 totalTemperature.primitiveFieldRef() = 0;
 totalTemperature.correctBoundaryConditions();
@@ -293,7 +293,7 @@ forAll(allSpeciesMeanKE, mKE)
             ),
             mesh,
             dimensionSet(1, 2, -2, 0, 0, 0, 0),
-            "zeroGradient"
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     allSpeciesMeanKE[mKE].primitiveFieldRef() = 0;
@@ -314,7 +314,7 @@ volScalarField totalMeanKE
     ),
     mesh,
     dimensionSet(1, 2, -2, 0, 0, 0, 0),
-    "zeroGradient"
+    fvPatchFieldBase::zeroGradientType()
 );
 totalMeanKE.primitiveFieldRef() = 0;
 totalMeanKE.correctBoundaryConditions();

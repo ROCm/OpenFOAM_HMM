@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,11 +47,23 @@ Foam::fixedValuePointPatchField<Type>::fixedValuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const dictionary& dict,
-    const bool valueRequired
+    const Type& value
 )
 :
-    valuePointPatchField<Type>(p, iF, dict, valueRequired)
+    valuePointPatchField<Type>(p, iF, value)
+{}
+
+
+template<class Type>
+Foam::fixedValuePointPatchField<Type>::fixedValuePointPatchField
+(
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
+)
+:
+    valuePointPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 

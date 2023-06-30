@@ -51,7 +51,7 @@ Foam::isoSurfacePoint::adaptPatchFields
             fld.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         fld,        // internal field
         true        // preserveCouples
@@ -111,11 +111,12 @@ Foam::isoSurfacePoint::adaptPatchFields
                 sliceFldBf[patchi]
             );
 
-            const scalarField& w = mesh.weights().boundaryField()[patchi];
-
-            tmp<Field<Type>> f =
-                w*pfld.patchInternalField()
-              + (1.0-w)*pfld.patchNeighbourField();
+            tmp<Field<Type>> f = lerp
+            (
+                pfld.patchNeighbourField(),
+                pfld.patchInternalField(),
+                mesh.weights().boundaryField()[patchi]
+            );
 
             bitSet isCollocated
             (

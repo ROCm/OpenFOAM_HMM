@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -30,7 +30,7 @@ solvers
         mergeLevels     1;
     }
 
-    "(U|k|epsilon|R|nuTilda)"
+    "(U|R|nuTilda)"
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
@@ -38,7 +38,7 @@ solvers
         relTol          0.1;
     }
 
-    omega
+    "(omega|epsilon|k)"
     {
         solver          PBiCGStab;
         preconditioner  DILU;

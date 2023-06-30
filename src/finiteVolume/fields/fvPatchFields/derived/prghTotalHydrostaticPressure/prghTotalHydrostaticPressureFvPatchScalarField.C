@@ -122,21 +122,21 @@ void Foam::prghTotalHydrostaticPressureFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& rhop =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const scalarField& ph_rghp =
-        patch().lookupPatchField<volScalarField, scalar>(ph_rghName_);
+        patch().lookupPatchField<volScalarField>(ph_rghName_);
 
     const scalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const vectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+        patch().lookupPatchField<volVectorField>(UName_);
 
     operator==
     (
         ph_rghp
-      - 0.5*rhop*(1.0 - pos0(phip))*magSqr(Up)
+      - 0.5*rhop*(neg(phip))*magSqr(Up)
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();
@@ -148,12 +148,12 @@ void Foam::prghTotalHydrostaticPressureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     os.writeEntryIfDifferent<word>("ph_rgh", "ph_rgh", ph_rghName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

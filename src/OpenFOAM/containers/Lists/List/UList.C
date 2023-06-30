@@ -261,24 +261,28 @@ Foam::label Foam::UList<T>::rfind(const T& val, label pos) const
 template<class T>
 bool Foam::UList<T>::operator==(const UList<T>& list) const
 {
+    /// OR:
+    /// return
+    /// (
+    ///     (this->size_ == list.size_)
+    //   && std::equal(cbegin(), cend(), list.cbegin())
+    /// );
+
     const label len = this->size_;
     if (len != list.size_)
     {
         return false;
     }
 
-    bool equal = true;
-
     List_CONST_ACCESS(T, (*this), lhs);
     List_CONST_ACCESS(T, (list), rhs);
 
     for (label i = 0; i < len; ++i)
     {
-        equal = (lhs[i] == rhs[i]);
-        if (!equal) break;
+        if (!(lhs[i] == rhs[i])) return false;
     }
 
-    return equal;
+    return true;
 }
 
 
@@ -292,11 +296,21 @@ bool Foam::UList<T>::operator!=(const UList<T>& list) const
 template<class T>
 bool Foam::UList<T>::operator<(const UList<T>& list) const
 {
+    /// OR:
+    /// return std::lexicographical_compare
+    /// (
+    ///     cbegin(), cend(),
+    ///     list.cbegin(), list.cend()
+    /// );
+
+    const const_iterator last1 = cend();
+    const const_iterator last2 = list.cend();
+
     for
     (
-        const_iterator lhs = begin(), rhs = list.begin();
-        lhs < end() && rhs < list.end();
-        ++lhs, ++rhs
+        const_iterator lhs = cbegin(), rhs = list.cbegin();
+        (lhs != last1) && (rhs != last2);
+        ++lhs, (void) ++rhs
     )
     {
         if (*lhs < *rhs)

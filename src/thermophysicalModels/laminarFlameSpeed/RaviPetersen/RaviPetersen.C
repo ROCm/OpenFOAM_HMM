@@ -302,7 +302,7 @@ Foam::laminarFlameSpeedModels::RaviPetersen::operator()() const
             p.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         p.mesh(),
         dimensionedScalar(dimless, Zero)
@@ -334,7 +334,7 @@ Foam::laminarFlameSpeedModels::RaviPetersen::operator()() const
                 p.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             p.mesh(),
             dimensionedScalar(dimVelocity, Zero)

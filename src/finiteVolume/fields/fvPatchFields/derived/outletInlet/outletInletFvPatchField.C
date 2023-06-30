@@ -42,7 +42,7 @@ Foam::outletInletFvPatchField<Type>::outletInletFvPatchField
 {
     this->refValue() = *this;
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = 0;
 }
 
 
@@ -71,24 +71,17 @@ Foam::outletInletFvPatchField<Type>::outletInletFvPatchField
     mixedFvPatchField<Type>(p, iF),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
-    this->refValue() = Field<Type>("outletValue", dict, p.size());
-
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchField<Type>::operator=(this->refValue());
-    }
-
+    // Require outletValue (MUST_READ)
+    this->refValue().assign("outletValue", dict, p.size());
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = 0;
+
+    if (!this->readValueEntry(dict))
+    {
+        fvPatchField<Type>::extrapolateInternal();
+    }
 }
 
 
@@ -126,10 +119,7 @@ void Foam::outletInletFvPatchField<Type>::updateCoeffs()
     }
 
     const Field<scalar>& phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            phiName_
-        );
+        this->patch().template lookupPatchField<surfaceScalarField>(phiName_);
 
     this->valueFraction() = pos0(phip);
 
@@ -143,7 +133,7 @@ void Foam::outletInletFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->refValue().writeEntry("outletValue", os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

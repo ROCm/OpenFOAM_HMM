@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef localIOdictionary_H
-#define localIOdictionary_H
+#ifndef Foam_localIOdictionary_H
+#define Foam_localIOdictionary_H
 
 #include "baseIOdictionary.H"
 
@@ -82,6 +82,12 @@ public:
 
         //- Construct given an IOobject and Istream
         localIOdictionary(const IOobject& io, Istream& is);
+
+
+    // Factory Methods
+
+        //- Read and return contents. The IOobject will not be registered
+        static dictionary readContents(const IOobject& io);
 
 
     //- Destructor

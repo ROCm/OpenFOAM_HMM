@@ -55,18 +55,11 @@ prghPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     p_("p", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(p_);
     }
@@ -147,10 +140,8 @@ void Foam::prghPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const scalarField& rhop = patch().lookupPatchField<volScalarField, scalar>
-    (
-        rhoName_
-    );
+    const scalarField& rhop =
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(db().time());
@@ -173,10 +164,10 @@ void Foam::prghPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::prghPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     p_.writeEntry("p", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -51,7 +51,7 @@ Foam::optimisationManager::optimisationManager(fvMesh& mesh)
             mesh,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         )
     ),
     mesh_(mesh),
@@ -162,9 +162,9 @@ Foam::autoPtr<Foam::optimisationManager> Foam::optimisationManager::New
             "optimisationDict",
             mesh.time().system(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false // Do not register
+            IOobject::NO_REGISTER
         )
     );
 

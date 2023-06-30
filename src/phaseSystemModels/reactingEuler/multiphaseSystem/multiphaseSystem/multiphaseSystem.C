@@ -708,7 +708,7 @@ void Foam::multiphaseSystem::solve()
         phase.alphaRhoPhiRef() =
             fvc::interpolate(phase.rho())*phase.alphaPhi();
 
-        phase.clip(SMALL, 1 - SMALL);
+        phase.clamp_range(SMALL, 1 - SMALL);
     }
 
     calcAlphas();

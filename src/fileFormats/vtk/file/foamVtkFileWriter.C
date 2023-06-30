@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,11 +76,11 @@ Foam::Ostream& Foam::vtk::fileWriter::reportBadState
 Foam::Ostream& Foam::vtk::fileWriter::reportBadState
 (
     Ostream& os,
-    outputState expected,
+    outputState expected1,
     outputState expected2
 ) const
 {
-    reportBadState(os, expected)
+    reportBadState(os, expected1)
         << " or (" << stateNames[expected2] << ')';
     return os;
 }
@@ -554,10 +554,18 @@ bool Foam::vtk::fileWriter::writeProcIDs(const label nValues)
     {
         ++nCellData_;
     }
+    else if (isState(outputState::POINT_DATA))
+    {
+        ++nPointData_;
+    }
     else
     {
-        reportBadState(FatalErrorInFunction, outputState::CELL_DATA)
-            << " for procID field" << nl << endl
+        reportBadState
+        (
+            FatalErrorInFunction,
+            outputState::CELL_DATA,
+            outputState::POINT_DATA
+        )   << " for procID field" << nl << endl
             << exit(FatalError);
 
         return false;

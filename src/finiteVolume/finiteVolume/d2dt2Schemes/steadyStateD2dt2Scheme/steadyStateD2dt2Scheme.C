@@ -56,7 +56,7 @@ steadyStateD2dt2Scheme<Type>::fvcD2dt2
             (
                 "d2dt2("+vf.name()+')',
                 mesh().time().timeName(),
-                mesh(),
+                mesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -81,7 +81,7 @@ steadyStateD2dt2Scheme<Type>::fvcD2dt2
         (
             "d2dt2("+rho.name()+','+vf.name()+')',
             mesh().time().timeName(),
-            mesh(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),

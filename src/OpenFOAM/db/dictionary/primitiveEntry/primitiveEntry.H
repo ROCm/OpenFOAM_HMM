@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef primitiveEntry_H
-#define primitiveEntry_H
+#ifndef Foam_primitiveEntry_H
+#define Foam_primitiveEntry_H
 
 #include "entry.H"
 #include "ITstream.H"
@@ -56,6 +56,11 @@ namespace Foam
 
 // Forward Declarations
 class dictionary;
+class primitiveEntry;
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<primitiveEntry>&);
+
 
 /*---------------------------------------------------------------------------*\
                        Class primitiveEntry Declaration
@@ -193,17 +198,10 @@ public:
         //- Write, optionally with contents only (no keyword, etc)
         void write(Ostream& os, const bool contentsOnly) const;
 
-        //- Return info proxy.
-        //  Used to print token information to a stream
-        InfoProxy<primitiveEntry> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- to print token information to a stream
+        InfoProxy<primitiveEntry> info() const noexcept { return *this; }
 };
-
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<primitiveEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

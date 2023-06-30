@@ -47,7 +47,7 @@ void Foam::fft::fftRenumberRecurse
         // We've worked out the renumbering scheme. Now copy
         // the components across
 
-        data[l1] = complex(renumData[l2].Re(), renumData[l2].Im());
+        data[l1] = renumData[l2];
     }
     else
     {
@@ -150,12 +150,12 @@ Foam::fft::realTransform1D(const scalarField& field)
     auto tresult = tmp<complexField>::New(nBy2 + 1);
     auto& result = tresult.ref();
 
-    result[0].Re() = out[0];
-    result[nBy2].Re() = out[nBy2];
+    result[0].real(out[0]);
+    result[nBy2].real(out[nBy2]);
     for (label i = 1; i < nBy2; ++i)
     {
-        result[i].Re() = out[i];
-        result[i].Im() = out[n - i];
+        result[i].real(out[i]);
+        result[i].imag(out[n - i]);
     }
 
     fftw_destroy_plan(plan);
@@ -198,8 +198,8 @@ void Foam::fft::transform
 
     forAll(field, i)
     {
-        inPtr[i][0] = field[i].Re();
-        inPtr[i][1] = field[i].Im();
+        inPtr[i][0] = field[i].real();
+        inPtr[i][1] = field[i].imag();
     }
 
     // Create the plan
@@ -220,8 +220,8 @@ void Foam::fft::transform
 
     forAll(field, i)
     {
-        field[i].Re() = outPtr[i][0];
-        field[i].Im() = outPtr[i][1];
+        field[i].real(outPtr[i][0]);
+        field[i].imag(outPtr[i][1]);
     }
 
     fftw_destroy_plan(plan);

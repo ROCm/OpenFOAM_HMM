@@ -58,7 +58,7 @@ average
             (
                 "average("+ssf.name()+')',
                 ssf.instance(),
-                mesh(),
+                mesh.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),

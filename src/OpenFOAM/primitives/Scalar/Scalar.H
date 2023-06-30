@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -233,42 +233,42 @@ inline constexpr Scalar component(const Scalar val, const direction) noexcept
 
 
 //- Return 1 if s is greater_equal zero, or otherwise -1
-inline Scalar sign(const Scalar s)
+inline Scalar sign(const Scalar s) noexcept
 {
     return (s >= 0)? 1: -1;
 }
 
 
-//- Return 1 if s is greater than zero, otherwise 1
-inline Scalar pos(const Scalar s)
+//- Return 1 if s is greater than zero, otherwise 0
+inline Scalar pos(const Scalar s) noexcept
 {
     return (s > 0)? 1: 0;
 }
 
 
 //- Return 1 if s is greater_equal zero, or otherwise 0
-inline Scalar pos0(const Scalar s)
+inline Scalar pos0(const Scalar s) noexcept
 {
     return (s >= 0)? 1: 0;
 }
 
 
 //- Return 1 if s is less than zero, or otherwise 0
-inline Scalar neg(const Scalar s)
+inline Scalar neg(const Scalar s) noexcept
 {
     return (s < 0)? 1: 0;
 }
 
 
 //- Return 1 if s is less_equal zero, or otherwise 0
-inline Scalar neg0(const Scalar s)
+inline Scalar neg0(const Scalar s) noexcept
 {
     return (s <= 0)? 1: 0;
 }
 
 
 //- Return the positive part of s, otherwise zero. Same as max(0, s).
-inline Scalar posPart(const Scalar s)
+inline Scalar posPart(const Scalar s) noexcept
 {
     return (s > 0)? s: 0;
 }
@@ -276,21 +276,35 @@ inline Scalar posPart(const Scalar s)
 
 //- Return the negative part of s, otherwise zero. Same as min(0, s).
 //  Does not change the sign
-inline Scalar negPart(const Scalar s)
+inline Scalar negPart(const Scalar s) noexcept
 {
     return (s < 0)? s: 0;
 }
 
 
-inline bool equal(const Scalar& s1, const Scalar& s2)
+inline bool equal(const Scalar& a, const Scalar& b)
 {
-    return mag(s1 - s2) <= ScalarVSMALL;
+    return mag(a - b) <= ScalarVSMALL;
 }
 
 
-inline bool notEqual(const Scalar s1, const Scalar s2)
+inline bool notEqual(const Scalar a, const Scalar b)
 {
-    return mag(s1 - s2) > ScalarVSMALL;
+    return mag(a - b) > ScalarVSMALL;
+}
+
+
+//- Clamp scalar value to a 0-1 range
+inline Scalar clamp(const Scalar val, const Foam::zero_one)
+{
+    return (val < 0) ? 0 : (1 < val) ? 1 : val;
+}
+
+
+// Fast implementation, and with scalar promotion of upper/lower limits
+inline Scalar clamp(const Scalar val, const Scalar lower, const Scalar upper)
+{
+    return (val < lower) ? lower : (upper < val) ? upper : val;
 }
 
 
@@ -303,6 +317,15 @@ inline Scalar limit(const Scalar s1, const Scalar s2)
 inline Scalar minMod(const Scalar s1, const Scalar s2)
 {
     return (mag(s1) < mag(s2)) ? s1: s2;
+}
+
+
+//- Linear interpolation of scalars a and b by factor t
+//  Explicit form (not fused multiply add etc) for exact values at end points.
+//  Unlike std::lerp (C++20) there are no isfinite() checks etc.
+inline constexpr Scalar lerp(const Scalar a, const Scalar b, const Scalar t)
+{
+    return (Scalar{1}-t)*a + t*b;
 }
 
 

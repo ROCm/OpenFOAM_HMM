@@ -80,8 +80,8 @@ void Foam::patchToCell::combine(topoSet& set, const bool add) const
 
         if (verbose_)
         {
-            Info<< "    Found matching patch " << pp.name()
-                << " with " << pp.size() << " faces." << endl;
+            Info<< "    Found matching patch " << pp.name() << " with "
+                << returnReduce(pp.size(), sumOp<label>()) << " faces" << endl;
         }
 
         for
@@ -100,7 +100,7 @@ void Foam::patchToCell::combine(topoSet& set, const bool add) const
         WarningInFunction
             << "Cannot find any patches matching "
             << flatOutput(selectedPatches_) << nl
-            << "Valid names are " << flatOutput(mesh_.boundaryMesh().names())
+            << "Valid names: " << flatOutput(mesh_.boundaryMesh().names())
             << endl;
     }
 }
@@ -132,7 +132,7 @@ Foam::patchToCell::patchToCell
     if (!dict.readIfPresent("patches", selectedPatches_))
     {
         selectedPatches_.resize(1);
-        selectedPatches_.first() =
+        selectedPatches_.front() =
             dict.getCompat<wordRe>("patch", {{"name", 1806}});
     }
 }
@@ -161,7 +161,7 @@ void Foam::patchToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells associated with patches "
+            Info<< "    Adding cells associated with patches: "
                 << flatOutput(selectedPatches_) << " ..." << endl;
         }
 
@@ -171,7 +171,7 @@ void Foam::patchToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing cells associated with patches "
+            Info<< "    Removing cells associated with patches: "
                 << flatOutput(selectedPatches_) << " ..." << endl;
         }
 

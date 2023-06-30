@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,9 +57,11 @@ SourceFiles
 #include "boolList.H"
 #include "labelList.H"
 #include "edgeList.H"
-#include "point.H"
+#include "face.H"
+#include "pointField.H"
 #include "intersection.H"
 #include "HashSet.H"
+#include "SubList.H"
 #include "objectHit.H"
 #include "PrimitivePatchBase.H"
 
@@ -69,8 +71,9 @@ namespace Foam
 {
 
 // Forward Declarations
-class face;
 template<class T> class Map;
+template<class FaceList, class PointField> class PrimitivePatch;
+
 
 /*---------------------------------------------------------------------------*\
                            Class PrimitivePatch Declaration
@@ -108,6 +111,7 @@ public:
     // Public Data Types
 
         //- Enumeration defining the surface type. Used in check routines.
+        //  Ordered from 'good' to 'bad'
         enum surfaceTopo
         {
             MANIFOLD,
@@ -239,10 +243,10 @@ private:
         void visitPointRegion
         (
             const label pointi,
-            const labelList& pFaces,
+            const labelUList& pFaces,
             const label startFacei,
-            const label startEdgeI,
-            boolList& pFacesHad
+            const label startEdgei,
+            UList<bool>& pFacesVisited
         ) const;
 
 
@@ -522,12 +526,14 @@ public:
 
     // Check
 
-        //- Calculate surface type formed by patch.
-        //  Types:
+        //- Calculate surface type formed by patch,
+        //- optionally recording the indices of illegal edges.
+        //
+        //  Return types:
         //  - all edges have two neighbours (manifold)
         //  - some edges have more than two neighbours (illegal)
         //  - other (open)
-        surfaceTopo surfaceType() const;
+        surfaceTopo surfaceType(labelHashSet* badEdgesPtr = nullptr) const;
 
         //- Check surface formed by patch for manifoldness (see above).
         //  Return true if any incorrect edges are found.
@@ -535,7 +541,7 @@ public:
         bool checkTopology
         (
             const bool report = false,
-            labelHashSet* setPtr = nullptr
+            labelHashSet* pointSetPtr = nullptr
         ) const;
 
         //- Checks primitivePatch for faces sharing point but not edge.
@@ -547,7 +553,7 @@ public:
         bool checkPointManifold
         (
             const bool report = false,
-            labelHashSet* setPtr = nullptr
+            labelHashSet* pointSetPtr = nullptr
         ) const;
 
 

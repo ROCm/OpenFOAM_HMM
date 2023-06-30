@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,16 +29,6 @@ License
 #include "zeroGradientFvPatchField.H"
 #include "fvPatchFieldMapper.H"
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::fvPatchField<Type>::zeroGradientType()
-{
-    return zeroGradientFvPatchField<Type>::typeName;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -59,9 +50,9 @@ Foam::zeroGradientFvPatchField<Type>::zeroGradientFvPatchField
     const dictionary& dict
 )
 :
-    fvPatchField<Type>(p, iF, dict, false)
+    fvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    fvPatchField<Type>::operator=(this->patchInternalField());
+    fvPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
 }
 
 
@@ -109,7 +100,7 @@ void Foam::zeroGradientFvPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    fvPatchField<Type>::operator==(this->patchInternalField());
+    fvPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
     fvPatchField<Type>::evaluate();
 }
 

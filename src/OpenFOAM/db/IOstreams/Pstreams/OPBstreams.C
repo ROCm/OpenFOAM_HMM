@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 
 Foam::UOPBstream::UOPBstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int toProcNo,
     DynamicList<char>& sendBuf,
     const int tag,
@@ -48,7 +48,7 @@ Foam::UOPBstream::UOPBstream
 
 Foam::OPBstream::OPBstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int toProcNo,
     const label bufSize,
     const int tag,

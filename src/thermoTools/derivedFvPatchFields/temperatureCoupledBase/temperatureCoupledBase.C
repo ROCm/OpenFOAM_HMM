@@ -341,10 +341,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                 mesh.lookupObject<solidThermo>(basicThermo::dictName);
 
             const symmTensorField& alphaAni =
-                patch_.lookupPatchField<volSymmTensorField, scalar>
-                (
-                    alphaAniName_
-                );
+                patch_.lookupPatchField<volSymmTensorField>(alphaAniName_);
 
             const scalarField& pp = thermo.p().boundaryField()[patchi];
 
@@ -498,10 +495,7 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::alpha
         case mtDirectionalSolidThermo:
         {
             const symmTensorField& alphaAni =
-                patch_.lookupPatchField<volSymmTensorField, scalar>
-                (
-                    alphaAniName_
-                );
+                patch_.lookupPatchField<volSymmTensorField>(alphaAniName_);
 
             const vectorField n(patch_.nf());
 

@@ -149,29 +149,18 @@ externalCoupledTemperatureMixedFvPatchScalarField
         Tref_ = Function1<scalar>::New("Tref", dict, &db());
     }
 
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Initialise same way as mixed
-        this->refValue() = scalarField("refValue", dict, p.size());
-        this->refGrad() = scalarField("refGradient", dict, p.size());
-        this->valueFraction() = scalarField("valueFraction", dict, p.size());
-
         evaluate();
     }
     else
     {
         // For convenience: initialise as fixedValue with either read value
         // or extrapolated value
-        if (dict.found("value"))
+        if (!this->readValueEntry(dict))
         {
-            fvPatchField<scalar>::operator=
-            (
-                scalarField("value", dict, p.size())
-            );
-        }
-        else
-        {
-            fvPatchField<scalar>::operator=(this->patchInternalField());
+            fvPatchField<scalar>::extrapolateInternal();
         }
 
         // Initialise as a fixed value
@@ -265,7 +254,7 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
     const scalarField& Twall = *this;
 
     // Fluid temperature [K]
-    tmp<scalarField> tfluid;
+    scalarField Tfluid(size());
 
     if (refTempType_ == refTemperatureType::USER)
     {
@@ -273,15 +262,13 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
         const scalar currTref =
             Tref_->value(this->db().time().timeOutputValue());
 
-        tfluid = tmp<scalarField>::New(size(), currTref);
+        Tfluid = currTref;
     }
     else
     {
         // Near wall cell temperature
-        tfluid = patchInternalField();
+        this->patchInternalField(Tfluid);
     }
-
-    const scalarField Tfluid(tfluid);
 
     // Heat transfer coefficient [W/m2/K]
     // This htc needs to be always larger or equal to zero

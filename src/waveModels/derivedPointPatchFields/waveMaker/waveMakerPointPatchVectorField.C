@@ -89,7 +89,7 @@ Foam::scalar Foam::waveMakerPointPatchVectorField::timeCoeff
     const scalar t
 ) const
 {
-    return max(0, min(t/rampTime_, 1));
+    return clamp(t/rampTime_, zero_one{});
 }
 
 
@@ -166,7 +166,7 @@ Foam::waveMakerPointPatchVectorField::waveMakerPointPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchField<vector>(p, iF, dict, false),
+    fixedValuePointPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
     motionType_(motionTypeNames.get("motionType", dict)),
     n_(dict.get<vector>("n")),
     gHat_(Zero),
@@ -460,7 +460,7 @@ void Foam::waveMakerPointPatchVectorField::write(Ostream& os) const
     os.writeEntry("rampTime", rampTime_);
     os.writeEntry("secondOrder", secondOrder_);
     os.writeEntry("nPaddle", nPaddle_);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

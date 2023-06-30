@@ -108,7 +108,7 @@ void setAlpha
     {
         cutCell.calcSubCell(cellI, 0.0);
 
-        alpha1[cellI] = max(min(cutCell.VolumeOfFluid(), 1), 0);
+        alpha1[cellI] = clamp(cutCell.VolumeOfFluid(), zero_one{});
 
         if (writeOBJ && (mag(cutCell.faceArea()) >= 1e-14))
         {

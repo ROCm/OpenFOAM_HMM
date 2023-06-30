@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,14 +29,6 @@ License
 #include "calculatedFvsPatchField.H"
 #include "fvPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::fvsPatchField<Type>::calculatedType()
-{
-    return Foam::calculatedFvsPatchField<Type>::typeName;
-}
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -58,7 +50,7 @@ Foam::calculatedFvsPatchField<Type>::calculatedFvsPatchField
     const dictionary& dict
 )
 :
-    fvsPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    fvsPatchField<Type>(p, iF, dict, IOobjectOption::MUST_READ)
 {}
 
 

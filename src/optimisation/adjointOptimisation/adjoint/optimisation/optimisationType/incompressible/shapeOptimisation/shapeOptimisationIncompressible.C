@@ -73,7 +73,7 @@ void shapeOptimisation::updateDesignVariables(scalarField& correction)
                     mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 mesh_.points()
             );

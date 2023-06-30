@@ -256,7 +256,8 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
                 mesh.time().timeName(),
                 mesh,
                 IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             mesh
         );

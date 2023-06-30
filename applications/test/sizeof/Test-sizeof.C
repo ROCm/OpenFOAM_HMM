@@ -31,9 +31,8 @@ Description
 
 #include "bool.H"
 #include "Switch.H"
-#include "string.H"
 #include "dictionary.H"
-#include "nil.H"
+#include "zero.H"
 #include "IOstreams.H"
 #include "PstreamBuffers.H"
 #include "argList.H"
@@ -82,8 +81,8 @@ int main(int argc, char *argv[])
     }
 
     {
-        nil x;
-        cout<<"nil:" << sizeof(x) << nl;
+        zero x;
+        cout<<"zero:" << sizeof(x) << nl;
     }
     #if 0
     {

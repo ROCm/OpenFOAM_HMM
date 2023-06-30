@@ -92,7 +92,7 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     heatSource_
     (
         heatSourceTypeNames.getOrDefault
@@ -106,18 +106,10 @@ atmTurbulentHeatFluxTemperatureFvPatchScalarField
     Cp0_(Function1<scalar>::New("Cp0", dict, &db())),
     q_(PatchFunction1<scalar>::New(p.patch(), "q", dict))
 {
-    if (dict.found("value") && dict.found("gradient"))
+    if (!this->readGradientEntry(dict) || !this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator =
-            (
-                Field<scalar>("value", dict, p.size())
-            );
-        gradient() = Field<scalar>("gradient", dict, p.size());
-    }
-    else
-    {
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        extrapolateInternal();
+        gradient() = Zero;
     }
 }
 
@@ -186,7 +178,7 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& alphaEffp =
-        patch().lookupPatchField<volScalarField, scalar>(alphaEffName_);
+        patch().lookupPatchField<volScalarField>(alphaEffName_);
 
     const scalar t = db().time().timeOutputValue();
     const scalar Cp0 = Cp0_->value(t);
@@ -230,12 +222,12 @@ void atmTurbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
 void atmTurbulentHeatFluxTemperatureFvPatchScalarField::write(Ostream& os) const
 {
-    fixedGradientFvPatchScalarField::write(os);
+    fixedGradientFvPatchField<scalar>::write(os);
     os.writeEntry("heatSource", heatSourceTypeNames[heatSource_]);
     os.writeEntry("alphaEff", alphaEffName_);
     Cp0_->writeData(os);
     q_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

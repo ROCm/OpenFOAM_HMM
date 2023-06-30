@@ -253,36 +253,48 @@ bool Foam::dimensionSet::operator/=(const dimensionSet& ds)
 
 // * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * * //
 
-Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::min(const dimensionSet& a, const dimensionSet& b)
 {
     if (dimensionSet::checking())
     {
-        checkDims("min(a, b)", ds1, ds2);
+        checkDims("min(a, b)", a, b);
     }
 
-    return ds1;
+    return a;
 }
 
 
-Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::max(const dimensionSet& a, const dimensionSet& b)
 {
     if (dimensionSet::checking())
     {
-        checkDims("max(a, b)", ds1, ds2);
+        checkDims("max(a, b)", a, b);
     }
 
-    return ds1;
+    return a;
 }
 
 
-Foam::dimensionSet Foam::clip(const dimensionSet& ds1, const dimensionSet& ds2)
+Foam::dimensionSet Foam::clamp(const dimensionSet& a, const dimensionSet& range)
+{
+    // In may cases the min/max range will be created from raw values
+    // (no dimension) so accept those without error
+    if (dimensionSet::checking() && !range.dimensionless())
+    {
+        checkDims("clamp(a, b)", a, range);
+    }
+
+    return a;
+}
+
+Foam::dimensionSet Foam::lerp(const dimensionSet& a, const dimensionSet& b)
 {
     if (dimensionSet::checking())
     {
-        checkDims("clip(a, b)", ds1, ds2);
+        checkDims("lerp(a, b)", a, b);
     }
 
-    return ds1;
+    return a;
 }
 
 
@@ -324,39 +336,17 @@ Foam::dimensionSet Foam::pow(const dimensionSet& ds, const scalar p)
 Foam::dimensionSet Foam::pow
 (
     const dimensionSet& ds,
-    const dimensionedScalar& dS
+    const dimensionedScalar& p
 )
 {
-    if (dimensionSet::checking() && !dS.dimensions().dimensionless())
+    if (dimensionSet::checking() && !p.dimensions().dimensionless())
     {
         FatalErrorInFunction
             << "Exponent of pow is not dimensionless" << endl
             << abort(FatalError);
     }
 
-    return pow(ds, dS.value());
-}
-
-
-Foam::dimensionSet Foam::pow
-(
-    const dimensionedScalar& dS,
-    const dimensionSet& ds
-)
-{
-    if
-    (
-        dimensionSet::checking()
-     && !dS.dimensions().dimensionless()
-     && !ds.dimensionless()
-    )
-    {
-        FatalErrorInFunction
-            << "Argument or exponent of pow not dimensionless" << endl
-            << abort(FatalError);
-    }
-
-    return ds;
+    return pow(ds, p.value());
 }
 
 
@@ -472,6 +462,8 @@ Foam::dimensionSet Foam::inv(const dimensionSet& ds)
 {
     return dimensionSet
     (
+        // Avoid signed zero values by subtracting from zero (with rounding)
+        // instead of using a simple '-value'
         0.0-ds[dimensionSet::MASS],
         0.0-ds[dimensionSet::LENGTH],
         0.0-ds[dimensionSet::TIME],

@@ -86,7 +86,7 @@ semiPermeableBaffleVelocityFvPatchVectorField
     fixedValueFvPatchVectorField(p, iF),
     rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {
-    fvPatchVectorField::operator==(vectorField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -139,7 +139,7 @@ void Foam::semiPermeableBaffleVelocityFvPatchVectorField::updateCoeffs()
     typedef semiPermeableBaffleMassFractionFvPatchScalarField YBCType;
 
     const scalarField& rhop =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const PtrList<volScalarField>& Y = composition().Y();
 
@@ -170,9 +170,9 @@ void Foam::semiPermeableBaffleVelocityFvPatchVectorField::write
     Ostream& os
 ) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

@@ -412,7 +412,7 @@ void kinematicSingleLayer::solveThickness
     }
 
     // Bound film thickness by a minimum of zero
-    delta_.max(0.0);
+    delta_.clamp_min(0);
 
     // Update U field
     U_ -= fvc::reconstruct(deltarUAf*phiAdd);
@@ -468,7 +468,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimDensity, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     mu_
     (
@@ -482,7 +482,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimPressure*dimTime, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     sigma_
     (
@@ -496,7 +496,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimMass/sqr(dimTime), Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     delta_
@@ -523,7 +523,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     U_
     (
@@ -548,7 +548,7 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::NO_WRITE
         ),
         U_,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     Uw_
     (
@@ -561,7 +561,7 @@ kinematicSingleLayer::kinematicSingleLayer
             IOobject::NO_WRITE
         ),
         U_,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     deltaRho_
     (
@@ -575,7 +575,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(delta_.dimensions()*rho_.dimensions(), Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     phi_
@@ -604,7 +604,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimMass, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     cloudMassTrans_
     (
@@ -618,7 +618,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar(dimMass, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     cloudDiameterTrans_
     (
@@ -632,7 +632,7 @@ kinematicSingleLayer::kinematicSingleLayer
         ),
         regionMesh(),
         dimensionedScalar("minus1", dimLength, -1.0),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
 
     USp_
@@ -807,8 +807,8 @@ kinematicSingleLayer::kinematicSingleLayer
                 time().timeName(),
                 regionMesh(),
                 IOobject::READ_IF_PRESENT,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             fvc::flux(deltaRho_*U_)
         );
@@ -1093,7 +1093,7 @@ tmp<volScalarField::Internal> kinematicSingleLayer::Srho() const
             primaryMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         primaryMesh(),
         dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
@@ -1115,7 +1115,7 @@ tmp<volScalarField::Internal> kinematicSingleLayer::Srho
             primaryMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         primaryMesh(),
         dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
@@ -1134,7 +1134,7 @@ tmp<volScalarField::Internal> kinematicSingleLayer::Sh() const
             primaryMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         primaryMesh(),
         dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

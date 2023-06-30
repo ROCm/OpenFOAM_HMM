@@ -33,7 +33,7 @@ Note
 #include "fileName.H"
 #include "dictionary.H"
 #include "JobInfo.H"
-#include "Pstream.H"
+#include "UPstream.H"
 #include "StringStream.H"
 #include "foamVersion.H"
 #include "OSspecific.H"
@@ -44,7 +44,7 @@ Note
 bool Foam::error::master(const label communicator)
 {
     // Trap negative value for comm as 'default'. This avoids direct use
-    // of Pstream::worldComm which may not have been initialised
+    // of UPstream::worldComm which may have not yet been initialised
 
     return
     (

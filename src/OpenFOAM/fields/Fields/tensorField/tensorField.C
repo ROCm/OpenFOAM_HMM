@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,48 +44,18 @@ UNARY_FUNCTION(scalar, tensor, tr)
 UNARY_FUNCTION(sphericalTensor, tensor, sph)
 UNARY_FUNCTION(symmTensor, tensor, symm)
 UNARY_FUNCTION(symmTensor, tensor, twoSymm)
+UNARY_FUNCTION(symmTensor, tensor, devSymm)
+UNARY_FUNCTION(symmTensor, tensor, devTwoSymm)
 UNARY_FUNCTION(tensor, tensor, skew)
 UNARY_FUNCTION(tensor, tensor, dev)
 UNARY_FUNCTION(tensor, tensor, dev2)
 UNARY_FUNCTION(scalar, tensor, det)
 UNARY_FUNCTION(tensor, tensor, cof)
 
-void inv(Field<tensor>& tf, const UList<tensor>& tf1)
+void inv(Field<tensor>& result, const UList<tensor>& f1)
 {
-    if (tf.empty())
-    {
-        return;
-    }
-
-    // Attempting to identify 2-D cases
-    const scalar minThreshold = SMALL*magSqr(tf1[0]);
-    const Vector<bool> removeCmpts
-    (
-        magSqr(tf1[0].xx()) < minThreshold,
-        magSqr(tf1[0].yy()) < minThreshold,
-        magSqr(tf1[0].zz()) < minThreshold
-    );
-
-    if (removeCmpts.x() || removeCmpts.y() || removeCmpts.z())
-    {
-        tensor adjust(Zero);
-
-        if (removeCmpts.x()) adjust.xx() = 1;
-        if (removeCmpts.y()) adjust.yy() = 1;
-        if (removeCmpts.z()) adjust.zz() = 1;
-
-        tensorField tf1Plus(tf1);
-
-        tf1Plus += adjust;
-
-        TFOR_ALL_F_OP_FUNC_F(tensor, tf, =, inv, tensor, tf1Plus)
-
-        tf -= adjust;
-    }
-    else
-    {
-        TFOR_ALL_F_OP_FUNC_F(tensor, tf, =, inv, tensor, tf1)
-    }
+    // With 'failsafe' invert
+    TFOR_ALL_F_OP_F_FUNC(tensor, result, =, tensor, f1, safeInv)
 }
 
 tmp<tensorField> inv(const UList<tensor>& tf)

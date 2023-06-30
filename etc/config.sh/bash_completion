@@ -5,7 +5,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2022 OpenCFD Ltd.
+#     Copyright (C) 2017-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -146,7 +146,7 @@ _of_complete_()
         COMPREPLY=($(compgen -W "$choices" -- ${cur}))
         ;;
     -fileHandler)
-        choices="collated uncollated hostCollated masterUncollated"
+        choices="collated uncollated hostCollated hostUncollated masterUncollated"
         COMPREPLY=($(compgen -W "$choices" -- ${cur}))
         ;;
     *)

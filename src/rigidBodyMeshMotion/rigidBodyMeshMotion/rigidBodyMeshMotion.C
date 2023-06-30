@@ -75,7 +75,7 @@ Foam::rigidBodyMeshMotion::bodyMesh::bodyMesh
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         pointMesh::New(mesh),
         dimensionedScalar(dimless, Zero)
@@ -111,7 +111,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
                 mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
       : coeffDict()
@@ -392,7 +392,7 @@ void Foam::rigidBodyMeshMotion::solve()
 bool Foam::rigidBodyMeshMotion::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Force ASCII writing
@@ -408,12 +408,12 @@ bool Foam::rigidBodyMeshMotion::writeObject
             mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
     model_.state().write(dict);
-    return dict.regIOobject::writeObject(streamOpt, valid);
+    return dict.regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

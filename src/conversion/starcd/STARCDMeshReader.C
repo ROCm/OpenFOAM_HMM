@@ -697,7 +697,8 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
     // keep empty patch region in reserve
     ++nPatches;
     Info<< "Number of patches = " << nPatches
-        << " (including extra for missing)" << endl;
+        << " (including extra for missing) with "
+        << nFaces << " faces" << endl;
 
     // resize
     origRegion.setSize(nPatches);
@@ -718,7 +719,7 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
 
         auto iter = boundaryRegion_.cfind(origRegion[patchi]);
 
-        if (iter.found())
+        if (iter.good())
         {
             const dictionary& dict = *iter;
 

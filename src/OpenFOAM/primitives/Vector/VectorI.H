@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -244,12 +244,34 @@ Foam::Vector<Cmpt>::less_zxy(const Vector<Cmpt>& a, const Vector<Cmpt>& b)
 }
 
 
-// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+//- Linear interpolation of vectors a and b by factor t
+template<class Cmpt>
+inline Vector<Cmpt> lerp
+(
+    const Vector<Cmpt>& a,
+    const Vector<Cmpt>& b,
+    const scalar t
+)
+{
+    const scalar onet = (1-t);
+
+    return Vector<Cmpt>
+    (
+        onet*a.x() + t*b.x(),
+        onet*a.y() + t*b.y(),
+        onet*a.z() + t*b.z()
+    );
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 //- Dummy innerProduct for scalar
 //  Allows the construction of vtables for virtual member functions

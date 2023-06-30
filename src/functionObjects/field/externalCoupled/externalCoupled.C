@@ -607,7 +607,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
             const wordList writeFields(groupDict.get<wordList>("writeFields"));
 
             auto fnd = regionToGroups_.find(regionGroupNames_.last());
-            if (fnd.found())
+            if (fnd.good())
             {
                 fnd().append(nGroups);
             }

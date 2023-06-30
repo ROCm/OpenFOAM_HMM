@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,6 +206,9 @@ class primitiveMesh
             //- Calculate edge list
             void calcCellEdges() const;
 
+            //- Calculate cell-point addressing
+            void calcCellPoints() const;
+
             //- Calculate point-point addressing
             void calcPointPoints() const;
 
@@ -214,20 +217,7 @@ class primitiveMesh
             //  Create and destroy as a set, using clearOutEdges()
             void calcEdges(const bool doFaceEdges) const;
             void clearOutEdges();
-            //- Helper: return (after optional creation) edge between two points
-            static label getEdge
-            (
-                List<DynamicList<label>>&,
-                DynamicList<edge>&,
-                const label,
-                const label
-            );
-            //- For on-the-fly addressing calculation
-            static label findFirstCommonElementFromSortedLists
-            (
-                const labelList&,
-                const labelList&
-            );
+
 
 protected:
 

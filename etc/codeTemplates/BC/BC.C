@@ -93,10 +93,7 @@ CONSTRUCT
 
     /*
     //Initialise with the value entry if evaluation is not possible
-    FVPATCHF::operator=
-    (
-        FIELD("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
     this->refValue() = *this;
     */
 }
@@ -205,11 +202,9 @@ void Foam::CLASS::updateCoeffs()
     );
 
     const scalarField& phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            "phi"
-        );
-    this->valueFraction() = 1.0 - pos0(phip);
+        this->patch().template lookupPatchField<surfaceScalarField>("phi");
+
+    this->valueFraction() = neg(phip);
 
     PARENT::updateCoeffs();
 }
@@ -227,7 +222,7 @@ void Foam::CLASS::write
     fieldData_.writeEntry("fieldData", os);
     timeVsData_->writeData(os);
     os.writeEntry("wordData", wordData_);
-    this->writeEntry("value", os);
+    FVPATCHF::writeValueEntry(os);
 }
 
 

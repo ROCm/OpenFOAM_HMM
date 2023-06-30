@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,9 +41,11 @@ void Foam::expressions::exprDriver::fill_random
 {
     if (seed <= 0)
     {
-        if (timeStatePtr_)
+        const TimeState* ts = this->timeState();
+
+        if (ts)
         {
-            seed = (timeStatePtr_->timeIndex() - seed);
+            seed = (ts->timeIndex() - seed);
         }
         else
         {

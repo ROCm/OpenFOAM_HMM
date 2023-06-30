@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,8 +83,8 @@ pressurePermeableAlphaInletOutletVelocityFvPatchVectorField
     alphaName_(dict.getOrDefault<word>("alpha", "none")),
     alphaMin_(dict.getOrDefault<scalar>("alphaMin", 1))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    fvPatchFieldBase::readDict(dict);
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
     refValue() = Zero;
     refGrad() = Zero;
     valueFraction() = 1.0;
@@ -131,21 +131,17 @@ updateCoeffs()
         return;
     }
 
-    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
-
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const vectorField n(patch().nf());
 
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         refValue() = (phip/patch().magSf())*n;
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         refValue() = (phip/(rhop*patch().magSf()))*n;
     }
@@ -159,12 +155,12 @@ updateCoeffs()
             << exit(FatalError);
     }
 
-    valueFraction() = 1.0 - pos0(phip);
+    valueFraction() = neg(phip);
 
     if (alphaName_ != "none")
     {
         const scalarField& alphap =
-            patch().lookupPatchField<volScalarField, scalar>(alphaName_);
+            patch().lookupPatchField<volScalarField>(alphaName_);
 
         const scalarField alphaCut(pos(alphap - alphaMin_));
         valueFraction() = max(alphaCut, valueFraction());
@@ -186,7 +182,7 @@ void Foam::pressurePermeableAlphaInletOutletVelocityFvPatchVectorField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchVectorField::write(os);
+    mixedFvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     os.writeEntryIfDifferent<word>("alpha", "none", alphaName_);
@@ -206,8 +202,7 @@ void Foam::pressurePermeableAlphaInletOutletVelocityFvPatchVectorField
 
     fvPatchField<vector>::operator=
     (
-        valueFraction()*(n()*(n() & pvf))
-      + (1 - valueFraction())*pvf
+        lerp(pvf, n()*(n() & pvf), valueFraction())
     );
 }
 

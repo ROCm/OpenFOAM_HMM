@@ -199,7 +199,7 @@ void alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField::write
     os.writeEntry("fixedDmdt", fixedDmdt_);
     os.writeEntry("L", L_);
     dmdt_.writeEntry("dmdt", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

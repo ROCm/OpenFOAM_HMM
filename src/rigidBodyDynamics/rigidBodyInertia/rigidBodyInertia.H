@@ -57,15 +57,10 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
 namespace RBD
 {
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class rigidBodyInertia;
 Istream& operator>>(Istream&, rigidBodyInertia&);
 Ostream& operator<<(Ostream&, const rigidBodyInertia&);

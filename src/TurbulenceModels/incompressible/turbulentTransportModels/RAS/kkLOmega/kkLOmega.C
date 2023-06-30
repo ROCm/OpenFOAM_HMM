@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -626,7 +626,7 @@ void kkLOmega::correct()
 
     const volScalarField Omega(sqrt(2.0)*mag(skew(gradU)));
 
-    const volScalarField S2(2.0*magSqr(dev(symm(gradU))));
+    const volScalarField S2(2.0*magSqr(devSymm(gradU)));
 
     const volScalarField ktS(fSS(Omega)*fw*kt_);
 
@@ -679,6 +679,8 @@ void kkLOmega::correct()
 
 
     omega_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    omega_.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
 
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn

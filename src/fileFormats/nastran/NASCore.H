@@ -38,7 +38,6 @@ SourceFiles
 #define Foam_fileFormats_NASCore_H
 
 #include "scalar.H"
-#include "string.H"
 #include "Enum.H"
 #include "face.H"
 #include "point.H"

@@ -276,7 +276,7 @@ void reactingOneDim::solveSpeciesMass()
         }
 
         YiEqn.solve(regionMesh().solver("Yi"));
-        Yi.max(0.0);
+        Yi.clamp_min(0);
         Yt += Yi;
     }
 

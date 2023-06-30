@@ -47,7 +47,7 @@ tractionDisplacementCorrectionFvPatchVectorField
     traction_(p.size(), Zero),
     pressure_(p.size(), Zero)
 {
-    fvPatchVectorField::operator=(patchInternalField());
+    extrapolateInternal();
     gradient() = Zero;
 }
 
@@ -79,7 +79,7 @@ tractionDisplacementCorrectionFvPatchVectorField
     traction_("traction", dict, p.size()),
     pressure_("pressure", dict, p.size())
 {
-    fvPatchVectorField::operator=(patchInternalField());
+    extrapolateInternal();
     gradient() = Zero;
 }
 
@@ -152,14 +152,9 @@ void tractionDisplacementCorrectionFvPatchVectorField::updateCoeffs()
         "mechanicalProperties"
     );
 
-    const fvPatchField<scalar>& rho =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
-
-    const fvPatchField<scalar>& rhoE =
-        patch().lookupPatchField<volScalarField, scalar>("E");
-
-    const fvPatchField<scalar>& nu =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+    const auto& rho = patch().lookupPatchField<volScalarField>("rho");
+    const auto& rhoE = patch().lookupPatchField<volScalarField>("E");
+    const auto& nu = patch().lookupPatchField<volScalarField>("nu");
 
     scalarField E(rhoE/rho);
     scalarField mu(E/(2.0*(1.0 + nu)));
@@ -172,11 +167,8 @@ void tractionDisplacementCorrectionFvPatchVectorField::updateCoeffs()
 
     vectorField n(patch().nf());
 
-    const fvPatchField<symmTensor>& sigmaD =
-        patch().lookupPatchField<volSymmTensorField, symmTensor>("sigmaD");
-
-    const fvPatchField<tensor>& sigmaExp =
-        patch().lookupPatchField<volTensorField, tensor>("sigmaExp");
+    const auto& sigmaD = patch().lookupPatchField<volSymmTensorField>("sigmaD");
+    const auto& sigmaExp = patch().lookupPatchField<volTensorField>("sigmaExp");
 
     gradient() =
     (
@@ -190,10 +182,10 @@ void tractionDisplacementCorrectionFvPatchVectorField::updateCoeffs()
 // Write
 void tractionDisplacementCorrectionFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     traction_.writeEntry("traction", os);
     pressure_.writeEntry("pressure", os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

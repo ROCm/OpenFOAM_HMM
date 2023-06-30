@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -257,7 +257,7 @@ void Foam::globalMeshData::countSharedEdges
 
         auto globalFnd = globalShared.find(e);
 
-        if (globalFnd.found())
+        if (globalFnd.good())
         {
             if (globalFnd() == -1)
             {
@@ -328,11 +328,11 @@ void Foam::globalMeshData::calcSharedEdges() const
 
         const auto e0Fnd = meshToShared.cfind(e[0]);
 
-        if (e0Fnd.found())
+        if (e0Fnd.good())
         {
             const auto e1Fnd = meshToShared.cfind(e[1]);
 
-            if (e1Fnd.found())
+            if (e1Fnd.good())
             {
                 // Found edge which uses shared points. Probably shared.
 
@@ -346,7 +346,7 @@ void Foam::globalMeshData::calcSharedEdges() const
 
                 auto iter = localShared.find(sharedEdge);
 
-                if (!iter.found())
+                if (!iter.good())
                 {
                     // First occurrence of this point combination. Store.
                     localShared.insert(sharedEdge, labelList(1, edgeI));
@@ -463,7 +463,7 @@ void Foam::globalMeshData::calcSharedEdges() const
 
         const auto edgeFnd = globalShared.cfind(e);
 
-        if (edgeFnd.found())
+        if (edgeFnd.good())
         {
             // My local edge is indeed a shared one. Go through all local edge
             // labels with this point combination.
@@ -1225,7 +1225,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
                 forAll(f, fp)
                 {
                     const auto iter = meshPointMap.cfind(f[fp]);
-                    if (iter.found())
+                    if (iter.good())
                     {
                         nPointFaces[iter.val()]++;
                     }
@@ -1260,7 +1260,7 @@ void Foam::globalMeshData::calcPointBoundaryFaces
                 {
                     const auto iter = meshPointMap.cfind(f[fp]);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         label bFacei =
                              pp.start() + i - mesh_.nInternalFaces();
@@ -1497,7 +1497,7 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
             const label celli = pCells[i];
             const auto fnd = meshCellMap.cfind(celli);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 bCells[i] = fnd();
             }
@@ -2504,8 +2504,8 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
     const globalIndex globalPPoints(meshPoints.size());
 
     labelList patchToCoupled(meshPoints.size(), -1);
-    label nCoupled = 0;
     labelList coupledToGlobalPatch(pointSlavesMap.constructSize(), -1);
+    //label nCoupled = 0;
 
     // Note: loop over patch since usually smaller
     forAll(meshPoints, patchPointi)
@@ -2514,11 +2514,11 @@ Foam::autoPtr<Foam::globalIndex> Foam::globalMeshData::mergePoints
 
         const auto iter = cpp.meshPointMap().cfind(meshPointi);
 
-        if (iter.found())
+        if (iter.good())
         {
             patchToCoupled[patchPointi] = iter();
             coupledToGlobalPatch[iter()] = globalPPoints.toGlobal(patchPointi);
-            nCoupled++;
+            //++nCoupled;
         }
     }
 
@@ -2714,58 +2714,35 @@ void Foam::globalMeshData::updateMesh()
 
     // *** Temporary hack to avoid problems with overlapping communication
     // *** between these reductions and the calculation of deltaCoeffs
-    //const label comm = UPstream::worldComm + 1;
-    const label comm = UPstream::allocateCommunicator
+
+    UPstream::communicator dupComm
     (
         UPstream::worldComm,
-        identity(UPstream::nProcs(UPstream::worldComm)),
-        true
+        labelRange(UPstream::nProcs(UPstream::worldComm))
     );
-    const label oldWarnComm = UPstream::warnComm;
-    UPstream::warnComm = comm;
 
+    const label comm = dupComm.comm();
+    const label oldWarnComm = UPstream::commWarn(comm);
 
-    // Total number of faces.
-    nTotalFaces_ = returnReduce
-    (
-        mesh_.nFaces(),
-        sumOp<label>(),
-        UPstream::msgType(),
-        comm
-    );
+    FixedList<label, 3> totals;
+
+    totals[0] = mesh_.nPoints();
+    totals[1] = mesh_.nFaces();
+    totals[2] = mesh_.nCells();
+
+    reduce(totals, sumOp<label>(), UPstream::msgType(), comm);
+
+    nTotalPoints_ = totals[0];
+    nTotalFaces_ = totals[1];
+    nTotalCells_ = totals[2];
+
+    // Restore communicator settings
+    UPstream::commWarn(oldWarnComm);
 
     if (debug)
     {
-        Pout<< "globalMeshData : nTotalFaces:" << nTotalFaces_ << endl;
-    }
-
-    nTotalCells_ = returnReduce
-    (
-        mesh_.nCells(),
-        sumOp<label>(),
-        UPstream::msgType(),
-        comm
-    );
-
-    if (debug)
-    {
-        Pout<< "globalMeshData : nTotalCells:" << nTotalCells_ << endl;
-    }
-
-    nTotalPoints_ = returnReduce
-    (
-        mesh_.nPoints(),
-        sumOp<label>(),
-        UPstream::msgType(),
-        comm
-    );
-
-    UPstream::freeCommunicator(comm);
-    UPstream::warnComm = oldWarnComm;
-
-    if (debug)
-    {
-        Pout<< "globalMeshData : nTotalPoints:" << nTotalPoints_ << endl;
+        Info<< "globalMeshData : Total points/faces/cells : "
+            << totals << endl;
     }
 }
 

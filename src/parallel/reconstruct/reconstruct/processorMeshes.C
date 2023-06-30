@@ -195,7 +195,7 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
                     meshes_[proci].thisDb(),
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false  // not registered
+                    IOobject::NO_REGISTER
                 )
             )
         );

@@ -82,12 +82,7 @@ Foam::enthalpySorptionFvPatchScalarField::enthalpySorptionFvPatchScalarField
     speciesName_(dict.get<word>("species")),
     pName_(dict.getOrDefault<word>("p", "p")),
     TName_(dict.getOrDefault<word>("T", "T")),
-    dhdt_
-    (
-        dict.found("dhdt")
-      ? scalarField("dhdt", dict, p.size())
-      : scalarField(p.size(), 0)
-    )
+    dhdt_("dhdt", dict, p.size(), IOobjectOption::LAZY_READ)
 {
     switch (enthalpyModel_)
     {
@@ -103,14 +98,7 @@ Foam::enthalpySorptionFvPatchScalarField::enthalpySorptionFvPatchScalarField
         }
     }
 
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(Zero);
     }
@@ -208,10 +196,7 @@ patchSource() const
     const auto& Yp =
         refCast<const speciesSorptionFvPatchScalarField>
         (
-            patch().lookupPatchField<volScalarField, scalar>
-            (
-                speciesName_
-            )
+            patch().lookupPatchField<volScalarField>(speciesName_)
         );
 
     // mass rate [kg/sec/m3]
@@ -224,11 +209,8 @@ patchSource() const
 
     if (includeHs_)
     {
-        const fvPatchField<scalar>& pp =
-            patch().lookupPatchField<volScalarField, scalar>(pName_);
-
-        const fvPatchField<scalar>& Tp =
-            patch().lookupPatchField<volScalarField, scalar>(TName_);
+        const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
+        const auto& Tp = patch().lookupPatchField<volScalarField>(TName_);
 
         const auto& thermo = db().lookupObject<rhoReactionThermo>
         (
@@ -270,10 +252,7 @@ void Foam::enthalpySorptionFvPatchScalarField::updateCoeffs()
     const auto& Yp =
         refCast<const speciesSorptionFvPatchScalarField>
         (
-            patch().lookupPatchField<volScalarField, scalar>
-            (
-                speciesName_
-            )
+            patch().lookupPatchField<volScalarField>(speciesName_)
         );
 
     switch (enthalpyModel_)
@@ -313,7 +292,7 @@ void Foam::enthalpySorptionFvPatchScalarField::updateCoeffs()
 
 void Foam::enthalpySorptionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("enthalpyModel", enthalpyModelTypeNames[enthalpyModel_]);
 
@@ -332,7 +311,7 @@ void Foam::enthalpySorptionFvPatchScalarField::write(Ostream& os) const
 
     dhdt_.writeEntry("dhdt", os);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

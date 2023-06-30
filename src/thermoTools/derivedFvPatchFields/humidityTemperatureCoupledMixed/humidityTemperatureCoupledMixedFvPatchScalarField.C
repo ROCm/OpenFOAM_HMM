@@ -108,7 +108,8 @@ Foam::humidityTemperatureCoupledMixedFvPatchScalarField::thicknessField
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero)
@@ -248,7 +249,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
             << exit(FatalIOError);
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     if (massModeTypeNames_.readIfPresent("mode", dict, mode_))
     {
@@ -315,13 +316,9 @@ humidityTemperatureCoupledMixedFvPatchScalarField
     }
 
 
-
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
@@ -439,14 +436,12 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     const fvPatch& nbrPatch =
         refCast<const fvMesh>(nbrMesh).boundary()[nbrPatchI];
 
-    const humidityTemperatureCoupledMixedFvPatchScalarField&
-        nbrField =
-        refCast
+    const auto& nbrField = refCast
         <
             const humidityTemperatureCoupledMixedFvPatchScalarField
         >
         (
-            nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
+            nbrPatch.lookupPatchField<volScalarField>(TnbrName_)
         );
 
     // Swap to obtain full local values of neighbour internal field
@@ -515,24 +510,21 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
                         const fixedGradientFvPatchField<scalar>
                     >
                     (
-                        patch().lookupPatchField<volScalarField, scalar>
-                        (
-                            specieName_
-                        )
+                        patch().lookupPatchField<volScalarField>(specieName_)
                     )
                 );
 
-            const fvPatchScalarField& pp =
-                patch().lookupPatchField<volScalarField, scalar>(pName_);
+            const auto& pp =
+                patch().lookupPatchField<volScalarField>(pName_);
 
-            const fvPatchVectorField& Up =
-                patch().lookupPatchField<volVectorField, vector>(UName_);
+            const auto& Up =
+                patch().lookupPatchField<volVectorField>(UName_);
 
-            const fvPatchScalarField& rhop =
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            const auto& rhop =
+                patch().lookupPatchField<volScalarField>(rhoName_);
 
-            const fvPatchScalarField& mup =
-                patch().lookupPatchField<volScalarField, scalar>(muName_);
+            const auto& mup =
+                patch().lookupPatchField<volScalarField>(muName_);
 
             const vectorField Ui(Up.patchInternalField());
             const scalarField Yi(Yp.patchInternalField());
@@ -716,13 +708,13 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
     scalarField qr(Tp.size(), Zero);
     if (qrName_ != "none")
     {
-        qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
+        qr = patch().lookupPatchField<volScalarField>(qrName_);
     }
 
     scalarField qrNbr(Tp.size(), Zero);
     if (qrNbrName_ != "none")
     {
-        qrNbr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrNbrName_);
+        qrNbr = nbrPatch.lookupPatchField<volScalarField>(qrNbrName_);
         mpp.distribute(qrNbr);
     }
 
@@ -772,7 +764,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);

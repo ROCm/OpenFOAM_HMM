@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -156,6 +156,8 @@ UNARY_FUNCTION(scalar, symmTensor, tr, transform)
 UNARY_FUNCTION(sphericalTensor, symmTensor, sph, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, symm, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, twoSymm, transform)
+UNARY_FUNCTION(symmTensor, symmTensor, devSymm, transform)
+UNARY_FUNCTION(symmTensor, symmTensor, devTwoSymm, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2, transform)
 UNARY_FUNCTION(scalar, symmTensor, det, transform)

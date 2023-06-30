@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ inline Foam::predicates::scalars::unary Foam::predicates::scalars::operation
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::predicates::scalars::found
+inline bool Foam::predicates::scalars::contains
 (
     const scalar value,
     label pos
@@ -72,15 +72,15 @@ inline bool Foam::predicates::scalars::found
 
 inline bool Foam::predicates::scalars::match(const scalar value) const
 {
-    return this->matchAny(value);
+    return matchAny(value);
 }
 
 
 inline bool Foam::predicates::scalars::matchAny(const scalar value) const
 {
-    for (const unary& test : *this)
+    for (const unary& pred : *this)
     {
-        if (test(value))
+        if (pred(value))
         {
             return true;
         }
@@ -92,9 +92,9 @@ inline bool Foam::predicates::scalars::matchAny(const scalar value) const
 
 inline bool Foam::predicates::scalars::matchAll(const scalar value) const
 {
-    for (const unary& test : *this)
+    for (const unary& pred : *this)
     {
-        if (!test(value))
+        if (!pred(value))
         {
             return false;
         }
@@ -112,9 +112,9 @@ inline Foam::labelList Foam::predicates::scalars::matching
     labelList indices(this->size());
 
     label i = 0, count = 0;
-    for (const unary& test : *this)
+    for (const unary& pred : *this)
     {
-        if (test(value))
+        if (pred(value))
         {
             indices[count] = i;
             ++count;
@@ -140,7 +140,7 @@ inline Foam::labelList Foam::predicates::scalars::matching
     label count = 0;
     for (label i=0; i < len; ++i)
     {
-        if (match(input[i]) ? !invert : invert)
+        if (matchAny(input[i]) ? !invert : invert)
         {
             indices[count] = i;
             ++count;
@@ -149,14 +149,6 @@ inline Foam::labelList Foam::predicates::scalars::matching
     indices.resize(count);
 
     return indices;
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-inline bool Foam::predicates::scalars::operator()(const scalar value) const
-{
-    return this->found(value);
 }
 
 

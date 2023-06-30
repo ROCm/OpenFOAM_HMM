@@ -279,7 +279,7 @@ void Foam::reconstruction::plicRDF::calcResidual
             if (mag(normal) != 0 && j != 0)
             {
                 vector n = normal/mag(normal);
-                scalar cosAngle = max(min((cellNormal & n), 1), -1);
+                scalar cosAngle = clamp((cellNormal & n), -1, 1);
                 avgDiffNormal += acos(cosAngle) * mag(normal);
                 weight += mag(normal);
                 if (cosAngle < maxDiffNormal)

@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::cellIOList
-
-Description
-    IOList of cells
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellIOList_H
-#define cellIOList_H
+#ifndef Foam_cellIOList_H
+#define Foam_cellIOList_H
 
 #include "cell.H"
 #include "CompactIOList.H"
@@ -41,7 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of cell
     typedef IOList<cell> cellIOList;
+
+    //! Compact IO for a List of cell
     typedef CompactIOList<cell, label> cellCompactIOList;
 }
 

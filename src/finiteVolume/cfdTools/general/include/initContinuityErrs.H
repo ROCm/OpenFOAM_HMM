@@ -44,11 +44,11 @@ uniformDimensionedScalarField cumulativeContErrIO
         "cumulativeContErr",
         runTime.timeName(),
         "uniform",
-        mesh,
+        mesh.thisDb(),
         IOobject::READ_IF_PRESENT,
         IOobject::AUTO_WRITE
     ),
-    dimensionedScalar(dimless, Zero)
+    dimensionedScalar(word::null, dimless, Zero)
 );
 scalar& cumulativeContErr = cumulativeContErrIO.value();
 

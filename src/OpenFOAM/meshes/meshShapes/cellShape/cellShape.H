@@ -62,6 +62,9 @@ bool operator==(const cellShape& a, const cellShape& b);
 Istream& operator>>(Istream& is, cellShape& s);
 Ostream& operator<<(Ostream& os, const cellShape& s);
 
+template<>
+Ostream& operator<<(Ostream& os, const InfoProxy<cellShape>& ip);
+
 
 /*---------------------------------------------------------------------------*\
                           Class cellShape Declaration
@@ -212,11 +215,9 @@ public:
         //- Collapse shape to correct one after removing duplicate vertices
         void collapse();
 
-        //- Return info proxy, to print information to a stream
-        Foam::InfoProxy<cellShape> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<cellShape> info() const noexcept { return *this; }
 
 
     // Friend Operators
@@ -224,15 +225,11 @@ public:
         friend bool operator==(const cellShape& a, const cellShape& b);
 
 
-    // IOstream operators
+    // IOstream Operators
 
         friend Istream& operator>>(Istream& is, cellShape& s);
         friend Ostream& operator<<(Ostream& os, const cellShape& s);
 };
-
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<cellShape>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

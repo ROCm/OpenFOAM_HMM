@@ -229,13 +229,13 @@ Foam::label Foam::cellZoneSet::maxSize(const polyMesh& mesh) const
 bool Foam::cellZoneSet::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Write shadow cellSet
     word oldTypeName = typeName;
     const_cast<word&>(type()) = cellSet::typeName;
-    bool ok = cellSet::writeObject(streamOpt, valid);
+    bool ok = cellSet::writeObject(streamOpt, writeOnProc);
     const_cast<word&>(type()) = oldTypeName;
 
     // Modify cellZone
@@ -265,7 +265,7 @@ bool Foam::cellZoneSet::writeObject
     }
     cellZones.clearAddressing();
 
-    return ok && cellZones.write(valid);
+    return ok && cellZones.write(writeOnProc);
 }
 
 

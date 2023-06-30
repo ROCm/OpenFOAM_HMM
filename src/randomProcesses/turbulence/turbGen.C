@@ -74,8 +74,11 @@ Foam::vectorField Foam::turbGen::U()
     (
         fft::reverseTransform
         (
-            ComplexField(cos(constant::mathematical::twoPi*rndPhases)*s,
-            sin(constant::mathematical::twoPi*rndPhases)*s),
+            ComplexField
+            (
+                cos(constant::mathematical::twoPi*rndPhases)*s,
+                sin(constant::mathematical::twoPi*rndPhases)*s
+            ),
             K.nn()
         )*recRootN
     );

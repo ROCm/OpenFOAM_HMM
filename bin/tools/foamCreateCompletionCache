@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2017-2022 OpenCFD Ltd.
+#     Copyright (C) 2017-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -144,6 +144,7 @@ HEADER
 #   -help-full
 #
 # Ignores
+#   -doc-source   Advanced (deprecated?) option
 #   -help-man     Internal option
 #   -hostRoots    Advanced distributed run option
 #   -roots        Advanced distributed run option
@@ -163,7 +164,8 @@ extractOptions()
     local helpText=$($appName -help-full 2>/dev/null | \
         sed -ne '1,/^[Oo]ptions:/d' \
             -e '/^ \{8\}/d;' \
-            -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d; /^-help-man/d;' \
+            -e 's/^ *//; /^$/d; /^[^-]/d; /^--/d;' \
+            -e '/^-doc-source/d; /^-help-man/d;' \
             -e '/^-hostRoots /d; /^-roots /d;' \
             -e '/^-lib /d; /^-no-libs /d;' \
             -e '/^-[a-z]*-switch /d;' \

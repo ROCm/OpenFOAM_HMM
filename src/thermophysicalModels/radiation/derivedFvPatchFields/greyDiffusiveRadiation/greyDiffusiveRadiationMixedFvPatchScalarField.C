@@ -53,8 +53,8 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     qRadExt_(0),
     qRadExtDir_(Zero)
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 1.0;
 }
 
@@ -88,20 +88,15 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     qRadExt_(dict.getOrDefault<scalar>("qRadExt", 0)),
     qRadExtDir_(dict.getOrDefault<vector>("qRadExtDir", Zero))
 {
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
+        // Full restart
+        this->readValueEntry(dict, IOobjectOption::MUST_READ);
     }
     else
     {
-        refValue() = 0.0;
-        refGrad() = 0.0;
+        refValue() = Zero;
+        refGrad() = Zero;
         valueFraction() = 1.0;
 
         fvPatchScalarField::operator=(refValue());
@@ -151,8 +146,7 @@ updateCoeffs()
     int oldTag = UPstream::msgType();
     UPstream::msgType() = oldTag+1;
 
-    const scalarField& Tp =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
+    const auto& Tp = patch().lookupPatchField<volScalarField>(TName_);
 
     const fvDOM& dom = db().lookupObject<fvDOM>("radiationProperties");
 
@@ -224,7 +218,7 @@ updateCoeffs()
     if (dom.useSolarLoad())
     {
         // Looking for primary heat flux single band
-        Ir += patch().lookupPatchField<volScalarField,scalar>
+        Ir += patch().lookupPatchField<volScalarField>
         (
             dom.primaryFluxName_ + "_0"
         );
@@ -374,7 +368,7 @@ void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     os.writeEntryIfDifferent<scalar>("qRadExt", Zero, qRadExt_);
     os.writeEntryIfDifferent<vector>("qRadExtDir", Zero, qRadExtDir_);

@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceLocation_H
-#define surfaceLocation_H
+#ifndef Foam_surfaceLocation_H
+#define Foam_surfaceLocation_H
 
 #include "pointIndexHit.H"
 #include "triangle.H"
@@ -63,7 +63,9 @@ class triSurface;
 
 Istream& operator>>(Istream&, surfaceLocation&);
 Ostream& operator<<(Ostream&, const surfaceLocation&);
+
 Ostream& operator<<(Ostream&, const InfoProxy<surfaceLocation>&);
+
 
 /*---------------------------------------------------------------------------*\
                        Class surfaceLocation Declaration
@@ -139,11 +141,9 @@ public:
         //- Normal. Approximate for points.
         vector normal(const triSurface& s) const;
 
-        //- Return info proxy, to print information to a stream
-        InfoProxy<surfaceLocation> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- to print information to a stream
+        InfoProxy<surfaceLocation> info() const noexcept { return *this; }
 
         //- Write info about selected face index to a stream
         void write(Ostream& os, const triSurface& s) const;
@@ -154,12 +154,6 @@ public:
         friend Istream& operator>>(Istream& is, surfaceLocation& sl);
 
         friend Ostream& operator<<(Ostream& os, const surfaceLocation& sl);
-
-        friend Ostream& operator<<
-        (
-            Ostream& os,
-            const InfoProxy<surfaceLocation>& ip
-        );
 };
 
 

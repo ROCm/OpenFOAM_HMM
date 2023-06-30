@@ -355,26 +355,25 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
     {
         if (procI != Pstream::myProcNo())
         {
-            //const treeBoundBox& srcBb = srcBbs[procI];
             const treeBoundBox& srcPatchBb = srcPatchBbs[procI];
             const treeBoundBox& tgtPatchBb = tgtPatchBbs[Pstream::myProcNo()];
 
             if (srcPatchBb.overlaps(tgtPatchBb))
             {
                 UIPstream is(procI, pBufs);
-                {
-                    treeBoundBox receivedBb(is);
-                    if (srcPatchBb != receivedBb)
-                    {
-                        FatalErrorInFunction
-                            << "proc:" << procI
-                            << " srcPatchBb:" << srcPatchBb
-                            << " receivedBb:" << receivedBb
-                            << exit(FatalError);
-                    }
-                }
+                const treeBoundBox receivedBb(is);
                 const labelVector zoneDivs(is);
                 const PackedList<2> srcPatchTypes(is);
+
+                // Verify validity
+                if (srcPatchBb != receivedBb)
+                {
+                    FatalErrorInFunction
+                        << "proc:" << procI
+                        << " srcPatchBb:" << srcPatchBb
+                        << " receivedBb:" << receivedBb
+                        << exit(FatalError);
+                }
 
                 forAll(tgtCellMap, tgtCelli)
                 {
@@ -1167,14 +1166,14 @@ void Foam::cellCellStencils::inverseDistance::findHoles
 
 
     // See which regions have not been visited (regionType == 1)
-    label count = 0;
+    // label count = 0;
     forAll(cellRegion, cellI)
     {
         label type = regionType[cellRegion[cellI]];
         if (type == 1 && cellTypes[cellI] != HOLE)
         {
             cellTypes[cellI] = HOLE;
-            count++;
+            // ++count;
         }
     }
 }
@@ -1733,11 +1732,11 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     )
 {
     // Protect local fields from interpolation
@@ -1763,7 +1762,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
         mesh_,
         IOobject::READ_IF_PRESENT,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
     if (io.typeHeaderOk<volScalarField>(true))
     {

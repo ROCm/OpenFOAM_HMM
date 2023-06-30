@@ -68,7 +68,7 @@ void Foam::refinementFeatures::read
             io.time(),                          // registry
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         const fileName fName(typeFilePath<extendedFeatureEdgeMesh>(extFeatObj));
@@ -102,7 +102,7 @@ void Foam::refinementFeatures::read
                 io.time(),                          // registry
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             );
 
             const fileName fName(typeFilePath<featureEdgeMesh>(featObj));

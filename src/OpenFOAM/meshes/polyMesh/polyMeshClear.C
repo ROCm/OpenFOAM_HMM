@@ -40,9 +40,7 @@ void Foam::polyMesh::removeBoundary()
 {
     DebugInFunction << "Removing boundary patches." << endl;
 
-    // Remove the point zones
     boundary_.clear();
-    boundary_.setSize(0);
 
     clearOut();
 }

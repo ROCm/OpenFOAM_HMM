@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,15 @@ License
 #include "meshTools.H"
 #include "edgeHashes.H"
 #include "unitConversion.H"
+#include "OBJstream.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(pairPatchAgglomeration, 0);
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -44,7 +53,8 @@ void Foam::pairPatchAgglomeration::compactLevels(const label nCreatedLevels)
 bool Foam::pairPatchAgglomeration::continueAgglomerating
 (
     const label nLocal,
-    const label nLocalOld
+    const label nLocalOld,
+    const label nMarkedEdges
 )
 {
     // Keep agglomerating
@@ -54,65 +64,80 @@ bool Foam::pairPatchAgglomeration::continueAgglomerating
 
     label nGlobal = returnReduce(nLocal, sumOp<label>());
     label nGlobalOld = returnReduce(nLocalOld, sumOp<label>());
+    label nGlobalMarked = returnReduce(nMarkedEdges, sumOp<label>());
 
     return
     (
         returnReduceOr(nLocal > nFacesInCoarsestLevel_)
      || nGlobal > nGlobalFacesInCoarsestLevel_
     )
-    && nGlobal != nGlobalOld;
+    && (nGlobal != nGlobalOld || nGlobalMarked > 0);
 }
 
 
 void Foam::pairPatchAgglomeration::setLevel0EdgeWeights()
 {
     const bPatch& coarsePatch = patchLevels_[0];
-    forAll(coarsePatch.edges(), i)
+    const auto& coarseEdges = coarsePatch.edges();
+
+    // Statistics on edges
+    label nNonManif = 0;
+    label nFeat = 0;
+
+    for (label i = 0; i < coarsePatch.nInternalEdges(); i++)
     {
-        if (coarsePatch.isInternalEdge(i))
+        scalar edgeLength = coarseEdges[i].mag(coarsePatch.localPoints());
+
+        const labelList& eFaces = coarsePatch.edgeFaces()[i];
+
+        if (eFaces.size() == 2)
         {
-            scalar edgeLength =
-                coarsePatch.edges()[i].mag(coarsePatch.localPoints());
+            scalar cosI =
+                coarsePatch.faceNormals()[eFaces[0]]
+              & coarsePatch.faceNormals()[eFaces[1]];
 
-            const labelList& eFaces = coarsePatch.edgeFaces()[i];
+            const edge edgeCommon = edge(eFaces[0], eFaces[1]);
 
-            if (eFaces.size() == 2)
+            if (facePairWeight_.found(edgeCommon))
             {
-                scalar cosI =
-                    coarsePatch.faceNormals()[eFaces[0]]
-                  & coarsePatch.faceNormals()[eFaces[1]];
-
-                const edge edgeCommon = edge(eFaces[0], eFaces[1]);
-
-                if (facePairWeight_.found(edgeCommon))
-                {
-                    facePairWeight_[edgeCommon] += edgeLength;
-                }
-                else
-                {
-                    facePairWeight_.insert(edgeCommon, edgeLength);
-                }
-
-                if (mag(cosI) < Foam::cos(degToRad(featureAngle_)))
-                {
-                    facePairWeight_[edgeCommon] = -1.0;
-                }
+                facePairWeight_[edgeCommon] += edgeLength;
             }
             else
             {
-                forAll(eFaces, j)
-                {
-                    for (label k = j+1; k<eFaces.size(); k++)
-                    {
-                        facePairWeight_.insert
-                        (
-                            edge(eFaces[j], eFaces[k]),
-                            -1.0
-                        );
-                    }
-                }
+                facePairWeight_.insert(edgeCommon, edgeLength);
+            }
+
+            if (cosI < Foam::cos(degToRad(featureAngle_)))
+            {
+                facePairWeight_[edgeCommon] = -1.0;
+                nFeat++;
             }
         }
+        else
+        {
+            forAll(eFaces, j)
+            {
+                for (label k = j+1; k<eFaces.size(); k++)
+                {
+                    facePairWeight_.insert
+                    (
+                        edge(eFaces[j], eFaces[k]),
+                        -1.0
+                    );
+                }
+            }
+            nNonManif++;
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "Level:" << 0
+            << " nEdges:" << coarsePatch.nEdges() << " of which:" << nl
+            << "    boundary:" << coarsePatch.nBoundaryEdges() << nl
+            << "    non-manifold:" << nNonManif << nl
+            << "    feature (angle < " << featureAngle_ << "):" << nFeat << nl
+            << endl;
     }
 }
 
@@ -123,9 +148,8 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
 )
 {
     const bPatch& coarsePatch = patchLevels_[fineLevelIndex];
+    const auto& coarseEdges = coarsePatch.edges();
     const labelList& fineToCoarse = restrictAddressing_[fineLevelIndex];
-    const label nCoarseI =  max(fineToCoarse) + 1;
-    labelListList coarseToFine(invertOneToMany(nCoarseI, fineToCoarse));
 
     edgeHashSet fineFeaturedFaces(coarsePatch.nEdges()/10);
 
@@ -144,54 +168,173 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
         }
     }
 
+
+    // Statistics on edges
+    label nNonManif = 0;
+    label nFeat = 0;
+
     // Clean old weights
     facePairWeight_.clear();
     facePairWeight_.resize(coarsePatch.nEdges());
 
-    forAll(coarsePatch.edges(), i)
+    for (label i = 0; i < coarsePatch.nInternalEdges(); i++)
     {
-        if (coarsePatch.isInternalEdge(i))
+        scalar edgeLength = coarseEdges[i].mag(coarsePatch.localPoints());
+
+        const labelList& eFaces = coarsePatch.edgeFaces()[i];
+
+        if (eFaces.size() == 2)
         {
-            scalar edgeLength =
-                coarsePatch.edges()[i].mag(coarsePatch.localPoints());
-
-            const labelList& eFaces = coarsePatch.edgeFaces()[i];
-
-            if (eFaces.size() == 2)
+            const edge edgeCommon(eFaces[0], eFaces[1]);
+            // If the fine 'pair' faces was featured edge so it is
+            // the coarse 'pair'
+            if (fineFeaturedFaces.found(edgeCommon))
             {
-                const edge edgeCommon = edge(eFaces[0], eFaces[1]);
-                if (facePairWeight_.found(edgeCommon))
+                auto w = facePairWeight_.find(edgeCommon);
+                if (!w.good())
                 {
-                    facePairWeight_[edgeCommon] += edgeLength;
+                    facePairWeight_.insert(edgeCommon, -1.0);
+                    nFeat++;
+                }
+                else if (w() != -1.0)
+                {
+                    // Mark as feature edge
+                    w() = -1.0;
+                    nFeat++;
+                }
+            }
+            else
+            {
+                auto w = facePairWeight_.find(edgeCommon);
+                if (w)
+                {
+                    if (w() != -1.0)
+                    {
+                        w() += edgeLength;
+                    }
                 }
                 else
                 {
                     facePairWeight_.insert(edgeCommon, edgeLength);
                 }
-                // If the fine 'pair' faces was featured edge so it is
-                // the coarse 'pair'
-                if (fineFeaturedFaces.found(edgeCommon))
+            }
+        }
+        else
+        {
+            // Set edge as barrier by setting weight to -1
+            forAll(eFaces, j)
+            {
+                for (label k = j+1; k<eFaces.size(); k++)
                 {
-                    facePairWeight_[edgeCommon] = -1.0;
+                    facePairWeight_.insert
+                    (
+                        edge(eFaces[j], eFaces[k]),
+                        -1.0
+                    );
                 }
             }
-            else
+            nNonManif++;
+        }
+    }
+
+    if (debug)
+    {
+        Pout<< "Level:" << fineLevelIndex
+            << " nEdges:" << coarsePatch.nEdges() << " of which:" << nl
+            << "    boundary:" << coarsePatch.nBoundaryEdges() << nl
+            << "    non-manifold:" << nNonManif << nl
+            << "    feature (angle < " << featureAngle_ << "):" << nFeat << nl
+            << endl;
+    }
+}
+
+
+bool Foam::pairPatchAgglomeration::isSingleEdgeLoop
+(
+    const bPatch& patch,
+    const labelList& faceIDs,
+    const label facei
+) const
+{
+    // Does combining facei with faceIDs produce a valid single face?
+
+    labelList allFaces(faceIDs.size()+1);
+    SubList<label>(allFaces, faceIDs.size()) = faceIDs;
+    allFaces.last() = facei;
+
+    // Construct single face
+    const indirectPrimitivePatch upp
+    (
+        IndirectList<face>(patch, allFaces),
+        patch.points()
+    );
+
+    return (upp.edgeLoops().size() == 1);
+}
+
+
+Foam::label Foam::pairPatchAgglomeration::maxValidNeighbour
+(
+    const bool addToCluster,
+    const bPatch& patch,
+    const label facei,
+    const labelList& fineToCoarse
+    //const labelListList& coarseToFine
+) const
+{
+    // Return index of neighbour face with max edge weight. Either looks
+    // at clustered faces (addToCluster=true) or at unclustered faces
+
+    const auto& fFaces = patch.faceFaces()[facei];
+
+    label matchFaceNeibNo = -1;
+    scalar maxFaceWeight = -0.5;    // negative but larger than -1 (= feature)
+
+    if (addToCluster)
+    {
+        // Check faces to find grouped neighbour with largest face weight
+        // and that forms a single edge cut
+        for (const label faceNeig : fFaces)
+        {
+            const label coarsei = fineToCoarse[faceNeig];
+
+            if (coarsei >= 0)
             {
-                // Set edge as barrier by setting weight to -1
-                forAll(eFaces, j)
+                const edge edgeCommon = edge(facei, faceNeig);
+                const auto& weight = facePairWeight_[edgeCommon];
+                if
+                (
+                    (weight > maxFaceWeight)
+                 //&& (isSingleEdgeLoop(patch, coarseToFine[coarsei], facei))
+                )
                 {
-                    for (label k = j+1; k<eFaces.size(); k++)
-                    {
-                        facePairWeight_.insert
-                        (
-                            edge(eFaces[j], eFaces[k]),
-                            -1.0
-                        );
-                    }
+                    maxFaceWeight = weight;
+                    matchFaceNeibNo = faceNeig;
                 }
             }
         }
     }
+    else
+    {
+        // Check faces to find ungrouped neighbour with largest face weight
+        for (const label faceNeig : fFaces)
+        {
+            const label coarsei = fineToCoarse[faceNeig];
+
+            if (coarsei < 0)    // ungrouped
+            {
+                const edge edgeCommon = edge(facei, faceNeig);
+                const auto& weight = facePairWeight_[edgeCommon];
+                if (weight > maxFaceWeight)
+                {
+                    maxFaceWeight = weight;
+                    matchFaceNeibNo = faceNeig;
+                }
+            }
+        }
+    }
+
+    return matchFaceNeibNo;
 }
 
 
@@ -307,7 +450,8 @@ bool Foam::pairPatchAgglomeration::agglomeratePatch
 (
     const bPatch& patch,
     const labelList& fineToCoarse,
-    const label fineLevelIndex
+    const label fineLevelIndex,
+    label& nMarkedEdges
 )
 {
     if (min(fineToCoarse) == -1)
@@ -333,9 +477,12 @@ bool Foam::pairPatchAgglomeration::agglomeratePatch
     const label nCoarseI =  max(fineToCoarse) + 1;
     List<face> patchFaces(nCoarseI);
 
-
     // Patch faces per agglomeration
     labelListList coarseToFine(invertOneToMany(nCoarseI, fineToCoarse));
+
+    // Additional feature edges created
+    nMarkedEdges = 0;
+
 
     for (label coarseI = 0; coarseI < nCoarseI; coarseI++)
     {
@@ -350,23 +497,54 @@ bool Foam::pairPatchAgglomeration::agglomeratePatch
 
         if (upp.edgeLoops().size() != 1)
         {
-            if (fineFaces.size() == 2)
+            // More than one outside loop. Possible because pair-wise
+            // agglomeration has e.g. walked a path leaving a hole in the
+            // middle of a coarse face.
+            //  - mark as feature edges to avoid locally further agglomeration
+            //  - but further agglomeration might e.g. 'fill in the hole'
+            //  - or immediately leave all agglomeration
+            // Currently we have no choice but to leave agglomeration since
+            // we cannot store a face-with-hole.
+
+
+            //{
+            //    OBJstream os
+            //    (
+            //        "error_agglomeration_"+Foam::name(fineLevelIndex)+".obj"
+            //    );
+            //    Pout<< "Writing error patch at level:" << fineLevelIndex
+            //        << " to:" << os.name() << endl;
+            //    os.write(upp.localFaces(), upp.localPoints(), true);
+            //}
+
+            if (fineFaces.size() >= 2)
             {
-                const edge e(fineFaces[0], fineFaces[1]);
-                facePairWeight_[e] = -1.0;
+                forAll(fineFaces, j)
+                {
+                    for (label k = j+1; k<fineFaces.size(); k++)
+                    {
+                        const edge e(fineFaces[j], fineFaces[k]);
+
+                        auto w = facePairWeight_.find(e);
+                        if (!w.good())
+                        {
+                            facePairWeight_.insert(e, -1.0);
+                            nMarkedEdges++;
+                        }
+                        else if (w() != -1.0)
+                        {
+                            // Mark as feature edge
+                            w() = -1.0;
+                            nMarkedEdges++;
+                        }
+                    }
+                }
             }
-            else if (fineFaces.size() == 3)
-            {
-                const edge e(fineFaces[0], fineFaces[1]);
-                const edge e1(fineFaces[0], fineFaces[2]);
-                const edge e2(fineFaces[2], fineFaces[1]);
-                facePairWeight_[e] = -1.0;
-                facePairWeight_[e1] = -1.0;
-                facePairWeight_[e2] = -1.0;
-            }
+
             return false;
         }
 
+        // In-place override face
         patchFaces[coarseI] = face
         (
             renumber
@@ -398,6 +576,7 @@ void Foam::pairPatchAgglomeration::agglomerate()
 
     label nCoarseFaces = 0;
     label nCoarseFacesOld = 0;
+    label nMarkedEdges = 0;
 
     while (nCreatedLevels < maxLevels_)
     {
@@ -421,18 +600,28 @@ void Foam::pairPatchAgglomeration::agglomerate()
             {
                 // Attempt to create coarse face addressing
                 // - returns true if successful; otherwise resets edge weights
-                //   and assume try again...
+                //   and tries again...
                 createdLevel = agglomeratePatch
                 (
                     patch,
                     tfinalAgglom,
-                    nCreatedLevels
+                    nCreatedLevels,
+                    nMarkedEdges
                 );
             }
         }
 
         if (createdLevel)
         {
+            if (debug)
+            {
+                const auto& agglomPatch = patchLevels_[nCreatedLevels];
+                OBJstream os("agglomPatch"+Foam::name(nCreatedLevels)+".obj");
+                Pout<< "Writing new patch at level:" << nCreatedLevels
+                    << " to:" << os.name() << endl;
+                os.write(agglomPatch, agglomPatch.points(), true);
+            }
+
             restrictAddressing_.set(nCreatedLevels, tfinalAgglom);
 
             mapBaseToTopAgglom(nCreatedLevels);
@@ -455,7 +644,7 @@ void Foam::pairPatchAgglomeration::agglomerate()
 
         // Check to see if we need to continue agglomerating
         // - Note: performs parallel reductions
-        if (!continueAgglomerating(nCoarseFaces, nCoarseFacesOld))
+        if (!continueAgglomerating(nCoarseFaces, nCoarseFacesOld, nMarkedEdges))
         {
             break;
         }
@@ -480,81 +669,63 @@ Foam::tmp<Foam::labelField> Foam::pairPatchAgglomeration::agglomerateOneLevel
 
     const labelListList& faceFaces = patch.faceFaces();
 
+    //labelListList coarseToFine(nFineFaces);
     nCoarseFaces = 0;
 
     forAll(faceFaces, facei)
     {
-        const labelList& fFaces = faceFaces[facei];
-
         if (coarseCellMap[facei] < 0)
         {
-            label matchFaceNo = -1;
-            label matchFaceNeibNo = -1;
-            scalar maxFaceWeight = -GREAT;
+            const label matchFaceNeibNo = maxValidNeighbour
+            (
+                false,          // ungrouped neighbours only
+                patch,
+                facei,
+                coarseCellMap
+                //coarseToFine
+            );
 
-            // Check faces to find ungrouped neighbour with largest face weight
-            forAll(fFaces, i)
-            {
-                label faceNeig = fFaces[i];
-                const edge edgeCommon = edge(facei, faceNeig);
-                if
-                (
-                    facePairWeight_[edgeCommon] > maxFaceWeight
-                 && coarseCellMap[faceNeig] < 0
-                 && facePairWeight_[edgeCommon] != -1.0
-                )
-                {
-                    // Match found. Pick up all the necessary data
-                    matchFaceNo = facei;
-                    matchFaceNeibNo = faceNeig;
-                    maxFaceWeight = facePairWeight_[edgeCommon];
-                }
-            }
-
-            if (matchFaceNo >= 0)
+            if (matchFaceNeibNo >= 0)
             {
                 // Make a new group
-                coarseCellMap[matchFaceNo] = nCoarseFaces;
+                coarseCellMap[facei] = nCoarseFaces;
                 coarseCellMap[matchFaceNeibNo] = nCoarseFaces;
+                //coarseToFine[nCoarseFaces] =
+                //    labelList({facei, matchFaceNeibNo});
                 nCoarseFaces++;
             }
             else
             {
                 // No match. Find the best neighbouring cluster and
                 // put the cell there
-                label clusterMatchFaceNo = -1;
-                scalar clusterMaxFaceCoeff = -GREAT;
+                const label clusterMatchFaceNo = maxValidNeighbour
+                (
+                    true,          // grouped neighbours only
+                    patch,
+                    facei,
+                    coarseCellMap
+                    //coarseToFine
+                );
 
-                forAll(fFaces, i)
-                {
-                    label faceNeig = fFaces[i];
-                    const edge edgeCommon = edge(facei, faceNeig);
-                    if
-                    (
-                        facePairWeight_[edgeCommon] > clusterMaxFaceCoeff
-                     && facePairWeight_[edgeCommon] != -1.0
-                     && coarseCellMap[faceNeig] >= 0
-                    )
-                    {
-                        clusterMatchFaceNo = faceNeig;
-                        clusterMaxFaceCoeff = facePairWeight_[edgeCommon];
-                    }
-                }
-
-                if (clusterMatchFaceNo > 0)
+                if (clusterMatchFaceNo >= 0)
                 {
                     // Add the cell to the best cluster
-                    coarseCellMap[facei] = coarseCellMap[clusterMatchFaceNo];
+                    const label coarsei = coarseCellMap[clusterMatchFaceNo];
+                    coarseCellMap[facei] = coarsei;
+                    //coarseToFine[coarsei].append(facei);
                 }
                 else
                 {
                     // If not create single-cell "clusters" for each
                     coarseCellMap[facei] = nCoarseFaces;
+                    //coarseToFine[nCoarseFaces] = labelList({facei});
                     nCoarseFaces++;
                 }
             }
         }
     }
+
+    //coarseToFine.setSize(nCoarseFaces);
 
     // Check that all faces are part of clusters,
     for (label facei=0; facei<nFineFaces; facei++)

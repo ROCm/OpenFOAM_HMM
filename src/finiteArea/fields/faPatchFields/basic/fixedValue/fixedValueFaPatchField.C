@@ -45,10 +45,23 @@ Foam::fixedValueFaPatchField<Type>::fixedValueFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
+    const Type& value
 )
 :
-    faPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    faPatchField<Type>(p, iF, value)
+{}
+
+
+template<class Type>
+Foam::fixedValueFaPatchField<Type>::fixedValueFaPatchField
+(
+    const faPatch& p,
+    const DimensionedField<Type, areaMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
+)
+:
+    faPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
@@ -133,9 +146,8 @@ template<class Type>
 void Foam::fixedValueFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
-
 
 
 // ************************************************************************* //

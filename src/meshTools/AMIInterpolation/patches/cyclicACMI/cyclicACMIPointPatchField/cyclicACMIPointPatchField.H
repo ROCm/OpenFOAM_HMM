@@ -35,12 +35,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicACMIPointPatchField_H
-#define cyclicACMIPointPatchField_H
+#ifndef Foam_cyclicACMIPointPatchField_H
+#define Foam_cyclicACMIPointPatchField_H
 
 #include "coupledPointPatchField.H"
 #include "cyclicACMIPointPatch.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,7 +129,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         cyclicACMIPointPatchField
         (
             const cyclicACMIPointPatchField<Type>&,
@@ -189,11 +189,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return
-                   !(
-                        cyclicACMIPatch_.parallel()
-                     || pTraits<Type>::rank == 0
-                    );
+                return (pTraits<Type>::rank && !cyclicACMIPatch_.parallel());
             }
 
             //- Return face transformation tensor

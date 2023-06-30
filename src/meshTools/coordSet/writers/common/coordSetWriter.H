@@ -538,7 +538,8 @@ public:
 
     // Other
 
-        //- Return info proxy.
+        //- Return info proxy,
+        //- used to print information to a stream
         virtual InfoProxy<coordSetWriter> info() const
         {
             return *this;
@@ -548,7 +549,7 @@ public:
         friend Ostream& operator<<
         (
             Ostream& os,
-            const InfoProxy<coordSetWriter>& ip
+            const InfoProxy<coordSetWriter>& iproxy
         );
 
 

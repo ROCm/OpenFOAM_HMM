@@ -232,14 +232,13 @@ void Foam::regionToCell::shrinkRegions
                 if (selectedCell[celli])
                 {
                     selectedCell[celli] = false;
-                    nChanged++;
+                    ++nChanged;
                 }
             }
         }
     }
     Info<< "    Eroded "
-        << returnReduce(nChanged, sumOp<label>())
-        << " cells." << endl;
+        << returnReduce(nChanged, sumOp<label>()) << " cells." << endl;
 }
 
 
@@ -308,7 +307,7 @@ void Foam::regionToCell::erode
 
         // Select all cells using these points
 
-        label nChanged = 0;
+        // label nChanged = 0;
         forAll(boundaryPoint, pointi)
         {
             if (boundaryPoint[pointi])
@@ -320,7 +319,7 @@ void Foam::regionToCell::erode
                     if (!removeCell[celli])
                     {
                         removeCell[celli] = true;
-                        nChanged++;
+                        // ++nChanged;
                     }
                 }
             }

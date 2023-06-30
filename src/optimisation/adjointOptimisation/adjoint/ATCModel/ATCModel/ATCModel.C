@@ -101,8 +101,9 @@ ATCModel::ATCModel
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("limiter", dimless, 1.0),
-        zeroGradientFvPatchField<scalar>::typeName
+        scalar(1),
+        dimless,
+        fvPatchFieldBase::zeroGradientType()
     ),
     ATC_
     (
@@ -231,17 +232,18 @@ tmp<volScalarField> ATCModel::createLimiter
     (
         new volScalarField
         (
-           IOobject
-           (
-               "limiter",
-               mesh.time().timeName(),
-               mesh,
-               IOobject::NO_READ,
-               IOobject::NO_WRITE
-           ),
-           mesh,
-           dimensionedScalar("limiter", dimless, 1.0),
-           zeroGradientFvPatchField<scalar>::typeName
+            IOobject
+            (
+                "limiter",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            scalar(1),
+            dimless,
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     volScalarField& limiter = tlimiter.ref();

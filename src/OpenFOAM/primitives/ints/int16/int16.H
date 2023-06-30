@@ -27,7 +27,7 @@ Primitive
     int16_t
 
 Description
-    16bit signed integer. I/O is done via an int32.
+    16bit signed integer. I/O is done as an int32.
 
 SourceFiles
     int16.C
@@ -38,16 +38,15 @@ SourceFiles
 #define Foam_primitives_int16_H
 
 #include <cstdint>
+
+#include "direction.H"
+#include "pTraits.H"
 #include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class Istream;
-class Ostream;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

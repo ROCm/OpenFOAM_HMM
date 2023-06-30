@@ -84,10 +84,10 @@ int main(int argc, char *argv[])
     DynamicList<string> dynlst;
     dynlst.reserve(16);
 
-    dynlst.append("string1 with content");
-    dynlst.append("string2 other content");
-    dynlst.append("string3 more");
-    dynlst.append("string4 done");
+    dynlst.push_back("string1 with content");
+    dynlst.push_back("string2 other content");
+    dynlst.push_back("string3 more");
+    dynlst.push_back("string4 done");
 
     {
         CStringList inC(dynlst);
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
         dynlst.clear();
         for (int i=0; i<argc; ++i)
         {
-            dynlst.append(argv[i]);
+            dynlst.push_back(argv[i]);
         }
 
         Info<< "input: " << dynlst << endl;

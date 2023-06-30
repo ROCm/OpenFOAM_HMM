@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 
 #include "complex.H"
 #include "IOstreams.H"
+#include <sstream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -69,7 +70,11 @@ Foam::complex::complex(Istream& is)
 
 Foam::word Foam::name(const complex& c)
 {
-    return '(' + std::to_string(c.Re()) + ',' + std::to_string(c.Im()) + ')';
+    // Caution std::to_string(double) is locale sensitive!
+    std::ostringstream buf;
+    buf << '(' << c.real() << ',' << c.imag() << ')';
+
+    return word(buf.str(), false);  // Needs no stripping
 }
 
 

@@ -31,6 +31,14 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    makePatchFieldType(scalar, fan);
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<>
@@ -38,11 +46,8 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 {
     if (this->cyclicPatch().owner())
     {
-        const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>(phiName_);
-
-        const fvsPatchField<scalar>& phip =
-            patch().patchField<surfaceScalarField, scalar>(phi);
+        const auto& phip =
+            patch().lookupPatchField<surfaceScalarField>(phiName_);
 
         scalarField Un(max(phip/patch().magSf(), scalar(0)));
 
@@ -77,9 +82,9 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             }
         }
 
-        if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        if (phip.internalField().dimensions() == dimMass/dimTime)
         {
-            Un /= patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            Un /= patch().lookupPatchField<volScalarField>(rhoName_);
         }
 
         if (nonDimensional_)
@@ -102,14 +107,6 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 
         this->relax();
     }
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    makeTemplatePatchTypeField(scalar, fan);
 }
 
 

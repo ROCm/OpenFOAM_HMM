@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicFaePatchField_H
-#define cyclicFaePatchField_H
+#ifndef Foam_cyclicFaePatchField_H
+#define Foam_cyclicFaePatchField_H
 
 #include "coupledFaePatchField.H"
 #include "cyclicFaPatch.H"
@@ -85,7 +85,7 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const dictionary&
+            const dictionary& dict
         );
 
         //- Construct by mapping given cyclicFaePatchField onto a new patch

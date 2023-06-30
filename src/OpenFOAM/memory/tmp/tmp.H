@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,8 @@ Description
     and a shared_ptr without ref-counting and null deleter.
     This allows the tmp to double as a pointer management and an indirect
     pointer to externally allocated objects.
+    In contrast to std::shared_ptr, only a limited number of tmp items
+    will ever share a pointer.
 
 SourceFiles
     tmpI.H
@@ -73,6 +75,8 @@ class tmp
         enum refType
         {
             PTR,        //!< A managed pointer (ref-counted)
+            CACHE_PTR,  //!< A managed pointer (ref-counted), but immovable
+            REF_Types,  //!< Magic value (ptr: less-than, ref: greater than)
             CREF,       //!< A const reference to an object
             REF         //!< A non-const reference to an object
         };
@@ -86,9 +90,8 @@ class tmp
 
     // Private Member Functions
 
-        //- Increment the ref-count for a managed pointer
-        //- and check that it is not oversubscribed
-        inline void incrCount();
+        //- Fatal if ref-count of a managed pointer is oversubscribed
+        inline void checkUseCount() const;
 
 
 public:
@@ -116,6 +119,10 @@ public:
 
         //- Construct, taking ownership of the pointer.
         inline explicit tmp(T* p);
+
+        //- Construct, taking ownership of the pointer,
+        //- with specified protection against moving.
+        inline tmp(bool immovable, T* p);
 
         //- Implicit construct for a const reference to an object.
         inline constexpr tmp(const T& obj) noexcept;
@@ -166,6 +173,19 @@ public:
             return tmp<T>(new T(std::forward<Args>(args)...));
         }
 
+        //- Construct movable/immovable tmp with forwarding arguments
+        //  \param immovable create as non-movable pointer
+        //  \param args list of arguments with which an instance of T
+        //      will be constructed.
+        //
+        //  \note Similar to std::make_shared, but the overload for
+        //      array types is not disabled.
+        template<class... Args>
+        static tmp<T> NewImmovable(bool immovable, Args&&... args)
+        {
+            return tmp<T>(immovable, new T(std::forward<Args>(args)...));
+        }
+
         //- Construct tmp from derived type with forwarding arguments
         //  \param args list of arguments with which an instance of U
         //      will be constructed.
@@ -191,13 +211,13 @@ public:
         bool good() const noexcept { return bool(ptr_); }
 
         //- If the stored/referenced content is const
-        bool is_const() const noexcept { return (type_ == CREF); }
+        inline bool is_const() const noexcept;
 
         //- True if this is a managed pointer (not a reference)
-        bool is_pointer() const noexcept { return (type_ == PTR); }
+        inline bool is_pointer() const noexcept;
 
         //- True if this is a reference (not a pointer)
-        bool is_reference() const noexcept { return (type_ != PTR); }
+        inline bool is_reference() const noexcept;
 
         //- True if this is a non-null managed pointer with a unique ref-count
         inline bool movable() const noexcept;
@@ -239,8 +259,12 @@ public:
         //- Clear existing and transfer ownership.
         inline void reset(tmp<T>&& other) noexcept;
 
-        //- Delete managed temporary object and set to new given pointer
+        //- Delete managed temporary object and set to new given pointer.
         inline void reset(T* p = nullptr) noexcept;
+
+        //- Delete managed temporary object and set to new given pointer,
+        //- with specified protection against moving.
+        inline void reset(bool immovable, T* p) noexcept;
 
         //- Avoid inadvertent casting (to object or pointer)
         void reset(const autoPtr<T>&) = delete;
@@ -330,8 +354,10 @@ public:
         //- Identical to good(), or bool operator
         bool valid() const noexcept { return bool(ptr_); }
 
-        //- Identical to is_pointer()
-        bool isTmp() const noexcept { return type_ == PTR; }
+        //- Identical to is_pointer(). Prefer is_pointer() or movable().
+        //
+        //  \deprecated(2020-07) - prefer is_pointer() or movable()
+        bool isTmp() const noexcept { return is_pointer(); }
 
         //- Deprecated(2020-07) True if a null managed pointer
         //

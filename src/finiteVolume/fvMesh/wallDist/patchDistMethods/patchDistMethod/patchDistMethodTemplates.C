@@ -40,7 +40,7 @@ Foam::wordList Foam::patchDistMethod::patchTypes
     wordList yTypes
     (
         mesh.boundary().size(),
-        zeroGradientFvPatchField<Type>::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     for (const label patchi : patchIDs)

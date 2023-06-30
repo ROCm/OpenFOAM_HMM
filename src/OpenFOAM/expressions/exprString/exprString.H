@@ -43,7 +43,7 @@ SeeAlso
 #ifndef Foam_expressions_exprString_H
 #define Foam_expressions_exprString_H
 
-#include "string.H"
+#include "word.H"
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

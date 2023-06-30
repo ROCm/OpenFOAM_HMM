@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -84,14 +84,25 @@ Foam::label Foam::decompositionMethod::nDomains
     const word& regionName
 )
 {
-    const label nDomainsGlobal = decompDict.get<label>("numberOfSubdomains");
+    label nDomainsRegion = 0;
+    label nDomainsGlobal = UPstream::nProcs();
+
+    // Allow numberOfSubdomains to be optional in parallel, which allows
+    // for missing files on directories that have not yet been created.
+
+    decompDict.readEntry<label>
+    (
+        "numberOfSubdomains",
+        nDomainsGlobal,
+        keyType::REGEX,  // keyType::LITERAL?
+        (UPstream::parRun() ? IOobject::LAZY_READ : IOobject::MUST_READ)
+    );
 
     if (!regionName.empty())
     {
         const dictionary& regionDict =
             optionalRegionDict(decompDict, regionName);
 
-        label nDomainsRegion;
         if (regionDict.readIfPresent("numberOfSubdomains", nDomainsRegion))
         {
             if (nDomainsRegion >= 1 && nDomainsRegion <= nDomainsGlobal)
@@ -100,9 +111,9 @@ Foam::label Foam::decompositionMethod::nDomains
             }
 
             WarningInFunction
-                << "ignoring out of range numberOfSubdomains "
-                << nDomainsRegion << " for region " << regionName
-                << nl << nl
+                << "Ignoring region [" << regionName
+                << "] numberOfSubdomains: " << nDomainsRegion
+                << ", using global: " << nDomainsGlobal << nl
                 << endl;
         }
     }

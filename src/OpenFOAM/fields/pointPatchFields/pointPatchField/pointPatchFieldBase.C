@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ void Foam::pointPatchFieldBase::readDict(const dictionary& dict)
 
 const Foam::objectRegistry& Foam::pointPatchFieldBase::db() const
 {
-    return patch_.boundaryMesh().mesh()();
+    return patch_.boundaryMesh().mesh().thisDb();
 }
 
 

@@ -104,11 +104,8 @@ void Foam::fixedRhoFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvPatchField<scalar>& psip =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
-
-    const fvPatchField<scalar>& pp =
-        patch().lookupPatchField<volScalarField, scalar>(pName_);
+    const auto& psip = patch().lookupPatchField<volScalarField>(psiName_);
+    const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
 
     operator==(psip*pp);
 
@@ -118,11 +115,10 @@ void Foam::fixedRhoFvPatchScalarField::updateCoeffs()
 
 void Foam::fixedRhoFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
-
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

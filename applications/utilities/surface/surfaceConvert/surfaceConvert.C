@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,6 +144,7 @@ int main(int argc, char *argv[])
         "The output precision"
     );
     argList::addOptionCompat("precision", {"writePrecision", 1812});
+    argList::addVerboseOption();
 
     argList args(argc, argv);
 
@@ -160,6 +161,8 @@ int main(int argc, char *argv[])
 
     const auto importName = args.get<fileName>(1);
     const auto exportName = args.get<fileName>(2);
+
+    const int optVerbose  = args.verbose();
 
     if (importName == exportName)
     {
@@ -207,7 +210,7 @@ int main(int argc, char *argv[])
     if (args.found("clean"))
     {
         Info<< "Cleaning up surface" << endl;
-        surf.cleanup(true);
+        surf.cleanup(optVerbose);
 
         Info<< "After cleaning up surface:" << endl;
         surf.writeStats(Info);

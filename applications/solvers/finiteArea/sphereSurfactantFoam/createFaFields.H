@@ -47,6 +47,7 @@ forAll(Us, faceI)
     Us[faceI].z() =
         Uinf.value()*0.25*R[faceI].x()*R[faceI].z()/sqr(mag(R[faceI]));
 }
+Us.boundaryFieldRef().evaluateCoupled<coupledFaPatch>();
 
 Us -= aMesh.faceAreaNormals()*(aMesh.faceAreaNormals() & Us);
 

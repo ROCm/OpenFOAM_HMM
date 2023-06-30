@@ -42,7 +42,7 @@ SourceFiles
 #define Foam_polySurface_H
 
 #include "objectRegistry.H"
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 #include "meshedSurf.H"
 #include "polySurfaceFieldsFwd.H"
 
@@ -391,7 +391,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
 

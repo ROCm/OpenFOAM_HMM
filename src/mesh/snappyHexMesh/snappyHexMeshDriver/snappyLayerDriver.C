@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -843,7 +843,7 @@ void Foam::snappyLayerDriver::handleWarpedFaces
     {
         const face& f = pp[i];
         label faceI = pp.addressing()[i];
-        label patchI = patches.patchID()[faceI-mesh.nInternalFaces()];
+        label patchI = patches.patchID(faceI);
 
         // It is hard to calculate some length scale if not in relative
         // mode so disable this check.
@@ -1376,7 +1376,7 @@ void Foam::snappyLayerDriver::determineSidePatches
         {
             label patchi = edgePatchID[i];
             const auto fnd = wantedToAddedPatch.cfind(patchi);
-            if (fnd.found())
+            if (fnd.good())
             {
                 edgePatchID[i] = fnd.val();
             }
@@ -1968,7 +1968,7 @@ void Foam::snappyLayerDriver::getPatchDisplacement
 //                const label meshFacei = pp.addressing()[patchFacei];
 //                const label celli = mesh.faceOwner()[meshFacei];
 //                Map<labelList>::iterator faceFnd = cellToFaces.find(celli);
-//                if (faceFnd.found())
+//                if (faceFnd.good())
 //                {
 //                    labelList& faces = faceFnd();
 //                    faces.appendUniq(patchFacei);
@@ -2256,7 +2256,7 @@ Foam::label Foam::snappyLayerDriver::truncateDisplacement
         forAll(f, fp)
         {
             const auto fnd = meshPointMap.cfind(f[fp]);
-            if (fnd.found())
+            if (fnd.good())
             {
                 const label patchPointi = fnd.val();
 
@@ -2973,7 +2973,7 @@ Foam::List<Foam::labelPair> Foam::snappyLayerDriver::getBafflesOnAddedMesh
         label oldFacei = newToOldFaces[facei];
 
         const auto faceFnd = baffleSet.find(oldFacei);
-        if (faceFnd.found())
+        if (faceFnd.good())
         {
             label bafflei = faceFnd();
             labelPair& p = newBaffles[bafflei];
@@ -3246,8 +3246,8 @@ bool Foam::snappyLayerDriver::writeLayerData
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
-                    IOobject::AUTO_WRITE,
-                    false
+                    IOobject::NO_WRITE,
+                    IOobject::NO_REGISTER
                 ),
                 mesh,
                 dimensionedScalar(dimless, Zero),
@@ -3286,8 +3286,8 @@ bool Foam::snappyLayerDriver::writeLayerData
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
-                    IOobject::AUTO_WRITE,
-                    false
+                    IOobject::NO_WRITE,
+                    IOobject::NO_REGISTER
                 ),
                 mesh,
                 dimensionedScalar(dimless, Zero),
@@ -3314,8 +3314,8 @@ bool Foam::snappyLayerDriver::writeLayerData
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
-                    IOobject::AUTO_WRITE,
-                    false
+                    IOobject::NO_WRITE,
+                    IOobject::NO_REGISTER
                 ),
                 mesh,
                 dimensionedScalar(dimless, Zero),
@@ -3897,10 +3897,10 @@ Foam::snappyLayerDriver::makeMeshMover
                 << errorMsg.c_str() << nl << nl
                 << "Exiting dry-run" << nl << endl;
 
-            if (Pstream::parRun())
+            if (UPstream::parRun())
             {
                 Perr<< "\nFOAM parallel run exiting\n" << endl;
-                Pstream::exit(0);
+                UPstream::exit(0);
             }
             else
             {
@@ -4454,7 +4454,7 @@ void Foam::snappyLayerDriver::mapFaceZonePoints
         {
             const label oldFacei = map.faceMap()[facei];
             const auto iter = oldFaceToBaffle.find(oldFacei);
-            if (oldFacei != -1 && iter.found())
+            if (oldFacei != -1 && iter.good())
             {
                 const label bafflei = iter();
                 auto& newBaffle = newBaffles[bafflei];
@@ -4588,7 +4588,7 @@ void Foam::snappyLayerDriver::updatePatch
             const label oldMeshPointi =
                 map.pointMap()[newMeshPointi];
             const auto iter = baseMap.find(oldMeshPointi);
-            if (iter.found())
+            if (iter.good())
             {
                 newToOldPatchPoints[newPointi] = iter();
             }

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2019 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,36 +30,6 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-template<class Type, class LUType>
-class Amultiplier
-:
-    public LduInterfaceField<Type>::Amultiplier
-{
-    const Field<LUType>& A_;
-
-public:
-
-    Amultiplier(const Field<LUType>& A)
-    :
-        A_(A)
-    {}
-
-    virtual ~Amultiplier() = default;
-
-    virtual void addAmul(Field<Type>& Apsi, const Field<Type>& psi) const
-    {
-        Apsi += A_*psi;
-    }
-};
-
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type, class DType, class LUType>
 void Foam::LduMatrix<Type, DType, LUType>::Amul
 (
@@ -79,6 +49,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Amul
 
     const LUType* const __restrict__ upperPtr = upper().begin();
     const LUType* const __restrict__ lowerPtr = lower().begin();
+
+    const label startRequest = UPstream::nRequests();
 
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
@@ -109,7 +81,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Amul
         true,
         interfacesUpper_,
         psi,
-        Apsi
+        Apsi,
+        startRequest
     );
 
     tpsi.clear();
@@ -135,6 +108,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Tmul
 
     const LUType* const __restrict__ lowerPtr = lower().begin();
     const LUType* const __restrict__ upperPtr = upper().begin();
+
+    const label startRequest = UPstream::nRequests();
 
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
@@ -164,7 +139,8 @@ void Foam::LduMatrix<Type, DType, LUType>::Tmul
         true,
         interfacesLower_,
         psi,
-        Tpsi
+        Tpsi,
+        startRequest
     );
 
     tpsi.clear();
@@ -242,6 +218,8 @@ void Foam::LduMatrix<Type, DType, LUType>::residual
     // Note: there is a change of sign in the coupled
     // interface update to add the contibution to the r.h.s.
 
+    const label startRequest = UPstream::nRequests();
+
     // Initialise the update of interfaced interfaces
     initMatrixInterfaces
     (
@@ -271,7 +249,8 @@ void Foam::LduMatrix<Type, DType, LUType>::residual
         false,
         interfacesUpper_,
         psi,
-        rA
+        rA,
+        startRequest
     );
 }
 
@@ -282,7 +261,7 @@ Foam::tmp<Foam::Field<Type>> Foam::LduMatrix<Type, DType, LUType>::residual
     const Field<Type>& psi
 ) const
 {
-    tmp<Field<Type>> trA(new Field<Type>(psi.size()));
+    auto trA = tmp<Field<Type>>::New(psi.size());
     residual(trA.ref(), psi);
     return trA;
 }

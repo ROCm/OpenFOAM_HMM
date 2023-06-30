@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,14 +35,16 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define checkField(gf1, gf2, op)                                               \
-if ((gf1).mesh() != (gf2).mesh())                                              \
-{                                                                              \
-    FatalErrorInFunction                                                       \
-        << "different mesh for fields "                                        \
-        << (gf1).name() << " and " << (gf2).name()                             \
-        << " during operation " <<  op                                         \
-        << abort(FatalError);                                                  \
+// Check that both fields use the same mesh
+#undef  checkField
+#define checkField(fld1, fld2, op)                                  \
+if (&(fld1).mesh() != &(fld2).mesh())                               \
+{                                                                   \
+    FatalErrorInFunction                                            \
+        << "Different mesh for fields "                             \
+        << (fld1).name() << " and " << (fld2).name()                \
+        << " during operation " << op                               \
+        << abort(FatalError);                                       \
 }
 
 
@@ -85,7 +87,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields()
             this->db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         typeName
     );
@@ -193,18 +195,18 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, ds, false),
+    Internal(io, mesh, dims, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
     boundaryField_(mesh.boundary(), *this, patchFieldType)
 {
     DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
+        << "Creating" << nl << this->info() << endl;
 
     readIfPresent();
 }
@@ -215,19 +217,71 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const wordList& patchFieldTypes,
     const wordList& actualPatchTypes
 )
 :
-    Internal(io, mesh, ds, false),
+    Internal(io, mesh, dims, false),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
     boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
 {
     DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
+        << "Creating" << nl << this->info() << endl;
+
+    readIfPresent();
+}
+
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const Type& value,
+    const dimensionSet& dims,
+    const word& patchFieldType
+)
+:
+    Internal(io, mesh, value, dims, false),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(mesh.boundary(), *this, patchFieldType)
+{
+    DebugInFunction
+        << "Creating" << nl << this->info() << endl;
+
+    boundaryField_ == value;
+
+    readIfPresent();
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const Type& value,
+    const dimensionSet& dims,
+    const wordList& patchFieldTypes,
+    const wordList& actualPatchTypes
+)
+:
+    Internal(io, mesh, value, dims, false),
+    timeIndex_(this->time().timeIndex()),
+    field0Ptr_(nullptr),
+    fieldPrevIterPtr_(nullptr),
+    boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
+{
+    DebugInFunction
+        << "Creating" << nl << this->info() << endl;
+
+    boundaryField_ == value;
 
     readIfPresent();
 }
@@ -242,19 +296,15 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, dt, false),
-    timeIndex_(this->time().timeIndex()),
-    field0Ptr_(nullptr),
-    fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, patchFieldType)
-{
-    DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
-
-    boundaryField_ == dt.value();
-
-    readIfPresent();
-}
+    GeometricField<Type, PatchField, GeoMesh>
+    (
+        io,
+        mesh,
+        dt.value(),
+        dt.dimensions(),
+        patchFieldType
+    )
+{}
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -267,19 +317,16 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const wordList& actualPatchTypes
 )
 :
-    Internal(io, mesh, dt, false),
-    timeIndex_(this->time().timeIndex()),
-    field0Ptr_(nullptr),
-    fieldPrevIterPtr_(nullptr),
-    boundaryField_(mesh.boundary(), *this, patchFieldTypes, actualPatchTypes)
-{
-    DebugInFunction
-        << "Creating temporary" << nl << this->info() << endl;
-
-    boundaryField_ == dt.value();
-
-    readIfPresent();
-}
+    GeometricField<Type, PatchField, GeoMesh>
+    (
+        io,
+        mesh,
+        dt.value(),
+        dt.dimensions(),
+        patchFieldTypes,
+        actualPatchTypes
+    )
+{}
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -390,12 +437,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& iField,
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, ds, iField),
+    Internal(io, mesh, dims, iField),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -413,12 +460,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     Field<Type>&& iField,
     const word& patchFieldType
 )
 :
-    Internal(io, mesh, ds, std::move(iField)),
+    Internal(io, mesh, dims, std::move(iField)),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -436,12 +483,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& iField,
     const PtrList<PatchField<Type>>& ptfl
 )
 :
-    Internal(io, mesh, ds, iField),
+    Internal(io, mesh, dims, iField),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -459,12 +506,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     Field<Type>&& iField,
     const PtrList<PatchField<Type>>& ptfl
 )
 :
-    Internal(io, mesh, ds, std::move(iField)),
+    Internal(io, mesh, dims, std::move(iField)),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -482,12 +529,12 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const tmp<Field<Type>>& tfield,
     const PtrList<PatchField<Type>>& ptfl
 )
 :
-    Internal(io, mesh, ds, tfield),
+    Internal(io, mesh, dims, tfield),
     timeIndex_(this->time().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -1167,14 +1214,9 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
 Foam::GeometricField<Type, PatchField, GeoMesh>::T() const
 {
-    auto tresult = tmp<GeometricField<Type, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<Type, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            this->name() + ".T()",
-            this->instance(),
-            this->db()
-        ),
+        this->name() + ".T()",
         this->mesh(),
         this->dimensions()
     );
@@ -1201,14 +1243,9 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::component
     const direction d
 ) const
 {
-    auto tresult = tmp<GeometricField<cmptType, PatchField, GeoMesh>>::New
+    auto tresult = GeometricField<cmptType, PatchField, GeoMesh>::New
     (
-        IOobject
-        (
-            this->name() + ".component(" + Foam::name(d) + ')',
-            this->instance(),
-            this->db()
-        ),
+        this->name() + ".component(" + Foam::name(d) + ')',
         this->mesh(),
         this->dimensions()
     );
@@ -1250,60 +1287,88 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::replace
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::min
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_min
 (
-    const dimensioned<Type>& dt
+    const Type& lower
 )
 {
-    Foam::min(primitiveFieldRef(), primitiveField(), dt.value());
-    Foam::min(boundaryFieldRef(), boundaryField(), dt.value());
+    primitiveFieldRef().clamp_min(lower);
+    boundaryFieldRef().clamp_min(lower);
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::max
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_max
 (
-    const dimensioned<Type>& dt
+    const Type& upper
 )
 {
-    Foam::max(primitiveFieldRef(), primitiveField(), dt.value());
-    Foam::max(boundaryFieldRef(), boundaryField(), dt.value());
+    primitiveFieldRef().clamp_max(upper);
+    boundaryFieldRef().clamp_max(upper);
 }
 
 
 template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clip
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_min
+(
+    const dimensioned<Type>& lower
+)
+{
+    this->clamp_min(lower.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_max
+(
+    const dimensioned<Type>& upper
+)
+{
+    this->clamp_max(upper.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
+(
+    const Type& lower,
+    const Type& upper
+)
+{
+    primitiveFieldRef().clamp_range(lower, upper);
+    boundaryFieldRef().clamp_range(lower, upper);
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
+(
+    const MinMax<Type>& range
+)
+{
+    primitiveFieldRef().clamp_range(range.min(), range.max());
+    boundaryFieldRef().clamp_range(range.min(), range.max());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
+(
+    const dimensioned<Type>& lower,
+    const dimensioned<Type>& upper
+)
+{
+    this->clamp_range(lower.value(), upper.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::clamp_range
 (
     const dimensioned<MinMax<Type>>& range
 )
 {
-    Foam::clip(primitiveFieldRef(), primitiveField(), range.value());
-    Foam::clip(boundaryFieldRef(), boundaryField(), range.value());
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::clip
-(
-    const dimensioned<Type>& minVal,
-    const dimensioned<Type>& maxVal
-)
-{
-    MinMax<Type> range(minVal.value(), maxVal.value());
-
-    Foam::clip(primitiveFieldRef(), primitiveField(), range);
-    Foam::clip(boundaryFieldRef(), boundaryField(), range);
-}
-
-
-template<class Type, template<class> class PatchField, class GeoMesh>
-void Foam::GeometricField<Type, PatchField, GeoMesh>::maxMin
-(
-    const dimensioned<Type>& minVal,
-    const dimensioned<Type>& maxVal
-)
-{
-    this->clip(minVal, maxVal);
+    this->clamp_range(range.value());
 }
 
 

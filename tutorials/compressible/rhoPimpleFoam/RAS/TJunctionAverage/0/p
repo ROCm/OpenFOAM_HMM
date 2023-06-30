@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -40,19 +40,24 @@ boundaryField
 
     outlet1
     {
-        type            exprFixedValue;
+        type            uniformFixedValue;
         value           $internalField;
-        // debug           true;
-        // debug.scanner   true;
-        // debug.parser    true;
 
-        variables
-        (
-            "pInlet{inlet} = weightAverage(p)"
-            "pOutlet2{outlet2} = p"
-        );
+        uniformValue
+        {
+            type               expression;
+            // debug           true;
+            // debug.scanner   true;
+            // debug.parser    true;
 
-        valueExpr      "0.5*(pInlet + pOutlet2)";
+            variables
+            (
+                "pInlet{inlet} = weightAverage(p)"
+                "pOutlet2{outlet2} = p"
+            );
+
+            expression  "0.5*(pInlet + pOutlet2)";
+        }
     }
 
     outlet2

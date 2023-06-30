@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ inline void Foam::argList::readList(ITstream& is, List<T>& list)
     {
         // Single token - treat like List with one entry
         list.resize(1);
-        is >> list.first();
+        is >> list.front();
     }
     else
     {
@@ -177,7 +177,7 @@ Foam::argList::options() noexcept
 
 inline bool Foam::argList::found(const word& optName) const
 {
-    return options_.found(optName);
+    return options_.contains(optName);
 }
 
 
@@ -309,7 +309,7 @@ inline T Foam::argList::getOrDefault
     const T& deflt
 ) const
 {
-    if (found(optName))
+    if (options_.contains(optName))
     {
         return get<T>(optName);
     }
@@ -325,7 +325,7 @@ inline bool Foam::argList::readIfPresent
     T& val
 ) const
 {
-    if (found(optName))
+    if (options_.contains(optName))
     {
         val = get<T>(optName);
         return true;
@@ -376,7 +376,7 @@ inline Foam::List<T> Foam::argList::getList
 {
     List<T> list;
 
-    if (mandatory || found(optName))
+    if (mandatory || options_.contains(optName))
     {
         ITstream is(options_[optName]);
 
@@ -396,7 +396,7 @@ inline bool Foam::argList::readListIfPresent
     List<T>& list
 ) const
 {
-    if (found(optName))
+    if (options_.contains(optName))
     {
         ITstream is(options_[optName]);
 

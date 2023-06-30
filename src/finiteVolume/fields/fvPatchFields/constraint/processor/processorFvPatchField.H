@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorFvPatchField_H
-#define processorFvPatchField_H
+#ifndef Foam_processorFvPatchField_H
+#define Foam_processorFvPatchField_H
 
 #include "coupledFvPatchField.H"
 #include "processorLduInterfaceField.H"
@@ -69,30 +69,37 @@ class processorFvPatchField
     public processorLduInterfaceField,
     public coupledFvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the processor patch
         const processorFvPatch& procPatch_;
 
+
         // Sending and receiving
+
+            //- Current (non-blocking) send request
+            mutable label sendRequest_;
+
+            //- Current (non-blocking) recv request
+            mutable label recvRequest_;
 
             //- Send buffer.
             mutable Field<Type> sendBuf_;
 
             //- Receive buffer.
-            mutable Field<Type> receiveBuf_;
-
-            //- Outstanding request
-            mutable label outstandingSendRequest_;
-
-            //- Outstanding request
-            mutable label outstandingRecvRequest_;
+            mutable Field<Type> recvBuf_;
 
             //- Scalar send buffer
             mutable solveScalarField scalarSendBuf_;
 
-            //- Scalar receive buffer
-            mutable solveScalarField scalarReceiveBuf_;
+            //- Scalar recv buffer
+            mutable solveScalarField scalarRecvBuf_;
+
+
+    // Private Member Functions
+
+        //- Receive and send requests have both completed
+        virtual bool all_ready() const;
 
 
 public:
@@ -173,34 +180,34 @@ public:
 
     // Member Functions
 
-        // Access
+    // Coupling
 
-            //- Return true if running parallel
-            virtual bool coupled() const
-            {
-                return Pstream::parRun();
-            }
+        //- The patch field is coupled if running in parallel
+        virtual bool coupled() const { return UPstream::parRun(); }
 
-            //- Return neighbour field given internal field
-            virtual tmp<Field<Type>> patchNeighbourField() const;
+        //- Are all (receive) data available?
+        virtual bool ready() const;
+
+        //- Return neighbour field given internal field
+        virtual tmp<Field<Type>> patchNeighbourField() const;
 
 
-        // Evaluation functions
+    // Evaluation
 
-            //- Initialise the evaluation of the patch field
-            virtual void initEvaluate(const Pstream::commsTypes commsType);
+        //- Initialise the evaluation of the patch field
+        virtual void initEvaluate(const Pstream::commsTypes commsType);
 
-            //- Evaluate the patch field
-            virtual void evaluate(const Pstream::commsTypes commsType);
+        //- Evaluate the patch field
+        virtual void evaluate(const Pstream::commsTypes commsType);
 
-            //- Return patch-normal gradient
-            virtual tmp<Field<Type>> snGrad
-            (
-                const scalarField& deltaCoeffs
-            ) const;
+        //- Return patch-normal gradient
+        virtual tmp<Field<Type>> snGrad
+        (
+            const scalarField& deltaCoeffs
+        ) const;
 
-            //- Is all data available
-            virtual bool ready() const;
+
+        // Coupled interface functionality
 
             //- Initialise neighbour matrix update
             virtual void initInterfaceMatrixUpdate
@@ -251,47 +258,45 @@ public:
                 const scalarField& coeffs,
                 const Pstream::commsTypes commsType
             ) const;
-            
 
 
-        //- Processor coupled interface functions
+    // Processor coupled interface functions
 
-            //- Return communicator used for comms
-            virtual label comm() const
-            {
-                return procPatch_.comm();
-            }
+        //- Return communicator used for communication
+        virtual label comm() const
+        {
+            return procPatch_.comm();
+        }
 
-            //- Return processor number
-            virtual int myProcNo() const
-            {
-                return procPatch_.myProcNo();
-            }
+        //- Return processor number
+        virtual int myProcNo() const
+        {
+            return procPatch_.myProcNo();
+        }
 
-            //- Return neighbour processor number
-            virtual int neighbProcNo() const
-            {
-                return procPatch_.neighbProcNo();
-            }
+        //- Return neighbour processor number
+        virtual int neighbProcNo() const
+        {
+            return procPatch_.neighbProcNo();
+        }
 
-            //- Does the patch field perform the transformation
-            virtual bool doTransform() const
-            {
-                return !(procPatch_.parallel() || pTraits<Type>::rank == 0);
-            }
+        //- Does the patch field perform the transformation
+        virtual bool doTransform() const
+        {
+            return (pTraits<Type>::rank && !procPatch_.parallel());
+        }
 
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
-            {
-                return procPatch_.forwardT();
-            }
+        //- Return face transformation tensor
+        virtual const tensorField& forwardT() const
+        {
+            return procPatch_.forwardT();
+        }
 
-            //- Return rank of component for transform
-            virtual int rank() const
-            {
-                return pTraits<Type>::rank;
-            }
-
+        //- Return rank of component for transform
+        virtual int rank() const
+        {
+            return pTraits<Type>::rank;
+        }
 };
 
 

@@ -39,27 +39,28 @@ Description
     and the distance between face centres.
 
     The input from viewFactorsDict are:
-
+    \verbatim
         GaussQuadTol              0.1;      // GaussQuad  error
         distTol                   8;        // R/Average(rm)
         alpha                     0.22;     // Use for common edges for 2LI
+    \endverbatim
 
 
     For debugging purposes, the following entries can be set in viewFactorsDict:
-
+    \verbatim
         writeViewFactorMatrix     true;
         writeFacesAgglomeration   false;
-        dumpRays		          false;
-
+        dumpRays                  false;
 
         writeViewFactorMatrix   writes the sum of the VF on each face.
         writeFacesAgglomeration writes the agglomeration
         dumpRays                dumps rays
-
+    \endverbatim
 
     The participating patches in the VF calculation have to be in the
     'viewFactorWall' patch group (in the polyMesh/boundary file), e.g.
 
+    \verbatim
     floor
     {
         type            wall;
@@ -67,6 +68,7 @@ Description
         nFaces          100;
         startFace       3100;
     }
+    \endverbatim
 
     Compile with -DNO_CGAL only if no CGAL present - CGAL AABB tree performs
     better than the built-in octree.
@@ -480,7 +482,7 @@ int main(int argc, char *argv[])
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -824,7 +826,7 @@ int main(int argc, char *argv[])
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         nCoarseFaces
     );
@@ -1273,7 +1275,7 @@ int main(int argc, char *argv[])
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         std::move(globalFaceFaces)
     );

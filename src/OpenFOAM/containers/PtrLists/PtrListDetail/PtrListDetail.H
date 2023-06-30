@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,19 +89,51 @@ public:
 
     // Member Functions
 
-        //- Return the count of non-nullptr entries
-        label count() const;
+        //- Return const pointer to element or nullptr for out-of-range access.
+        inline const T* get(const label i) const;
 
-        //- Locate the first null entry, -1 if there are none (or empty list)
-        label findNull() const;
+        //- Return pointer to element or nullptr for out-of-range access.
+        inline T* get(const label i);
+
+        //- Return the number of non-null entries
+        label count() const noexcept;
 
         //- FatalError if any null exists in the list
         inline void checkNonNull() const;
 
-        //- Assign all pointers to nullptr, without deleting.
+        //- Locate the first entry that is non-null.
+        //  \return the location or -1 if there are no bits set.
+        //
+        //  \note Method name as per bitSet
+        label find_first() const;
+
+        //- Locate the first entry that is null, -1 if there are none (or empty list)
+        //  \return the location or -1 if the list is empty or all entries
+        //  are non-null.
+        //
+        //  \note Method name as per bitSet, symmetry with find_first()
+        label find_first_not() const;
+
+        //- Locate the next non-null entry, starting one beyond the specified
+        //- position
+        //  \return the location or -1 if remaining entries are null.
+        //
+        //  \note Method name as per bitSet
+        label find_next(label pos) const;
+
+        //- Locate the next null entry, starting one beyond the specified
+        //- position
+        //  \return the location or -1 if remaining entries are non-null.
+        //
+        //  \note Method name as per bitSet
+        label find_next_not(label pos) const;
+
+        //- Reassign all pointers to nullptr, without deleting.
+        //- Does not affect the list size.
         void setNull();
 
-        //- Delete the allocated entries, but retain the list size.
+        //- Delete allocated entries and reassign to nullptr.
+        //- Does not affect the list size.
         void free();
 
         //- Make a copy by cloning each of the list pointers.
@@ -139,6 +171,7 @@ public:
         // Too fragile or dangerous
         void resize_nocopy(const label) = delete;
 };
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,7 +179,8 @@ Foam::label Foam::snappyRefineDriver::featureEdgeRefine
                     decomposer_,
                     distributor_,
                     cellsToRefine,
-                    refineParams.maxLoadUnbalance()
+                    refineParams.maxLoadUnbalance(),
+                    refineParams.maxCellUnbalance()
                 );
             }
             else
@@ -190,7 +191,8 @@ Foam::label Foam::snappyRefineDriver::featureEdgeRefine
                     decomposer_,
                     distributor_,
                     cellsToRefine,
-                    refineParams.maxLoadUnbalance()
+                    refineParams.maxLoadUnbalance(),
+                    refineParams.maxCellUnbalance()
                 );
             }
         }
@@ -313,7 +315,8 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
         else
@@ -324,7 +327,8 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
     }
@@ -490,7 +494,8 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
         else
@@ -501,7 +506,8 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
     }
@@ -742,7 +748,8 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
         else
@@ -753,7 +760,8 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
     }
@@ -967,7 +975,8 @@ Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
         else
@@ -978,7 +987,8 @@ Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
     }
@@ -1029,23 +1039,14 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
 
             forAll(cells, celli)
             {
-                const cell& cFaces = cells[celli];
-
                 label nIntFaces = 0;
-                forAll(cFaces, i)
+                for (const label meshFacei : cells[celli])
                 {
-                    label bFacei = cFaces[i]-mesh.nInternalFaces();
-                    if (bFacei < 0)
+                    const label patchi = pbm.patchID(meshFacei);
+
+                    if (patchi < 0 || pbm[patchi].coupled())
                     {
-                        nIntFaces++;
-                    }
-                    else
-                    {
-                        label patchi = pbm.patchID()[bFacei];
-                        if (pbm[patchi].coupled())
-                        {
-                            nIntFaces++;
-                        }
+                        ++nIntFaces;
                     }
                 }
 
@@ -1099,6 +1100,22 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
         {
             Info<< "Stopping refining since too few cells selected."
                 << nl << endl;
+
+            if (refineParams.balanceAtEnd())
+            {
+                Info<< "Final mesh balancing" << endl;
+
+                meshRefiner_.balance
+                (
+                    "",
+                    decomposer_,
+                    distributor_,
+                    cellsToRefine,
+                    0,
+                    -1
+                );
+            }
+
             break;
         }
 
@@ -1117,7 +1134,8 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
         else
@@ -1128,7 +1146,8 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
     }
@@ -1462,7 +1481,8 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                     decomposer_,
                     distributor_,
                     cellsToRefine,
-                    refineParams.maxLoadUnbalance()
+                    refineParams.maxLoadUnbalance(),
+                    refineParams.maxCellUnbalance()
                 );
             }
             else
@@ -1473,7 +1493,8 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                     decomposer_,
                     distributor_,
                     cellsToRefine,
-                    refineParams.maxLoadUnbalance()
+                    refineParams.maxLoadUnbalance(),
+                    refineParams.maxCellUnbalance()
                 );
             }
         }
@@ -1710,7 +1731,8 @@ Foam::label Foam::snappyRefineDriver::boundaryRefinementInterfaceRefine
                     decomposer_,
                     distributor_,
                     cellsToRefine,
-                    refineParams.maxLoadUnbalance()
+                    refineParams.maxLoadUnbalance(),
+                    refineParams.maxCellUnbalance()
                 );
             }
             else
@@ -1721,7 +1743,8 @@ Foam::label Foam::snappyRefineDriver::boundaryRefinementInterfaceRefine
                     decomposer_,
                     distributor_,
                     cellsToRefine,
-                    refineParams.maxLoadUnbalance()
+                    refineParams.maxLoadUnbalance(),
+                    refineParams.maxCellUnbalance()
                 );
             }
         }
@@ -1970,7 +1993,8 @@ Foam::label Foam::snappyRefineDriver::shellRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
         else
@@ -1981,7 +2005,8 @@ Foam::label Foam::snappyRefineDriver::shellRefine
                 decomposer_,
                 distributor_,
                 cellsToRefine,
-                refineParams.maxLoadUnbalance()
+                refineParams.maxLoadUnbalance(),
+                refineParams.maxCellUnbalance()
             );
         }
     }

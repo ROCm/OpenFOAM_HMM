@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef memoryStreamBuffer_H
-#define memoryStreamBuffer_H
+#ifndef Foam_memoryStreamBuffer_H
+#define Foam_memoryStreamBuffer_H
 
 #include "UList.H"
 #include <type_traits>
@@ -43,9 +43,6 @@ Description
 
 namespace Foam
 {
-
-// Forward Declarations
-class Ostream;
 
 /*---------------------------------------------------------------------------*\
                           Class memorybuf Declaration

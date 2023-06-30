@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,11 +79,11 @@ void Foam::fileFormats::ensightMeshReader::readVerts
         is.read(verti);
         //if (nodeIdToPoints.size())
         //{
-        //    verts.append(nodeIdToPoints[verti]);
+        //    verts.push_back(nodeIdToPoints[verti]);
         //}
         //else
         {
-            verts.append(verti-1);
+            verts.push_back(verti-1);
         }
     }
 }
@@ -672,29 +672,16 @@ bool Foam::fileFormats::ensightMeshReader::readGeometry
             bool finished = false;
             do
             {
-                label partIndex;
-                is.read(partIndex);
-                partIDs.append(partIndex);
-
                 // Make space
-                partNames.setSize(partIDs.size());
-                partPoints.append(new pointField(0));
-                partNodeIDs.append(new labelList(0));
-                partPointIDs.append(new Map<label>());
+                partIDs.emplace_back();
+                is.read(partIDs.back());
 
-                partCells.append(new faceListList(0));
-                partCellIDs.append(new labelList(0));
-                partCellElemIDs.append(new Map<label>());
-
-                partFaces.append(new faceList(0));
-                partFaceIDs.append(new labelList(0));
-                partFaceElemIDs.append(new Map<label>());
-
-                is.read(partNames.last());
+                partNames.emplace_back();
+                is.read(partNames.back());
 
                 Pout<< indent
-                    << "Reading part " << partIndex
-                    << " name " << partNames.last()
+                    << "Reading part " << partIDs.back()
+                    << " name " << partNames.back()
                     << " starting at line " << is.lineNumber()
                     << " position " << is.stdStream().tellg() << endl;
 
@@ -705,27 +692,27 @@ bool Foam::fileFormats::ensightMeshReader::readGeometry
                     read_node_ids,
                     read_elem_ids,
 
-                    partPoints.last(),
-                    partNodeIDs.last(),
-                    partPointIDs.last(),
+                    partPoints.emplace_back(),
+                    partNodeIDs.emplace_back(),
+                    partPointIDs.emplace_back(),
 
                     // Cells (cell-to-faces)
-                    partCells.last(),
-                    partCellIDs.last(),
-                    partCellElemIDs.last(),
+                    partCells.emplace_back(),
+                    partCellIDs.emplace_back(),
+                    partCellElemIDs.emplace_back(),
 
                     // Faces
-                    partFaces.last(),
-                    partFaceIDs.last(),
-                    partFaceElemIDs.last()
+                    partFaces.emplace_back(),
+                    partFaceIDs.emplace_back(),
+                    partFaceElemIDs.emplace_back()
                 );
 
-                partPoints.last() *= scaleFactor;
+                partPoints.back() *= scaleFactor;
 
                 Pout<< indent
-                    << "For part " << partIndex
-                    << " read cells " << partCells.last().size()
-                    << " faces " << partFaces.last().size()
+                    << "For part " << partIDs.back()
+                    << " read cells " << partCells.back().size()
+                    << " faces " << partFaces.back().size()
                     << endl;
 
                 Pout<< decrIndent;
@@ -952,7 +939,7 @@ bool Foam::fileFormats::ensightMeshReader::readGeometry
     // - but instead pass in ordered faces (lowest numbered vertex first)
     HashTable<cellFaceIdentifier, face, face::symmHasher> vertsToCell
     (
-        2*cellOffsets.last()
+        2*cellOffsets.back()
     );
 
     // Insert cell's faces into hashtable
@@ -1064,24 +1051,24 @@ bool Foam::fileFormats::ensightMeshReader::readGeometry
     if (vertsToCell.size())
     {
         // Unused internal or boundary faces
-        boundaryIds_.append(List<cellFaceIdentifier>(0));
+        boundaryIds_.emplace_back(vertsToCell.size());
         {
-            auto& cellAndFaces = boundaryIds_.last();
-            cellAndFaces.setSize(vertsToCell.size());
+            auto& cellAndFaces = boundaryIds_.back();
             label i = 0;
-            for (const auto& e : vertsToCell)
+            forAllConstIters(vertsToCell, iter)
             {
-                cellAndFaces[i++] = e;
+                cellAndFaces[i++] = iter.val();
             }
         }
-        patchTypes_.append("empty");
-        patchNames_.append("defaultFaces");
-        patchPhysicalTypes_.append("empty");
-        patchStarts_.append(0);
-        patchSizes_.append(0);
+
+        patchTypes_.push_back("empty");
+        patchNames_.push_back("defaultFaces");
+        patchPhysicalTypes_.push_back("empty");
+        patchStarts_.push_back(0);
+        patchSizes_.push_back(0);
 
         Pout<< "Introducing default patch " << patchNames_.size()-1
-            << " name " << patchNames_.last() << endl;
+            << " name " << patchNames_.back() << endl;
     }
 
     return true;

@@ -78,22 +78,15 @@ Foam::outletPhaseMeanVelocityFvPatchVectorField
     Umean_(dict.get<scalar>("Umean")),
     alphaName_(dict.lookup("alpha"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
     refValue() = Zero;
     refGrad() = Zero;
-    valueFraction() = 0.0;
+    valueFraction() = 0;
 
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fvPatchVectorField::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchVectorField::operator=(patchInternalField());
+        this->extrapolateInternal();
     }
 }
 
@@ -132,8 +125,10 @@ void Foam::outletPhaseMeanVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    scalarField alphap =
-        patch().lookupPatchField<volScalarField, scalar>(alphaName_);
+    scalarField alphap
+    (
+        patch().lookupPatchField<volScalarField>(alphaName_)
+    );
 
     alphap = max(alphap, scalar(0));
     alphap = min(alphap, scalar(1));
@@ -172,7 +167,7 @@ void Foam::outletPhaseMeanVelocityFvPatchVectorField::write
 
     os.writeEntry("Umean", Umean_);
     os.writeEntry("alpha", alphaName_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

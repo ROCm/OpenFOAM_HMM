@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::faceIOList
-
-Description
-    IOList of faces
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceIOList_H
-#define faceIOList_H
+#ifndef Foam_faceIOList_H
+#define Foam_faceIOList_H
 
 #include "face.H"
 #include "CompactIOList.H"
@@ -41,7 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of face
     typedef IOList<face> faceIOList;
+
+    //! Compact IO for a List of face
     typedef CompactIOList<face, label> faceCompactIOList;
 }
 

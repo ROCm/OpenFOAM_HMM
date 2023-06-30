@@ -1,4 +1,17 @@
 #------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | www.openfoam.com
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+#     Copyright (C) 2011-2016 OpenFOAM Foundation
+#     Copyright (C) 2017-2023 OpenCFD Ltd.
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
+#
+#------------------------------------------------------------------------------
 # Script
 #     doxyFilter.sed
 #
@@ -113,6 +126,13 @@ s/^    //
 /^Usage *$/,/^[^ ]/{
 /^Usage/c\
 \\par Usage
+s/^    //
+}
+
+
+/^Environment *$/,/^[^ ]/{
+/^Environment/c\
+\\par Environment
 s/^    //
 }
 

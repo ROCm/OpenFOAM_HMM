@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dummyAgglomeration_H
-#define dummyAgglomeration_H
+#ifndef Foam_dummyAgglomeration_H
+#define Foam_dummyAgglomeration_H
 
 #include "GAMGAgglomeration.H"
 
@@ -52,7 +52,7 @@ class dummyAgglomeration
 :
     public GAMGAgglomeration
 {
-    // Private data
+    // Private Data
 
         //- Preset number of levels
         label nLevels_;
@@ -81,6 +81,20 @@ public:
             const lduMesh& mesh,
             const dictionary& controlDict
         );
+
+        //- Agglomerate from a starting level. Starting level is usually 0
+        //- (initial mesh) but sometimes >0 (restarting after processor
+        //- agglomeration)
+        virtual void agglomerate
+        (
+            const label nCellsInCoarsestLevel,
+            const label startLevel,
+            const scalarField& startFaceWeights,
+            const bool doProcessorAgglomerate = true
+        )
+        {
+            NotImplemented;
+        }
 };
 
 

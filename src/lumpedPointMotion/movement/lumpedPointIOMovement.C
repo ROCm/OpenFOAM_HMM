@@ -64,7 +64,7 @@ Foam::lumpedPointIOMovement::New
             obr,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            true // register object
+            IOobject::REGISTER
         ),
         ownerId  // tag this patch as owner too
     );

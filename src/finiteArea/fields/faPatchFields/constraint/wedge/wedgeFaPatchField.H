@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef wedgeFaPatchField_H
-#define wedgeFaPatchField_H
+#ifndef Foam_wedgeFaPatchField_H
+#define Foam_wedgeFaPatchField_H
 
 #include "transformFaPatchField.H"
 #include "wedgeFaPatch.H"
@@ -58,7 +58,6 @@ class wedgeFaPatchField
 :
     public transformFaPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -75,6 +74,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: NO_READ
         wedgeFaPatchField
         (
             const faPatch&,

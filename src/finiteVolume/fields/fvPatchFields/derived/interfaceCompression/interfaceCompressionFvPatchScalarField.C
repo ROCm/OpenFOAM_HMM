@@ -110,8 +110,8 @@ void Foam::interfaceCompressionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::write(os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

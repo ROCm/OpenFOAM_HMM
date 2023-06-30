@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,8 +50,7 @@ Description
 #include "turbulentTransportModel.H"
 #include "turbulentFluidThermoModel.H"
 #include "wallDist.H"
-#include "processorFvPatchField.H"
-#include "zeroGradientFvPatchField.H"
+#include "processorFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,35 +60,11 @@ static const scalar kappa(0.41);
 
 
 template<class Type>
-void correctProcessorPatches
-(
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
+void correctProcessorPatches(GeometricField<Type, fvPatchField, volMesh>& fld)
 {
-    if (!Pstream::parRun())
+    if (UPstream::parRun())
     {
-        return;
-    }
-
-    // Not possible to use correctBoundaryConditions on fields as they may
-    // use local info as opposed to the constraint values employed here,
-    // but still need to update processor patches
-    auto& bf = vf.boundaryFieldRef();
-
-    forAll(bf, patchi)
-    {
-        if (isA<processorFvPatchField<Type>>(bf[patchi]))
-        {
-            bf[patchi].initEvaluate();
-        }
-    }
-
-    forAll(bf, patchi)
-    {
-        if (isA<processorFvPatchField<Type>>(bf[patchi]))
-        {
-            bf[patchi].evaluate();
-        }
+        fld.boundaryFieldRef().template evaluateCoupled<processorFvPatch>();
     }
 }
 
@@ -109,7 +84,7 @@ void blendField
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (fieldHeader.typeHeaderOk<volScalarField>(true))
@@ -117,13 +92,13 @@ void blendField
         volScalarField fld(fieldHeader, mesh);
         scalarField& pf = fld.primitiveFieldRef();
         pf = (1 - mask)*pf + mask*boundaryLayerField;
-        fld.max(SMALL);
+        fld.clamp_min(SMALL);
 
+        // Correct the processor patches only.
         // Do not correct BC
         // - operation may use inconsistent fields wrt these local
         //   manipulations
-        //fld.correctBoundaryConditions();
-        correctProcessorPatches<scalar>(fld);
+        correctProcessorPatches(fld);
 
         Info<< "Writing " << fieldName << nl << endl;
         fld.write();
@@ -147,7 +122,7 @@ void calcOmegaField
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (omegaHeader.typeHeaderOk<volScalarField>(true))
@@ -156,13 +131,13 @@ void calcOmegaField
         scalarField& pf = omega.primitiveFieldRef();
 
         pf = (1 - mask)*pf + mask*epsilonBL/(Cmu*kBL + SMALL);
-        omega.max(SMALL);
+        omega.clamp_min(SMALL);
 
+        // Correct the processor patches only.
         // Do not correct BC
         // - operation may use inconsistent fields wrt these local
         //   manipulations
-        // omega.correctBoundaryConditions();
-        correctProcessorPatches<scalar>(omega);
+        correctProcessorPatches(omega);
 
         Info<< "Writing omega\n" << endl;
         omega.write();
@@ -184,7 +159,7 @@ void setField
         mesh,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (fldHeader.typeHeaderOk<volScalarField>(true))
@@ -192,11 +167,11 @@ void setField
         volScalarField fld(fldHeader, mesh);
         fld = value;
 
+        // Correct the processor patches only.
         // Do not correct BC
         // - operation may use inconsistent fields wrt these local
         //   manipulations
-        // fld.correctBoundaryConditions();
-        correctProcessorPatches<scalar>(fld);
+        correctProcessorPatches(fld);
 
         Info<< "Writing " << fieldName << nl << endl;
         fld.write();
@@ -343,7 +318,7 @@ int main(int argc, char *argv[])
         }
     }
     mask.correctBoundaryConditions();
-    correctProcessorPatches<vector>(U);
+    correctProcessorPatches(U);
 
     if (writeTurbulenceFields)
     {
@@ -351,12 +326,12 @@ int main(int argc, char *argv[])
         volScalarField nut(calcNut(mesh, U));
 
         // Blend nut using boundary layer profile
-        volScalarField S("S", mag(dev(symm(fvc::grad(U)))));
+        volScalarField S("S", mag(devSymm(fvc::grad(U))));
         nut = (1 - mask)*nut + mask*sqr(kappa*min(y, ybl))*::sqrt(2)*S;
 
         // Do not correct BC - wall functions will 'undo' manipulation above
         // by using nut from turbulence model
-        correctProcessorPatches<scalar>(nut);
+        correctProcessorPatches(nut);
 
         Info<< "Writing nut\n" << endl;
         nut.write();

@@ -42,8 +42,8 @@ Foam::wallHeatTransferFvPatchScalarField::wallHeatTransferFvPatchScalarField
     Tinf_(p.size(), Zero),
     alphaWall_(p.size(), Zero)
 {
-    refValue() = 0.0;
-    refGrad() = 0.0;
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 0.0;
 }
 
@@ -74,17 +74,10 @@ Foam::wallHeatTransferFvPatchScalarField::wallHeatTransferFvPatchScalarField
     alphaWall_("alphaWall", dict, p.size())
 {
     refValue() = Tinf_;
-    refGrad() = 0.0;
+    refGrad() = Zero;
     valueFraction() = 0.0;
 
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         evaluate();
     }
@@ -175,10 +168,10 @@ void Foam::wallHeatTransferFvPatchScalarField::updateCoeffs()
 
 void Foam::wallHeatTransferFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     Tinf_.writeEntry("Tinf", os);
     alphaWall_.writeEntry("alphaWall", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

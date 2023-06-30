@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,48 +29,35 @@ License
 #include "data.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-int Foam::data::debug(Foam::debug::debugSwitch("data", 0));
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::data::data(const objectRegistry& obr)
+Foam::data::data
+(
+    const word& name,
+    const objectRegistry& obr,
+    const dictionary* content
+)
 :
     IOdictionary
     (
         IOobject
         (
-            "data",
+            name,
             obr.time().system(),
             obr,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    prevTimeIndex_(0)
-{
-    set("solverPerformance", dictionary());
-}
-
-
-Foam::data::data(const objectRegistry& obr, const dictionary& dict)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            "data",
-            obr.time().system(),
-            obr,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         ),
-        dict
+        content
     ),
-    prevTimeIndex_(0)
-{}
+    prevTimeIndex_(-1)
+{
+    if (content == nullptr || !findDict("solverPerformance", keyType::LITERAL))
+    {
+        set("solverPerformance", dictionary());
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

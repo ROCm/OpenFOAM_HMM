@@ -340,9 +340,9 @@ Foam::tensor Foam::eigenVectors(const symmTensor& T)
 
 Foam::symmTensor Foam::pinv(const symmTensor& st)
 {
-    const scalar dt = det(st);
+    const scalar detval = st.det();
 
-    if (dt < ROOTVSMALL)
+    if (detval < ROOTVSMALL)
     {
         // Fall back to pseudo inverse
         scalarRectangularMatrix mat(3, 3);
@@ -361,7 +361,7 @@ Foam::symmTensor Foam::pinv(const symmTensor& st)
         );
     }
 
-    return inv(st, dt);
+    return Foam::inv(st, detval);
 }
 
 

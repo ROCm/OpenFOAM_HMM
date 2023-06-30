@@ -134,12 +134,9 @@ Foam::List<Foam::word> Foam::PtrListOps::names
     {
         const T* ptr = list.get(i);
 
-        if (bool(ptr))
+        if (bool(ptr) && matcher(ptr->name()))
         {
-            if (matcher(ptr->name()))
-            {
-                output[count++] = (ptr->name());
-            }
+            output[count++] = (ptr->name());
         }
     }
 

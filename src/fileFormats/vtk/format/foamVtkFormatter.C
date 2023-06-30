@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ Foam::vtk::formatter& Foam::vtk::formatter::closeTag(const bool isEmpty)
         if (isEmpty)
         {
             // Eg, <tag ... />
-            xmlTags_.remove();
+            xmlTags_.pop_back();
             os_ << " /";
         }
         os_ << '>' << nl;
@@ -124,7 +124,8 @@ Foam::vtk::formatter& Foam::vtk::formatter::closeTag(const bool isEmpty)
 
 Foam::vtk::formatter& Foam::vtk::formatter::endTag(const word& tagName)
 {
-    const word curr(xmlTags_.remove());
+    const word curr(std::move(xmlTags_.back()));
+    xmlTags_.pop_back();
     indent();
 
     if (inTag_)

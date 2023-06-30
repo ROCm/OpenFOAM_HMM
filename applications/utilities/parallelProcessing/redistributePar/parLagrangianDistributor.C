@@ -146,7 +146,6 @@ Foam::parLagrangianDistributor::distributeLagrangianPositions
 
     labelListList subMap;
 
-
     // Allocate transfer buffers
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
@@ -283,32 +282,23 @@ Foam::parLagrangianDistributor::distributeLagrangianPositions
         lpi.rename(cloudName);
     }
 
-    // Work the send indices (subMap) into a mapDistributeBase
-    labelListList sizes(Pstream::nProcs());
-    labelList& nsTransPs = sizes[Pstream::myProcNo()];
-    nsTransPs.setSize(Pstream::nProcs());
-    forAll(subMap, sendProcI)
-    {
-        nsTransPs[sendProcI] = subMap[sendProcI].size();
-    }
-    // Send sizes across. Note: blocks.
-    Pstream::combineReduce(sizes, Pstream::listEq());
+    // Until now (FEB-2023) we have always used processor ordering for the
+    // construct map (whereas mapDistribute has local transfers first),
+    // so we'll stick with that for now, but can likely just use the subMap
+    // directly with mapDistribute and have it determine the constructMap.
 
-    labelListList constructMap(Pstream::nProcs());
+    labelList recvSizes;
+    Pstream::exchangeSizes(subMap, recvSizes);
+
     label constructSize = 0;
-    forAll(constructMap, procI)
+    labelListList constructMap(Pstream::nProcs());
+
+    forAll(constructMap, proci)
     {
-        const label nRecv = sizes[procI][UPstream::myProcNo()];
-
-        labelList& map = constructMap[procI];
-
-        map.setSize(nRecv);
-        forAll(map, i)
-        {
-            map[i] = constructSize++;
-        }
+        const label len = recvSizes[proci];
+        constructMap[proci] = identity(len, constructSize);
+        constructSize += len;
     }
-
 
     return autoPtr<mapDistributeBase>::New
     (

@@ -46,11 +46,11 @@ static const char* headerTypeCompat = "IOPtrList<coordinateSystem>";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::coordinateSystems::readFromStream(const bool valid)
+void Foam::coordinateSystems::readFromStream(const bool readOnProc)
 {
-    Istream& is = readStream(word::null, valid);
+    Istream& is = readStream(word::null, readOnProc);
 
-    if (valid)
+    if (readOnProc)
     {
         if (headerClassName() == typeName)
         {
@@ -308,14 +308,14 @@ bool Foam::coordinateSystems::writeData(Ostream& os) const
 bool Foam::coordinateSystems::writeObject
 (
     IOstreamOption,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Force ASCII, uncompressed
     return regIOobject::writeObject
     (
         IOstreamOption(IOstreamOption::ASCII),
-        valid
+        writeOnProc
     );
 }
 

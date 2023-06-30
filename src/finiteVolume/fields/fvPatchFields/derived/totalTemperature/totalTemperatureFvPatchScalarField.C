@@ -73,21 +73,14 @@ Foam::totalTemperatureFvPatchScalarField::totalTemperatureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     UName_(dict.getOrDefault<word>("U", "U")),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     psiName_(dict.getOrDefault<word>("psi", "thermo:psi")),
     gamma_(dict.get<scalar>("gamma")),
     T0_("T0", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(T0_);
     }
@@ -157,20 +150,20 @@ void Foam::totalTemperatureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvPatchVectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const auto& Up =
+        patch().lookupPatchField<volVectorField>(UName_);
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phip =
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
-    const fvPatchField<scalar>& psip =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
+    const auto& psip =
+        patch().lookupPatchField<volScalarField>(psiName_);
 
     scalar gM1ByG = (gamma_ - 1.0)/gamma_;
 
     operator==
     (
-        T0_/(1.0 + 0.5*psip*gM1ByG*(1.0 - pos0(phip))*magSqr(Up))
+        T0_/(1.0 + 0.5*psip*gM1ByG*(neg(phip))*magSqr(Up))
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();
@@ -179,13 +172,13 @@ void Foam::totalTemperatureFvPatchScalarField::updateCoeffs()
 
 void Foam::totalTemperatureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
     os.writeEntry("gamma", gamma_);
     T0_.writeEntry("T0", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

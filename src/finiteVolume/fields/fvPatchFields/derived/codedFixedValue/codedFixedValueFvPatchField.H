@@ -34,6 +34,9 @@ Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValueFvPatchField) which is then used to evaluate.
 
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the code is executed.
+
     The code entries:
     \plaintable
        codeInclude | include files
@@ -102,8 +105,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codedFixedValueFvPatchField_H
-#define codedFixedValueFvPatchField_H
+#ifndef Foam_codedFixedValueFvPatchField_H
+#define Foam_codedFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "codedBase.H"
@@ -245,7 +248,7 @@ public:
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
-        //- Evaluate the patch field, sets Updated to false
+        //- Evaluate the patch field, sets updated() to false
         virtual void evaluate
         (
             const Pstream::commsTypes commsType=Pstream::commsTypes::blocking

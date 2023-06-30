@@ -25,21 +25,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniformFixedGradientFvPatchFields.H"
+#include "uniformFixedGradientFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fieldTypes.H"
 #include "volFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchFields(uniformFixedGradient);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+namespace Foam
+{
+    makePatchTypeFieldTypedefs(uniformFixedGradient);
+    makePatchFields(uniformFixedGradient);
+}
 
 // ************************************************************************* //

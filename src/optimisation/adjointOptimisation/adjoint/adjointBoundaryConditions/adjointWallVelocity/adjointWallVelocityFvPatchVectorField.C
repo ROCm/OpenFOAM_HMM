@@ -77,10 +77,7 @@ adjointWallVelocityFvPatchVectorField
     kappa_(dict.getOrDefault<scalar>("kappa", 0.41)),
     E_(dict.getOrDefault<scalar>("E", 9.8))
 {
-    fvPatchField<vector>::operator=
-    (
-        vectorField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -225,11 +222,11 @@ void Foam::adjointWallVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::adjointWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("kappa", kappa_);
     os.writeEntry("E", E_);
     os.writeEntry("solverName", adjointSolverName_);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

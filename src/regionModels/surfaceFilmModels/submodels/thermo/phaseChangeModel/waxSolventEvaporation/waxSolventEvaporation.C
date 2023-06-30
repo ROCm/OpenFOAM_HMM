@@ -196,7 +196,7 @@ void waxSolventEvaporation::correctModel
             film.regionMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         film.regionMesh(),
         dimensionedScalar(dimDensity*dimVelocity, Zero)
@@ -211,7 +211,7 @@ void waxSolventEvaporation::correctModel
             film.regionMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         film.regionMesh(),
         dimensionedScalar(dimDensity*dimVelocity, Zero)
@@ -357,8 +357,7 @@ void waxSolventEvaporation::correctModel
         YsolventEqn.relax();
         YsolventEqn.solve();
 
-        Ysolvent_.min(1);
-        Ysolvent_.max(0);
+        Ysolvent_.clamp_range(zero_one{});
 
         scalarField dm
         (

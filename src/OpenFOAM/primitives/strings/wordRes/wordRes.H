@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,12 +38,18 @@ SourceFiles
 #ifndef Foam_wordRes_H
 #define Foam_wordRes_H
 
-#include "wordReList.H"
+#include "wordRe.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// List types
+typedef List<wordRe> wordReList;    //!< List of wordRe (word or regex)
+typedef UList<wordRe> wordReUList;  //!< UList of wordRe (word or regex)
+
 
 /*---------------------------------------------------------------------------*\
                            Class wordRes Declaration

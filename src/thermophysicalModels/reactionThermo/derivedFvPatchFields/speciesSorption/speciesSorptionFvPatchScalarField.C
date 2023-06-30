@@ -121,9 +121,10 @@ Foam::speciesSorptionFvPatchScalarField::field
             (
                 fieldName,
                 mesh.time().timeName(),
-                mesh,
+                mesh.thisDb(),
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             mesh,
             dimensionedScalar(dim, Zero)
@@ -174,27 +175,10 @@ Foam::speciesSorptionFvPatchScalarField::speciesSorptionFvPatchScalarField
     max_(dict.getCheck<scalar>("max", scalarMinMax::ge(0))),
     rhoS_(dict.get<scalar>("rhoS")),
     pName_(dict.getOrDefault<word>("p", "p")),
-    dfldp_
-    (
-        dict.found("dfldp")
-      ? scalarField("dfldp", dict, p.size())
-      : scalarField(p.size(), 0)
-    ),
-    mass_
-    (
-        dict.found("mass")
-      ? scalarField("mass", dict, p.size())
-      : scalarField(p.size(), 0)
-    )
+    dfldp_("dfldp", dict, p.size(), IOobjectOption::LAZY_READ),
+    mass_("mass", dict, p.size(), IOobjectOption::LAZY_READ)
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(Zero);
     }
@@ -369,8 +353,7 @@ void Foam::speciesSorptionFvPatchScalarField::updateCoeffs()
             // mole fraction
             tmp<scalarField> tco = calcMoleFractions();
 
-            const fvPatchField<scalar>& pp =
-                patch().lookupPatchField<volScalarField, scalar>(pName_);
+            const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
 
             cEq = max_*(kl_*tco()*pp/(1 + kl_*tco()*pp));
             break;
@@ -418,7 +401,7 @@ void Foam::speciesSorptionFvPatchScalarField::updateCoeffs()
 
 void Foam::speciesSorptionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry
     (
@@ -441,7 +424,7 @@ void Foam::speciesSorptionFvPatchScalarField::write(Ostream& os) const
     mass_.writeEntry("mass", os);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

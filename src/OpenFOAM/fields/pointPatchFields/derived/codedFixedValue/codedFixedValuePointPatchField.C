@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,11 +161,11 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
-    const dictionary& dict,
-    const bool valueRequired
+    const dictionary& dict
 )
 :
-    parent_bctype(p, iF, dict, false),
+    // The 'value' is optional (handled below)
+    parent_bctype(p, iF, dict, IOobjectOption::NO_READ),
     codedBase(),
     dict_
     (
@@ -186,11 +186,11 @@ Foam::codedFixedValuePointPatchField<Type>::codedFixedValuePointPatchField
 {
     updateLibrary(name_);
 
-    // Note: 'value' is used even with valueRequired = false ! This is
-    // inconsistent with fixedValueFvPatchField behaviour.
-
-    if (!dict.found("value")) // Q: check for valueRequired?
+    if (!this->readValueEntry(dict))
     {
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
+
         // Evaluate to assign a value
         this->evaluate(Pstream::commsTypes::blocking);
     }
@@ -238,7 +238,7 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
         // Make sure to construct the patchfield with up-to-date value
 
         OStringStream os;
-        static_cast<const Field<Type>&>(*this).writeEntry("value", os);
+        this->writeValueEntry(os);
         IStringStream is(os.str());
         dictionary constructDict(is);
 

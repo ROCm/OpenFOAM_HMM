@@ -79,11 +79,11 @@ namespace Foam
             error::printStack(Perr);
             std::abort();
         }
-        else if (Pstream::parRun())
+        else if (UPstream::parRun())
         {
             Perr<< nl << err << nl
                 << "\nFOAM parallel run exiting\n" << endl;
-            Pstream::exit(1);
+            UPstream::exit(1);
         }
         else
         {
@@ -113,7 +113,8 @@ void Foam::functionObjectList::createPropertiesDict() const
                 "uniform"/word("functionObjects"),
                 time_,
                 IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         )
     );
@@ -132,7 +133,8 @@ void Foam::functionObjectList::createOutputRegistry() const
                 time_.timeName(),
                 time_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             )
         )
     );
@@ -149,7 +151,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObjectList::remove
 
     auto iter = indices_.find(key);  // Index of existing functionObject
 
-    if (iter.found())
+    if (iter.good())
     {
         oldIndex = *iter;
 
@@ -453,7 +455,9 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
                 (
                     args["dict"],
                     runTime,
-                    IOobject::MUST_READ_IF_MODIFIED
+                    IOobject::MUST_READ_IF_MODIFIED,
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 )
             )
         );
@@ -1181,7 +1185,7 @@ bool Foam::functionObjectList::read()
             // Insert active functionObject into the list
             if (objPtr)
             {
-                newPtrs.set(nFunc, objPtr);
+                newPtrs.set(nFunc, std::move(objPtr));
                 newIndices.insert(key, nFunc);
                 ++nFunc;
             }

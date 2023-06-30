@@ -67,19 +67,19 @@ alphaContactAngleTwoPhaseFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedGradientFvPatchScalarField(p, iF),
+    fixedGradientFvPatchScalarField(p, iF),  // Bypass dictionary constructor
     limit_(limitControlNames_.get("limit", dict))
 {
-    if (dict.found("gradient"))
+    if (this->readGradientEntry(dict))
     {
-        gradient() = scalarField("gradient", dict, p.size());
         fixedGradientFvPatchScalarField::updateCoeffs();
         fixedGradientFvPatchScalarField::evaluate();
     }
     else
     {
-        fvPatchField<scalar>::operator=(patchInternalField());
-        gradient() = 0.0;
+        // Fallback: set to zero-gradient
+        extrapolateInternal();
+        gradient() = Zero;
     }
 }
 
@@ -133,23 +133,20 @@ void Foam::alphaContactAngleTwoPhaseFvPatchScalarField::evaluate
         gradient() =
         patch().deltaCoeffs()
        *(
-           max(min
-           (
-               *this + gradient()/patch().deltaCoeffs(),
-               scalar(1)), scalar(0)
-           ) - *this
+           clamp(*this + gradient()/patch().deltaCoeffs(), zero_one{})
+         - *this
        );
     }
     else if (limit_ == lcZeroGradient)
     {
-        gradient() = 0.0;
+        gradient() = Zero;
     }
 
     fixedGradientFvPatchScalarField::evaluate();
 
     if (limit_ == lcAlpha)
     {
-        scalarField::operator=(max(min(*this, scalar(1)), scalar(0)));
+        scalarField::operator=(clamp(*this, zero_one{}));
     }
 }
 
@@ -159,7 +156,7 @@ void Foam::alphaContactAngleTwoPhaseFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedGradientFvPatchScalarField::write(os);
+    fixedGradientFvPatchField<scalar>::write(os);
     os.writeEntry("limit", limitControlNames_[limit_]);
 }
 

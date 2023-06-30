@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sliceRange_H
-#define sliceRange_H
+#ifndef Foam_sliceRange_H
+#define Foam_sliceRange_H
 
 #include "label.H"
 #include <iterator>
@@ -47,8 +47,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 template<class T> class List;
 template<class T, unsigned N> class FixedList;
 
@@ -112,41 +110,24 @@ public:
 
     // Access
 
-        //- The first/start value in the range (inclusive)
-        constexpr label start() const noexcept
-        {
-            return start_;
-        }
+        //- The start value in the range
+        constexpr label start() const noexcept { return start_; }
 
         //- The size of the range
-        constexpr label size() const noexcept
-        {
-            return size_;
-        }
+        constexpr label size() const noexcept { return size_; }
 
         //- The stride for the range
-        constexpr label stride() const noexcept
-        {
-            return stride_;
-        }
+        constexpr label stride() const noexcept { return stride_; }
 
         //- True if range is empty (zero-sized)
-        bool empty() const noexcept
-        {
-            return !size_;
-        }
+        bool empty() const noexcept { return !size_; }
 
-        //- The first/start value in the range (inclusive)
-        constexpr label first() const noexcept
-        {
-            return start_;
-        }
+        //- The (inclusive) lower value of the range.
+        constexpr label min() const noexcept { return start_; }
 
-        //- The (inclusive) upper value of the range
-        label last() const noexcept
-        {
-            return start_ + (size_-1) * stride_;
-        }
+        //- The (inclusive) upper value of the range.
+        //- Ill-defined for an empty range
+        label max() const noexcept { return start_ + (size_-1) * stride_; }
 
         //- Return list of labels corresponding to the slice
         List<label> labels() const;
@@ -492,7 +473,7 @@ inline constexpr bool operator==
 {
     return
     (
-        a.first() == b.first()
+        a.start() == b.start()
      && a.size() == b.size()
      && a.stride() == b.stride()
     );
@@ -510,10 +491,10 @@ inline constexpr bool operator<
 {
     return
     (
-        a.first() < b.first()
+        a.start() < b.start()
      ||
         (
-            !(b.first() < a.first())
+            !(b.start() < a.start())
          &&
             (
                 a.size() < b.size()

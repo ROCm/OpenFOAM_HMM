@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -167,9 +167,9 @@ cloudFunctions
         writer          vtk;
     }
 
-    patchParticleHistogram1
+    particleHistogram1
     {
-        type            patchParticleHistogram;
+        type            particleHistogram;
         patches
         (
             cycLeft_half0
@@ -181,9 +181,9 @@ cloudFunctions
         maxStoredParcels 20;
     }
 
-    patchPostProcessing1
+    particlePostProcessing1
     {
-        type            patchPostProcessing;
+        type            particlePostProcessing;
         fields          (position "U.*" d T nParticle);
         maxStoredParcels 20;
         patches

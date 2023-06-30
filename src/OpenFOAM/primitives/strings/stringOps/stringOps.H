@@ -40,13 +40,12 @@ SourceFiles
 #define Foam_stringOps_H
 
 #include "scalar.H"
-#include "string.H"
 #include "SubStrings.H"
-#include "word.H"
 #include "dictionary.H"
 #include "HashTable.H"
 #include "stringOpsSort.H"
 #include "stringOpsEvaluate.H"
+#include "word.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

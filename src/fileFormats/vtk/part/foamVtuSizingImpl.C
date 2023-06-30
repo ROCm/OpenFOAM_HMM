@@ -756,7 +756,7 @@ void Foam::vtk::vtuSizing::populateArrays
 
     const label nInputCells = shapes.size();
 
-    label nIgnored = 0;
+    // label nIgnored = 0;
 
     for
     (
@@ -852,7 +852,7 @@ void Foam::vtk::vtuSizing::populateArrays
             // Silent here.
             // - already complained (and skipped) during initial sizing
             --cellIndex;
-            ++nIgnored;
+            // ++nIgnored;
         }
     }
 

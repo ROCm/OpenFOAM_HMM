@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulenceModel_H
-#define turbulenceModel_H
+#ifndef Foam_turbulenceModel_H
+#define Foam_turbulenceModel_H
 
 #include "IOdictionary.H"
 #include "primitiveFieldsFwd.H"
@@ -138,7 +138,7 @@ public:
         //- Helper function to return the name of the turbulence G field
         inline word GName() const
         {
-            return word(type() + ":G");
+            return IOobject::scopedName(type(), "G");
         }
 
         //- Access function to velocity field

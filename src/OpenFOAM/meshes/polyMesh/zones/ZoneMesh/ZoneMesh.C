@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,7 +133,7 @@ void Foam::ZoneMesh<ZoneType, MeshType>::calcGroupIDs() const
 
         for (const word& groupName : groups)
         {
-            groupLookup(groupName).append(zonei);
+            groupLookup(groupName).push_back(zonei);
         }
     }
 
@@ -428,7 +428,7 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::indices
         {
             const auto iter = groupZoneIDs().cfind(matcher);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Hash ids associated with the group
                 ids.insert(iter.val());
@@ -537,11 +537,9 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
         // Used for -dry-run, for example
         if (disallowGenericZones != 0)
         {
-            auto& zm = const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
-            zoneId = zm.size();
-
             Info<< "Creating dummy zone " << zoneName << endl;
-            zm.append(new ZoneType(zoneName, zoneId, zm));
+            auto& zm = const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
+            zm.emplace_back(zoneName, zm.size(), zm);
         }
     }
 
@@ -575,10 +573,9 @@ const ZoneType* Foam::ZoneMesh<ZoneType, MeshType>::cfindZone
     // Used for -dry-run, for example
     if (disallowGenericZones != 0)
     {
-        auto& zm = const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
-
         Info<< "Creating dummy zone " << zoneName << endl;
-        zm.append(new ZoneType(zoneName, zm.size(), zm));
+        auto& zm = const_cast<ZoneMesh<ZoneType, MeshType>&>(*this);
+        zm.emplace_back(zoneName, zm.size(), zm);
     }
 
     return nullptr;
@@ -678,7 +675,7 @@ void Foam::ZoneMesh<ZoneType, MeshType>::setGroup
     // Add to specified zones
     for (const label zonei : zoneIDs)
     {
-        zones[zonei].inGroups().appendUniq(groupName);
+        zones[zonei].inGroups().push_uniq(groupName);
         doneZone[zonei] = true;
     }
 
@@ -921,7 +918,7 @@ ZoneType& Foam::ZoneMesh<ZoneType, MeshType>::operator()
     if (!ptr)
     {
         ptr = new ZoneType(zoneName, this->size(), *this);
-        this->append(ptr);
+        this->push_back(ptr);
     }
 
     if (verbose)

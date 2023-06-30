@@ -338,7 +338,7 @@ void Foam::meshStructure::correct
                             )
                         );
 
-                        if (fnd.found())
+                        if (fnd.good())
                         {
                             faceToPatchEdgeAddressing_[facei] = fnd.val();
                             faceToPatchFaceAddressing_[facei] = 0;

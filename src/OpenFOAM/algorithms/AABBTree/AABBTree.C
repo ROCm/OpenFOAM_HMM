@@ -116,7 +116,7 @@ void Foam::AABBTree<Type>::createBoxes
             {
                 if (isUsedPoint.set(pointI))
                 {
-                    component.append(points[pointI][maxDir]);
+                    component.push_back(points[pointI][maxDir]);
                 }
             }
         }
@@ -167,12 +167,12 @@ void Foam::AABBTree<Type>::createBoxes
         // if it crosses the bin boundaries
         if (addMin)
         {
-            minBinObjectIDs.append(objI);
+            minBinObjectIDs.push_back(objI);
             minBb.add(points, obj);
         }
         if (addMax)
         {
-            maxBinObjectIDs.append(objI);
+            maxBinObjectIDs.push_back(objI);
             maxBb.add(points, obj);
         }
     }
@@ -209,13 +209,13 @@ void Foam::AABBTree<Type>::createBoxes
     {
         // New leaf
         minI = nodes.size();
-        nodes.append(labelPair(-1, -1));
+        nodes.emplace_back(-1, -1);
     }
     else
     {
         // Update existing leaf
         minI = -addressing.size() - 1;
-        addressing.append(minBinObjectIDs);
+        addressing.push_back(minBinObjectIDs);
     }
 
     label maxI;
@@ -223,13 +223,13 @@ void Foam::AABBTree<Type>::createBoxes
     {
         // New leaf
         maxI = nodes.size();
-        nodes.append(labelPair(-1, -1));
+        nodes.emplace_back(-1, -1);
     }
     else
     {
         // Update existing leaf
         maxI = -addressing.size() - 1;
-        addressing.append(maxBinObjectIDs);
+        addressing.push_back(maxBinObjectIDs);
     }
 
     nodes(nodeI) = labelPair(minI, maxI);
@@ -308,7 +308,7 @@ Foam::AABBTree<Type>::AABBTree
     DynamicList<labelPair> nodes(maxLevel);
     DynamicList<labelList> addr(maxLevel);
 
-    nodes.append(labelPair(-1, -1));
+    nodes.emplace_back(-1, -1);
     treeBoundBox topBb(points);
     topBb.inflate(0.01);
 
@@ -356,13 +356,13 @@ Foam::AABBTree<Type>::AABBTree
     {
         if (nodes[nodeI].first() < 0)
         {
-            boundBoxes.append(bbs[nodeI].first());
-            addressing.append(addr[-(nodes[nodeI].first() + 1)]);
+            boundBoxes.push_back(bbs[nodeI].first());
+            addressing.push_back(addr[-(nodes[nodeI].first() + 1)]);
         }
         if (nodes[nodeI].second() < 0)
         {
-            boundBoxes.append(bbs[nodeI].second());
-            addressing.append(addr[-(nodes[nodeI].second() + 1)]);
+            boundBoxes.push_back(bbs[nodeI].second());
+            addressing.push_back(addr[-(nodes[nodeI].second() + 1)]);
         }
     }
 

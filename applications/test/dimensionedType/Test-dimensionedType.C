@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2018-2019 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,7 @@ License
 
 #include "dictionary.H"
 #include "primitiveEntry.H"
-#include "dimensionedScalar.H"
-#include "dimensionedTensor.H"
+#include "dimensionedTypes.H"
 
 using namespace Foam;
 
@@ -102,6 +101,18 @@ int main(int argc, char *argv[])
         }
     }
 
+    {
+        dimensionedLabel a("min", dimTime, -10);
+        dimensionedLabel b("max", dimTime, 100);
+        scalar t = 0.5;
+
+        Info<< "lerp of" << nl
+            << "    " << a << nl
+            << "    " << b << nl
+            << "  = " << lerp(a, b, t) << nl
+            << " vs " << ((1-t)*a + t*b) << nl
+            << nl;
+    }
 
     Pout<< "zero scalar (time): " << dimensionedScalar(dimTime) << endl;
     Pout<< "zero vector: " << dimensionedVector(dimLength) << endl;

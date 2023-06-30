@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
                 if (tok.good())
                 {
-                    tokens.append(std::move(tok));
+                    tokens.push_back(std::move(tok));
                     if (verbose)
                     {
                         Info<< "after append: " << tok.info() << endl;

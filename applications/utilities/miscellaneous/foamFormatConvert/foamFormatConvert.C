@@ -106,7 +106,7 @@ bool writeZones
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     bool writeOk = false;
@@ -203,7 +203,7 @@ bool writeOptionalMeshObject
     const word& name,
     const fileName& meshDir,
     Time& runTime,
-    const bool valid
+    const bool writeOnProc
 )
 {
     IOobject io
@@ -214,12 +214,11 @@ bool writeOptionalMeshObject
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     bool writeOk = false;
-
-    bool haveFile = io.typeHeaderOk<IOField<label>>(false);
+    const bool haveFile = io.typeHeaderOk<regIOobject>(false);
 
     // Make sure all know if there is a valid class name
     wordList classNames(1, io.headerClassName());
@@ -230,10 +229,10 @@ bool writeOptionalMeshObject
     {
         Info<< "        Reading " << classNames[0]
             << " : " << name << endl;
-        T meshObject(io, valid && haveFile);
+        T meshObject(io, writeOnProc && haveFile);
 
         Info<< "        Writing " << name << endl;
-        writeOk = meshObject.regIOobject::write(valid && haveFile);
+        writeOk = meshObject.regIOobject::write(writeOnProc && haveFile);
     }
 
     return writeOk;
@@ -265,7 +264,7 @@ int main(int argc, char *argv[])
     // enable noConstant by switching
     if (!args.found("noConstant"))
     {
-        args.setOption("constant", "");
+        args.setOption("constant");
     }
     else
     {
@@ -376,41 +375,41 @@ int main(int argc, char *argv[])
 
         forAllConstIters(objects, iter)
         {
-            const word& headerClassName = (*iter)->headerClassName();
+            const IOobject& io = *(iter.val());
 
             if
             (
-                headerClassName == volScalarField::typeName
-             || headerClassName == volVectorField::typeName
-             || headerClassName == volSphericalTensorField::typeName
-             || headerClassName == volSymmTensorField::typeName
-             || headerClassName == volTensorField::typeName
+                io.isHeaderClass<volScalarField>()
+             || io.isHeaderClass<volVectorField>()
+             || io.isHeaderClass<volSphericalTensorField>()
+             || io.isHeaderClass<volSymmTensorField>()
+             || io.isHeaderClass<volTensorField>()
 
-             || headerClassName == surfaceScalarField::typeName
-             || headerClassName == surfaceVectorField::typeName
-             || headerClassName == surfaceSphericalTensorField::typeName
-             || headerClassName == surfaceSymmTensorField::typeName
-             || headerClassName == surfaceTensorField::typeName
+             || io.isHeaderClass<surfaceScalarField>()
+             || io.isHeaderClass<surfaceVectorField>()
+             || io.isHeaderClass<surfaceSphericalTensorField>()
+             || io.isHeaderClass<surfaceSymmTensorField>()
+             || io.isHeaderClass<surfaceTensorField>()
 
-             || headerClassName == pointScalarField::typeName
-             || headerClassName == pointVectorField::typeName
-             || headerClassName == pointSphericalTensorField::typeName
-             || headerClassName == pointSymmTensorField::typeName
-             || headerClassName == pointTensorField::typeName
+             || io.isHeaderClass<pointScalarField>()
+             || io.isHeaderClass<pointVectorField>()
+             || io.isHeaderClass<pointSphericalTensorField>()
+             || io.isHeaderClass<pointSymmTensorField>()
+             || io.isHeaderClass<pointTensorField>()
 
-             || headerClassName == volScalarField::Internal::typeName
-             || headerClassName == volVectorField::Internal::typeName
-             || headerClassName == volSphericalTensorField::Internal::typeName
-             || headerClassName == volSymmTensorField::Internal::typeName
-             || headerClassName == volTensorField::Internal::typeName
+             || io.isHeaderClass<volScalarField::Internal>()
+             || io.isHeaderClass<volVectorField::Internal>()
+             || io.isHeaderClass<volSphericalTensorField::Internal>()
+             || io.isHeaderClass<volSymmTensorField::Internal>()
+             || io.isHeaderClass<volTensorField::Internal>()
             )
             {
-                Info<< "        Reading " << headerClassName
-                    << " : " << (*iter)->name() << endl;
+                Info<< "        Reading " << io.headerClassName()
+                    << " : " << io.name() << endl;
 
-                fieldDictionary fDict(*iter(), headerClassName);
+                fieldDictionary fDict(io, io.headerClassName());
 
-                Info<< "        Writing " << (*iter)->name() << endl;
+                Info<< "        Writing " << io.name() << endl;
                 fDict.regIOobject::write();
             }
         }

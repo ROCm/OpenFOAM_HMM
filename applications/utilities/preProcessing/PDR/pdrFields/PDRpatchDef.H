@@ -38,7 +38,7 @@ SourceFiles
 #ifndef PDRpatchDef_H
 #define PDRpatchDef_H
 
-#include "string.H"
+#include "word.H"
 #include "scalar.H"
 #include "Enum.H"
 

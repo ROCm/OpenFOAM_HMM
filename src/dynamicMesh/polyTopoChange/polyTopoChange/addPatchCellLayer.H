@@ -202,9 +202,6 @@ class addPatchCellLayer
             polyTopoChange&
         ) const;
 
-        //- Find patch to neighbouring processor
-        static label findProcPatch(const polyMesh&, const label nbrProcID);
-
         //- Extract properties from mesh face
         static void setFaceProps
         (

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,10 +35,18 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// One-parameter versions
 
 template<class TypeR, class Type1>
 struct reuseTmp
 {
+    //- Pass-through to tmp New
+    static tmp<Field<TypeR>> New(const Field<Type1>& f1)
+    {
+        return tmp<Field<TypeR>>::New(f1.size());
+    }
+
+    //- Dissimilar types: just use size
     static tmp<Field<TypeR>> New(const tmp<Field<Type1>>& tf1)
     {
         return tmp<Field<TypeR>>::New(tf1().size());
@@ -49,8 +57,8 @@ struct reuseTmp
 template<class TypeR>
 struct reuseTmp<TypeR, TypeR>
 {
-    //- Allow optional copy assignment of the initial content
-    //- for identical input and output types
+    //- Identical input and return types:
+    //- allow optional copy assignment of the initial content
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<TypeR>>& tf1,
@@ -85,9 +93,13 @@ template<class TypeR> tmp<Field<TypeR>> New
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Two-parameter versions
+
 template<class TypeR, class Type1, class Type12, class Type2>
 struct reuseTmpTmp
 {
+    //- Dissimilar types: just use size
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<Type1>>& tf1,
@@ -102,6 +114,7 @@ struct reuseTmpTmp
 template<class TypeR, class Type1, class Type12>
 struct reuseTmpTmp<TypeR, Type1, Type12, TypeR>
 {
+    //- Second input has return type
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<Type1>>& tf1,
@@ -121,6 +134,7 @@ struct reuseTmpTmp<TypeR, Type1, Type12, TypeR>
 template<class TypeR, class Type2>
 struct reuseTmpTmp<TypeR, TypeR, TypeR, Type2>
 {
+    //- First input has return type
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<TypeR>>& tf1,
@@ -140,6 +154,7 @@ struct reuseTmpTmp<TypeR, TypeR, TypeR, Type2>
 template<class TypeR>
 struct reuseTmpTmp<TypeR, TypeR, TypeR, TypeR>
 {
+    //- Both inputs have return type
     static tmp<Field<TypeR>> New
     (
         const tmp<Field<TypeR>>& tf1,

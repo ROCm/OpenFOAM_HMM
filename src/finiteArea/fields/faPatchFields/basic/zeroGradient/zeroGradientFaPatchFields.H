@@ -23,19 +23,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
-SourceFiles
-    zeroGradientFaPatchFields.C
-
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef zeroGradientFaPatchFields_H
-#define zeroGradientFaPatchFields_H
+#ifndef Foam_zeroGradientFaPatchFields_H
+#define Foam_zeroGradientFaPatchFields_H
 
 #include "zeroGradientFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(zeroGradient)
+makeFaPatchTypeFieldTypedefs(zeroGradient);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -86,7 +86,7 @@ Foam::processorFaePatchField<Type>::processorFaePatchField
     const dictionary& dict
 )
 :
-    coupledFaePatchField<Type>(p, iF, dict),
+    coupledFaePatchField<Type>(p, iF, dict, IOobjectOption::LAZY_READ),
     procPatch_(refCast<const processorFaPatch>(p, dict))
 {
     if (!isType<processorFaPatch>(p))
@@ -119,13 +119,6 @@ Foam::processorFaePatchField<Type>::processorFaePatchField
 :
     coupledFaePatchField<Type>(ptf, iF),
     procPatch_(refCast<const processorFaPatch>(ptf.patch()))
-{}
-
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::processorFaePatchField<Type>::~processorFaePatchField()
 {}
 
 

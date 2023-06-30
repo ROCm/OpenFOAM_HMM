@@ -169,7 +169,7 @@ void Foam::cyclicFaPatch::makeWeights(scalarField& w) const
 {
     const scalarField& magL = magEdgeLengths();
 
-    const scalarField deltas(edgeNormals() & faPatch::delta());
+    const scalarField deltas(edgeNormals() & coupledFaPatch::delta());
     const label sizeby2 = deltas.size()/2;
 
     scalar maxMatchError = 0;
@@ -222,7 +222,7 @@ void Foam::cyclicFaPatch::makeWeights(scalarField& w) const
 
 void Foam::cyclicFaPatch::makeDeltaCoeffs(scalarField& dc) const
 {
-    const scalarField deltas(edgeNormals() & faPatch::delta());
+    const scalarField deltas(edgeNormals() & coupledFaPatch::delta());
     const label sizeby2 = deltas.size()/2;
 
     for (label edgei = 0; edgei < sizeby2; ++edgei)
@@ -272,7 +272,7 @@ void Foam::cyclicFaPatch::movePoints
 
 Foam::tmp<Foam::vectorField> Foam::cyclicFaPatch::delta() const
 {
-    const vectorField patchD(faPatch::delta());
+    const vectorField patchD(coupledFaPatch::delta());
     const label sizeby2 = patchD.size()/2;
 
     auto tpdv = tmp<vectorField>::New(patchD.size());
@@ -284,7 +284,7 @@ Foam::tmp<Foam::vectorField> Foam::cyclicFaPatch::delta() const
         for (label edgei = 0; edgei < sizeby2; ++edgei)
         {
             const vector& ddi = patchD[edgei];
-            vector dni = patchD[edgei + sizeby2];
+            const vector& dni = patchD[edgei + sizeby2];
 
             pdv[edgei] = ddi - dni;
             pdv[edgei + sizeby2] = -pdv[edgei];
@@ -295,7 +295,7 @@ Foam::tmp<Foam::vectorField> Foam::cyclicFaPatch::delta() const
         for (label edgei = 0; edgei < sizeby2; ++edgei)
         {
             const vector& ddi = patchD[edgei];
-            vector dni = patchD[edgei + sizeby2];
+            const vector& dni = patchD[edgei + sizeby2];
 
             pdv[edgei] = ddi - transform(forwardT()[0], dni);
             pdv[edgei + sizeby2] = -transform(reverseT()[0], pdv[edgei]);
@@ -321,7 +321,9 @@ Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::interfaceInternalField
     const labelUList& edgeFaces
 ) const
 {
-    return patchInternalField(internalData, edgeFaces);
+    auto tpfld = tmp<labelField>::New();
+    patchInternalField(internalData, edgeFaces, tpfld.ref());
+    return tpfld;
 }
 
 

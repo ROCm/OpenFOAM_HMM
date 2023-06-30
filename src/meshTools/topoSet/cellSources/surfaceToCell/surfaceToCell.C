@@ -79,9 +79,9 @@ Foam::label Foam::surfaceToCell::getNearest
 {
     const auto iter = cache.cfind(pointi);
 
-    if (iter.found())
+    if (iter.good())
     {
-        return *iter;  // Return cached value
+        return iter.val();  // Return cached value
     }
 
     pointIndexHit inter = querySurf.nearest(pt, span);

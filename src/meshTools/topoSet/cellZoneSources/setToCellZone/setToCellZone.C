@@ -109,8 +109,8 @@ void Foam::setToCellZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Adding all cells from cellSet " << setName_
-                    << " ..." << endl;
+                Info<< "    Adding all cells from cell set: "
+                    << setName_ << " ..." << endl;
             }
 
             // Load the sets
@@ -134,8 +134,8 @@ void Foam::setToCellZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Removing all cells from cellSet " << setName_
-                    << " ..." << endl;
+                Info<< "    Removing all cells from cell set: "
+                    << setName_ << " ..." << endl;
             }
 
             // Load the set

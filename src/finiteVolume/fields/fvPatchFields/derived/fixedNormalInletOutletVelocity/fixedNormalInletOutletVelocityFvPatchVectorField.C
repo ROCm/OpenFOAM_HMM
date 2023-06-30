@@ -71,8 +71,8 @@ fixedNormalInletOutletVelocityFvPatchVectorField
         fvPatchVectorField::New(p, iF, dict.subDict("normalVelocity"))
     )
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    fvPatchFieldBase::readDict(dict);
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
     refValue() = normalVelocity();
     refGrad() = Zero;
     valueFraction() = Zero;
@@ -166,8 +166,8 @@ void Foam::fixedNormalInletOutletVelocityFvPatchVectorField::updateCoeffs()
 
     if (fixTangentialInflow_)
     {
-        const fvsPatchField<scalar>& phip =
-            patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        const auto& phip =
+            patch().lookupPatchField<surfaceScalarField>(phiName_);
 
         valueFraction() += neg(phip)*(I - valueFraction());
     }
@@ -183,7 +183,7 @@ void Foam::fixedNormalInletOutletVelocityFvPatchVectorField::write
 )
 const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntry("fixTangentialInflow", fixTangentialInflow_);
 
@@ -191,7 +191,7 @@ const
     normalVelocity_->write(os);
     os.endBlock();
 
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

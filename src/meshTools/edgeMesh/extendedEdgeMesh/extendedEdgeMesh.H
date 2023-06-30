@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2020 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,14 +56,14 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef extendedEdgeMesh_H
-#define extendedEdgeMesh_H
+#ifndef Foam_extendedEdgeMesh_H
+#define Foam_extendedEdgeMesh_H
 
 #include "edgeMesh.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
 #include "treeDataPoint.H"
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -205,7 +205,7 @@ protected:
     // Protected Constructors
 
         //- Construct null, initializing start indices with -1
-        explicit extendedEdgeMesh(class one::minus);
+        explicit extendedEdgeMesh(std::nullptr_t);
 
 
     // Protected Member Functions

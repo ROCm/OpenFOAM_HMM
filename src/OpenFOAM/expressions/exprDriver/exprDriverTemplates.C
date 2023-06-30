@@ -117,7 +117,7 @@ const Foam::Function1<Type>* Foam::expressions::exprDriver::getFunction1Ptr
 
     const auto iter = tbl.cfind(name);
 
-    if (iter.found())
+    if (iter.good())
     {
         func = iter.val().get();
     }

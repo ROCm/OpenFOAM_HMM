@@ -47,19 +47,22 @@ namespace regionModels
 
 void Foam::regionModels::regionModel::constructMeshObjects()
 {
-    if (!time_.foundObject<fvMesh>(regionName_))
+    fvMesh* regionMeshPtr = time_.getObjectPtr<fvMesh>(regionName_);
+
+    if (!regionMeshPtr)
     {
-        fvMesh* regionMeshPtr =
-            new fvMesh
+        regionMeshPtr = new fvMesh
+        (
+            IOobject
             (
-                IOobject
-                (
-                    regionName_,
-                    time_.timeName(),
-                    time_,
-                    IOobject::MUST_READ
-                )
-            );
+                regionName_,
+                time_.timeName(),
+                time_,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            )
+        );
 
         regionMeshPtr->objectRegistry::store();
     }
@@ -433,7 +436,7 @@ Foam::regionModels::regionModel::regionModel
             mesh.time(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         ),
         dict
     ),

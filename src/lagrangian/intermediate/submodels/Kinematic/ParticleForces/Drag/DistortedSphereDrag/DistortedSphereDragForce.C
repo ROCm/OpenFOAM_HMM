@@ -84,7 +84,7 @@ Foam::forceSuSp Foam::DistortedSphereDragForce<CloudType>::calcCoupled
 ) const
 {
     // Limit the drop distortion to y=0 (sphere) and y=1 (disk)
-    const scalar y = min(max(p.y(), scalar(0)), scalar(1));
+    const scalar y = clamp(p.y(), zero_one{});
 
     // (LMR:Eq. 10)
     return

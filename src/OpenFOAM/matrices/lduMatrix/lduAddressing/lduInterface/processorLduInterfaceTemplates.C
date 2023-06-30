@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,7 +35,7 @@ License
 template<class Type>
 void Foam::processorLduInterface::send
 (
-    const Pstream::commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const UList<Type>& f
 ) const
 {
@@ -43,8 +43,8 @@ void Foam::processorLduInterface::send
 
     if
     (
-        commsType == Pstream::commsTypes::blocking
-     || commsType == Pstream::commsTypes::scheduled
+        commsType == UPstream::commsTypes::blocking
+     || commsType == UPstream::commsTypes::scheduled
     )
     {
         UOPstream::write
@@ -57,31 +57,37 @@ void Foam::processorLduInterface::send
             comm()
         );
     }
-    else if (commsType == Pstream::commsTypes::nonBlocking)
+    else if (commsType == UPstream::commsTypes::nonBlocking)
     {
-        resizeBuf(receiveBuf_, nBytes);
+        resizeBuf(byteSendBuf_, nBytes);
+        std::memcpy
+        (
+            static_cast<void*>(byteSendBuf_.data()), f.cdata(), nBytes
+        );
+
+        resizeBuf(byteRecvBuf_, nBytes);
+
+        if (!nBytes)
+        {
+            // Can skip empty messages
+            return;
+        }
 
         UIPstream::read
         (
             commsType,
             neighbProcNo(),
-            receiveBuf_.data(),
+            byteRecvBuf_.data(),
             nBytes,
             tag(),
             comm()
-        );
-
-        resizeBuf(sendBuf_, nBytes);
-        std::memcpy
-        (
-            static_cast<void*>(sendBuf_.data()), f.cdata(), nBytes
         );
 
         UOPstream::write
         (
             commsType,
             neighbProcNo(),
-            sendBuf_.cdata(),
+            byteSendBuf_.cdata(),
             nBytes,
             tag(),
             comm()
@@ -99,14 +105,16 @@ void Foam::processorLduInterface::send
 template<class Type>
 void Foam::processorLduInterface::receive
 (
-    const Pstream::commsTypes commsType,
+    const UPstream::commsTypes commsType,
     UList<Type>& f
 ) const
 {
+    const label nBytes = f.byteSize();
+
     if
     (
-        commsType == Pstream::commsTypes::blocking
-     || commsType == Pstream::commsTypes::scheduled
+        commsType == UPstream::commsTypes::blocking
+     || commsType == UPstream::commsTypes::scheduled
     )
     {
         UIPstream::read
@@ -114,16 +122,16 @@ void Foam::processorLduInterface::receive
             commsType,
             neighbProcNo(),
             f.data_bytes(),
-            f.byteSize(),
+            nBytes,
             tag(),
             comm()
         );
     }
-    else if (commsType == Pstream::commsTypes::nonBlocking)
+    else if (commsType == UPstream::commsTypes::nonBlocking)
     {
         std::memcpy
         (
-            static_cast<void*>(f.data()), receiveBuf_.cdata(), f.byteSize()
+            static_cast<void*>(f.data()), byteRecvBuf_.cdata(), nBytes
         );
     }
     else
@@ -138,7 +146,7 @@ void Foam::processorLduInterface::receive
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::processorLduInterface::receive
 (
-    const Pstream::commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const label size
 ) const
 {
@@ -151,22 +159,31 @@ Foam::tmp<Foam::Field<Type>> Foam::processorLduInterface::receive
 template<class Type>
 void Foam::processorLduInterface::compressedSend
 (
-    const Pstream::commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer && f.size())
+    if
+    (
+        f.size()
+     && UPstream::floatTransfer
+     && (!std::is_integral<Type>::value && sizeof(scalar) != sizeof(float))
+    )
     {
-        static const label nCmpts = sizeof(Type)/sizeof(scalar);
-        label nm1 = (f.size() - 1)*nCmpts;
-        label nlast = sizeof(Type)/sizeof(float);
-        label nFloats = nm1 + nlast;
-        label nBytes = nFloats*sizeof(float);
+        static const label nCmpts =
+        (
+            // Placeholder value for unusable template instantiation
+            std::is_integral<Type>::value
+          ? 1
+          : sizeof(Type)/sizeof(scalar)
+        );
+        const label nm1 = (f.size() - 1)*nCmpts;
+        const label nBytes = f.size()*nCmpts*sizeof(float);
 
         const scalar *sArray = reinterpret_cast<const scalar*>(f.cdata());
         const scalar *slast = &sArray[nm1];
-        resizeBuf(sendBuf_, nBytes);
-        float *fArray = reinterpret_cast<float*>(sendBuf_.data());
+        resizeBuf(byteSendBuf_, nBytes);
+        float *fArray = reinterpret_cast<float*>(byteSendBuf_.data());
 
         for (label i=0; i<nm1; i++)
         {
@@ -177,29 +194,29 @@ void Foam::processorLduInterface::compressedSend
 
         if
         (
-            commsType == Pstream::commsTypes::blocking
-         || commsType == Pstream::commsTypes::scheduled
+            commsType == UPstream::commsTypes::blocking
+         || commsType == UPstream::commsTypes::scheduled
         )
         {
             UOPstream::write
             (
                 commsType,
                 neighbProcNo(),
-                sendBuf_.cdata(),
+                byteSendBuf_.cdata(),
                 nBytes,
                 tag(),
                 comm()
             );
         }
-        else if (commsType == Pstream::commsTypes::nonBlocking)
+        else if (commsType == UPstream::commsTypes::nonBlocking)
         {
-            resizeBuf(receiveBuf_, nBytes);
+            resizeBuf(byteRecvBuf_, nBytes);
 
             UIPstream::read
             (
                 commsType,
                 neighbProcNo(),
-                receiveBuf_.data(),
+                byteRecvBuf_.data(),
                 nBytes,
                 tag(),
                 comm()
@@ -209,7 +226,7 @@ void Foam::processorLduInterface::compressedSend
             (
                 commsType,
                 neighbProcNo(),
-                sendBuf_.cdata(),
+                byteSendBuf_.cdata(),
                 nBytes,
                 tag(),
                 comm()
@@ -232,37 +249,46 @@ void Foam::processorLduInterface::compressedSend
 template<class Type>
 void Foam::processorLduInterface::compressedReceive
 (
-    const Pstream::commsTypes commsType,
+    const UPstream::commsTypes commsType,
     UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer && f.size())
+    if
+    (
+        f.size()
+     && UPstream::floatTransfer
+     && (!std::is_integral<Type>::value && sizeof(scalar) != sizeof(float))
+    )
     {
-        static const label nCmpts = sizeof(Type)/sizeof(scalar);
-        label nm1 = (f.size() - 1)*nCmpts;
-        label nlast = sizeof(Type)/sizeof(float);
-        label nFloats = nm1 + nlast;
-        label nBytes = nFloats*sizeof(float);
+        static const label nCmpts =
+        (
+            // Placeholder value for unusable template instantiation
+            std::is_integral<Type>::value
+          ? 1
+          : sizeof(Type)/sizeof(scalar)
+        );
+        const label nm1 = (f.size() - 1)*nCmpts;
+        const label nBytes = f.size()*nCmpts*sizeof(float);
 
         if
         (
-            commsType == Pstream::commsTypes::blocking
-         || commsType == Pstream::commsTypes::scheduled
+            commsType == UPstream::commsTypes::blocking
+         || commsType == UPstream::commsTypes::scheduled
         )
         {
-            resizeBuf(receiveBuf_, nBytes);
+            resizeBuf(byteRecvBuf_, nBytes);
 
             UIPstream::read
             (
                 commsType,
                 neighbProcNo(),
-                receiveBuf_.data(),
+                byteRecvBuf_.data(),
                 nBytes,
                 tag(),
                 comm()
             );
         }
-        else if (commsType != Pstream::commsTypes::nonBlocking)
+        else if (commsType != UPstream::commsTypes::nonBlocking)
         {
             FatalErrorInFunction
                 << "Unsupported communications type " << int(commsType)
@@ -270,7 +296,7 @@ void Foam::processorLduInterface::compressedReceive
         }
 
         const float *fArray =
-            reinterpret_cast<const float*>(receiveBuf_.cdata());
+            reinterpret_cast<const float*>(byteRecvBuf_.cdata());
         f.last() = reinterpret_cast<const Type&>(fArray[nm1]);
         scalar *sArray = reinterpret_cast<scalar*>(f.data());
         const scalar *slast = &sArray[nm1];
@@ -290,7 +316,7 @@ void Foam::processorLduInterface::compressedReceive
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::processorLduInterface::compressedReceive
 (
-    const Pstream::commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const label size
 ) const
 {

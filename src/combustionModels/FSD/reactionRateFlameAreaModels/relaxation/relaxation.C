@@ -136,8 +136,7 @@ void Foam::reactionRateFlameAreaModels::relaxation::correct
        - fvm::SuSp(rho*(tau + Rc), omega_)
     );
 
-    omega_.min(omega0);
-    omega_.max(0.0);
+    omega_.clamp_range(0, omega0.value());
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,10 +65,9 @@ inline Foam::SphericalTensor<Cmpt>::SphericalTensor(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Cmpt>
-inline const Foam::SphericalTensor<Cmpt>&
-Foam::SphericalTensor<Cmpt>::T() const
+inline Foam::scalar Foam::SphericalTensor<Cmpt>::diagSqr() const
 {
-    return *this;
+    return 3*Foam::magSqr(this->ii());
 }
 
 
@@ -111,8 +110,8 @@ inline SphericalTensor<Cmpt> inv(const SphericalTensor<Cmpt>& st)
     if (mag(st.ii()) < VSMALL)
     {
         FatalErrorInFunction
-            << "SphericalTensor is not invertible due to the zero determinant:"
-            << "det(SphericalTensor) = " << det(st)
+            << "SphericalTensor not invertible, determinant:"
+            << det(st) << " tensor:" << st << nl
             << abort(FatalError);
     }
     #endif
@@ -121,11 +120,11 @@ inline SphericalTensor<Cmpt> inv(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Return the square of Frobenius norm of a SphericalTensor as a Cmpt
+//- Return the square of Frobenius norm of a SphericalTensor
 template<class Cmpt>
-inline Cmpt magSqr(const SphericalTensor<Cmpt>& st)
+inline Foam::scalar magSqr(const SphericalTensor<Cmpt>& st)
 {
-    return Cmpt(3*mag(st.ii()*st.ii()));
+    return st.diagSqr();
 }
 
 
@@ -158,6 +157,19 @@ template<class Cmpt>
 inline Cmpt cmptAv(const SphericalTensor<Cmpt>& st)
 {
     return st.ii();
+}
+
+
+//- Linear interpolation of spherical tensors a and b by factor t
+template<class Cmpt>
+inline SphericalTensor<Cmpt> lerp
+(
+    const SphericalTensor<Cmpt>& a,
+    const SphericalTensor<Cmpt>& b,
+    const scalar t
+)
+{
+    return SphericalTensor<Cmpt>((1-t)*a.ii() + t*b.ii());
 }
 
 

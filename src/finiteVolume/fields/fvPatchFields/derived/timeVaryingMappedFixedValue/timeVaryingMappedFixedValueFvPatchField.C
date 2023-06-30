@@ -53,7 +53,7 @@ timeVaryingMappedFixedValueFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF, dict, false),
+    fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     uniformValue_
     (
         new PatchFunction1Types::MappedFile<Type>
@@ -66,11 +66,7 @@ timeVaryingMappedFixedValueFvPatchField
         )
     )
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator==(Field<Type>("value", dict, p.size()));
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         // Note: we use evaluate() here to trigger updateCoeffs followed
         //       by re-setting of fvatchfield::updated_ flag. This is
@@ -202,7 +198,7 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::write
 {
     fvPatchField<Type>::write(os);
     uniformValue_->writeData(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

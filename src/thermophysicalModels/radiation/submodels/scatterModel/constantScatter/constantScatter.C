@@ -77,7 +77,7 @@ Foam::radiation::constantScatter::sigmaEff() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             sigma_*(3.0 - C_)

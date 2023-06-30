@@ -131,7 +131,7 @@ void Foam::potential::potential::readPotentialDict()
                 mesh_,
                 IOobject::MUST_READ_IF_MODIFIED,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
     );
@@ -258,7 +258,7 @@ void Foam::potential::potential::readMdInitialiseDict
             mesh_,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

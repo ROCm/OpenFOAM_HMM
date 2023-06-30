@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
 )
 :
     cyclicACMILduInterfaceField(),
-    coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
+    coupledFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     cyclicACMIPatch_(refCast<const cyclicACMIFvPatch>(p, dict))
 {
     if (!isA<cyclicACMIFvPatch>(p))
@@ -68,7 +68,8 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
             << exit(FatalIOError);
     }
 
-    if (!dict.found("value") && this->coupled())
+    // Use 'value' supplied, or set to coupled field
+    if (!this->readValueEntry(dict) && this->coupled())
     {
         // Extra check: make sure that the non-overlap patch is before
         // this so it has actually been read - evaluate will crash otherwise
@@ -112,6 +113,7 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
     if (!isA<cyclicACMIFvPatch>(this->patch()))
     {
         FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()
@@ -183,7 +185,7 @@ Foam::cyclicACMIFvPatchField<Type>::patchNeighbourField() const
 
     if (doTransform())
     {
-        tpnf.ref() = transform(forwardT(), tpnf());
+        transform(tpnf.ref(), forwardT(), tpnf());
     }
 
     return tpnf;
@@ -459,7 +461,7 @@ template<class Type>
 void Foam::cyclicACMIFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

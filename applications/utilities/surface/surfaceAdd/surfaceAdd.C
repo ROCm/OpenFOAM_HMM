@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
         "factor",
         "Geometry scaling factor on input surfaces"
     );
+    argList::addVerboseOption();
 
     argList args(argc, argv);
 
@@ -87,6 +88,7 @@ int main(int argc, char *argv[])
     const auto inFileName2 = args.get<fileName>(2);
     const auto outFileName = args.get<fileName>(3);
 
+    const int  optVerbose   = args.verbose();
     const bool addPoint     = args.found("points");
     const bool mergeRegions = args.found("mergeRegions");
 
@@ -284,7 +286,7 @@ int main(int argc, char *argv[])
     }
 
     // Merge all common points and do some checks
-    combinedSurf.cleanup(true);
+    combinedSurf.cleanup(optVerbose);
 
     Info<< "Merged surface:" << endl;
 

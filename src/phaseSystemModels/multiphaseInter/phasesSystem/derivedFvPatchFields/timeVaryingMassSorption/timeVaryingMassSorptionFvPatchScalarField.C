@@ -80,19 +80,12 @@ timeVaryingMassSorptionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     kabs_(dict.getCheck<scalar>("kabs", scalarMinMax::ge(0))),
     max_(dict.getCheck<scalar>("max", scalarMinMax::ge(0))),
     kdes_(dict.getCheckOrDefault<scalar>("kdes", 0, scalarMinMax::ge(0)))
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(Zero);
     }
@@ -258,13 +251,13 @@ void Foam::timeVaryingMassSorptionFvPatchScalarField::updateCoeffs()
 
 void Foam::timeVaryingMassSorptionFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("kabs", kabs_);
     os.writeEntry("max", max_);
     os.writeEntryIfDifferent<scalar>("kdes", scalar(0), kdes_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

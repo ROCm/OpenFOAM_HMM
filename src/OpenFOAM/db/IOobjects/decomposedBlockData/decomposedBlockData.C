@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -114,6 +114,7 @@ bool Foam::decomposedBlockData::readBlockEntry
     // 0.  NCHARS (...)
     // 1.  List<char> NCHARS (...)
     // 2.  processorN  List<char> NCHARS (...) ;
+    // 3.  processorN  NCHARS (...) ;
 
     is.fatalCheck(FUNCTION_NAME);
     token tok(is);
@@ -145,6 +146,125 @@ bool Foam::decomposedBlockData::readBlockEntry
 }
 
 
+bool Foam::decomposedBlockData::skipBlockEntry(Istream& is)
+{
+    // As per readBlockEntry but seeks instead of reading.
+    // Internals like charList::readList
+
+    // Handle any of these:
+    // 0.  NCHARS (...)
+    // 1.  List<char> NCHARS (...)
+    // 2.  processorN  List<char> NCHARS (...) ;
+    // 3.  processorN  NCHARS (...) ;
+
+    if (!is.good()) return false;
+    token tok(is);
+    if (!is.good()) return false;
+
+    // Dictionary format has primitiveEntry keyword:
+    const bool isDictFormat = (tok.isWord() && !tok.isCompound());
+
+    if (isDictFormat)
+    {
+        is >> tok;
+        if (!is.good()) return false;
+    }
+
+
+    bool handled = false;
+
+    // Like charList::readList
+    if (tok.isCompound())
+    {
+        handled = true;
+    }
+    else if (tok.isLabel())
+    {
+        // Label: could be int(..) or just a plain '0'
+
+        const label len = tok.labelToken();
+
+        // Binary, always contiguous
+
+        if (len)
+        {
+            const auto oldFmt = is.format(IOstreamOption::BINARY);
+
+            // read(...) includes surrounding start/end delimiters.
+
+            // Note: nullptr to seek instead of reading
+            is.read(nullptr, std::streamsize(len));
+
+            is.format(oldFmt);
+        }
+
+        handled = true;
+    }
+    else
+    {
+        // Incorrect token
+        return false;
+    }
+
+    if (isDictFormat)
+    {
+        is.fatalCheck(FUNCTION_NAME);
+        is >> tok;
+        is.fatalCheck(FUNCTION_NAME);
+
+        // Swallow trailing ';'
+        if (tok.good() && !tok.isPunctuation(token::END_STATEMENT))
+        {
+            is.putBack(tok);
+        }
+    }
+
+    return handled;
+}
+
+
+Foam::label Foam::decomposedBlockData::getNumBlocks
+(
+    Istream& is,
+    const bool readHeader
+)
+{
+    label nBlocks = 0;
+
+    if (readHeader)
+    {
+        token tok(is);
+
+        if (is.good() && tok.isWord("FoamFile"))
+        {
+            dictionary headerDict(is);  // Read sub-dictionary content
+
+            if (headerDict.readIfPresent("version", tok))
+            {
+                is.version(tok);
+            }
+            is.format(headerDict.get<word>("format"));
+            //// Obtain number of blocks directly
+            // headerDict.readIfPresent("blocks", nBlocks);
+            //{
+            //    return nBlocks;
+            //}
+        }
+        else if (tok.good())
+        {
+            is.putBack(tok);
+        }
+    }
+
+    while (is.good() && skipBlockEntry(is))
+    {
+        ++nBlocks;
+    }
+
+    return nBlocks;
+}
+
+
 std::streamoff Foam::decomposedBlockData::writeBlockEntry
 (
     OSstream& os,
@@ -158,12 +278,36 @@ std::streamoff Foam::decomposedBlockData::writeBlockEntry
 
     const word procName("processor" + Foam::name(blocki));
 
+    // Write as commented content
     {
         os  << nl << "// " << procName << nl;
         charData.writeList(os) << nl;
     }
+    // Write as primitiveEntry
+    // {
+    //     os << nl << procName << nl;
+    //     charData.writeList(os);
+    //     os.endEntry();
+    // }
 
     return blockOffset;
+}
+
+
+std::streamoff Foam::decomposedBlockData::writeBlockEntry
+(
+    OSstream& os,
+    const label blocki,
+    const std::string& content
+)
+{
+    UList<char> charData
+    (
+        const_cast<char*>(content.data()),
+        label(content.size())
+    );
+
+    return decomposedBlockData::writeBlockEntry(os, blocki, charData);
 }
 
 
@@ -176,10 +320,10 @@ std::streamoff Foam::decomposedBlockData::writeBlockEntry
     const bool withLocalHeader
 )
 {
-    // String(s) from all data to write
+    // String of all data to write
     string contentChars;
     {
-        OStringStream os(streamOptData);
+        OStringStream buf(streamOptData);
 
         bool ok = true;
 
@@ -188,30 +332,23 @@ std::streamoff Foam::decomposedBlockData::writeBlockEntry
         {
             const bool old = IOobject::bannerEnabled(false);
 
-            ok = io.writeHeader(os);
+            ok = io.writeHeader(buf);
 
             IOobject::bannerEnabled(old);
         }
 
         // Write the data to the Ostream
-        ok = ok && io.writeData(os);
+        ok = ok && io.writeData(buf);
 
         if (!ok)
         {
             return std::streamoff(-1);
         }
 
-        contentChars = os.str();
+        contentChars = buf.str();
     }
 
-    // The character data
-    UList<char> charData
-    (
-        const_cast<char*>(contentChars.data()),
-        label(contentChars.size())
-    );
-
-    return decomposedBlockData::writeBlockEntry(os, blocki, charData);
+    return decomposedBlockData::writeBlockEntry(os, blocki, contentChars);
 }
 
 
@@ -607,51 +744,49 @@ void Foam::decomposedBlockData::gatherSlaveData
     const UList<char>& data,
     const labelUList& recvSizes,
 
-    const label startProc,
-    const label nProcs,
+    const labelRange& fromProcs,
 
     List<int>& sliceOffsets,
-    List<char>& recvData
+    DynamicList<char>& recvData
 )
 {
+    const label myProci = UPstream::myProcNo(comm);
+    const label numProcs = UPstream::nProcs(comm);
+
+    int nSendBytes = 0;
+    recvData.clear();
+
     // Calculate master data
     List<int> sliceSizes;
     if (UPstream::master(comm))
     {
-        const label numProcs = UPstream::nProcs(comm);
-
         sliceSizes.resize(numProcs, 0);
         sliceOffsets.resize(numProcs+1, 0);
 
+        // Offset 1 beyond the end of the range
+        const label endProci = fromProcs.end_value();
+
         int totalSize = 0;
-        label proci = startProc;
-        for (label i = 0; i < nProcs; i++)
+        for (const label proci : fromProcs)
         {
             sliceSizes[proci] = int(recvSizes[proci]);
             sliceOffsets[proci] = totalSize;
             totalSize += sliceSizes[proci];
-            ++proci;
         }
-        sliceOffsets[proci] = totalSize;
-        recvData.setSize(totalSize);
-    }
 
-    int nSend = 0;
-    if
-    (
-       !UPstream::master(comm)
-     && (UPstream::myProcNo(comm) >= startProc)
-     && (UPstream::myProcNo(comm) < startProc+nProcs)
-    )
+        sliceOffsets[endProci] = totalSize;
+        recvData.resize(totalSize);
+    }
+    else if (fromProcs.contains(myProci))
     {
         // Note: UPstream::gather limited to int
-        nSend = int(data.size_bytes());
+        nSendBytes = int(data.size_bytes());
     }
 
     UPstream::gather
     (
         data.cdata(),
-        nSend,
+        nSendBytes,
 
         recvData.data(),
         sliceSizes,
@@ -671,7 +806,7 @@ Foam::label Foam::decomposedBlockData::calcNumProcs
 {
     const label nProcs = UPstream::nProcs(comm);
 
-    label nSendProcs = -1;
+    label nSendProcs = 0;
     if (UPstream::master(comm))
     {
         off_t totalSize = recvSizes[startProci];
@@ -685,19 +820,9 @@ Foam::label Foam::decomposedBlockData::calcNumProcs
         nSendProcs = proci-startProci;
     }
 
-    // Scatter nSendProcs
-    label n;
-    UPstream::scatter
-    (
-        reinterpret_cast<const char*>(&nSendProcs),
-        List<int>(nProcs, sizeof(nSendProcs)),
-        List<int>(nProcs, Zero),
-        reinterpret_cast<char*>(&n),
-        sizeof(n),
-        comm
-    );
+    Pstream::broadcast(nSendProcs, comm);
 
-    return n;
+    return nSendProcs;
 }
 
 
@@ -709,7 +834,7 @@ bool Foam::decomposedBlockData::writeBlocks
     const UList<char>& masterData,
 
     const labelUList& recvSizes,
-    const PtrList<SubList<char>>& slaveData,
+    const UPtrList<SubList<char>>& slaveData,
 
     const UPstream::commsTypes commsType,
     const bool syncReturnState
@@ -718,7 +843,7 @@ bool Foam::decomposedBlockData::writeBlocks
     if (debug)
     {
         Pout<< "decomposedBlockData::writeBlocks:"
-            << " stream:" << (osPtr ? osPtr->name() : "invalid")
+            << " stream:" << (osPtr ? osPtr->name() : "none")
             << " data:" << masterData.size()
             << " (master only) slaveData:" << slaveData.size()
             << " commsType:" << Pstream::commsTypeNames[commsType] << endl;
@@ -733,7 +858,7 @@ bool Foam::decomposedBlockData::writeBlocks
     {
         blockOffset.resize(nProcs);
 
-        OSstream& os = *osPtr;
+        OSstream& os = osPtr();
 
         blockOffset[UPstream::masterNo()] =
             decomposedBlockData::writeBlockEntry
@@ -753,7 +878,7 @@ bool Foam::decomposedBlockData::writeBlocks
         if (UPstream::master(comm))
         {
             // Master data already written ...
-            OSstream& os = *osPtr;
+            OSstream& os = osPtr();
 
             // Write slaves
             for (label proci = 1; proci < nProcs; ++proci)
@@ -775,20 +900,26 @@ bool Foam::decomposedBlockData::writeBlocks
         if (UPstream::master(comm))
         {
             // Master data already written ...
-            OSstream& os = *osPtr;
+            OSstream& os = osPtr();
 
             // Receive and write slaves
-            DynamicList<char> elems;
+            label maxNonLocalSize = 0;
             for (label proci = 1; proci < nProcs; ++proci)
             {
-                elems.resize(recvSizes[proci]);
+                maxNonLocalSize = max(maxNonLocalSize, recvSizes[proci]);
+            }
+
+            DynamicList<char> elems(maxNonLocalSize);
+            for (label proci = 1; proci < nProcs; ++proci)
+            {
+                elems.resize_nocopy(recvSizes[proci]);
                 UIPstream::read
                 (
                     UPstream::commsTypes::scheduled,
                     proci,
                     elems.data(),
                     elems.size_bytes(),
-                    Pstream::msgType(),
+                    UPstream::msgType(),
                     comm
                 );
 
@@ -811,7 +942,7 @@ bool Foam::decomposedBlockData::writeBlocks
                 UPstream::masterNo(),
                 masterData.cdata(),
                 masterData.size_bytes(),
-                Pstream::msgType(),
+                UPstream::msgType(),
                 comm
             );
         }
@@ -826,6 +957,8 @@ bool Foam::decomposedBlockData::writeBlocks
         // Starting slave processor and number of processors
         label startProc = 1;
         label nSendProcs = nProcs-1;
+
+        DynamicList<char> recvData;
 
         while (nSendProcs > 0 && startProc < nProcs)
         {
@@ -848,16 +981,16 @@ bool Foam::decomposedBlockData::writeBlocks
 
 
             // Gather data from (a slice of) the slaves
+            labelRange fromProcs(startProc, nSendProcs);
+
             List<int> sliceOffsets;
-            List<char> recvData;
             gatherSlaveData
             (
                 comm,
                 masterData,
                 recvSizes,
 
-                startProc,      // startProc,
-                nSendProcs,     // nProcs,
+                fromProcs,
 
                 sliceOffsets,
                 recvData
@@ -865,15 +998,10 @@ bool Foam::decomposedBlockData::writeBlocks
 
             if (UPstream::master(comm))
             {
-                OSstream& os = *osPtr;
+                OSstream& os = osPtr();
 
-                // Write slaves
-                for
-                (
-                    label proci = startProc;
-                    proci < startProc+nSendProcs;
-                    ++proci
-                )
+                // Write received data
+                for (const label proci : fromProcs)
                 {
                     SubList<char> dataSlice
                     (
@@ -1002,7 +1130,7 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
 bool Foam::decomposedBlockData::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     autoPtr<OSstream> osPtr;

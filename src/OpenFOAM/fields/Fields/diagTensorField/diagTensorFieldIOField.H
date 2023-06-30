@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::diagTensorFieldIOField
-
-Description
-    diagTensorFieldField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef diagTensorFieldIOField_H
-#define diagTensorFieldIOField_H
+#ifndef Foam_diagTensorFieldIOField_H
+#define Foam_diagTensorFieldIOField_H
 
 #include "diagTensorField.H"
 #include "CompactIOField.H"
@@ -41,7 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of diagTensorField
     typedef IOField<diagTensorField> diagTensorFieldIOField;
+
+    //! Compact IO for a Field of diagTensorField
     typedef CompactIOField<diagTensorField, diagTensor>
     diagTensorFieldCompactIOField;
 }

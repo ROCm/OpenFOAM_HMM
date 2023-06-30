@@ -57,6 +57,7 @@ pTraits<Scalar>::pTraits(Istream& is)
 
 word name(const Scalar val)
 {
+    // Caution std::to_string(double) is locale sensitive!
     std::ostringstream buf;
     buf << val;
 

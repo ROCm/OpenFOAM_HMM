@@ -91,7 +91,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
                 fvm,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             );
 
             if (vfHeader.typeHeaderOk<volScalarField>(true))

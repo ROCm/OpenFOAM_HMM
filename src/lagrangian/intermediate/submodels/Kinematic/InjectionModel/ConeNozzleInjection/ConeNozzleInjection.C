@@ -186,7 +186,15 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     tetPti_(-1),
     directionVsTime_(nullptr),
     direction_(Zero),
-    omegaPtr_(nullptr),
+    omegaPtr_
+    (
+        Function1<scalar>::NewIfPresent
+        (
+            "omega",
+            this->coeffDict(),
+            &owner.mesh()
+        )
+    ),
     parcelsPerSecond_(this->coeffDict().getScalar("parcelsPerSecond")),
     flowRateProfile_
     (
@@ -247,16 +255,8 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     thetaInner_->userTimeToTime(time);
     thetaOuter_->userTimeToTime(time);
 
-    if (this->coeffDict().found("omega"))
+    if (omegaPtr_)
     {
-        omegaPtr_ =
-            Function1<scalar>::New
-            (
-                "omega",
-                this->coeffDict(),
-                &owner.mesh()
-            );
-
         omegaPtr_->userTimeToTime(time);
     }
 

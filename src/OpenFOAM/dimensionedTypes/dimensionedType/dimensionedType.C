@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dimensionedType.H"
-#include "pTraits.H"
 #include "dictionary.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -709,22 +708,15 @@ Foam::dimensioned<Type> Foam::cmptDivide
 template<class Type>
 Foam::dimensioned<Type> Foam::max
 (
-    const dimensioned<Type>& dt1,
-    const dimensioned<Type>& dt2
+    const dimensioned<Type>& a,
+    const dimensioned<Type>& b
 )
 {
-    if (dt1.dimensions() != dt2.dimensions())
-    {
-        FatalErrorInFunction
-            << "dimensions of arguments are not equal"
-            << abort(FatalError);
-    }
-
     return dimensioned<Type>
     (
-        "max(" + dt1.name() + ',' + dt2.name() + ')',
-        dt1.dimensions(),
-        max(dt1.value(), dt2.value())
+        "max(" + a.name() + ',' + b.name() + ')',
+        max(a.dimensions(), b.dimensions()),
+        max(a.value(), b.value())
     );
 }
 
@@ -732,22 +724,32 @@ Foam::dimensioned<Type> Foam::max
 template<class Type>
 Foam::dimensioned<Type> Foam::min
 (
-    const dimensioned<Type>& dt1,
-    const dimensioned<Type>& dt2
+    const dimensioned<Type>& a,
+    const dimensioned<Type>& b
 )
 {
-    if (dt1.dimensions() != dt2.dimensions())
-    {
-        FatalErrorInFunction
-            << "dimensions of arguments are not equal"
-            << abort(FatalError);
-    }
-
     return dimensioned<Type>
     (
-        "min(" + dt1.name() + ',' + dt2.name() + ')',
-        dt1.dimensions(),
-        min(dt1.value(), dt2.value())
+        "min(" + a.name() + ',' + b.name() + ')',
+        min(a.dimensions(), b.dimensions()),
+        min(a.value(), b.value())
+    );
+}
+
+
+template<class Type>
+Foam::dimensioned<Type> Foam::lerp
+(
+    const dimensioned<Type>& a,
+    const dimensioned<Type>& b,
+    const scalar t
+)
+{
+    return dimensioned<Type>
+    (
+        "lerp(" + a.name() + ',' + b.name() + ',' + ::Foam::name(t) + ')',
+        lerp(a.dimensions(), b.dimensions()),
+        lerp(a.value(), b.value(), t)
     );
 }
 

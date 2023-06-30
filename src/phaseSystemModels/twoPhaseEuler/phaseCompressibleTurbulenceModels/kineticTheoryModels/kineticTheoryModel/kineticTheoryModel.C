@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -256,7 +256,7 @@ Foam::RASModels::kineticTheoryModel::R() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-          - (nut_)*dev(twoSymm(fvc::grad(U_)))
+          - (nut_)*devTwoSymm(fvc::grad(U_))
           - (lambda_*fvc::div(phi_))*symmTensor::I
         )
     );
@@ -335,7 +335,7 @@ Foam::RASModels::kineticTheoryModel::devRhoReff
                 IOobject::NO_WRITE
             ),
           - (rho_*nut_)
-           *dev(twoSymm(fvc::grad(U)))
+           *devTwoSymm(fvc::grad(U))
           - ((rho_*lambda_)*fvc::div(phi_))*symmTensor::I
         )
     );
@@ -530,8 +530,7 @@ void Foam::RASModels::kineticTheoryModel::correct()
         kappa_ = conductivityModel_->kappa(alpha, Theta_, gs0_, rho, da, e_);
     }
 
-    Theta_.max(0);
-    Theta_.min(100);
+    Theta_.clamp_range(0, 100);
 
     {
         // particle viscosity (Table 3.2, p.47)
@@ -563,7 +562,8 @@ void Foam::RASModels::kineticTheoryModel::correct()
         );
 
         // Limit viscosity and add frictional viscosity
-        nut_.min(maxNut_);
+        nut_.clamp_max(maxNut_);
+
         nuFric_ = min(nuFric_, maxNut_ - nut_);
         nut_ += nuFric_;
     }

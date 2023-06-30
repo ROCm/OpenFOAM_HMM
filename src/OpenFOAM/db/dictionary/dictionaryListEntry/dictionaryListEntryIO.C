@@ -132,7 +132,11 @@ void Foam::dictionaryListEntry::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryListEntry& e)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const dictionaryListEntry& e
+)
 {
     e.write(os);
     return os;
@@ -143,10 +147,10 @@ template<>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<dictionaryListEntry>& ip
+    const InfoProxy<dictionaryListEntry>& iproxy
 )
 {
-    const dictionaryListEntry& e = ip.t_;
+    const auto& e = *iproxy;
 
     os  << "    dictionaryListEntry '" << e.keyword() << "'" << endl;
 

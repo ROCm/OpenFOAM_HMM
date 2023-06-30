@@ -50,8 +50,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef adjointkOmegaSST_H
-#define adjointkOmegaSST_H
+#ifndef Foam_adjointkOmegaSST_H
+#define Foam_adjointkOmegaSST_H
 
 #include "adjointRASModel.H"
 #include "wallDist.H"
@@ -247,7 +247,7 @@ protected:
             {
                 return tmp<volScalarField::Internal>::New
                 (
-                    this->type() + ":beta",
+                    IOobject::scopedName(this->type(), "beta"),
                     blend(F1, beta1_, beta2_)
                 );
             }
@@ -259,7 +259,7 @@ protected:
             {
                 return tmp<volScalarField>::New
                 (
-                    this->type() + ":beta",
+                    IOobject::scopedName(this->type(), "beta"),
                     blend(F1, beta1_, beta2_)
                 );
             }
@@ -271,7 +271,7 @@ protected:
             {
                 return tmp<volScalarField::Internal>::New
                 (
-                    this->type() + ":gamma",
+                    IOobject::scopedName(this->type(), "gamma"),
                     blend(F1, gamma1_, gamma2_)
                 );
             }
@@ -283,7 +283,7 @@ protected:
             {
                 return tmp<volScalarField>::New
                 (
-                    this->type() + ":gamma",
+                    IOobject::scopedName(this->type(), "gamma"),
                     blend(F1, gamma1_, gamma2_)
                 );
             }

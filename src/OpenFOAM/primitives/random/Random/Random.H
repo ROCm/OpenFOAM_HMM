@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Random_H
-#define Random_H
+#ifndef Foam_Random_H
+#define Foam_Random_H
 
 #include "Rand48.H"
 #include "label.H"

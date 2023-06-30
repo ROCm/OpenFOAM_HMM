@@ -18,13 +18,19 @@ global/etcFiles/etcFiles.C
 
 fileOps = global/fileOperations
 $(fileOps)/fileOperation/fileOperation.C
-$(fileOps)/fileOperationInitialise/fileOperationInitialise.C
+$(fileOps)/fileOperation/fileOperationBroadcast.C
+$(fileOps)/fileOperation/fileOperationNew.C
+$(fileOps)/fileOperation/fileOperationRanks.C
+$(fileOps)/fileOperation/fileOperationInitialise.C
+$(fileOps)/dummyFileOperation/dummyFileOperation.C
 $(fileOps)/uncollatedFileOperation/uncollatedFileOperation.C
 $(fileOps)/masterUncollatedFileOperation/masterUncollatedFileOperation.C
 $(fileOps)/collatedFileOperation/collatedFileOperation.C
 $(fileOps)/collatedFileOperation/hostCollatedFileOperation.C
 $(fileOps)/collatedFileOperation/threadedCollatedOFstream.C
 $(fileOps)/collatedFileOperation/OFstreamCollator.C
+
+parallel/processorTopology/processorTopology.C
 
 bools = primitives/bools
 $(bools)/bool/bool.C
@@ -40,22 +46,21 @@ $(chars)/lists/charUList.C
 primitives/direction/directionIO.C
 
 ints = primitives/ints
+$(ints)/uint/uintIO.C
 $(ints)/uint8/uint8.C
-$(ints)/uint8/uint8IO.C
 $(ints)/uint16/uint16.C
 $(ints)/uint32/uint32.C
 $(ints)/uint32/uint32IO.C
 $(ints)/uint64/uint64.C
 $(ints)/uint64/uint64IO.C
-$(ints)/uint/uintIO.C
+$(ints)/uLabel/uLabel.C
+$(ints)/int/intIO.C
 $(ints)/int16/int16.C
 $(ints)/int32/int32.C
 $(ints)/int32/int32IO.C
 $(ints)/int64/int64.C
 $(ints)/int64/int64IO.C
-$(ints)/int/intIO.C
 $(ints)/label/label.C
-$(ints)/uLabel/uLabel.C
 $(ints)/lists/labelList.C
 $(ints)/lists/labelIOList.C
 $(ints)/lists/labelListIOList.C
@@ -240,11 +245,12 @@ containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C
 
+db/options/IOstreamOption.C
+
 Streams = db/IOstreams
 $(Streams)/token/tokenIO.C
 
 IOstreams = $(Streams)/IOstreams
-$(IOstreams)/IOstreamOption.C
 $(IOstreams)/IOstream.C
 $(IOstreams)/Istream.C
 $(IOstreams)/Ostream.C
@@ -359,6 +365,7 @@ $(regIOobject)/regIOobjectWrite.C
 
 db/IOobjectList/IOobjectList.C
 db/objectRegistry/objectRegistry.C
+db/objectRegistry/objectRegistryCache.C
 db/CallbackRegistry/CallbackRegistryName.C
 
 dll = db/dynamicLibrary
@@ -429,6 +436,7 @@ $(lduMatrix)/solvers/smoothSolver/smoothSolver.C
 $(lduMatrix)/solvers/PCG/PCG.C
 $(lduMatrix)/solvers/PBiCG/PBiCG.C
 $(lduMatrix)/solvers/PBiCGStab/PBiCGStab.C
+$(lduMatrix)/solvers/FPCG/FPCG.C
 $(lduMatrix)/solvers/PPCG/PPCG.C
 $(lduMatrix)/solvers/PPCR/PPCR.C
 

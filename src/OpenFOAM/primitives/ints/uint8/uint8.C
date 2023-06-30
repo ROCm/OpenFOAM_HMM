@@ -26,6 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "uint8.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,6 +47,19 @@ Foam::pTraits<uint8_t>::pTraits(Istream& is)
 {
     is >> p_;
 }
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+uint8_t Foam::readUint8(Istream& is)
+{
+    uint8_t val(0);
+    is >> val;
+
+    return val;
+}
+
+// IO operators are identical to direction, which is uint8_t
 
 
 // ************************************************************************* //

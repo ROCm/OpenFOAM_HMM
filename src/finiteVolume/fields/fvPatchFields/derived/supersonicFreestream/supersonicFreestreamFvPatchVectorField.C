@@ -72,18 +72,11 @@ supersonicFreestreamFvPatchVectorField
     TInf_(dict.get<scalar>("TInf")),
     gamma_(dict.get<scalar>("gamma"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchField<vector>::operator=(patchInternalField());
+        this->extrapolateInternal();
     }
 
     refValue() = *this;
@@ -166,14 +159,11 @@ void Foam::supersonicFreestreamFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvPatchField<scalar>& pT =
-        patch().lookupPatchField<volScalarField, scalar>(TName_);
+    const auto& pT = patch().lookupPatchField<volScalarField>(TName_);
 
-    const fvPatchField<scalar>& pp =
-        patch().lookupPatchField<volScalarField, scalar>(pName_);
+    const auto& pp = patch().lookupPatchField<volScalarField>(pName_);
 
-    const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
+    const auto& ppsi = patch().lookupPatchField<volScalarField>(psiName_);
 
     // Need R of the free-stream flow.  Assume R is independent of location
     // along patch so use face 0
@@ -297,7 +287,7 @@ void Foam::supersonicFreestreamFvPatchVectorField::updateCoeffs()
 
 void Foam::supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     os.writeEntryIfDifferent<word>("p", "p", pName_);
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
@@ -305,7 +295,7 @@ void Foam::supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
     os.writeEntry("pInf", pInf_);
     os.writeEntry("TInf", TInf_);
     os.writeEntry("gamma", gamma_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

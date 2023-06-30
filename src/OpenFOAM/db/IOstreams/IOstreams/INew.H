@@ -55,7 +55,7 @@ class INew
 public:
 
     //- Default construct
-    INew() = default;
+    INew() noexcept = default;
 
     //- New from Istream
     autoPtr<T> operator()(Istream& is) const

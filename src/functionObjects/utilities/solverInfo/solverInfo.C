@@ -91,7 +91,9 @@ void Foam::functionObjects::solverInfo::createResidualField
         IOobject::scopedName("initialResidual", fieldName)
     );
 
-    if (!mesh_.foundObject<IOField<scalar>>(residualName))
+    auto* fieldPtr = mesh_.getObjectPtr<IOField<scalar>>(residualName);
+
+    if (!fieldPtr)
     {
         auto* fieldPtr =
             new IOField<scalar>
@@ -102,7 +104,8 @@ void Foam::functionObjects::solverInfo::createResidualField
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
                 ),
                 Field<scalar>(mesh_.nCells(), Zero)
             );
@@ -213,11 +216,11 @@ bool Foam::functionObjects::solverInfo::write()
                     mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 mesh_,
                 dimensionedScalar(dimless, Zero),
-                zeroGradientFvPatchField<scalar>::typeName
+                fvPatchFieldBase::zeroGradientType()
             );
 
             residual.primitiveFieldRef() = *residualPtr;

@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
 
-    treeBoundBox bb(cube(0, 1));
+    treeBoundBox bb(zero_one{});
     treeBoundBox sub(cube(0.1, 0.8));
 
     Info<< nl

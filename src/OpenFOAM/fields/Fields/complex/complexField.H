@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef complexField_H
-#define complexField_H
+#ifndef Foam_complexField_H
+#define Foam_complexField_H
 
 #include "complex.H"
 #include "scalarField.H"
@@ -53,46 +53,87 @@ namespace Foam
 
 typedef Field<complex> complexField;
 
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-//- Zip together complex field from components
+//- Zip together complex field from real/imag components
 void zip
 (
     complexField& result,
-    const UList<scalar>& re,
-    const UList<scalar>& im
+    const UList<scalar>& realValues,
+    const UList<scalar>& imagValues
+);
+
+//- Zip together complex field from real components and constant imag component
+void zip
+(
+    complexField& result,
+    const UList<scalar>& realValues,
+    const scalar imagValue
+);
+
+//- Zip together complex field from constant real component and imag components
+void zip
+(
+    complexField& result,
+    const scalar realValue,
+    const UList<scalar>& imagValues
 );
 
 //- Unzip complex field into components
 void unzip
 (
     const UList<complex>& input,
-    scalarField& re,
-    scalarField& im
+    scalarField& realValues,
+    scalarField& imagValues
 );
 
 
-//- Zip up two lists of values into a list of complex
+//- Create complex field by zipping two lists of real/imag values
 complexField ComplexField
 (
-    const UList<scalar>& re,
-    const UList<scalar>& im
+    const UList<scalar>& realValues,
+    const UList<scalar>& imagValues
 );
 
-//- Create complex field from a list of real (using imag == 0)
-complexField ReComplexField(const UList<scalar>& re);
+//- Create complex field by zipping a list of real components
+//- and a constant imag component
+complexField ComplexField
+(
+    const UList<scalar>& realValues,
+    const scalar imagValue
+);
 
-//- Create complex field from a list of imag (using real == 0)
-complexField ImComplexField(const UList<scalar>& im);
+//- Create complex field by zipping a constant real component
+//- and a list of imag components
+complexField ComplexField
+(
+    const scalar realValue,
+    const UList<scalar>& imagValues
+);
+
 
 //- Extract real component
-scalarField Re(const UList<complex>& cf);
+scalarField Re(const UList<complex>& cmplx);
 
 //- Extract imag component
-scalarField Im(const UList<complex>& cf);
+scalarField Im(const UList<complex>& cmplx);
 
 //- Sum real and imag components
-scalarField ReImSum(const UList<complex>& cf);
+scalarField ReImSum(const UList<complex>& cmplx);
+
+
+//- Create complex field from a list of real (using imag == 0)
+inline complexField ReComplexField(const UList<scalar>& realValues)
+{
+    return ComplexField(realValues, scalar(0));
+}
+
+//- Create complex field from a list of imag (using real == 0)
+inline complexField ImComplexField(const UList<scalar>& imagValues)
+{
+    return ComplexField(scalar(0), imagValues);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

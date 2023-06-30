@@ -35,12 +35,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicAMIPointPatchField_H
-#define cyclicAMIPointPatchField_H
+#ifndef Foam_cyclicAMIPointPatchField_H
+#define Foam_cyclicAMIPointPatchField_H
 
 #include "coupledPointPatchField.H"
 #include "cyclicAMIPointPatch.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,7 +129,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         cyclicAMIPointPatchField
         (
             const cyclicAMIPointPatchField<Type>&,
@@ -189,11 +189,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return
-                   !(
-                        cyclicAMIPatch_.parallel()
-                     || pTraits<Type>::rank == 0
-                    );
+                return (pTraits<Type>::rank && !cyclicAMIPatch_.parallel());
             }
 
             //- Return face transformation tensor

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -257,6 +257,29 @@ void Foam::PDRblock::gridControl::writeDict
         os.endBlock();
     }
     os << nl;
+}
+
+
+void Foam::PDRblock::location::reset
+(
+    const scalar low,
+    const scalar upp,
+    const label nCells
+)
+{
+    scalarList& grid = *this;
+
+    grid.resize_nocopy(nCells+1);
+
+    grid.front() = low;
+    grid.back() = upp;
+
+    const scalar span = (upp - low);
+
+    for (label pointi = 1; pointi < nCells; ++pointi)
+    {
+        grid[pointi] = low + (pointi*span)/nCells;
+    }
 }
 
 

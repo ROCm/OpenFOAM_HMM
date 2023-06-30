@@ -48,9 +48,9 @@ SourceFiles
 #ifndef Foam_PatchTools_H
 #define Foam_PatchTools_H
 
-#include "PrimitivePatch.H"
-#include "globalIndex.H"
 #include "autoPtr.H"
+#include "globalIndex.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

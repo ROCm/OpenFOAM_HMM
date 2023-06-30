@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::surfZoneIdentifierList
-
-Description
-    A List of surfZoneIdentifier.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfZoneIdentifierList_H
-#define surfZoneIdentifierList_H
+#ifndef Foam_surfZoneIdentifierList_H
+#define Foam_surfZoneIdentifierList_H
 
 #include "surfZoneIdentifier.H"
 #include "List.H"
@@ -41,14 +35,9 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-typedef List<surfZoneIdentifier> surfZoneIdentifierList;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    //! List of surfZoneIdentifier
+    typedef List<surfZoneIdentifier> surfZoneIdentifierList;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

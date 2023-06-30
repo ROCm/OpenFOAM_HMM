@@ -161,15 +161,11 @@ Foam::functionObjects::extractEulerianParticles::phiU() const
 {
     DebugInFunction << endl;
 
-    const surfaceScalarField& phi
-    (
-        mesh_.lookupObject<surfaceScalarField>(phiName_)
-    );
+    const auto& phi = mesh_.lookupObject<surfaceScalarField>(phiName_);
 
     if (phi.dimensions() == dimMass/dimTime)
     {
-        const volScalarField& rho =
-            mesh_.lookupObject<volScalarField>(rhoName_);
+        const auto& rho = mesh_.lookupObject<volScalarField>(rhoName_);
 
         return phi/fvc::interpolate(rho);
     }

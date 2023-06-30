@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,21 +58,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> stabilise
     const dimensioned<scalar>& ds
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tRes
+    auto tRes = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "stabilise(" + gsf.name() + ',' + ds.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            ds.dimensions() + gsf.dimensions()
-        )
+        "stabilise(" + gsf.name() + ',' + ds.name() + ')',
+        gsf.mesh(),
+        ds.dimensions() + gsf.dimensions()
     );
 
     stabilise(tRes.ref(), gsf, ds);
@@ -136,170 +127,192 @@ void pow
 template<template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
 (
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf1,
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf2
+    const GeometricField<scalar, PatchField, GeoMesh>& f1,
+    const GeometricField<scalar, PatchField, GeoMesh>& f2
 )
 {
-    if (!gsf1.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Base field is not dimensionless: " << gsf1.dimensions()
-            << exit(FatalError);
-    }
-
-    if (!gsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << gsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    if
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "pow(" + gsf1.name() + ',' + gsf2.name() + ')',
-                gsf1.instance(),
-                gsf1.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf1.mesh(),
-            dimless
-        )
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
+    {
+        FatalErrorInFunction
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
+    }
+
+    auto tresult = GeometricField<scalar, PatchField, GeoMesh>::New
+    (
+        "pow(" + f1.name() + ',' + f2.name() + ')',
+        f1.mesh(),
+        dimless
     );
 
-    pow(tPow.ref(), gsf1, gsf2);
+    pow(tresult.ref(), f1, f2);
 
-    return tPow;
+    return tresult;
 }
 
 
 template<template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
 (
-    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tgsf1,
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf2
+    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tf1,
+    const GeometricField<scalar, PatchField, GeoMesh>& f2
 )
 {
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf1 = tgsf1();
+    const auto& f1 = tf1();
 
-    if (!gsf1.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Base field is not dimensionless: " << gsf1.dimensions()
-            << exit(FatalError);
-    }
-
-    if (!gsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << gsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    if
     (
-        New
-        (
-            tgsf1,
-            "pow(" + gsf1.name() + ',' + gsf2.name() + ')',
-            dimless
-        )
-    );
-
-    pow(tPow.ref(), gsf1, gsf2);
-
-    tgsf1.clear();
-
-    return tPow;
-}
-
-
-template<template<class> class PatchField, class GeoMesh>
-tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
-(
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf1,
-    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tgsf2
-)
-{
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf2 = tgsf2();
-
-    if (!gsf1.dimensions().dimensionless())
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Base field is not dimensionless: " << gsf1.dimensions()
-            << exit(FatalError);
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
     }
 
-    if (!gsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << gsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
     (
         New
         (
-            tgsf2,
-            "pow(" + gsf1.name() + ',' + gsf2.name() + ')',
+            tf1,
+            "pow(" + f1.name() + ',' + f2.name() + ')',
             dimless
         )
     );
 
-    pow(tPow.ref(), gsf1, gsf2);
+    pow(tresult.ref(), f1, f2);
 
-    tgsf2.clear();
+    tf1.clear();
 
-    return tPow;
+    return tresult;
+}
+
+
+template<template<class> class PatchField, class GeoMesh>
+tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
+(
+    const GeometricField<scalar, PatchField, GeoMesh>& f1,
+    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tf2
+)
+{
+    const auto& f2 = tf2();
+
+    if
+    (
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
+    {
+        FatalErrorInFunction
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
+    }
+
+    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
+    (
+        New
+        (
+            tf2,
+            "pow(" + f1.name() + ',' + f2.name() + ')',
+            dimless
+        )
+    );
+
+    pow(tresult.ref(), f1, f2);
+
+    tf2.clear();
+
+    return tresult;
 }
 
 template<template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
 (
-    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tgsf1,
-    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tgsf2
+    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tf1,
+    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tf2
 )
 {
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf1 = tgsf1();
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf2 = tgsf2();
+    const auto& f1 = tf1();
+    const auto& f2 = tf2();
 
-    if (!gsf1.dimensions().dimensionless())
+    if
+    (
+        dimensionSet::checking()
+     && (!f1.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Base field is not dimensionless: " << gsf1.dimensions()
-            << exit(FatalError);
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!f1.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base field dimensions: " << f1.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
     }
 
-    if (!gsf2.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << gsf2.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
     (
         reuseTmpTmpGeometricField
             <scalar, scalar, scalar, scalar, PatchField, GeoMesh>::New
         (
-            tgsf1,
-            tgsf2,
-            "pow(" + gsf1.name() + ',' + gsf2.name() + ')',
+            tf1,
+            tf2,
+            "pow(" + f1.name() + ',' + f2.name() + ')',
             dimless
         )
     );
 
-    pow(tPow.ref(), gsf1, gsf2);
+    pow(tresult.ref(), f1, f2);
 
-    tgsf1.clear();
-    tgsf2.clear();
+    tf1.clear();
+    tf2.clear();
 
-    return tPow;
+    return tresult;
 }
 
 
@@ -319,70 +332,70 @@ void pow
 template<template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
 (
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf,
+    const GeometricField<scalar, PatchField, GeoMesh>& f1,
     const dimensionedScalar& ds
 )
 {
-    if (!ds.dimensions().dimensionless())
+    if
+    (
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Exponent is not dimensionless: " << ds.dimensions()
+            << "pow() expects dimensionless parameters, but found" << nl
+            << "    Exponent dimensions: " << ds.dimensions() << nl
             << exit(FatalError);
     }
 
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    auto tresult = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "pow(" + gsf.name() + ',' + ds.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            pow(gsf.dimensions(), ds)
-        )
+        "pow(" + f1.name() + ',' + ds.name() + ')',
+        f1.mesh(),
+        pow(f1.dimensions(), ds)
     );
 
-    pow(tPow.ref(), gsf, ds);
+    pow(tresult.ref(), f1, ds);
 
-    return tPow;
+    return tresult;
 }
 
 template<template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
 (
-    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tgsf,
+    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tf1,
     const dimensionedScalar& ds
 )
 {
-    if (!ds.dimensions().dimensionless())
+    const auto& f1 = tf1();
+
+    if
+    (
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Exponent is not dimensionless: " << ds.dimensions()
+            << "pow() expects dimensionless parameters, but found" << nl
+            << "    Exponent dimensions: " << ds.dimensions() << nl
             << exit(FatalError);
     }
 
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf = tgsf();
-
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
     (
         New
         (
-            tgsf,
-            "pow(" + gsf.name() + ',' + ds.name() + ')',
-            pow(gsf.dimensions(), ds)
+            tf1,
+            "pow(" + f1.name() + ',' + ds.name() + ')',
+            pow(f1.dimensions(), ds)
         )
     );
 
-    pow(tPow.ref(), gsf, ds);
+    pow(tresult.ref(), f1, ds);
 
-    tgsf.clear();
+    tf1.clear();
 
-    return tPow;
+    return tresult;
 }
 
 template<template<class> class PatchField, class GeoMesh>
@@ -423,43 +436,41 @@ template<template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
 (
     const dimensionedScalar& ds,
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf
+    const GeometricField<scalar, PatchField, GeoMesh>& f2
 )
 {
-    if (!ds.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Base scalar is not dimensionless: " << ds.dimensions()
-            << exit(FatalError);
-    }
-
-    if (!gsf.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << gsf.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    if
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "pow(" + ds.name() + ',' + gsf.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            dimless
-        )
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
+    {
+        FatalErrorInFunction
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!ds.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base scalar dimensions: " << ds.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
+    }
+
+    auto tresult = GeometricField<scalar, PatchField, GeoMesh>::New
+    (
+        "pow(" + ds.name() + ',' + f2.name() + ')',
+        f2.mesh(),
+        dimless
     );
 
-    pow(tPow.ref(), ds, gsf);
+    pow(tresult.ref(), ds, f2);
 
-    return tPow;
+    return tresult;
 }
 
 
@@ -467,40 +478,48 @@ template<template<class> class PatchField, class GeoMesh>
 tmp<GeometricField<scalar, PatchField, GeoMesh>> pow
 (
     const dimensionedScalar& ds,
-    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tgsf
+    const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tf2
 )
 {
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf = tgsf();
+    const auto& f2 = tf2();
 
-    if (!ds.dimensions().dimensionless())
+    if
+    (
+        dimensionSet::checking()
+     && (!ds.dimensions().dimensionless() || !f2.dimensions().dimensionless())
+    )
     {
         FatalErrorInFunction
-            << "Base scalar is not dimensionless: " << ds.dimensions()
-            << exit(FatalError);
+            << "pow() expects dimensionless parameters, but found" << nl;
+
+        if (!ds.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Base scalar dimensions: " << ds.dimensions() << nl;
+        }
+        if (!f2.dimensions().dimensionless())
+        {
+            FatalError
+                << "    Exponent field dimensions: " << f2.dimensions() << nl;
+        }
+        FatalError << exit(FatalError);
     }
 
-    if (!gsf.dimensions().dimensionless())
-    {
-        FatalErrorInFunction
-            << "Exponent field is not dimensionless: " << gsf.dimensions()
-            << exit(FatalError);
-    }
-
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tPow
+    tmp<GeometricField<scalar, PatchField, GeoMesh>> tresult
     (
         New
         (
-            tgsf,
-            "pow(" + ds.name() + ',' + gsf.name() + ')',
+            tf2,
+            "pow(" + ds.name() + ',' + f2.name() + ')',
             dimless
         )
     );
 
-    pow(tPow.ref(), ds, gsf);
+    pow(tresult.ref(), ds, f2);
 
-    tgsf.clear();
+    tf2.clear();
 
-    return tPow;
+    return tresult;
 }
 
 template<template<class> class PatchField, class GeoMesh>
@@ -556,21 +575,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> atan2
     const GeometricField<scalar, PatchField, GeoMesh>& gsf2
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tAtan2
+    auto tAtan2 = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "atan2(" + gsf1.name() + ',' + gsf2.name() + ')',
-                gsf1.instance(),
-                gsf1.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf1.mesh(),
-            atan2(gsf1.dimensions(), gsf2.dimensions())
-        )
+        "atan2(" + gsf1.name() + ',' + gsf2.name() + ')',
+        gsf1.mesh(),
+        atan2(gsf1.dimensions(), gsf2.dimensions())
     );
 
     atan2(tAtan2.ref(), gsf1, gsf2);
@@ -683,21 +692,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> atan2
     const dimensionedScalar& ds
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tAtan2
+    auto tAtan2 = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "atan2(" + gsf.name() + ',' + ds.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            atan2(gsf.dimensions(), ds)
-        )
+        "atan2(" + gsf.name() + ',' + ds.name() + ')',
+        gsf.mesh(),
+        atan2(gsf.dimensions(), ds)
     );
 
     atan2(tAtan2.ref(), gsf, ds);
@@ -772,21 +771,11 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> atan2
     const GeometricField<scalar, PatchField, GeoMesh>& gsf
 )
 {
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tAtan2
+    auto tAtan2 = GeometricField<scalar, PatchField, GeoMesh>::New
     (
-        new GeometricField<scalar, PatchField, GeoMesh>
-        (
-            IOobject
-            (
-                "atan2(" + ds.name() + ',' + gsf.name() + ')',
-                gsf.instance(),
-                gsf.db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            gsf.mesh(),
-            atan2(ds, gsf.dimensions())
-        )
+        "atan2(" + ds.name() + ',' + gsf.name() + ')',
+        gsf.mesh(),
+        atan2(ds, gsf.dimensions())
     );
 
     atan2(tAtan2.ref(), ds, gsf);
@@ -906,28 +895,18 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> func                          \
     const GeometricField<scalar, PatchField, GeoMesh>& gsf                     \
 )                                                                              \
 {                                                                              \
-    if (!gsf.dimensions().dimensionless())                                     \
+    if (dimensionSet::checking() && !gsf.dimensions().dimensionless())         \
     {                                                                          \
         FatalErrorInFunction                                                   \
-            << "gsf not dimensionless"                                         \
+            << "Field is not dimensionless: " << gsf.dimensions() << nl        \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \
-    tmp<GeometricField<scalar, PatchField, GeoMesh>> tFunc                     \
+    auto tFunc = GeometricField<scalar, PatchField, GeoMesh>::New              \
     (                                                                          \
-        new GeometricField<scalar, PatchField, GeoMesh>                        \
-        (                                                                      \
-            IOobject                                                           \
-            (                                                                  \
-                #func "(" + gsf.name() + ')',                                  \
-                gsf.instance(),                                                \
-                gsf.db(),                                                      \
-                IOobject::NO_READ,                                             \
-                IOobject::NO_WRITE                                             \
-            ),                                                                 \
-            gsf.mesh(),                                                        \
-            dimless                                                            \
-        )                                                                      \
+        #func "(" + gsf.name() + ')',                                          \
+        gsf.mesh(),                                                            \
+        dimless                                                                \
     );                                                                         \
                                                                                \
     func(tFunc.ref(), n, gsf);                                                 \
@@ -942,12 +921,12 @@ tmp<GeometricField<scalar, PatchField, GeoMesh>> func                          \
     const tmp<GeometricField<scalar, PatchField, GeoMesh>>& tgsf               \
 )                                                                              \
 {                                                                              \
-    const GeometricField<scalar, PatchField, GeoMesh>& gsf = tgsf();           \
+    const auto& gsf = tgsf();                                                  \
                                                                                \
-    if (!gsf.dimensions().dimensionless())                                     \
+    if (dimensionSet::checking() && !gsf.dimensions().dimensionless())         \
     {                                                                          \
         FatalErrorInFunction                                                   \
-            << " : gsf not dimensionless"                                      \
+            << "Field is not dimensionless: " << gsf.dimensions() << nl        \
             << abort(FatalError);                                              \
     }                                                                          \
                                                                                \

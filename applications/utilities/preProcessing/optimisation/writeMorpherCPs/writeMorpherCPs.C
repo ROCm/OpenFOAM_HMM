@@ -47,16 +47,14 @@ int main(int argc, char *argv[])
 
     const dictionary NURBSdict
     (
-        IOdictionary
+        IOdictionary::readContents
         (
             IOobject
             (
                 "dynamicMeshDict",
                 mesh.time().constant(),
                 mesh,
-                IOobject::MUST_READ_IF_MODIFIED,
-                IOobject::NO_WRITE,
-                false
+                IOobject::MUST_READ
             )
         ).subDict("volumetricBSplinesMotionSolverCoeffs")
     );

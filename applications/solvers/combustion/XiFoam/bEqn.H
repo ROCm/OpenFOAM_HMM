@@ -171,10 +171,7 @@ if (ign.ignited())
 
         fvOptions.correct(Su);
 
-        // Limit the maximum Su
-        // ~~~~~~~~~~~~~~~~~~~~
-        Su.min(SuMax);
-        Su.max(SuMin);
+        Su.clamp_range(SuMin, SuMax);
     }
     else
     {
@@ -218,7 +215,7 @@ if (ign.ignited())
           + (
                 scalar(1)
               + (2*XiShapeCoef)
-               *(scalar(0.5) - min(max(b, scalar(0)), scalar(1)))
+               *(scalar(0.5) - clamp(b, zero_one{}))
             )*(XiEqStar - scalar(1.001))
         );
 
@@ -226,7 +223,7 @@ if (ign.ignited())
         volScalarField R(Gstar*XiEqStar/(XiEqStar - scalar(1)));
         volScalarField G(R*(XiEq - scalar(1.001))/XiEq);
 
-        //R *= (Gstar + 2*mag(dev(symm(fvc::grad(U)))))/Gstar;
+        //R *= (Gstar + 2*mag(devSymm(fvc::grad(U))))/Gstar;
 
         // Solve for the flame wrinkling
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

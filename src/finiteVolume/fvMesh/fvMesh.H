@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017,2022 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,6 +96,7 @@ protected:
 
         //- Boundary mesh
         fvBoundaryMesh boundary_;
+
 
     // Demand-driven data
 
@@ -314,7 +315,10 @@ public:
             }
 
             //- Return reference to boundary mesh
-            const fvBoundaryMesh& boundary() const;
+            const fvBoundaryMesh& boundary() const noexcept
+            {
+                return boundary_;
+            }
 
             //- Return ldu addressing
             virtual const lduAddressing& lduAddr() const;
@@ -447,6 +451,9 @@ public:
             //- Return cell face area magnitudes
             const surfaceScalarField& magSf() const;
 
+            //- Return cell face unit normals
+            tmp<surfaceVectorField> unitSf() const;
+
             //- Return cell face motion fluxes
             const surfaceScalarField& phi() const;
 
@@ -504,11 +511,11 @@ public:
             virtual bool writeObject
             (
                 IOstreamOption streamOpt,
-                const bool valid
+                const bool writeOnProc
             ) const;
 
             //- Write mesh using IO settings from time
-            virtual bool write(const bool valid = true) const;
+            virtual bool write(const bool writeOnProc = true) const;
 
 
     // Member Operators

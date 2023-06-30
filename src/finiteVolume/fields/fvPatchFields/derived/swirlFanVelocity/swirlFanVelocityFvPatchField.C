@@ -40,25 +40,21 @@ void Foam::swirlFanVelocityFvPatchField::calcFanJump()
     {
         const scalar rpm = rpm_->value(this->db().time().timeOutputValue());
 
-        const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>(phiName_);
+        const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
-        const fvPatchField<scalar>& pOwner =
-            patch().lookupPatchField<volScalarField, scalar>(pName_);
+        const auto& pOwner = patch().lookupPatchField<volScalarField>(pName_);
 
         const label nbrIndex = this->cyclicPatch().neighbPatchID();
 
         const fvPatch& nbrPatch = patch().boundaryMesh()[nbrIndex];
 
-        const fvPatchField<scalar>& pSlave =
-            nbrPatch.lookupPatchField<volScalarField, scalar>(pName_);
+        const auto& pSlave = nbrPatch.lookupPatchField<volScalarField>(pName_);
 
         scalarField deltaP(mag(pOwner - pSlave));
 
         if (phi.dimensions() == dimMass/dimTime)
         {
-            deltaP /=
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            deltaP /= patch().lookupPatchField<volScalarField>(rhoName_);
         }
 
         const vector axisHat =

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,6 +161,28 @@ List<label> toc(const UList<bool>& bools);
 //
 //  \return a List of labels
 List<label> sortedToc(const UList<bool>& bools);
+
+
+//- Forward to bitSet::toc(), the sorted values of the 'on' entries.
+//
+//  \return a List of labels
+List<label> toc(const bitSet& bitset);
+
+//- Forward to bitSet::sortedToc(), the sorted values of the 'on' entries.
+//
+//  \return a List of labels
+List<label> sortedToc(const bitSet& bitset);
+
+
+//- Forward to labelHashSet::sortedToc(), the sorted values of the 'on' entries.
+//
+//  \return a List of labels
+List<label> toc(const labelHashSet& hashset);
+
+//- Forward to labelHashSet::sortedToc(), the sorted values of the 'on' entries.
+//
+//  \return a List of labels
+List<label> sortedToc(const labelHashSet& hashset);
 
 
 //- Count arbitrary number of bits (of an integral type)

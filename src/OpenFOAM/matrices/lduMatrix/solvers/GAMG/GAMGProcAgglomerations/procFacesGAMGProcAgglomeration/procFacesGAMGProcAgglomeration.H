@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,22 +40,16 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef procFacesGAMGProcAgglomeration_H
-#define procFacesGAMGProcAgglomeration_H
+#ifndef Foam_procFacesGAMGProcAgglomeration_H
+#define Foam_procFacesGAMGProcAgglomeration_H
 
 #include "GAMGProcAgglomeration.H"
-#include "DynamicList.H"
 #include "labelField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// Forward Declarations
-class GAMGAgglomeration;
-class lduMesh;
-class lduPrimitiveMesh;
 
 /*---------------------------------------------------------------------------*\
                     Class procFacesGAMGProcAgglomeration Declaration
@@ -69,8 +64,6 @@ class procFacesGAMGProcAgglomeration
         //- When to processor agglomerate
         const label nAgglomeratingCells_;
 
-        //- Allocated communicators
-        DynamicList<label> comms_;
 
     // Private Member Functions
 
@@ -90,20 +83,18 @@ class procFacesGAMGProcAgglomeration
         //- Do we need to agglomerate across processors?
         bool doProcessorAgglomeration(const lduMesh&) const;
 
-        //- No copy construct
-        procFacesGAMGProcAgglomeration
-        (
-            const procFacesGAMGProcAgglomeration&
-        ) = delete;
-
-        //- No copy assignment
-        void operator=(const procFacesGAMGProcAgglomeration&) = delete;
-
 
 public:
 
     //- Runtime type information
     TypeName("procFaces");
+
+    //- No copy construct
+    procFacesGAMGProcAgglomeration(const procFacesGAMGProcAgglomeration&)
+        = delete;
+
+    //- No copy assignment
+    void operator=(const procFacesGAMGProcAgglomeration&) = delete;
 
 
     // Constructors

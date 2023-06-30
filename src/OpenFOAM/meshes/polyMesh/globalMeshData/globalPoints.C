@@ -281,7 +281,7 @@ bool Foam::globalPoints::mergeInfo
     // Get the index into the procPoints list.
     const auto iter = meshToProcPoint_.cfind(localPointi);
 
-    if (iter.found())
+    if (iter.good())
     {
         if (mergeInfo(nbrInfo, localPointi, procPoints_[iter.val()]))
         {
@@ -330,7 +330,7 @@ bool Foam::globalPoints::storeInitialInfo
     // Get the index into the procPoints list.
     const auto iter = meshToProcPoint_.find(localPointi);
 
-    if (iter.found())
+    if (iter.good())
     {
         if (mergeInfo(nbrInfo, localPointi, procPoints_[iter.val()]))
         {
@@ -487,6 +487,34 @@ void Foam::globalPoints::sendPatchPoints
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     const labelPairList& patchInfo = globalTransforms_.patchTransformSign();
 
+    // Reset send/recv information
+    pBufs.clear();
+
+    // Information to send:
+
+    // The patch face
+    DynamicList<label> patchFaces;
+
+    // Index in patch face
+    DynamicList<label> indexInFace;
+
+    // All information I currently hold about the patchPoint
+    DynamicList<labelPairList> allInfo;
+
+
+    // Reduce communication by only sending non-zero data,
+    // but with multiply-connected processor/processor
+    // (eg, processorCyclic) also need to send zero information
+    // to keep things synchronised
+
+    // Has non-zero data sent
+    Map<int> isActiveSend(0);
+
+    if (UPstream::parRun())
+    {
+        isActiveSend.resize(2*min(patches.size(),pBufs.nProcs()));
+    }
+
     forAll(patches, patchi)
     {
         const polyPatch& pp = patches[patchi];
@@ -496,21 +524,21 @@ void Foam::globalPoints::sendPatchPoints
 
         if
         (
-            (Pstream::parRun() && isA<processorPolyPatch>(pp))
+            (UPstream::parRun() && isA<processorPolyPatch>(pp))
          && (mergeSeparated || patchInfo[patchi].first() == -1)
         )
         {
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(pp);
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
+            const label nbrProci = procPatch.neighbProcNo();
 
-            // Information to send:
-            // patch face
-            DynamicList<label> patchFaces(pp.nPoints());
-            // index in patch face
-            DynamicList<label> indexInFace(pp.nPoints());
-            // all information I currently hold about this patchPoint
-            DynamicList<labelPairList> allInfo(pp.nPoints());
+            patchFaces.clear();
+            patchFaces.reserve(pp.nPoints());
 
+            indexInFace.clear();
+            indexInFace.reserve(pp.nPoints());
+
+            allInfo.clear();
+            allInfo.reserve(pp.nPoints());
 
             // Now collect information on all points mentioned in
             // changedPoints. Note that these points only should occur on
@@ -548,16 +576,31 @@ void Foam::globalPoints::sendPatchPoints
                 }
             }
 
-            // Send to neighbour
-            if (debug)
-            {
-                Pout<< " Sending from " << pp.name() << " to "
-                    << procPatch.neighbProcNo() << "   point information:"
-                    << patchFaces.size() << endl;
-            }
 
-            UOPstream toNeighbour(procPatch.neighbProcNo(), pBufs);
-            toNeighbour << patchFaces << indexInFace << allInfo;
+            // Send to neighbour
+            {
+                UOPstream toNbr(nbrProci, pBufs);
+                toNbr << patchFaces << indexInFace << allInfo;
+
+                // Record if send is required (data are non-zero)
+                isActiveSend(nbrProci) |= int(!patchFaces.empty());
+
+                if (debug)
+                {
+                    Pout<< "Sending from " << pp.name() << " to proc:"
+                        << nbrProci << " point information:"
+                        << patchFaces.size() << endl;
+                }
+            }
+        }
+    }
+
+    // Eliminate unnecessary sends
+    forAllConstIters(isActiveSend, iter)
+    {
+        if (!iter.val())
+        {
+            pBufs.clearSend(iter.key());
         }
     }
 }
@@ -590,27 +633,33 @@ void Foam::globalPoints::receivePatchPoints
 
         if
         (
-            (Pstream::parRun() && isA<processorPolyPatch>(pp))
+            (UPstream::parRun() && isA<processorPolyPatch>(pp))
          && (mergeSeparated || patchInfo[patchi].first() == -1)
         )
         {
-            const processorPolyPatch& procPatch =
-                refCast<const processorPolyPatch>(pp);
+            const auto& procPatch = refCast<const processorPolyPatch>(pp);
+            const label nbrProci = procPatch.neighbProcNo();
+
+            if (!pBufs.recvDataCount(nbrProci))
+            {
+                // Nothing to receive
+                continue;
+            }
 
             labelList patchFaces;
             labelList indexInFace;
             List<labelPairList> nbrInfo;
 
             {
-                UIPstream fromNeighbour(procPatch.neighbProcNo(), pBufs);
-                fromNeighbour >> patchFaces >> indexInFace >> nbrInfo;
+                UIPstream fromNbr(nbrProci, pBufs);
+                fromNbr >> patchFaces >> indexInFace >> nbrInfo;
             }
 
             if (debug)
             {
                 Pout<< " On " << pp.name()
                     << " Received from "
-                    << procPatch.neighbProcNo() << "   point information:"
+                    << nbrProci << "   point information:"
                     << patchFaces.size() << endl;
             }
 
@@ -683,7 +732,7 @@ void Foam::globalPoints::receivePatchPoints
                     // Do we have information on pointA?
                     const auto procPointA = meshToProcPoint_.cfind(localA);
 
-                    if (procPointA.found())
+                    if (procPointA.good())
                     {
                         const labelPairList infoA = addSendTransform
                         (
@@ -700,7 +749,7 @@ void Foam::globalPoints::receivePatchPoints
                     // Same for info on pointB
                     const auto procPointB = meshToProcPoint_.cfind(localB);
 
-                    if (procPointB.found())
+                    if (procPointB.good())
                     {
                         const labelPairList infoB = addSendTransform
                         (
@@ -891,19 +940,23 @@ void Foam::globalPoints::calculateSharedPoints
     //   a point or edge.
     initOwnPoints(meshToPatchPoint, true, changedPoints);
 
+    // Note: to use 'scheduled' would have to intersperse send and receive.
+    // So for now just use nonBlocking. Also globalPoints itself gets
+    // constructed by mesh.globalData().patchSchedule() so creates a loop.
+    PstreamBuffers pBufs
+    (
+        (
+            Pstream::defaultCommsType == Pstream::commsTypes::scheduled
+          ? Pstream::commsTypes::nonBlocking
+          : Pstream::defaultCommsType
+        )
+    );
+
+    // Don't clear storage on persistent buffer
+    pBufs.allowClearRecv(false);
+
     // Do one exchange iteration to get neighbour points.
     {
-        // Note: to use 'scheduled' would have to intersperse send and receive.
-        // So for now just use nonBlocking. Also globalPoints itself gets
-        // constructed by mesh.globalData().patchSchedule() so creates a loop.
-        PstreamBuffers pBufs
-        (
-            (
-                Pstream::defaultCommsType == Pstream::commsTypes::scheduled
-              ? Pstream::commsTypes::nonBlocking
-              : Pstream::defaultCommsType
-            )
-        );
         sendPatchPoints
         (
             mergeSeparated,
@@ -911,7 +964,9 @@ void Foam::globalPoints::calculateSharedPoints
             pBufs,
             changedPoints
         );
+
         pBufs.finishedSends();
+
         receivePatchPoints
         (
             mergeSeparated,
@@ -933,14 +988,6 @@ void Foam::globalPoints::calculateSharedPoints
 
     do
     {
-        PstreamBuffers pBufs
-        (
-            (
-                Pstream::defaultCommsType == Pstream::commsTypes::scheduled
-              ? Pstream::commsTypes::nonBlocking
-              : Pstream::defaultCommsType
-            )
-        );
         sendPatchPoints
         (
             mergeSeparated,
@@ -948,7 +995,9 @@ void Foam::globalPoints::calculateSharedPoints
             pBufs,
             changedPoints
         );
+
         pBufs.finishedSends();
+
         receivePatchPoints
         (
             mergeSeparated,

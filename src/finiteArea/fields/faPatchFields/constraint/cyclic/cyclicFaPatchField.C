@@ -72,10 +72,11 @@ Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
 )
 :
-    coupledFaPatchField<Type>(p, iF, dict),
+    coupledFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     cyclicPatch_(refCast<const cyclicFaPatch>(p, dict))
 {
     if (!isA<cyclicFaPatch>(p))
@@ -89,7 +90,10 @@ Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
             << exit(FatalIOError);
     }
 
-    this->evaluate(Pstream::commsTypes::blocking);
+    if (IOobjectOption::isReadRequired(requireValue))
+    {
+        this->evaluate(Pstream::commsTypes::blocking);
+    }
 }
 
 

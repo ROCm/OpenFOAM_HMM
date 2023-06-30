@@ -80,8 +80,8 @@ pressureInletOutletVelocityFvPatchVectorField
     directionMixedFvPatchVectorField(p, iF),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    fvPatchFieldBase::readDict(dict);
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     if (dict.found("tangentialVelocity"))
     {
@@ -175,7 +175,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::updateCoeffs()
     }
 
     const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     valueFraction() = neg(phip)*(I - sqr(patch().nf()));
 
@@ -190,13 +190,13 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::write
 )
 const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     if (tangentialVelocity_.size())
     {
         tangentialVelocity_.writeEntry("tangentialVelocity", os);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,10 +46,23 @@ Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const dictionary& dict
+    const Type& value
 )
 :
-    faePatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    faePatchField<Type>(p, iF, value)
+{}
+
+
+template<class Type>
+Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
+(
+    const faPatch& p,
+    const DimensionedField<Type, edgeMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
+)
+:
+    faePatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
@@ -92,7 +106,7 @@ template<class Type>
 void Foam::fixedValueFaePatchField<Type>::write(Ostream& os) const
 {
     faePatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faePatchField<Type>::writeValueEntry(os);
 }
 
 

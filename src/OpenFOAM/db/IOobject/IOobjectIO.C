@@ -31,9 +31,13 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<IOobject>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<IOobject>& iproxy
+)
 {
-    const IOobject& io = ip.t_;
+    const auto& io = *iproxy;
 
     os  << "IOobject: "
         << io.type() << ' ' << io.name()

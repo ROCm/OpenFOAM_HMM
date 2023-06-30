@@ -51,7 +51,7 @@ Foam::leastSquaresVectors::leastSquaresVectors(const fvMesh& mesh)
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedVector(dimless/dimLength, Zero)
@@ -65,7 +65,7 @@ Foam::leastSquaresVectors::leastSquaresVectors(const fvMesh& mesh)
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedVector(dimless/dimLength, Zero)
@@ -129,7 +129,7 @@ void Foam::leastSquaresVectors::calcLeastSquaresVectors()
     }
 
 
-    // Invert the dd tensor
+    // Invert the dd tensors - including failsafe checks
     const symmTensorField invDd(inv(dd));
 
 

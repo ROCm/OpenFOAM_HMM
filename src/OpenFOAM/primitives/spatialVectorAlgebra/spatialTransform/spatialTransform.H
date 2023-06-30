@@ -54,11 +54,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
+// Forward Declarations
 class spatialTransform;
 Istream& operator>>(Istream&, spatialTransform&);
 Ostream& operator<<(Ostream&, const spatialTransform&);

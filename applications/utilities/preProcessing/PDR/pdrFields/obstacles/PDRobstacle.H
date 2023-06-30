@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PDRobstacle_H
-#define PDRobstacle_H
+#ifndef Foam_PDRobstacle_H
+#define Foam_PDRobstacle_H
 
 #include "InfoProxy.H"
 #include "labelPair.H"
@@ -290,8 +290,9 @@ public:
 
     // IOstream Operators
 
-        //- Return info proxy.
-        InfoProxy<PDRobstacle> info() const
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<PDRobstacle> info() const noexcept
         {
             return *this;
         }

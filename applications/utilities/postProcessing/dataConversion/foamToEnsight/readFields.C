@@ -55,7 +55,7 @@ Foam::label Foam::checkData
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false  // no register
+                    IOobject::NO_REGISTER
                 ).typeHeaderOk<volScalarField>(false, false);
 
             if (!good)

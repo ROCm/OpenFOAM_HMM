@@ -61,7 +61,8 @@ Foam::volScalarField& Foam::fv::atmPlantCanopyUSource::getOrReadField
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
+                IOobject::AUTO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_
         );

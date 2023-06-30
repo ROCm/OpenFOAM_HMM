@@ -46,8 +46,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellModel_H
-#define cellModel_H
+#ifndef Foam_cellModel_H
+#define Foam_cellModel_H
 
 #include "pointField.H"
 #include "edgeList.H"
@@ -65,6 +65,10 @@ namespace Foam
 // Forward Declarations
 class cellModel;
 Ostream& operator<<(Ostream& os, const cellModel& cm);
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<cellModel>&);
+
 
 /*---------------------------------------------------------------------------*\
                           Class cellModel Declaration
@@ -228,12 +232,10 @@ public:
             const UList<point>& points
         ) const;
 
-        //- Return info proxy.
-        //  Used to print information to a stream
-        InfoProxy<cellModel> info() const
-        {
-            return *this;
-        }
+
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<cellModel> info() const noexcept { return *this; }
 
         //- The writeData member function required by regIOobject
         bool writeData(Ostream& os) const
@@ -247,12 +249,6 @@ public:
 
         friend Ostream& operator<<(Ostream& os, const cellModel& cm);
 };
-
-
-// Ostream Operators
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<cellModel>& ip);
 
 
 // Global Operators

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -354,17 +354,17 @@ Ostream& operator<<(Ostream& os, const dimensionSet& ds);
 
 // Global Functions
 
-dimensionSet min(const dimensionSet& ds1, const dimensionSet& ds2);
-dimensionSet max(const dimensionSet& ds1, const dimensionSet& ds2);
-dimensionSet clip(const dimensionSet& ds1, const dimensionSet& ds2);
+dimensionSet min(const dimensionSet& a, const dimensionSet& b);
+dimensionSet max(const dimensionSet& a, const dimensionSet& b);
+dimensionSet clamp(const dimensionSet& a, const dimensionSet& range);
+dimensionSet lerp(const dimensionSet& a, const dimensionSet& b);
 
 dimensionSet cmptMultiply(const dimensionSet& ds1, const dimensionSet& ds2);
 dimensionSet cmptDivide(const dimensionSet& ds1, const dimensionSet& ds2);
 
 
 dimensionSet pow(const dimensionSet& ds, const scalar p);
-dimensionSet pow(const dimensionSet& ds, const dimensionedScalar& dS);
-dimensionSet pow(const dimensionedScalar& dS, const dimensionSet& ds);
+dimensionSet pow(const dimensionSet& ds, const dimensionedScalar& p);
 
 dimensionSet sqr(const dimensionSet& ds);
 dimensionSet pow2(const dimensionSet& ds);
@@ -432,6 +432,8 @@ dimensionSet operator&&(const dimensionSet& ds1, const dimensionSet& ds2);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Predefined dimensions (eg, dimless, dimMass, dimLength, dimTime, ...)
+// and unit systems
 #include "dimensionSets.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

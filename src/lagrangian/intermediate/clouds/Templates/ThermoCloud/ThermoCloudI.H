@@ -274,7 +274,7 @@ inline Foam::tmp<Foam::volScalarField> Foam::ThermoCloud<CloudType>::Ep() const
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh(),
             dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
@@ -310,7 +310,7 @@ inline Foam::tmp<Foam::volScalarField> Foam::ThermoCloud<CloudType>::ap() const
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh(),
             dimensionedScalar(dimless/dimLength, Zero)
@@ -347,7 +347,7 @@ Foam::ThermoCloud<CloudType>::sigmap() const
                 this->db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh(),
             dimensionedScalar(dimless/dimLength, Zero)

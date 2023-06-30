@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -287,16 +287,24 @@ protected:
         //- Reset containers and fields
         void reset();
 
+
     // Evaluation
 
-        //- Return the effective stress (viscous + turbulent)
-        tmp<volSymmTensorField> devRhoReff() const;
+        //- Return the effective stress (viscous + turbulent) for patch
+        tmp<symmTensorField> devRhoReff
+        (
+            const tensorField& gradUp,
+            const label patchi
+        ) const;
 
         //- Return dynamic viscosity field
         tmp<volScalarField> mu() const;
 
         //- Return rho if specified otherwise rhoRef
         tmp<volScalarField> rho() const;
+
+        //- Return rho if specified otherwise rhoRef for patch
+        tmp<scalarField> rho(const label patchi) const;
 
         //- Return rhoRef if the pressure field is
         //- dynamic (i.e. p/rho), otherwise return 1

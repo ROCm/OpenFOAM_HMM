@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -229,7 +229,19 @@ public:
 
         // Selectors
 
-            //- Return a new solver
+            //- Return a new solver of given type
+            static autoPtr<solver> New
+            (
+                const word& solverName,
+                const word& fieldName,
+                const lduMatrix& matrix,
+                const FieldField<Field, scalar>& interfaceBouCoeffs,
+                const FieldField<Field, scalar>& interfaceIntCoeffs,
+                const lduInterfaceFieldPtrsList& interfaces,
+                const dictionary& solverControls
+            );
+
+            //- Return a new solver given dictionary
             static autoPtr<solver> New
             (
                 const word& fieldName,
@@ -563,6 +575,10 @@ public:
             {
                 NotImplemented;
             }
+
+            //- Signal end of solver
+            virtual void setFinished(const solverPerformance& perf) const
+            {}
     };
 
 
@@ -776,17 +792,14 @@ public:
             tmp<Field<Type>> faceH(const tmp<Field<Type>>&) const;
 
 
-        // Info
+    // Info
 
-            //- Return info proxy.
-            //  Used to print matrix information to a stream
-            InfoProxy<lduMatrix> info() const
-            {
-                return *this;
-            }
+        //- Return info proxy,
+        //- used to print matrix information to a stream
+        InfoProxy<lduMatrix> info() const noexcept { return *this; }
 
 
-    // Member operators
+    // Member Operators
 
         void operator=(const lduMatrix&);
 
@@ -799,7 +812,7 @@ public:
         void operator*=(scalar);
 
 
-    // Ostream operator
+    // Ostream Operators
 
         friend Ostream& operator<<(Ostream&, const lduMatrix&);
         friend Ostream& operator<<(Ostream&, const InfoProxy<lduMatrix>&);

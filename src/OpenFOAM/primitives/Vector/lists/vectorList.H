@@ -23,34 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::vectorUList
-
-Description
-    A UList of vectors.
-
-Typedef
-    Foam::vectorList
-
-Description
-    A List of vectors.
-
-Typedef
-    Foam::vectorSubList
-
-Description
-    A SubList of vectors.
-
-Typedef
-    Foam::vectorListList
-
-Description
-    A List of vectorList.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef vectorList_H
-#define vectorList_H
+#ifndef Foam_vectorList_H
+#define Foam_vectorList_H
 
 #include "vector.H"
 #include "List.H"
@@ -60,10 +36,10 @@ Description
 
 namespace Foam
 {
-    typedef UList<vector> vectorUList;
-    typedef List<vector> vectorList;
-    typedef SubList<vector> vectorSubList;
-    typedef List<vectorList> vectorListList;
+    typedef List<vector> vectorList;            //!< List of vector
+    typedef SubList<vector> vectorSubList;      //!< SubList of vector
+    typedef UList<vector> vectorUList;          //!< UList of vector
+    typedef List<vectorList> vectorListList;    //!< List of vectorList
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

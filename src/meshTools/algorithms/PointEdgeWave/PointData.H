@@ -48,8 +48,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 template<class DataType> class PointData;
 
 template<class DataType>

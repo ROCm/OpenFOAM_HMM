@@ -89,8 +89,8 @@ public:
         (
             const pointPatch&,
             const DimensionedField<${TemplateType}, pointMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary& dict,
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping a copy onto a new patch

@@ -23,22 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::sphericalTensorUList
-
-Description
-    A UList of sphericalTensors.
-
-Typedef
-    Foam::sphericalTensorList
-
-Description
-    A List of sphericalTensors.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef sphericalTensorList_H
-#define sphericalTensorList_H
+#ifndef Foam_sphericalTensorList_H
+#define Foam_sphericalTensorList_H
 
 #include "sphericalTensor.H"
 #include "List.H"
@@ -47,9 +35,11 @@ Description
 
 namespace Foam
 {
-    typedef UList<sphericalTensor> sphericalTensorUList;
-
+    //! List of sphericalTensor
     typedef List<sphericalTensor> sphericalTensorList;
+
+    //! UList of sphericalTensor
+    typedef UList<sphericalTensor> sphericalTensorUList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

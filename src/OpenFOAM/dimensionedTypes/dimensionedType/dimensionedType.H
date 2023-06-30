@@ -503,6 +503,14 @@ template<class Type>
 dimensioned<Type> min(const dimensioned<Type>&, const dimensioned<Type>&);
 
 template<class Type>
+dimensioned<Type> lerp
+(
+    const dimensioned<Type>& a,
+    const dimensioned<Type>& b,
+    const scalar t
+);
+
+template<class Type>
 bool operator<(const dimensioned<Type>&, const dimensioned<Type>&);
 
 template<class Type>

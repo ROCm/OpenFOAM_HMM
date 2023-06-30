@@ -87,7 +87,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::basicFvGeometryScheme::weights() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false // Do not register
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimless
@@ -171,7 +171,7 @@ Foam::basicFvGeometryScheme::deltaCoeffs() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false // Do not register
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimless/dimLength
@@ -230,7 +230,7 @@ Foam::basicFvGeometryScheme::nonOrthDeltaCoeffs() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false // Do not register
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimless/dimLength
@@ -314,7 +314,7 @@ Foam::basicFvGeometryScheme::nonOrthCorrectionVectors() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false // Do not register
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimless

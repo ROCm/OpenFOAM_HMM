@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmetryFaePatchField_H
-#define symmetryFaePatchField_H
+#ifndef Foam_symmetryFaePatchField_H
+#define Foam_symmetryFaePatchField_H
 
 #include "faePatchField.H"
 #include "symmetryFaPatch.H"
@@ -59,7 +59,6 @@ class symmetryFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -76,6 +75,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: NO_READ
         symmetryFaePatchField
         (
             const faPatch&,

@@ -79,7 +79,7 @@ Foam::tmp<Foam::volScalarField> Foam::multiphaseEuler::dragModels::interface::K
             Ur.mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         Ur.mesh(),
         dimensionedScalar(dimDensity/dimTime, Zero)

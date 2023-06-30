@@ -55,7 +55,6 @@ SourceFiles
 #define Foam_enrichedPatch_H
 
 #include "Map.H"
-#include "point.H"
 #include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

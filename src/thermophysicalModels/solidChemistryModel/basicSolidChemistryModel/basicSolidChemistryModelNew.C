@@ -42,7 +42,7 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
             thermo.db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -58,9 +58,9 @@ Foam::basicSolidChemistryModel::New(solidReactionThermo& thermo)
             basicThermo::dictName,
             thermo.db().time().constant(),
             thermo.db(),
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

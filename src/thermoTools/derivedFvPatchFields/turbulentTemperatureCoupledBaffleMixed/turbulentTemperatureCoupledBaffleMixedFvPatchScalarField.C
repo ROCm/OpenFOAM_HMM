@@ -57,8 +57,8 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     ),
     TnbrName_("undefined-Tnbr")
 {
-    this->refValue() = 0.0;
-    this->refGrad() = 0.0;
+    this->refValue() = Zero;
+    this->refGrad() = Zero;
     this->valueFraction() = 1.0;
 }
 
@@ -143,20 +143,17 @@ turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
     );
 
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
         // Start from user entered data. Assume fixedValue.
         refValue() = *this;
-        refGrad() = 0.0;
+        refGrad() = Zero;
         valueFraction() = 1.0;
     }
 
@@ -346,10 +343,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
         const turbulentTemperatureCoupledBaffleMixedFvPatchScalarField
         >
         (
-            nbrPatch.lookupPatchField<volScalarField, scalar>
-            (
-                TnbrName_
-            )
+            nbrPatch.lookupPatchField<volScalarField>(TnbrName_)
         );
 
         // Swap to obtain full local values of neighbour K*delta
@@ -383,7 +377,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::updateCoeffs()
     //    - mixFraction = nbrKDelta / (nbrKDelta + myKDelta())
 
     this->refValue() = nbrIntFld;
-    this->refGrad() = 0.0;
+    this->refGrad() = Zero;
     this->valueFraction() = nbrKDelta/(nbrKDelta + myKDelta());
 
     mixedFvPatchScalarField::updateCoeffs();
@@ -463,7 +457,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntry("Tnbr", TnbrName_);
     if (thicknessLayer_)
     {

@@ -161,8 +161,7 @@ Foam::fv::atmLengthScaleTurbSource::atmLengthScaleTurbSource
     else
     {
         FatalErrorInFunction
-            << "Unable to find neither epsilon nor omega field." << nl
-            << "atmLengthScaleTurbSource needs either epsilon or omega field."
+            << "Needs either epsilon or omega field."
             << abort(FatalError);
     }
 

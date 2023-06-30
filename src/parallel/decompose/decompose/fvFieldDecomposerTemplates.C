@@ -58,7 +58,7 @@ Foam::fvFieldDecomposer::decomposeField
                 procMesh_.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             procMesh_,
             field.dimensions(),
@@ -87,7 +87,7 @@ Foam::fvFieldDecomposer::decomposeField
             patchi,
             fvPatchField<Type>::New
             (
-                calculatedFvPatchField<Type>::typeName,
+                fvPatchFieldBase::calculatedType(),
                 procMesh_.boundary()[patchi],
                 DimensionedField<Type, volMesh>::null()
             )
@@ -260,7 +260,7 @@ Foam::fvFieldDecomposer::decomposeField
             patchi,
             fvsPatchField<Type>::New
             (
-                calculatedFvsPatchField<Type>::typeName,
+                fvsPatchFieldBase::calculatedType(),
                 procMesh_.boundary()[patchi],
                 DimensionedField<Type, surfaceMesh>::null()
             )

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -102,7 +102,7 @@ static void printManOption(const word& optName)
         argList::optionUsage.lookup(optName, string::null)
     );
 
-    if (argList::validParOptions.found(optName))
+    if (argList::validParOptions.contains(optName))
     {
         Info<< "\\fB[Parallel option]\\fR" << nl;
     }
@@ -314,7 +314,7 @@ void Foam::argList::printMan() const
     for (const word& optName : validOptions.sortedToc())
     {
         // Normal (non-advanced) options
-        if (!advancedOptions.found(optName))
+        if (!advancedOptions.contains(optName))
         {
             printManOption(optName);
         }
@@ -333,7 +333,7 @@ void Foam::argList::printMan() const
     for (const word& optName : validOptions.sortedToc())
     {
         // Advanced options
-        if (advancedOptions.found(optName))
+        if (advancedOptions.contains(optName))
         {
             printManOption(optName);
         }
@@ -418,7 +418,7 @@ void Foam::argList::printUsage(bool full) const
     for (const word& optName : validOptions.sortedToc())
     {
         // Suppress advanced options for regular -help.
-        if (full || !advancedOptions.found(optName))
+        if (full || !advancedOptions.contains(optName))
         {
             printOption(optName);
         }

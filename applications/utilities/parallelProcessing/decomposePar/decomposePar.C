@@ -189,7 +189,7 @@ autoPtr<labelIOList> procAddressing
             procMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false  // do not register
+            IOobject::NO_REGISTER
         )
     );
 }
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
         "Test without writing the decomposition. "
         "Changes -cellDist to only write VTK output."
     );
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
     argList::addOption
     (
         "domains",
@@ -505,7 +505,7 @@ int main(int argc, char *argv[])
                     runTime,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 decompDictFile,
                 args.getOrDefault<label>("domains", 0),
@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
                         runTime,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
-                        false       // do not register
+                        IOobject::NO_REGISTER
                     ),
                     decompDictFile
                 )
@@ -551,7 +551,7 @@ int main(int argc, char *argv[])
         );
 
         // Give file handler a chance to determine the output directory
-        const_cast<fileOperation&>(fileHandler()).setNProcs(nDomains);
+        const_cast<fileOperation&>(fileHandler()).nProcs(nDomains);
 
         if (decomposeFieldsOnly)
         {
@@ -653,7 +653,7 @@ int main(int argc, char *argv[])
                 runTime,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             decompDictFile
         );
@@ -683,7 +683,7 @@ int main(int argc, char *argv[])
                         mesh,
                         IOobject::NO_READ,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     ),
                     procIds
                 );
@@ -724,7 +724,9 @@ int main(int argc, char *argv[])
                     (
                         Time::controlDictName,
                         args.rootPath(),
-                        args.caseName()/("processor" + Foam::name(proci))
+                        args.caseName()/("processor" + Foam::name(proci)),
+                        false,  // No function objects
+                        false   // No extra controlDict libs
                     );
                     // processorDb.setTime(runTime);
 
@@ -816,7 +818,7 @@ int main(int argc, char *argv[])
                         mesh,
                         IOobject::READ_IF_PRESENT,
                         IOobject::NO_WRITE,
-                        false  // not registered
+                        IOobject::NO_REGISTER
                     );
 
                     if (io.typeHeaderOk<faBoundaryMesh>(true))
@@ -1247,8 +1249,9 @@ int main(int argc, char *argv[])
                         (
                             Time::controlDictName,
                             args.rootPath(),
-                            args.caseName()
-                          / ("processor" + Foam::name(proci))
+                            args.caseName()/("processor" + Foam::name(proci)),
+                            false,  // No function objects
+                            false   // No extra controlDict libs
                         );
 
                         processorDb.setTime(runTime);

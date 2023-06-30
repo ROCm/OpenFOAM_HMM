@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,14 +49,47 @@ Foam::tmp<GeoField> Foam::getField
 (
     const IOobject* io,
     const fvMeshSubsetProxy& proxy,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
-    return
-        proxy.interpolate
+    tmp<GeoField> tfield;
+
+    if (io)
+    {
+        const word& fieldName = io->name();
+
+        if (cache)
+        {
+            // Get reference from cache if possible
+            tfield.cref(cache->cfindObject<GeoField>(fieldName));
+
+            if (tfield)
+            {
+                return tfield;
+            }
+        }
+
+        tfield = proxy.interpolate
         (
             getField<GeoField>(io, proxy.baseMesh(), syncPar)
         );
+
+        if (tfield && cache)
+        {
+            // Move field to the cache
+            IOobject newIO(tfield(), *cache);
+            newIO.readOpt(IOobject::NO_READ);
+            newIO.writeOpt(IOobject::NO_WRITE);
+
+            tfield.ref().checkOut();  // Paranoid
+            cache->store(new GeoField(newIO, tfield));
+
+            tfield.cref(cache->cfindObject<GeoField>(fieldName));
+        }
+    }
+
+    return tfield;
 }
 
 
@@ -71,7 +104,12 @@ Foam::tmp<GeoField> Foam::getField
 {
     // Can do something with syncPar on failure ...
 
-    return getField<GeoField>(objects.findObject(fieldName), mesh, syncPar);
+    return getField<GeoField>
+    (
+        objects.findObject(fieldName),
+        mesh,
+        syncPar
+    );
 }
 
 
@@ -81,12 +119,19 @@ Foam::tmp<GeoField> Foam::getField
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
     const word& fieldName,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
     // Can do something with syncPar on failure ...
 
-    return getField<GeoField>(objects.findObject(fieldName), proxy, syncPar);
+    return getField<GeoField>
+    (
+        objects.findObject(fieldName),
+        proxy,
+        syncPar,
+        cache
+    );
 }
 
 

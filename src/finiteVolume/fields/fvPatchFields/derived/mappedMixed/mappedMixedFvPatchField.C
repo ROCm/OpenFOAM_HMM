@@ -61,7 +61,9 @@ Foam::mappedMixedFvPatchField<Type>::mappedMixedFvPatchField
     const dictionary& dict
 )
 :
-    mixedFvPatchField<Type>(p, iF, dict),
+    // Bypass dictionary constructor (all reading handled later)
+    // but cannot use NO_READ since will still trigger an evaluate()
+    mixedFvPatchField<Type>(p, iF),
     mappedPatchFieldBase<Type>
     (
         mappedFixedValueFvPatchField<Type>::mapper(p, iF),
@@ -70,17 +72,13 @@ Foam::mappedMixedFvPatchField<Type>::mappedMixedFvPatchField
     ),
     weightFieldName_(dict.getOrDefault<word>("weightField", word::null))
 {
-    mixedFvPatchField<Type>::operator=
-    (
-        Field<Type>("value", dict, p.size())
-    );
+    fvPatchFieldBase::readDict(dict);  // Consistent with a dict constructor
 
-    if (dict.found("refValue"))
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
+
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        this->refValue() = Field<Type>("refValue", dict, p.size());
-        this->refGrad() = Field<Type>("refGradient", dict, p.size());
-        this->valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {

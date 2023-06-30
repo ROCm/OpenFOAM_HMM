@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledFvPatchField_H
-#define coupledFvPatchField_H
+#ifndef Foam_coupledFvPatchField_H
+#define Foam_coupledFvPatchField_H
 
 #include "LduInterfaceField.H"
 #include "fvPatchField.H"
@@ -60,7 +60,6 @@ class coupledFvPatchField
     public LduInterfaceField<Type>,
     public fvPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -90,8 +89,24 @@ public:
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&,
-            const bool valueRequired=true
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
+
+        //- Compatibility (prefer with readOption)
+        coupledFvPatchField
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, volMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            coupledFvPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
 
         //- Construct by mapping the given coupledFvPatchField onto a new patch
         coupledFvPatchField

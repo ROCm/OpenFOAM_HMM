@@ -53,7 +53,7 @@ Foam::functionObjects::surfaceDistance::surfaceDistance
 {
     read(dict);
 
-    volScalarField* procFieldPtr
+    volScalarField* distPtr
     (
         new volScalarField
         (
@@ -63,14 +63,15 @@ Foam::functionObjects::surfaceDistance::surfaceDistance
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimLength, Zero)
         )
     );
 
-    mesh_.objectRegistry::store(procFieldPtr);
+    mesh_.objectRegistry::store(distPtr);
 }
 
 

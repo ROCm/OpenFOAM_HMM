@@ -48,10 +48,6 @@ Description
 #define Foam_primitivePatch_H
 
 #include "PrimitivePatch.H"
-#include "face.H"
-#include "SubList.H"
-#include "List.H"
-#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

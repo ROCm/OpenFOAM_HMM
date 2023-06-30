@@ -55,7 +55,6 @@ namespace Foam
 
 // Forward Declarations
 class globalIndex;
-class labelRange;
 
 Istream& operator>>(Istream& is, globalIndex& gi);
 Ostream& operator<<(Ostream& os, const globalIndex& gi);
@@ -519,7 +518,9 @@ public:
         {
             List<Type> allData;
             gather(offsets, comm, procIDs, fld, allData, tag, ct);
-            if (Pstream::myProcNo(comm) == procIDs[0])
+
+            const int masterProci = procIDs.size() ? procIDs[0] : 0;
+            if (UPstream::myProcNo(comm) == masterProci)
             {
                 fld.transfer(allData);
             }

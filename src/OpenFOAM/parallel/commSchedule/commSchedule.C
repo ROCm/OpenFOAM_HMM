@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "commSchedule.H"
-#include "ListOps.H"
 #include "IOstreams.H"
 #include "IOmanip.H"
 #include "StringStream.H"
@@ -49,15 +48,15 @@ namespace Foam
 // Count the number of outstanding communications for a single processor
 static label outstandingComms
 (
-    const labelList& commToSchedule,
-    DynamicList<label>& procComms
+    const labelUList& commToSchedule,
+    const DynamicList<label>& procComms
 )
 {
     label nOutstanding = 0;
 
-    for (const label commi : procComms)
+    for (const label commPairi : procComms)
     {
-        if (commToSchedule[commi] == -1)
+        if (commToSchedule[commPairi] == -1)
         {
             ++nOutstanding;
         }
@@ -82,20 +81,20 @@ Foam::commSchedule::commSchedule
     // Determine comms per processor.
     List<DynamicList<label>> procToComms(nProcs);
 
-    forAll(comms, commI)
+    forAll(comms, commPairi)
     {
-        label proc0 = comms[commI][0];
-        label proc1 = comms[commI][1];
+        const label proc0 = comms[commPairi].first();
+        const label proc1 = comms[commPairi].second();
 
         if (proc0 < 0 || proc0 >= nProcs || proc1 < 0 || proc1 >= nProcs)
         {
             FatalErrorInFunction
                 << "Illegal processor(s): "
-                << comms[commI] << abort(FatalError);
+                << comms[commPairi] << abort(FatalError);
         }
 
-        procToComms[proc0].append(commI);
-        procToComms[proc1].append(commI);
+        procToComms[proc0].push_back(commPairi);
+        procToComms[proc1].push_back(commPairi);
     }
     // Note: no need to shrink procToComms. Are small.
 
@@ -108,7 +107,7 @@ Foam::commSchedule::commSchedule
             const labelPair& twoProcs = comms[i];
 
             Pout<< i << ": "
-                << twoProcs[0] << " with " << twoProcs[1] << endl;
+                << twoProcs.first() << " <-> " << twoProcs.second() << endl;
         }
         Pout<< endl;
 
@@ -158,44 +157,46 @@ Foam::commSchedule::commSchedule
 
         while (true)
         {
-            label maxCommI = -1;
+            label maxComm = -1;
             label maxNeed = labelMin;
 
-            forAll(comms, commI)
+            forAll(comms, commPairi)
             {
-                label proc0 = comms[commI][0];
-                label proc1 = comms[commI][1];
+                const label proc0 = comms[commPairi].first();
+                const label proc1 = comms[commPairi].second();
 
                 if
                 (
-                    commToSchedule[commI] == -1             // unscheduled
-                && !busy[proc0]
-                && !busy[proc1]
+                    commToSchedule[commPairi] == -1  // unscheduled
+                 && !busy[proc0]
+                 && !busy[proc1]
                 )
                 {
                     label need =
+                    (
                         outstandingComms(commToSchedule, procToComms[proc0])
-                      + outstandingComms(commToSchedule, procToComms[proc1]);
+                      + outstandingComms(commToSchedule, procToComms[proc1])
+                    );
 
-                    if (need > maxNeed)
+                    if (maxNeed < need)
                     {
                         maxNeed = need;
-                        maxCommI = commI;
+                        maxComm = commPairi;
                     }
                 }
             }
 
 
-            if (maxCommI == -1)
+            if (maxComm == -1)
             {
                 // Found no unscheduled procs.
                 break;
             }
 
-            // Schedule commI in this iteration
-            commToSchedule[maxCommI] = nScheduled++;
-            busy[comms[maxCommI][0]] = true;
-            busy[comms[maxCommI][1]] = true;
+            // Schedule commPairi in this iteration
+            commToSchedule[maxComm] = nScheduled++;
+            busy[comms[maxComm].first()] = true;
+            busy[comms[maxComm].second()] = true;
         }
 
         if (debug && UPstream::master())
@@ -206,16 +207,16 @@ Foam::commSchedule::commSchedule
             {
                 labelList procToComm(nProcs, -1);
 
-                forAll(commToSchedule, commI)
+                forAll(commToSchedule, commPairi)
                 {
-                    label sched = commToSchedule[commI];
+                    const label sched = commToSchedule[commPairi];
 
                     if (sched >= oldNScheduled && sched < nScheduled)
                     {
-                        label proc0 = comms[commI][0];
-                        procToComm[proc0] = commI;
-                        label proc1 = comms[commI][1];
-                        procToComm[proc1] = commI;
+                        const label proc0 = comms[commPairi].first();
+                        const label proc1 = comms[commPairi].second();
+                        procToComm[proc0] = commPairi;
+                        procToComm[proc1] = commPairi;
                     }
                 }
 
@@ -255,31 +256,32 @@ Foam::commSchedule::commSchedule
     labelList nProcScheduled(nProcs, Zero);
 
     // Count
-    forAll(schedule_, i)
+    for (const label commPairi : schedule_)
     {
-        label commI = schedule_[i];
-        const labelPair& twoProcs = comms[commI];
+        const labelPair& twoProcs = comms[commPairi];
 
-        nProcScheduled[twoProcs[0]]++;
-        nProcScheduled[twoProcs[1]]++;
+        nProcScheduled[twoProcs.first()]++;
+        nProcScheduled[twoProcs.second()]++;
     }
+
     // Allocate
     forAll(procSchedule_, proci)
     {
-        procSchedule_[proci].setSize(nProcScheduled[proci]);
+        procSchedule_[proci].resize_nocopy(nProcScheduled[proci]);
     }
+
     nProcScheduled = 0;
+
     // Fill
-    forAll(schedule_, i)
+    for (const label commPairi : schedule_)
     {
-        label commI = schedule_[i];
-        const labelPair& twoProcs = comms[commI];
+        const labelPair& twoProcs = comms[commPairi];
 
-        label proc0 = twoProcs[0];
-        procSchedule_[proc0][nProcScheduled[proc0]++] = commI;
+        const label proc0 = twoProcs.first();
+        const label proc1 = twoProcs.second();
 
-        label proc1 = twoProcs[1];
-        procSchedule_[proc1][nProcScheduled[proc1]++] = commI;
+        procSchedule_[proc0][nProcScheduled[proc0]++] = commPairi;
+        procSchedule_[proc1][nProcScheduled[proc1]++] = commPairi;
     }
 
     if (debug && UPstream::master())
@@ -292,13 +294,13 @@ Foam::commSchedule::commSchedule
 
             Pout<< "Processor " << proci << " talks to processors:" << endl;
 
-            forAll(procComms, i)
+            for (const label commPairi : procComms)
             {
-                const labelPair& twoProcs = comms[procComms[i]];
+                const labelPair& twoProcs = comms[commPairi];
 
-                label nbr = (twoProcs[1] == proci ? twoProcs[0] : twoProcs[1]);
-
-                Pout<< "    " << nbr << endl;
+                Pout<< "    "
+                    << (proci == twoProcs[1] ? twoProcs[0] : twoProcs[1])
+                    << endl;
             }
         }
         Pout<< endl;

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,7 +96,7 @@ Foam::linearViscousStress<BasicTurbulenceModel>::devRhoReff
                 IOobject::NO_WRITE
             ),
             (-(this->alpha_*this->rho_*this->nuEff()))
-           *dev(twoSymm(fvc::grad(U)))
+           *devTwoSymm(fvc::grad(U))
         )
     );
 }

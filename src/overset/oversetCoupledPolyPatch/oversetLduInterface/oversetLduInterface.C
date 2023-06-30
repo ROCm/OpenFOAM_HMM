@@ -32,13 +32,8 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(oversetLduInterface, 0);
+    defineTypeName(oversetLduInterface);
 }
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::oversetLduInterface::~oversetLduInterface()
-{}
 
 
 // ************************************************************************* //

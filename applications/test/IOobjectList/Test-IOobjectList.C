@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
             Info<< "==target==" << nl; reportDetail(objects);
             Info<< "==source==" << nl; reportDetail(other);
 
-            objects.merge(std::move(other));
+            objects.merge(other);
             Info<< nl << "After merge" << nl;
 
             Info<< "==target==" << nl; reportDetail(objects);

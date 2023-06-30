@@ -69,10 +69,7 @@ adjointFarFieldVelocityFvPatchVectorField
     fixedValueFvPatchVectorField(p, iF),
     adjointVectorBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
-    fvPatchField<vector>::operator=
-    (
-        vectorField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -185,9 +182,9 @@ Foam::adjointFarFieldVelocityFvPatchVectorField::valueBoundaryCoeffs
 
 void Foam::adjointFarFieldVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("solverName", adjointSolverName_);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

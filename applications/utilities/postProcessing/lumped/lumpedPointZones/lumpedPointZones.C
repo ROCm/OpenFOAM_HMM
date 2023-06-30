@@ -72,10 +72,7 @@ int main(int argc, char *argv[])
         "Suppress calculation/display of point interpolators"
     );
 
-    argList::addVerboseOption
-    (
-        "Additional verbosity"
-    );
+    argList::addVerboseOption();
 
     #include "addRegionOption.H"
     #include "setRootCase.H"

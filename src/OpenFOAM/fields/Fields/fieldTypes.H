@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,8 +24,15 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Namespace
+    Foam::fieldTypes
+
 Description
-    Header files for all the primitive types that Fields are instantiated for.
+    Collection of common field types
+
+Note
+    The fieldTypes header contains macros for primitive types
+    that Fields are instantiated for.
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,8 +51,10 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#define CAPITALIZE_bool Bool
 #define CAPITALIZE_label Label
 #define CAPITALIZE_scalar Scalar
+#define CAPITALIZE_complex Complex
 #define CAPITALIZE_vector Vector
 #define CAPITALIZE_sphericalTensor SphericalTensor
 #define CAPITALIZE_symmTensor SymmTensor
@@ -67,9 +76,40 @@ namespace Foam
 {
 namespace fieldTypes
 {
-    //- Standard basic field types (label, scalar, vector, tensor, etc)
-    //  These also correspond to cloud output fields.
-    extern const wordList basic;
+
+//- Standard basic field types (label, scalar, vector, tensor, etc)
+//  These also correspond to cloud output fields.
+extern const wordList basic;
+
+
+// Commonly used patch field types
+
+//- An \c empty patch field type
+inline const char* emptyTypeName_() noexcept { return "empty"; }
+
+//- An \c empty patch field type
+extern const word emptyType;
+
+//- A \c calculated patch field type
+inline const char* calculatedTypeName_() noexcept { return "calculated"; }
+
+//- A \c calculated patch field type
+extern const word calculatedType;
+
+//- A combined \c zero-gradient and \c calculated patch field type
+inline const char* extrapolatedCalculatedTypeName_() noexcept
+{
+    return "extrapolatedCalculated";
+}
+
+//- A combined \c zero-gradient and \c calculated patch field type
+extern const word extrapolatedCalculatedType;
+
+//- A \c zeroGradient patch field type
+inline const char* zeroGradientTypeName_() noexcept { return "zeroGradient"; }
+
+//- A \c zeroGradient patch field type
+extern const word zeroGradientType;
 
 } // End namespace fieldTypes
 } // End namespace Foam

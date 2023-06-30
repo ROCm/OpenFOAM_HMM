@@ -69,20 +69,12 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     qro_("qro", dict, p.size())
 {
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-
-    }
-    else
-    {
-         fvPatchScalarField::operator=(0.0);
+         fvPatchScalarField::operator=(Zero);
     }
 }
 
@@ -173,7 +165,7 @@ greyDiffusiveViewFactorFixedValueFvPatchScalarField::qro(label bandI) const
 
     if (radiation.useSolarLoad())
     {
-        tqrt.ref() += patch().lookupPatchField<volScalarField, scalar>
+        tqrt.ref() += patch().lookupPatchField<volScalarField>
         (
             radiation.primaryFluxName_ + "_"  + name(bandI)
         );
@@ -199,7 +191,7 @@ write
     Ostream& os
 ) const
 {
-    fixedValueFvPatchScalarField::write(os);
+    fixedValueFvPatchField<scalar>::write(os);
     qro_.writeEntry("qro", os);
 }
 

@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedSphericalTensor_H
-#define dimensionedSphericalTensor_H
+#ifndef Foam_dimensionedSphericalTensor_H
+#define Foam_dimensionedSphericalTensor_H
 
 #include "dimensionedType.H"
 #include "sphericalTensor.H"
@@ -50,7 +50,7 @@ namespace Foam
 typedef dimensioned<sphericalTensor> dimensionedSphericalTensor;
 
 
-// global functions
+// Global Functions
 
 dimensionedScalar tr(const dimensionedSphericalTensor&);
 dimensionedScalar det(const dimensionedSphericalTensor&);

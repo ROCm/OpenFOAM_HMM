@@ -1052,7 +1052,7 @@ void adjointkOmegaSST::updatePrimalRelatedFields()
         S2_ = 2*magSqr(symm(gradU_))
             + dimensionedScalar(dimless/sqr(dimTime), 1.e-21);
         S_ = sqrt(S2_);
-        GbyNu0_ = gradU_ && dev(twoSymm(gradU_));
+        GbyNu0_ = gradU_ && devTwoSymm(gradU_);
 
         // Instead of computing G directly here, delegate to RASModelVariables
         // to make sure G is computed consistently when the primal fields are
@@ -1066,7 +1066,7 @@ void adjointkOmegaSST::updatePrimalRelatedFields()
         (
             IOobject
             (
-                type() + ":G",
+                IOobject::scopedName(type(), "G"),
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -1808,7 +1808,7 @@ tmp<volSymmTensorField> adjointkOmegaSST::devReff
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-           -nuEff()*dev(twoSymm(fvc::grad(U)))
+           -nuEff()*devTwoSymm(fvc::grad(U))
         );
 }
 
@@ -2293,7 +2293,7 @@ tmp<volTensorField> adjointkOmegaSST::FISensitivityTerm()
             ),
             mesh_,
             dimensionedTensor(sqr(dimLength)/pow3(dimTime), Zero),
-            zeroGradientFvPatchTensorField::typeName
+            fvPatchFieldBase::zeroGradientType()
         )
     );
     volTensorField& FISens = tFISens.ref();
@@ -2320,7 +2320,7 @@ tmp<volTensorField> adjointkOmegaSST::FISensitivityTerm()
       + (
             case_1_GPrime_*wa()*gamma_
           + case_1_Pk_*ka()*nutRef()
-        )*2.*T(gradU_ & dev(twoSymm(gradU_)))*zeroFirstCell_
+        )*2.*T(gradU_ & devTwoSymm(gradU_))*zeroFirstCell_
         // S2 (includes contribution from nut in UEqn as well)
       + (
             dR_dnut()*a1_*k()/(b1_*S_*S_*S_*F2_)

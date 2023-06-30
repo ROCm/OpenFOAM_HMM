@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -261,11 +261,10 @@ public:
         //- True if pointer/reference is non-null. Same as good()
         explicit operator bool() const noexcept { return bool(ptr_); }
 
-        //- Cast to pointer type
+        //- Implicit cast to \em const pointer type.
+        //  \note no cast to non-const pointer,
+        //  since this would add uncertainty of ownership.
         operator const T*() const noexcept { return ptr_; }
-
-        //- Cast to pointer type
-        operator T*() noexcept { return ptr_; }
 
         //- Deprecated(2019-01) Automatic cast conversion to underlying type
         //  FatalError if no pointer is managed

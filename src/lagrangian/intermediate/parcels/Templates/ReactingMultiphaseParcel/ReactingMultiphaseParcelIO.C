@@ -93,7 +93,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
     const CompositionType& compModel
 )
 {
-    bool valid = c.size();
+    const bool readOnProc = c.size();
 
     ParcelType::readFields(c, compModel);
 
@@ -124,7 +124,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
                 "Y" + gasNames[j] + stateLabels[idGas],
                 IOobject::MUST_READ
             ),
-            valid
+            readOnProc
         );
 
         label i = 0;
@@ -144,7 +144,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
                 "Y" + liquidNames[j] + stateLabels[idLiquid],
                  IOobject::MUST_READ
             ),
-            valid
+            readOnProc
         );
 
         label i = 0;
@@ -164,7 +164,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
                 "Y" + solidNames[j] + stateLabels[idSolid],
                 IOobject::MUST_READ
             ),
-            valid
+            readOnProc
         );
 
         label i = 0;
@@ -195,7 +195,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
 {
     ParcelType::writeFields(c, compModel);
 
-    label np = c.size();
+    const label np = c.size();
+    const bool writeOnProc = c.size();
 
     // Write the composition fractions
     {
@@ -222,7 +223,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
                 ++i;
             }
 
-            YGas.write(np > 0);
+            YGas.write(writeOnProc);
         }
 
         const label idLiquid = compModel.idLiquid();
@@ -246,7 +247,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
                 ++i;
             }
 
-            YLiquid.write(np > 0);
+            YLiquid.write(writeOnProc);
         }
 
         const label idSolid = compModel.idSolid();
@@ -270,7 +271,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
                 ++i;
             }
 
-            YSolid.write(np > 0);
+            YSolid.write(writeOnProc);
         }
     }
 }
@@ -335,10 +336,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readObjects
 {
     ParcelType::readObjects(c, obr);
 
-    const label np = c.size();
+    // const label np = c.size();
+    const bool readOnProc = c.size();
 
     // The composition fractions
-    if (np > 0)
+    if (readOnProc)
     {
         const wordList& stateLabels = compModel.stateLabels();
 
@@ -402,9 +404,10 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeObjects
     ParcelType::writeObjects(c, obr);
 
     const label np = c.size();
+    const bool writeOnProc = c.size();
 
     // Write the composition fractions
-    if (np > 0)
+    if (writeOnProc)
     {
         const wordList& stateLabels = compModel.stateLabels();
 

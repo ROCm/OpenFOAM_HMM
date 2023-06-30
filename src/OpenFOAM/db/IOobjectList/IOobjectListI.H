@@ -109,7 +109,7 @@ inline Foam::IOobjectList::IOobjectList
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::IOobjectList::add(autoPtr<IOobject>&& objectPtr)
+inline bool Foam::IOobjectList::add(autoPtr<IOobject>& objectPtr)
 {
     if (objectPtr)
     {
@@ -120,7 +120,7 @@ inline bool Foam::IOobjectList::add(autoPtr<IOobject>&& objectPtr)
 }
 
 
-inline bool Foam::IOobjectList::add(autoPtr<IOobject>& objectPtr)
+inline bool Foam::IOobjectList::add(autoPtr<IOobject>&& objectPtr)
 {
     if (objectPtr)
     {

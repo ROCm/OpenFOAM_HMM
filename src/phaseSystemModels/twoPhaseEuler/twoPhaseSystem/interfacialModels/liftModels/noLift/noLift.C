@@ -74,7 +74,7 @@ Foam::tmp<Foam::volScalarField> Foam::liftModels::noLift::Cl() const
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(dimless, Zero)
@@ -95,7 +95,7 @@ Foam::tmp<Foam::volVectorField> Foam::liftModels::noLift::F() const
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedVector(dimF, Zero)
@@ -116,7 +116,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::liftModels::noLift::Ff() const
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensionedScalar(dimF*dimArea, Zero)

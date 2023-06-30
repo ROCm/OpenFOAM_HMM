@@ -80,8 +80,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given transformFvPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given transform patch field
+        //- onto a new patch
         transformFvPatchField
         (
             const transformFvPatchField<Type>&,
@@ -113,16 +113,10 @@ public:
         ) const = 0;
 
 
-    // Member functions
+    // Member Functions
 
-        // Attributes
-
-            //- Return true if the value of the patch field
-            //  is altered by assignment
-            virtual bool assignable() const
-            {
-                return true;
-            }
+        //- True: this patch field is altered by assignment.
+        virtual bool assignable() const { return true; }
 
 
         // Evaluation functions

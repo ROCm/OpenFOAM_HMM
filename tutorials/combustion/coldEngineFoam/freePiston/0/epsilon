@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -18,7 +18,7 @@ FoamFile
 
 dimensions      [0 2 -3 0 0 0 0];
 
-internalField   uniform $:internalField.epsilon;
+internalField   uniform $/internalField/epsilon;
 
 boundaryField
 {
@@ -34,7 +34,7 @@ boundaryField
 
     liner
     {
-        $:wall.epsilon;
+        $/wall/epsilon;
     }
 
     cylinderHead
@@ -48,5 +48,6 @@ boundaryField
     }
 }
 
+#remove (wall piston)
 
 // ************************************************************************* //

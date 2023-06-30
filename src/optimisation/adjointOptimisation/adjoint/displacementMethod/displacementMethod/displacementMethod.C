@@ -72,7 +72,7 @@ Foam::autoPtr<Foam::displacementMethod> Foam::displacementMethod::New
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
     word solverType(dynamicMeshDict.get<word>("solver"));

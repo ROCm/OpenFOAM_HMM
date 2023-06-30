@@ -233,7 +233,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         g_ = g.value();
     }
 
-    // scalar ramp = min(max((t.value() - 5)/10, 0), 1);
+    // scalar ramp = clamp((t.value() - 5)/10, zero_one{});
     scalar ramp = 1.0;
 
     motion_.update
@@ -274,7 +274,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 
     initialPoints_.writeEntry("initialPoints", os);
 
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

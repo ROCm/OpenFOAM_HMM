@@ -45,7 +45,7 @@ Foam::basicThermo::getThermoOrDie
     auto ctorIter = thermoTable.cfind(thermoTypeName);
 
     // Print error message if package not found in the table
-    if (!ctorIter.found())
+    if (!ctorIter.good())
     {
         FatalIOErrorInLookup
         (
@@ -109,7 +109,7 @@ Foam::basicThermo::getThermoOrDie
 
         auto ctorIter = thermoTable.cfind(thermoTypeName);
 
-        if (!ctorIter.found())
+        if (!ctorIter.good())
         {
             FatalIOErrorInLookup
             (
@@ -141,9 +141,9 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
             phasePropertyName(dictName, phaseName),
             mesh.time().constant(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -190,9 +190,9 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
             dictName,
             mesh.time().constant(),
             mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

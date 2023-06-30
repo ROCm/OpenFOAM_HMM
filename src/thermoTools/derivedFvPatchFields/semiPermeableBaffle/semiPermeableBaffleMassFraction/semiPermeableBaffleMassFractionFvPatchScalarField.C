@@ -66,7 +66,7 @@ semiPermeableBaffleMassFractionFvPatchScalarField
     c_(dict.getOrDefault<scalar>("c", 0)),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
     refValue() = Zero;
     refGrad() = Zero;
@@ -132,8 +132,7 @@ Foam::semiPermeableBaffleMassFractionFvPatchScalarField::phiY() const
     const label nbrPatchi = samplePolyPatch().index();
     const fvPatch& nbrPatch = patch().boundaryMesh()[nbrPatchi];
 
-    const fvPatchScalarField& nbrYp =
-        nbrPatch.lookupPatchField<volScalarField, scalar>(YName);
+    const auto& nbrYp = nbrPatch.lookupPatchField<volScalarField>(YName);
     scalarField nbrYc(nbrYp.patchInternalField());
     mappedPatchBase::map().distribute(nbrYc);
 
@@ -149,7 +148,7 @@ void Foam::semiPermeableBaffleMassFractionFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const turbulenceModel& turbModel =
         db().lookupObject<turbulenceModel>
@@ -171,11 +170,11 @@ void Foam::semiPermeableBaffleMassFractionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     mappedPatchBase::write(os);
     os.writeEntryIfDifferent<scalar>("c", 0, c_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

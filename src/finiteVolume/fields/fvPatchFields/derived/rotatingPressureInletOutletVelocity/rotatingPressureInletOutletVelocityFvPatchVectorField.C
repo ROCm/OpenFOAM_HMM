@@ -91,7 +91,6 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
     pressureInletOutletVelocityFvPatchVectorField(p, iF, dict),
     omega_(Function1<vector>::New("omega", dict, &db()))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
     calcTangentialVelocity();
 }
 
@@ -130,10 +129,10 @@ void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::write
     Ostream& os
 ) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("phi", phiName());
     omega_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

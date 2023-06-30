@@ -87,13 +87,14 @@ Foam::string Foam::functionEntries::calcEntry::evaluate
     dictionary codeDict(parentDict, codeSubDict);
 
     // Use function to write stream
-    OStringStream os(is.format());
+    OStringStream buf(is.format());
+    buf.precision(16);      // Some reasonably high precision
 
     streamingFunctionType function = getFunction(parentDict, codeDict);
-    (*function)(os, parentDict);
+    (*function)(buf, parentDict);
 
     // Return evaluated content as string
-    return os.str();
+    return buf.str();
 }
 
 

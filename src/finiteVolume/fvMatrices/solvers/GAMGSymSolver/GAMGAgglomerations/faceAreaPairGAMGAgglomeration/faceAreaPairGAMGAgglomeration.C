@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,7 +68,8 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
     //agglomerate(mesh, sqrt(fvmesh.magSf().primitiveField()));
     agglomerate
     (
-        mesh,
+        nCellsInCoarsestLevel_,
+        0,          //mesh,
         mag
         (
             cmptMultiply
@@ -77,7 +79,8 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
                 vector(1, 1.01, 1.02)
                 //vector::one
             )
-        )
+        ),
+        true
     );
 }
 
@@ -95,7 +98,8 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
     //agglomerate(mesh, sqrt(mag(faceAreas)));
     agglomerate
     (
-        mesh,
+        nCellsInCoarsestLevel_,
+        0,          //mesh,
         mag
         (
             cmptMultiply
@@ -105,7 +109,8 @@ Foam::faceAreaPairGAMGAgglomeration::faceAreaPairGAMGAgglomeration
                 vector(1, 1.01, 1.02)
                 //vector::one
             )
-        )
+        ),
+        true
     );
 }
 

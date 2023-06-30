@@ -1135,10 +1135,10 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
 
                 // Convert edge end points to corresponding points on B side.
                 const auto fnd0 = aToB.cfind(e[0]);
-                if (fnd0.found())
+                if (fnd0.good())
                 {
                     const auto fnd1 = aToB.cfind(e[1]);
-                    if (fnd1.found())
+                    if (fnd1.good())
                     {
                         edgeMap.insert(edge(fnd0(), fnd1()), edgeI);
                     }
@@ -1168,7 +1168,7 @@ const Foam::edgeList& Foam::cyclicPolyPatch::coupledEdges() const
                 // Look up A edge from HashTable.
                 auto iter = edgeMap.find(e);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     const label edgeA = iter.val();
                     const edge& eA = edges()[edgeA];

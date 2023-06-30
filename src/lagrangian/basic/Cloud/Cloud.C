@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017, 2020 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,8 +161,7 @@ void Foam::Cloud<ParticleType>::move
     const labelList& procPatchNeighbours = pData.processorPatchNeighbours();
 
     // Which processors this processor is connected to
-    const labelList& neighbourProcs =
-        pData.topology().procNeighbours()[Pstream::myProcNo()];
+    const labelList& neighbourProcs = pData.topology().procNeighbours();
 
     // Initialise the stepFraction moved for the particles
     for (ParticleType& p : *this)

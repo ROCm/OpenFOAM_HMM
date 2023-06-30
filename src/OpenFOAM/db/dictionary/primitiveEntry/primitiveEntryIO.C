@@ -313,14 +313,14 @@ template<>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<primitiveEntry>& ip
+    const InfoProxy<primitiveEntry>& iproxy
 )
 {
-    const primitiveEntry& e = ip.t_;
+    const auto& e = *iproxy;
 
     e.print(os);
 
-    const label nPrintTokens = 10;
+    constexpr label nPrintTokens = 10;
 
     os  << "    primitiveEntry '" << e.keyword() << "' comprises ";
 

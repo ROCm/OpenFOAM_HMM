@@ -168,18 +168,17 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::updateCoeffs()
 
         tmp<vectorField> n = patch().nf();
 
-        const surfaceScalarField& phi =
-            db().lookupObject<surfaceScalarField>(phiName_);
+        const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
-        if (phi.dimensions() == dimVelocity*dimArea)
+        if (phi.dimensions() == dimVolume/dimTime)
         {
             // volumetric flow-rate
             operator==(tangentialVelocity + n*avgU);
         }
-        else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+        else if (phi.dimensions() == dimMass/dimTime)
         {
-            const fvPatchField<scalar>& rhop =
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            const auto& rhop =
+                patch().lookupPatchField<volScalarField>(rhoName_);
 
             // mass flow-rate
             operator==(tangentialVelocity + n*avgU/rhop);
@@ -211,7 +210,7 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
     os.writeEntry("axis", axis_);
     flowRate_->writeData(os);
     rpm_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef complexVector_H
-#define complexVector_H
+#ifndef Foam_complexVector_H
+#define Foam_complexVector_H
 
 #include "complex.H"
 #include "vector.H"

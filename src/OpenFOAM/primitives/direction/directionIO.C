@@ -47,7 +47,7 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& val)
     if (!t.good())
     {
         FatalIOErrorInFunction(is)
-            << "Bad token - could not get direction"
+            << "Bad token - could not get uint8/direction"
             << exit(FatalIOError);
         is.setBad();
         return is;
@@ -60,7 +60,7 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& val)
     else
     {
         FatalIOErrorInFunction(is)
-            << "Wrong token type - expected label (direction), found "
+            << "Wrong token type - expected label (uint8/direction), found "
             << t.info()
             << exit(FatalIOError);
         is.setBad();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -148,6 +148,20 @@ public:
 
         //- Replace a component field of the field
         void replace(const direction, const cmptType&);
+
+        //- Impose lower (floor) clamp on the field values (in-place)
+        void clamp_min(const Type& lower);
+
+        //- Impose upper (ceiling) clamp on the field values (in-place)
+        void clamp_max(const Type& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const Type& lower, const Type& upper);
+
+        //- Clamp field values (in-place) to the specified range.
+        //  Does not check if range is valid or not.
+        void clamp_range(const MinMax<Type>& range);
 
         //- Return the field transpose (only defined for second rank tensors)
         tmp<FieldField<Field, Type>> T() const;

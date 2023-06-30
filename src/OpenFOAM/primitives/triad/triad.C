@@ -395,7 +395,7 @@ Foam::scalar Foam::diff(const triad& A, const triad& B)
             (tmpA[dir] & tmpB[dir])
            /(Foam::mag(tmpA[dir])*Foam::mag(tmpA[dir]) + SMALL);
 
-        cosPhi = min(max(cosPhi, -1), 1);
+        cosPhi = clamp(cosPhi, -1, 1);
 
         sumDifference += mag(cosPhi - 1);
     }

@@ -29,12 +29,19 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 #include "PrecisionAdaptor.H"
+#include <map>
+#include <string>
+#include <vector>
+
+// Probably not needed, but in case we pickup parhip_interface.h
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
 
 #include "kaHIP_interface.h"
-
-#include <string>
-#include <map>
-#include <vector>
 
 // Provide a clear error message if we have a severe size mismatch
 // Allow widening, but not narrowing

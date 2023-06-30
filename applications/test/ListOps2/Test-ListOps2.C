@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 
         Info<< nl << "list: " << flatOutput(list) << nl << endl;
 
-        list.remove();
+        list.pop_back();
         Info<<"remove = " << flatOutput(list) << nl;
 
         {

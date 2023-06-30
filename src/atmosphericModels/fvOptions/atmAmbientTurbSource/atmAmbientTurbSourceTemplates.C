@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd
+    Copyright (C) 2020-2023 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,7 +71,7 @@ void Foam::fv::atmAmbientTurbSource::atmAmbientTurbSourceOmega
     const volScalarField::Internal& beta =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":beta")
+            IOobject::scopedName(turbPtr->type(), "beta")
         );
 
     // (RS:Eq. 4, rhs-term:5)

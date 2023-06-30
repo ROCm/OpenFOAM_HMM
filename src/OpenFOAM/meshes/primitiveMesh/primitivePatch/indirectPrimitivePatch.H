@@ -43,10 +43,8 @@ Description
 #ifndef Foam_indirectPrimitivePatch_H
 #define Foam_indirectPrimitivePatch_H
 
-#include "PrimitivePatch.H"
-#include "face.H"
+#include "primitivePatch.H"
 #include "IndirectList.H"
-#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

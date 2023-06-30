@@ -95,7 +95,7 @@ Foam::rigidBodyMeshMotionSolver::rigidBodyMeshMotionSolver
                 mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         )
       : coeffDict()
@@ -279,7 +279,7 @@ void Foam::rigidBodyMeshMotionSolver::solve()
 bool Foam::rigidBodyMeshMotionSolver::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Force ASCII writing
@@ -295,12 +295,12 @@ bool Foam::rigidBodyMeshMotionSolver::writeObject
             mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
     model_.state().write(dict);
-    return dict.regIOobject::writeObject(streamOpt, valid);
+    return dict.regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

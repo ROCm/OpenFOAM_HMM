@@ -135,10 +135,10 @@ Description
         {                                                                      \
             const auto& tbl = *prefix##TablePtr_;                              \
             auto iter = tbl.cfind(k);                                          \
-            if (!iter.found() && prefix##CompatTablePtr_)                      \
+            if (!iter.good() && prefix##CompatTablePtr_)                       \
             {                                                                  \
                 const auto altIter = prefix##CompatTablePtr_->cfind(k);        \
-                if (altIter.found())                                           \
+                if (altIter.good())                                            \
                 {                                                              \
                     const auto& alt = altIter.val();  /* <word,int> */         \
                     iter = tbl.cfind(alt.first);                               \
@@ -153,7 +153,7 @@ Description
                     }                                                          \
                 }                                                              \
             }                                                                  \
-            if (iter.found())                                                  \
+            if (iter.good())                                                   \
             {                                                                  \
                 return iter.val();                                             \
             }                                                                  \

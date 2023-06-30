@@ -6,8 +6,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Foam_UIndirectList_H
-#define Foam_UIndirectList_H
+#ifndef FoamCompat_UIndirectList_H
+#define FoamCompat_UIndirectList_H
 
 #include "IndirectList.H"
 

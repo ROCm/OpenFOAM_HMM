@@ -70,10 +70,11 @@ Foam::coupledFaePatchField<Type>::coupledFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
 )
 :
-    faePatchField<Type>(p, iF, dict)
+    faePatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
@@ -104,7 +105,7 @@ template<class Type>
 void Foam::coupledFaePatchField<Type>::write(Ostream& os) const
 {
     faePatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faePatchField<Type>::writeValueEntry(os);
 }
 
 

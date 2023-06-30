@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,13 +56,14 @@ class uncollatedFileOperation
     // Private Data
 
         //- Communicator allocated/managed by us
-        label managedComm_;
+        mutable label managedComm_;
 
 
     // Private Member Functions
 
         //- Any initialisation steps after constructing
         void init(bool verbose);
+
 
 protected:
 
@@ -90,14 +91,22 @@ protected:
 
 public:
 
-        //- Runtime type information
-        TypeName("uncollated");
+    //- Runtime type information
+    TypeName("uncollated");
 
 
     // Constructors
 
         //- Default construct
-        explicit uncollatedFileOperation(bool verbose);
+        explicit uncollatedFileOperation(bool verbose = false);
+
+        //- Construct from communicator with specified io-ranks
+        explicit uncollatedFileOperation
+        (
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
+            bool verbose = false
+        );
 
 
     //- Destructor
@@ -105,6 +114,11 @@ public:
 
 
     // Member Functions
+
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const;
+
 
         // OSSpecific equivalents
 
@@ -271,7 +285,7 @@ public:
                 regIOobject&,
                 const fileName&,
                 const word& typeName,
-                const bool procValid = true
+                const bool readOnProc = true
             ) const;
 
             //- Top-level read
@@ -291,7 +305,7 @@ public:
             (
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
             //- Generate an OSstream that writes a file
@@ -300,7 +314,7 @@ public:
                 IOstreamOption::atomicType,
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 };
 

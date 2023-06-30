@@ -41,7 +41,7 @@ Foam::genericPointPatchField<Type>::genericPointPatchField
     parent_bctype(p, iF)
 {
     FatalErrorInFunction
-        << "Trying to construct genericPointPatchField on patch "
+        << "Trying to construct generic patchField on patch "
         << this->patch().name()
         << " of field " << this->internalField().name() << nl
         << abort(FatalError);

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -82,6 +82,10 @@ InfoSwitches
 
 OptimisationSwitches
 {
+    // ===========
+    // File system
+    // ===========
+
     // Use physical (0) or logical (1) value for the cwd.
     cwd     1;
 
@@ -101,7 +105,7 @@ OptimisationSwitches
     fileModificationChecking timeStampMaster;
 
     //- Parallel IO file handler
-    //  uncollated (default), collated or masterUncollated
+    //  uncollated (default), collated, masterUncollated etc.
     fileHandler uncollated;
 
     //- collated: thread buffer size for queued file writes.
@@ -124,25 +128,63 @@ OptimisationSwitches
     ensight.maxChunk 5000000;
 
 
+    // =====================
+    // MPI/Parallel settings
+    // =====================
+
     // Default communication type (nonBlocking | scheduled | blocking);
     commsType       nonBlocking;
+
+    // Transfer double as float for processor boundaries. Mostly defunct.
     floatTransfer   0;
+
+    // Min number of processors to change to tree communication
     nProcsSimpleSum 0;
 
-    // MPI buffer size (bytes)
+    // MPI buffer size (bytes).
     // Can override with the MPI_BUFFER_SIZE env variable.
     // The default and minimum is (20000000).
     mpiBufferSize   0;
 
     // Optional max size (bytes) for unstructured data exchanges. In some
     // phases of OpenFOAM it can send over very large data chunks
-    // (e.g. in parallel load balancing) and some Pstream implementations have
+    // (e.g. in parallel load balancing) and some MPI implementations have
     // problems with this. Setting this variable > 0 indicates that the
     // data exchange needs to be done in multiple passes, each of maxCommsSize.
     // This is not switched on by default since it requires an additional
     // global reduction, even if multi-pass is not needed)
     maxCommsSize    0;
 
+    // Optional (experimental) feature in lduMatrixUpdate
+    // to poll (processor) interfaces for individual readiness
+    // instead of waiting for all to complete first.
+    //   -1 : wait for any requests to finish and dispatch when possible
+    //    0 : non-polling
+    //   >0 : number of times to poll for requests (and dispatch) before
+    //        reverting to non-polling (deprecated)
+    nPollProcInterfaces 0;
+
+    // Min number of processors to use non-blocking exchange (NBX) algorithm
+    //   >0 : enabled
+    nbx.min         0;
+
+    // Additional non-blocking exchange (NBX) tuning parameters (experimental)
+    //    0 : none
+    //    1 : initial barrier
+    nbx.tuning      0;
+
+    // Additional PstreamBuffers tuning parameters (experimental)
+    //   -1 : PEX with all-to-all for buffer sizes and point-to-point
+    //        for contents (legacy approach)
+    //    0 : hybrid PEX with NBX for buffer sizes and point-to-point
+    //        for contents (proposed new approach)
+    //    1 : full NBX for buffer sizes and contents (very experimental)
+    pbufs.tuning   -1;
+
+
+    // =====
+    // Other
+    // =====
 
     // Trap floating point exception.
     // Can override with FOAM_SIGFPE env variable (true|false)
@@ -499,7 +541,6 @@ DebugSwitches
     cubicUpwindFit      0;
     curve               0;
     cyclic              0;
-    cyclicLduInterface  0;
     cyclicLduInterfaceField 0;
     cylinderToCell      0;
     cylindrical         0;
@@ -684,7 +725,6 @@ DebugSwitches
     laplace             0;
     layerAdditionRemoval 0;
     layered             0;
-    lduInterface        0;
     lduInterfaceField   0;
     lduMatrix           1;
     lduMesh             0;
@@ -823,7 +863,6 @@ DebugSwitches
     primitiveMeshGeometry 0;
     probes              0;
     processor           0;
-    processorLduInterface 0;
     processorLduInterfaceField 0;
     pureMixture<constTransport<thermo<hConstThermo<perfectGas>>>> 0;
     pureMixture<sutherlandTransport<thermo<hConstThermo<perfectGas>>>> 0;
@@ -998,6 +1037,8 @@ DebugSwitches
     zoneToPoint         0;
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 DimensionedConstants
 {

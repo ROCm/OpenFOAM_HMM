@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,27 +32,24 @@ void Foam::fieldsDistributor::readField
 (
     const IOobject& io,
     const typename GeoField::Mesh& mesh,
-    const label i,
+    const label idx,
     PtrList<GeoField>& fields
 )
 {
-    fields.set(i, new GeoField(io, mesh));
+    fields.emplace_set(idx, io, mesh);
 }
+
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::fieldsDistributor::readField
 (
     const IOobject& io,
     const typename GeoMesh::Mesh& mesh,
-    const label i,
+    const label idx,
     PtrList<GeometricField<Type, PatchField, GeoMesh>>& fields
 )
 {
-    fields.set
-    (
-        i,
-        new GeometricField<Type, PatchField, GeoMesh>(io, mesh, false)
-    );
+    fields.emplace_set(idx, io, mesh, false);  // readOldTime = false
 }
 
 
@@ -75,7 +72,7 @@ void Foam::fieldsDistributor::readFields
 
     forAll(fieldObjects, i)
     {
-        fields.set(i, new GeoField(fieldObjects[i], mesh, readOldTime));
+        fields.emplace_set(i, fieldObjects[i], mesh, readOldTime);
     }
 }
 
@@ -96,7 +93,7 @@ void Foam::fieldsDistributor::readFields
 
     forAll(fieldObjects, i)
     {
-        fields.set(i, new GeoField(fieldObjects[i], mesh));
+        fields.emplace_set(i, fieldObjects[i], mesh);
     }
 }
 
@@ -104,6 +101,7 @@ void Foam::fieldsDistributor::readFields
 template<class BoolListType, class GeoField, class MeshSubsetter>
 void Foam::fieldsDistributor::readFieldsImpl
 (
+    refPtr<fileOperation>* readHandlerPtr,  // Can be nullptr
     const BoolListType& haveMeshOnProc,
     const MeshSubsetter* subsetter,
     const typename GeoField::Mesh& mesh,
@@ -122,17 +120,47 @@ void Foam::fieldsDistributor::readFieldsImpl
     wordList masterNames(objectNames);
     Pstream::broadcast(masterNames);
 
-    if (haveMeshOnProc.test(Pstream::myProcNo()) && objectNames != masterNames)
+    if
+    (
+        haveMeshOnProc.test(UPstream::myProcNo())
+     && objectNames != masterNames
+    )
     {
         FatalErrorInFunction
             << "Objects not synchronised across processors." << nl
             << "Master has " << flatOutput(masterNames) << nl
-            << "Processor " << Pstream::myProcNo()
+            << "Processor " << UPstream::myProcNo()
             << " has " << flatOutput(objectNames)
             << exit(FatalError);
     }
 
-    fields.clear();
+    #ifdef FULLDEBUG
+    {
+        // A bit more checking - this may not be strictly correct.
+        // The master must know about everyone, but the others really
+        // only need to know about themselves.
+        // Can broadcast decompose = yes/no from master
+
+        bitSet localValues(haveMeshOnProc);
+        bitSet masterValues(localValues);
+        Pstream::broadcast(masterValues);
+
+        localValues ^= masterValues;
+
+        if (localValues.any())
+        {
+            FatalErrorInFunction
+                << "haveMeshOnProc not synchronised across processors." << nl
+                << "Processor " << UPstream::myProcNo()
+                << " differs at these positions: "
+                << flatOutput(localValues.sortedToc()) << nl
+                << exit(FatalError);
+         }
+    }
+    #endif
+
+
+    fields.free();
     fields.resize(masterNames.size());
 
     if (fields.empty())
@@ -161,17 +189,11 @@ void Foam::fieldsDistributor::readFieldsImpl
     }
 
 
-    // Have master send all fields to processors that don't have a mesh. The
-    // issue is if a patchField does any parallel operations inside its
-    // construct-from-dictionary. This will not work when going to more
-    // processors (e.g. decompose = 1 -> many) ! We could make a special
-    // exception for decomposePar but nicer would be to have read-communicator
-    // ... For now detect if decomposing & disable parRun
-    if (Pstream::master())
+    // We are decomposing if none of the subprocs has a mesh
+    bool decompose = true;
+    if (UPstream::master())
     {
-        // Work out if we're decomposing - none of the subprocs has a mesh
-        bool decompose = true;
-        for (const int proci : Pstream::subProcs())
+        for (const int proci : UPstream::subProcs())
         {
             if (haveMeshOnProc.test(proci))
             {
@@ -179,38 +201,64 @@ void Foam::fieldsDistributor::readFieldsImpl
                 break;
             }
         }
-
-        const bool oldParRun = Pstream::parRun();
-        if (decompose)
-        {
-            Pstream::parRun(false);
-        }
-
-        forAll(masterNames, i)
-        {
-            const word& name = masterNames[i];
-            IOobject& io = *objects[name];
-            io.writeOpt(IOobject::AUTO_WRITE);
-
-            // Load field (but not oldTime)
-            readField(io, mesh, i, fields);
-        }
-
-        Pstream::parRun(oldParRun);  // Restore any changes
     }
-    else if (haveMeshOnProc.test(Pstream::myProcNo()))
+    Pstream::broadcast(decompose);
+
+
+    if (decompose && UPstream::master())
     {
-        // Have mesh so just try to load
+        const bool oldParRun = UPstream::parRun(false);
+
         forAll(masterNames, i)
         {
             const word& name = masterNames[i];
             IOobject& io = *objects[name];
             io.writeOpt(IOobject::AUTO_WRITE);
 
-            /// Pout<< "Attempt read: " << name << endl;
+            // Load field (but not oldTime)
+            readField(io, mesh, i, fields);
+        }
+
+        UPstream::parRun(oldParRun);
+    }
+    else if
+    (
+        !decompose
+     &&
+        // Has read-handler : use it to decide if reading is possible
+        // No  read-handler : decide based on the presence of a mesh
+        (
+            readHandlerPtr
+          ? readHandlerPtr->good()
+          : haveMeshOnProc.test(UPstream::myProcNo())
+        )
+    )
+    {
+        const label oldWorldComm = UPstream::worldComm;
+        refPtr<fileOperation> oldHandler;
+
+        if (readHandlerPtr)
+        {
+            // Swap read fileHandler for read fields
+            oldHandler = fileOperation::fileHandler(*readHandlerPtr);
+            UPstream::commWorld(fileHandler().comm());
+        }
+
+        forAll(masterNames, i)
+        {
+            const word& name = masterNames[i];
+            IOobject& io = *objects[name];
+            io.writeOpt(IOobject::AUTO_WRITE);
 
             // Load field (but not oldTime)
             readField(io, mesh, i, fields);
+        }
+
+        if (readHandlerPtr)
+        {
+            // Restore fileHandler
+            *readHandlerPtr = fileOperation::fileHandler(oldHandler);
+            UPstream::commWorld(oldWorldComm);
         }
     }
 
@@ -220,7 +268,7 @@ void Foam::fieldsDistributor::readFieldsImpl
 
     PtrList<dictionary> fieldDicts;
 
-    if (Pstream::master())
+    if (UPstream::master())
     {
         // Broadcast zero sized fields everywhere (if needed)
         // Send like a list of dictionaries
@@ -234,7 +282,7 @@ void Foam::fieldsDistributor::readFieldsImpl
         if (nDicts && subsetter)
         {
             // Disable communication for interpolate() method
-            const bool oldParRun = Pstream::parRun(false);
+            const bool oldParRun = UPstream::parRun(false);
 
             for (const auto& fld : fields)
             {
@@ -246,7 +294,7 @@ void Foam::fieldsDistributor::readFieldsImpl
                 toProcs.endBlock();
             }
 
-            Pstream::parRun(oldParRun);  // Restore state
+            UPstream::parRun(oldParRun);  // Restore state
         }
 
         toProcs << token::END_LIST << token::NL;  // End list
@@ -257,7 +305,7 @@ void Foam::fieldsDistributor::readFieldsImpl
         IPBstream fromMaster(UPstream::masterNo());  // worldComm
 
         // But only consume where needed...
-        if (!haveMeshOnProc.test(Pstream::myProcNo()))
+        if (!haveMeshOnProc.test(UPstream::myProcNo()))
         {
             fromMaster >> fieldDicts;
         }
@@ -267,30 +315,26 @@ void Foam::fieldsDistributor::readFieldsImpl
     // Use the received dictionaries (if any) to create missing fields.
 
     // Disable communication when constructing from dictionary
-    const bool oldParRun = Pstream::parRun(false);
+    const bool oldParRun = UPstream::parRun(false);
+
+    IOobject noreadIO
+    (
+        "none",
+        mesh.time().timeName(),
+        mesh.thisDb(),
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE,
+        IOobject::REGISTER
+    );
 
     forAll(fieldDicts, i)
     {
-        fields.set
-        (
-            i,
-            new GeoField
-            (
-                IOobject
-                (
-                    masterNames[i],
-                    mesh.time().timeName(),
-                    mesh.thisDb(),
-                    IOobject::NO_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                mesh,
-                fieldDicts[i]
-            )
-        );
+        noreadIO.resetHeader(masterNames[i]);
+
+        fields.emplace_set(i, noreadIO, mesh, fieldDicts[i]);
     }
 
-    Pstream::parRun(oldParRun);  // Restore any changes
+    UPstream::parRun(oldParRun);  // Restore any changes
 
 
     // Finally. Can checkOut of registry as required
@@ -338,6 +382,7 @@ void Foam::fieldsDistributor::readFields
 {
     readFieldsImpl
     (
+        nullptr,  // readHandler
         haveMeshOnProc,
         subsetter,
 
@@ -352,7 +397,7 @@ void Foam::fieldsDistributor::readFields
 template<class GeoField, class MeshSubsetter>
 void Foam::fieldsDistributor::readFields
 (
-    const boolList& haveMeshOnProc,
+    const boolUList& haveMeshOnProc,
     const MeshSubsetter* subsetter,
     const typename GeoField::Mesh& mesh,
     IOobjectList& allObjects,
@@ -362,6 +407,7 @@ void Foam::fieldsDistributor::readFields
 {
     readFieldsImpl
     (
+        nullptr,  // readHandler
         haveMeshOnProc,
         subsetter,
 
@@ -376,7 +422,7 @@ void Foam::fieldsDistributor::readFields
 template<class GeoField, class MeshSubsetter>
 void Foam::fieldsDistributor::readFields
 (
-    const boolList& haveMeshOnProc,
+    const boolUList& haveMeshOnProc,
     const typename GeoField::Mesh& mesh,
     const autoPtr<MeshSubsetter>& subsetter,
     IOobjectList& allObjects,
@@ -386,6 +432,33 @@ void Foam::fieldsDistributor::readFields
 {
     readFieldsImpl
     (
+        nullptr,  // readHandler
+        haveMeshOnProc,
+        subsetter.get(),
+
+        mesh,
+        allObjects,
+        fields,
+        deregister
+    );
+}
+
+
+template<class GeoField, class MeshSubsetter>
+void Foam::fieldsDistributor::readFields
+(
+    const boolUList& haveMeshOnProc,
+    refPtr<fileOperation>& readHandler,
+    const typename GeoField::Mesh& mesh,
+    const autoPtr<MeshSubsetter>& subsetter,
+    IOobjectList& allObjects,
+    PtrList<GeoField>& fields,
+    const bool deregister
+)
+{
+    readFieldsImpl
+    (
+       &readHandler,
         haveMeshOnProc,
         subsetter.get(),
 

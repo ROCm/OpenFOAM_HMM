@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2015 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ Namespace
 
 Description
     Global functions and variables for working with parallel streams,
-    but principally for mpi
+    but principally for MPI.
 
 SourceFiles
     PstreamGlobals.C
@@ -40,6 +40,15 @@ SourceFiles
 #define Foam_PstreamGlobals_H
 
 #include "DynamicList.H"
+#include "UPstream.H"  // for UPstream::Request
+
+// Include MPI without any C++ bindings
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
 #include <mpi.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,22 +58,15 @@ namespace Foam
 namespace PstreamGlobals
 {
 
-//- Outstanding non-blocking operations.
-extern DynamicList<MPI_Request> outstandingRequests_;
-extern DynamicList<label> freedRequests_;
-
-//- Max outstanding message tag operations.
-extern int nTags_;
-
-//- Free'd message tags
-extern DynamicList<int> freedTags_;
+// Track if MPI_Comm_free is needed for communicator index in MPICommunicators_
+extern DynamicList<bool> pendingMPIFree_;
 
 // Current communicators, which may be allocated or predefined
 // (eg, MPI_COMM_SELF, MPI_COMM_WORLD)
 extern DynamicList<MPI_Comm> MPICommunicators_;
 
-// Groups associated with the currrent communicators.
-extern DynamicList<MPI_Group> MPIGroups_;
+//- Outstanding non-blocking operations.
+extern DynamicList<MPI_Request> outstandingRequests_;
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -72,27 +74,50 @@ extern DynamicList<MPI_Group> MPIGroups_;
 //- Fatal if comm is outside the allocated range
 void checkCommunicator(const label comm, const label toProcNo);
 
-//- Reuse previously freed request locations or push request onto list
-//- of outstanding requests.
-//
-//  \return index of request within outstandingRequests_
-inline label push_request(MPI_Request request)
-{
-    label index;
 
-    if (freedRequests_.size())
+//- Reset UPstream::Request to null and/or the index of the outstanding
+//- request to -1.
+//  Does not affect the stack of outstanding requests.
+inline void reset_request
+(
+    UPstream::Request* requestPtr,
+    label* requestIdx = nullptr
+)
+{
+    if (requestPtr) *requestPtr = UPstream::Request(MPI_REQUEST_NULL);
+    if (requestIdx) *requestIdx = -1;
+}
+
+
+//- Transcribe MPI_Request to UPstream::Request
+//- (does not affect the stack of outstanding requests)
+//- or else push onto list of outstanding requests
+//- and (optionally) record its location
+inline void push_request
+(
+    MPI_Request request,
+    UPstream::Request* requestPtr = nullptr,
+    label* requestIdx = nullptr
+)
+{
+    if (requestPtr)
     {
-        index = freedRequests_.back();
-        freedRequests_.pop_back();
-        outstandingRequests_[index] = request;
+        // Transcribe as UPstream::Request
+        *requestPtr = UPstream::Request(request);
+
+        // Not on stack of outstanding requests
+        if (requestIdx) *requestIdx = -1;
     }
     else
     {
-        index = outstandingRequests_.size();
-        outstandingRequests_.push_back(request);
-    }
+        if (requestIdx)
+        {
+            // Its index into outstanding requests
+            *requestIdx = PstreamGlobals::outstandingRequests_.size();
+        }
 
-    return index;
+        PstreamGlobals::outstandingRequests_.push_back(request);
+    }
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -380,6 +380,32 @@ inline void Foam::Tensor<Cmpt>::diag(const Vector<Cmpt>& v)
 
 
 template<class Cmpt>
+inline void Foam::Tensor<Cmpt>::addDiag(const Vector<Cmpt>& v)
+{
+    this->v_[XX] += v.x(); this->v_[YY] += v.y(); this->v_[ZZ] += v.z();
+}
+
+
+template<class Cmpt>
+inline void Foam::Tensor<Cmpt>::subtractDiag(const Vector<Cmpt>& v)
+{
+    this->v_[XX] -= v.x(); this->v_[YY] -= v.y(); this->v_[ZZ] -= v.z();
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::Tensor<Cmpt>::diagSqr() const
+{
+    return
+    (
+        Foam::magSqr(this->xx())
+      + Foam::magSqr(this->yy())
+      + Foam::magSqr(this->zz())
+    );
+}
+
+
+template<class Cmpt>
 inline bool Foam::Tensor<Cmpt>::is_identity(const scalar tol) const
 {
     return
@@ -405,6 +431,109 @@ inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::T() const
         xy(), yy(), zy(),
         xz(), yz(), zz()
     );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::Tensor<Cmpt>::det() const
+{
+    return
+    (
+        xx()*yy()*zz() + xy()*yz()*zx()
+      + xz()*yx()*zy() - xx()*yz()*zy()
+      - xy()*yx()*zz() - xz()*yy()*zx()
+    );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::Tensor<Cmpt>::det2D(const direction excludeCmpt) const
+{
+    switch (excludeCmpt)
+    {
+        case 0:  // Eliminate x
+        {
+            return (yy()*zz() - yz()*zy());
+        }
+
+        case 1:  // Eliminate y
+        {
+            return (xx()*zz() - xz()*zx());
+        }
+    }
+
+    // Fall-through: Eliminate z
+    return (xx()*yy() - xy()*yx());
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::adjunct() const
+{
+    return Tensor<Cmpt>
+    (
+        yy()*zz() - zy()*yz(), xz()*zy() - xy()*zz(), xy()*yz() - xz()*yy(),
+        zx()*yz() - yx()*zz(), xx()*zz() - xz()*zx(), yx()*xz() - xx()*yz(),
+        yx()*zy() - yy()*zx(), xy()*zx() - xx()*zy(), xx()*yy() - yx()*xy()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::cof() const
+{
+    return this->adjunct().T();
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::adjunct2D
+(
+    const direction excludeCmpt
+) const
+{
+    switch (excludeCmpt)
+    {
+        case 0:  // Eliminate x
+        {
+            return Tensor<Cmpt>
+            (
+                Zero,  Zero,  Zero,
+                Zero,  zz(), -yz(),
+                Zero, -zy(),  yy()
+            );
+        }
+
+        case 1:  // Eliminate y
+        {
+            return Tensor<Cmpt>
+            (
+                zz(), Zero, -xz(),
+                Zero, Zero,  Zero,
+               -zx(), Zero,  xx()
+            );
+        }
+    }
+
+    // Fall-through: Eliminate z
+    return Tensor<Cmpt>
+    (
+        yy(), -xy(), Zero,
+       -yx(),  xx(), Zero,
+        Zero,  Zero, Zero
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::inv2D
+(
+    const direction excludeCmpt
+) const
+{
+    const Cmpt detval = this->det2D(excludeCmpt);
+
+    return this->adjunct2D(excludeCmpt)/detval;
 }
 
 
@@ -443,6 +572,84 @@ Foam::Tensor<Cmpt>::schur(const Tensor<Cmpt>& t2) const
         t1.yx()*t2.yx(), t1.yy()*t2.yy(), t1.yz()*t2.yz(),
         t1.zx()*t2.zx(), t1.zy()*t2.zy(), t1.zz()*t2.zz()
     );
+}
+
+
+// Invert without much error handling
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::inv() const
+{
+    const Cmpt detval = this->det();
+
+    #ifdef FULLDEBUG
+    if (mag(detval) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Tensor not properly invertible, determinant:"
+            << detval << " tensor:" << *this << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    return this->adjunct()/detval;
+}
+
+
+// Invert with some error handling
+template<class Cmpt>
+inline Foam::Tensor<Cmpt> Foam::Tensor<Cmpt>::safeInv() const
+{
+    {
+        // Attempt to identify and handle 2-D cases
+        // - use diagSqr instead of magSqr for fewer operations
+
+        const scalar magSqr_xx = Foam::magSqr(xx());
+        const scalar magSqr_yy = Foam::magSqr(yy());
+        const scalar magSqr_zz = Foam::magSqr(zz());
+
+        // SMALL: 1e-15 (double), 1e-6 (float), but 1e-6 may be adequate
+
+        const scalar threshold = SMALL * (magSqr_xx + magSqr_yy + magSqr_zz);
+
+        const bool small_xx = (magSqr_xx < threshold);
+        const bool small_yy = (magSqr_yy < threshold);
+        const bool small_zz = (magSqr_zz < threshold);
+
+        if (small_xx || small_yy || small_zz)
+        {
+            Tensor<Cmpt> work(*this);
+
+            if (small_xx) { work.xx() += pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() += pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() += pTraits<Cmpt>::one; }
+
+            const Cmpt detval = work.det();
+
+            if (mag(detval) < ROOTVSMALL)
+            {
+                // Appears to be nearly zero - leave untouched?
+                return Tensor<Cmpt>(Zero);
+            }
+
+            work = work.adjunct()/detval;
+
+            if (small_xx) { work.xx() -= pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() -= pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() -= pTraits<Cmpt>::one; }
+
+            return work;
+        }
+    }
+
+    const Cmpt detval = this->det();
+
+    if (mag(detval) < ROOTVSMALL)
+    {
+        // Appears to be nearly zero - leave untouched?
+        return Tensor<Cmpt>(Zero);
+    }
+
+    return this->adjunct()/detval;
 }
 
 
@@ -553,6 +760,36 @@ inline SymmTensor<Cmpt> twoSymm(const Tensor<Cmpt>& t)
 }
 
 
+//- Return the deviatoric part of the symmetric part of a Tensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devSymm(const Tensor<Cmpt>& t)
+{
+    const Cmpt sph(tr(t)/3.0);
+
+    return SymmTensor<Cmpt>
+    (
+        t.xx() - sph, 0.5*(t.xy() + t.yx()), 0.5*(t.xz() + t.zx()),
+                      t.yy() - sph,          0.5*(t.yz() + t.zy()),
+                                             t.zz() - sph
+    );
+}
+
+
+//- Return the deviatoric part of twice the symmetric part of a Tensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devTwoSymm(const Tensor<Cmpt>& t)
+{
+    const Cmpt sph((2.0/3.0)*tr(t));
+
+    return SymmTensor<Cmpt>
+    (
+        2*t.xx() - sph, (t.xy() + t.yx()), (t.xz() + t.zx()),
+                        2*t.yy() - sph,    (t.yz() + t.zy()),
+                                           2*t.zz() - sph
+    );
+}
+
+
 //- Return the skew-symmetric part of a Tensor
 template<class Cmpt>
 inline Tensor<Cmpt> skew(const Tensor<Cmpt>& t)
@@ -594,12 +831,7 @@ inline Tensor<Cmpt> dev2(const Tensor<Cmpt>& t)
 template<class Cmpt>
 inline Cmpt det(const Tensor<Cmpt>& t)
 {
-    return
-    (
-        t.xx()*t.yy()*t.zz() + t.xy()*t.yz()*t.zx()
-      + t.xz()*t.yx()*t.zy() - t.xx()*t.yz()*t.zy()
-      - t.xy()*t.yx()*t.zz() - t.xz()*t.yy()*t.zx()
-    );
+    return t.det();
 }
 
 
@@ -607,39 +839,25 @@ inline Cmpt det(const Tensor<Cmpt>& t)
 template<class Cmpt>
 inline Tensor<Cmpt> cof(const Tensor<Cmpt>& t)
 {
-    return Tensor<Cmpt>
-    (
-        t.yy()*t.zz() - t.zy()*t.yz(),
-        t.zx()*t.yz() - t.yx()*t.zz(),
-        t.yx()*t.zy() - t.yy()*t.zx(),
-
-        t.xz()*t.zy() - t.xy()*t.zz(),
-        t.xx()*t.zz() - t.xz()*t.zx(),
-        t.xy()*t.zx() - t.xx()*t.zy(),
-
-        t.xy()*t.yz() - t.xz()*t.yy(),
-        t.yx()*t.xz() - t.xx()*t.yz(),
-        t.xx()*t.yy() - t.yx()*t.xy()
-    );
+    return t.cof();
 }
 
 
-//- Return the inverse of a Tensor by using the given determinant
+//- Return the inverse of a Tensor, using the given determinant value
 template<class Cmpt>
-inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t, const Cmpt dett)
+inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t, const Cmpt detval)
 {
     #ifdef FULLDEBUG
-    if (mag(dett) < VSMALL)
+    if (mag(detval) < VSMALL)
     {
         FatalErrorInFunction
-            << "Tensor is not invertible due to the (almost) zero determinant:"
-            << "    Tensor = " << t << nl
-            << "    det(Tensor) = " << dett
+            << "Tensor not properly invertible, determinant:"
+            << detval << " tensor:" << t << nl
             << abort(FatalError);
     }
     #endif
 
-    return cof(t).T()/dett;
+    return t.adjunct()/detval;
 }
 
 
@@ -647,15 +865,7 @@ inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t, const Cmpt dett)
 template<class Cmpt>
 inline Tensor<Cmpt> inv(const Tensor<Cmpt>& t)
 {
-    return inv(t, det(t));
-}
-
-
-//- Return the inverse of this Tensor
-template<class Cmpt>
-inline Tensor<Cmpt> Tensor<Cmpt>::inv() const
-{
-    return Foam::inv(*this);
+    return t.inv();
 }
 
 
@@ -684,6 +894,32 @@ template<class Cmpt>
 inline Cmpt invariantIII(const Tensor<Cmpt>& t)
 {
     return det(t);
+}
+
+
+//- Linear interpolation of tensors a and b by factor t
+template<class Cmpt>
+inline Tensor<Cmpt> lerp
+(
+    const Tensor<Cmpt>& a,
+    const Tensor<Cmpt>& b,
+    const scalar t
+)
+{
+    const scalar onet = (1-t);
+
+    return Tensor<Cmpt>
+    (
+        onet*a.xx() + t*b.xx(),
+        onet*a.xy() + t*b.xy(),
+        onet*a.xz() + t*b.xz(),
+        onet*a.yx() + t*b.yx(),
+        onet*a.yy() + t*b.yy(),
+        onet*a.yz() + t*b.yz(),
+        onet*a.zx() + t*b.zx(),
+        onet*a.zy() + t*b.zy(),
+        onet*a.zz() + t*b.zz()
+    );
 }
 
 

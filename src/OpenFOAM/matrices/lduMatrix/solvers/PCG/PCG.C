@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -129,12 +129,14 @@ Foam::solverPerformance Foam::PCG::scalarSolve
     )
     {
         // --- Select and construct the preconditioner
-        autoPtr<lduMatrix::preconditioner> preconPtr =
-            lduMatrix::preconditioner::New
+        if (!preconPtr_)
+        {
+            preconPtr_ = lduMatrix::preconditioner::New
             (
                 *this,
                 controlDict_
             );
+        }
 
         // --- Solver iteration
         do
@@ -143,7 +145,7 @@ Foam::solverPerformance Foam::PCG::scalarSolve
             wArAold = wArA;
 
             // --- Precondition residual
-            preconPtr->precondition(wA, rA, cmpt);
+            preconPtr_->precondition(wA, rA, cmpt);
 
             // --- Update search directions:
             wArA = gSumProd(wA, rA, matrix().mesh().comm());
@@ -157,7 +159,7 @@ Foam::solverPerformance Foam::PCG::scalarSolve
             }
             else
             {
-                solveScalar beta = wArA/wArAold;
+                const solveScalar beta = wArA/wArAold;
 
                 for (label cell=0; cell<nCells; cell++)
                 {
@@ -177,7 +179,7 @@ Foam::solverPerformance Foam::PCG::scalarSolve
 
             // --- Update solution and residual:
 
-            solveScalar alpha = wArA/wApA;
+            const solveScalar alpha = wArA/wApA;
 
             for (label cell=0; cell<nCells; cell++)
             {
@@ -199,6 +201,11 @@ Foam::solverPerformance Foam::PCG::scalarSolve
         );
     }
 
+    if (preconPtr_)
+    {
+        preconPtr_->setFinished(solverPerf);
+    }
+
     matrix().setResidualField
     (
         ConstPrecisionAdaptor<scalar, solveScalar>(rA)(),
@@ -208,7 +215,6 @@ Foam::solverPerformance Foam::PCG::scalarSolve
 
     return solverPerf;
 }
-
 
 
 Foam::solverPerformance Foam::PCG::solve

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,84 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
+#include "cell.H"
+#include "bitSet.H"
+#include "DynamicList.H"
 #include "ListOps.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::primitiveMesh::calcCellPoints() const
+{
+    if (debug)
+    {
+        Pout<< "primitiveMesh::cellCellPoints() : "
+            << "calculating cellPoints" << endl;
+
+        if (debug == -1)
+        {
+            // For checking calls:abort so we can quickly hunt down
+            // origin of call
+            FatalErrorInFunction
+                << abort(FatalError);
+        }
+    }
+
+    // It is an error to attempt to recalculate cellPoints
+    // if the pointer is already set
+    if (cpPtr_)
+    {
+        FatalErrorInFunction
+            << "cellPoints already calculated"
+            << abort(FatalError);
+    }
+    else if (hasPointCells())
+    {
+        // Invert pointCells
+        cpPtr_ = new labelListList(nCells());
+        invertManyToMany(nCells(), pointCells(), *cpPtr_);
+    }
+    else
+    {
+        // Calculate cell-point topology
+
+        cpPtr_ = new labelListList(nCells());
+        auto& cellPointAddr = *cpPtr_;
+
+        const cellList& cellLst = cells();
+        const faceList& faceLst = faces();
+
+        // Tracking (only use each point id once)
+        bitSet usedPoints(nPoints());
+
+        // Vertex labels for the current cell
+        DynamicList<label> currPoints(256);
+
+        const label loopLen = nCells();
+
+        for (label celli = 0; celli < loopLen; ++celli)
+        {
+            // Clear any previous contents
+            usedPoints.unset(currPoints);
+            currPoints.clear();
+
+            for (const label facei : cellLst[celli])
+            {
+                for (const label pointi : faceLst[facei])
+                {
+                    // Only once for each point id
+                    if (usedPoints.set(pointi))
+                    {
+                        currPoints.push_back(pointi);
+                    }
+                }
+            }
+
+            cellPointAddr[celli] = currPoints;  // NB: unsorted
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -35,23 +112,7 @@ const Foam::labelListList& Foam::primitiveMesh::cellPoints() const
 {
     if (!cpPtr_)
     {
-        if (debug)
-        {
-            Pout<< "primitiveMesh::cellPoints() : "
-                << "calculating cellPoints" << endl;
-
-            if (debug == -1)
-            {
-                // For checking calls:abort so we can quickly hunt down
-                // origin of call
-                FatalErrorInFunction
-                    << abort(FatalError);
-            }
-        }
-
-        // Invert pointCells
-        cpPtr_ = new labelListList(nCells());
-        invertManyToMany(nCells(), pointCells(), *cpPtr_);
+        calcCellPoints();
     }
 
     return *cpPtr_;
@@ -81,14 +142,14 @@ const Foam::labelList& Foam::primitiveMesh::cellPoints
     }
 
     storage.clear();
-    if (set.size() > storage.capacity())
+    if (storage.capacity() < set.size())
     {
         storage.setCapacity(set.size());
     }
 
     for (const label pointi : set)
     {
-        storage.append(pointi);
+        storage.push_back(pointi);
     }
 
     return storage;

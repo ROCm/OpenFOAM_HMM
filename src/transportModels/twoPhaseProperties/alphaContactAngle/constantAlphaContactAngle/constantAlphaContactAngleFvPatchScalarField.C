@@ -117,7 +117,7 @@ void Foam::constantAlphaContactAngleFvPatchScalarField::write
 {
     alphaContactAngleTwoPhaseFvPatchScalarField::write(os);
     os.writeEntry("theta0", theta0_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,11 +67,12 @@ Foam::functionObjects::stabilityBlendingFactor::indicator()
                 time_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         mesh_.objectRegistry::store(fldPtr);
@@ -332,7 +333,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         auto& magGradCC = tmagGradCC.ref();
 
@@ -351,7 +352,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
                 ),
                 mesh_,
                 dimensionedScalar(dimLength, Zero),
-                zeroGradientFvPatchScalarField::typeName
+                fvPatchFieldBase::zeroGradientType()
             );
             cci = mesh_.C().component(i);
             cci.correctBoundaryConditions();
@@ -405,7 +406,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         auto& Co = CoPtr.ref();
@@ -417,7 +418,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
             max
             (
                 indicator,
-                min(max(scalar(0), (Co - Co1_)/(Co2_ - Co1_)), scalar(1))
+                clamp((Co - Co1_)/(Co2_ - Co1_), zero_one{})
             );
 
         if (first)
@@ -448,8 +449,7 @@ bool Foam::functionObjects::stabilityBlendingFactor::init(bool first)
     }
 
     indicator.correctBoundaryConditions();
-    indicator.min(1.0);
-    indicator.max(0.0);
+    indicator.clamp_range(zero_one{});
 
     // Update the blended surface field
     auto& surBlended = mesh_.lookupObjectRef<surfaceScalarField>(resultName_);
@@ -541,7 +541,8 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             time_.timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         ),
         mesh_,
         dimensionedScalar(dimless, Zero)
@@ -559,12 +560,13 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         );
 
         if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
         {
-            volScalarField* vfPtr = new volScalarField(fieldHeader, mesh_);
+            auto* vfPtr = new volScalarField(fieldHeader, mesh_);
             mesh_.objectRegistry::store(vfPtr);
         }
         else
@@ -588,12 +590,13 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         );
 
         if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
         {
-            volScalarField* vfPtr = new volScalarField(fieldHeader, mesh_);
+            auto* vfPtr = new volScalarField(fieldHeader, mesh_);
             mesh_.objectRegistry::store(vfPtr);
         }
         else
@@ -615,12 +618,13 @@ Foam::functionObjects::stabilityBlendingFactor::stabilityBlendingFactor
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            IOobject::NO_WRITE,
+            IOobject::REGISTER
         );
 
         if (fieldHeader.typeHeaderOk<volScalarField>(true, true, false))
         {
-            volScalarField* vfPtr(new volScalarField(fieldHeader, mesh_));
+            auto* vfPtr = new volScalarField(fieldHeader, mesh_);
             mesh_.objectRegistry::store(vfPtr);
         }
         else

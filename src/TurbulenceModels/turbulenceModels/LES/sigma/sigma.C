@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2022 Upstream CFD GmbH
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +141,7 @@ tmp<volScalarField> sigma<BasicTurbulenceModel>::k() const
         IOobject::groupName("k", this->U_.group()),
         (2.0*Ck_/this->Ce_)
        *sqr(this->delta())
-       *magSqr(dev(symm(fvc::grad(this->U_))))
+       *magSqr(devSymm(fvc::grad(this->U_)))
     );
 }
 

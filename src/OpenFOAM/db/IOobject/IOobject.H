@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,12 +45,12 @@ Description
         Object must be read from Istream on construction. \n
         Error if Istream does not exist or cannot be read.
         Does not check timestamp or re-read.
-      - \par MUST_READ_IF_MODIFIED
+      - \par READ_MODIFIED (MUST_READ_IF_MODIFIED)
         Object must be read from Istream on construction. \n
         Error if Istream does not exist or cannot be read. If object is
         registered its timestamp will be checked every timestep and possibly
         re-read.
-      - \par READ_IF_PRESENT
+      - \par LAZY_READ (READ_IF_PRESENT)
         Read object from Istream, but only if Istream exists. \n
         Error only if Istream exists but cannot be read.
         Does not check timestamp or re-read.
@@ -100,9 +100,9 @@ SourceFiles
 
 #include "fileName.H"
 #include "typeInfo.H"
-#include "autoPtr.H"
-#include "InfoProxy.H"
+#include "refPtr.H"  // For autoPtr, refPtr, tmp, stdFoam
 #include "Enum.H"
+#include "InfoProxy.H"
 #include "IOobjectOption.H"
 #include "IOstreamOption.H"
 
@@ -115,6 +115,11 @@ namespace Foam
 class Time;
 class dictionary;
 class objectRegistry;
+class IOobject;
+
+template<>
+Ostream& operator<<(Ostream&, const InfoProxy<IOobject>&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class IOobject Declaration
@@ -184,6 +189,12 @@ private:
 
         //- Reference to the objectRegistry
         const objectRegistry& db_;
+
+
+    // Private Member Functions
+
+        //- Construct from registry, io options. Without name, instance, local
+        IOobject(const objectRegistry& registry, IOobjectOption ioOpt);
 
 
 protected:
@@ -428,6 +439,13 @@ public:
             IOobjectOption::writeOption wOpt
         );
 
+        //- Copy construct, resetting register option
+        inline IOobject
+        (
+            const IOobject& io,
+            IOobjectOption::registerOption regOpt
+        );
+
 
         //- Clone
         autoPtr<IOobject> clone() const
@@ -450,7 +468,7 @@ public:
         const objectRegistry& db() const noexcept;
 
         //- Return Time associated with the objectRegistry
-        const Time& time() const;
+        const Time& time() const noexcept;
 
         //- Return the object name
         inline const word& name() const noexcept;
@@ -478,6 +496,11 @@ public:
 
         //- The sizeof (scalar) in bytes, possibly read from the header
         inline unsigned scalarByteSize() const noexcept;
+
+        //- Clear various bits (headerClassName, note, sizeof...)
+        //- that would be obtained when reading from a file.
+        //  \param newName if non-null, optionally rename the IOobject
+        void resetHeader(const word& newName = word::null);
 
 
     // Checks
@@ -633,11 +656,9 @@ public:
 
     // Info
 
-        //- Return info proxy, for printing information to a stream
-        InfoProxy<IOobject> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- for printing information to a stream
+        InfoProxy<IOobject> info() const noexcept { return *this; }
 
 
     // Member Operators
@@ -653,10 +674,6 @@ inline bool IOobject::isHeaderClass<void>() const
 {
     return true;
 }
-
-
-template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<IOobject>& ip);
 
 
 //- Template function for obtaining global vs. local status

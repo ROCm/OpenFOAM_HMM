@@ -94,8 +94,9 @@ void Foam::zoneToPoint::combine
 
         if (verbosity)
         {
-            Info<< "    Using zone " << zone.name()
-                << " with " << zone.size() << " points." << endl;
+            Info<< "    Using zone " << zone.name() << " with "
+                << returnReduce(zone.size(), sumOp<label>()) << " points"
+                << endl;
         }
 
         for (const label pointi : zone)
@@ -189,8 +190,7 @@ Foam::zoneToPoint::zoneToPoint
     if (!dict.readIfPresent("zones", zoneMatcher_))
     {
         zoneMatcher_.resize(1);
-        zoneMatcher_.first() =
-            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+        zoneMatcher_.front() = dict.getCompat<wordRe>("zone", {{"name", 1806}});
     }
 }
 
@@ -223,7 +223,7 @@ void Foam::zoneToPoint::zones(const wordRes& zonesSelector)
 void Foam::zoneToPoint::zones(const wordRe& zoneName)
 {
     zoneMatcher_.resize(1);
-    zoneMatcher_.first() = zoneName;
+    zoneMatcher_.front() = zoneName;
     zoneIDs_.clear();
 }
 
@@ -239,7 +239,7 @@ void Foam::zoneToPoint::zones(const label zoneID)
 {
     zoneMatcher_.clear();
     zoneIDs_.resize(1);
-    zoneIDs_.first() = zoneID;
+    zoneIDs_.front() = zoneID;
 }
 
 
@@ -253,7 +253,7 @@ void Foam::zoneToPoint::applyToSet
     {
         if (verbose_ && !zoneMatcher_.empty())
         {
-            Info<< "    Adding all points of point zones "
+            Info<< "    Adding all points of point zones: "
                 << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 
@@ -263,7 +263,7 @@ void Foam::zoneToPoint::applyToSet
     {
         if (verbose_ && !zoneMatcher_.empty())
         {
-            Info<< "    Removing all points of point zones "
+            Info<< "    Removing all points of point zones: "
                 << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 

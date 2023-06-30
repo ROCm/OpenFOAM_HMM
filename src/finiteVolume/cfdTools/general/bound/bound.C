@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,6 +57,9 @@ Foam::bound(volScalarField& vsf, const dimensionedScalar& lowerBound)
         );
 
         vsf.boundaryFieldRef() = max(vsf.boundaryField(), lowerBound.value());
+
+        // Give coupled bcs chance to update since cell values changed
+        vsf.boundaryFieldRef().evaluateCoupled<coupledFvPatch>();
     }
 
     return vsf;

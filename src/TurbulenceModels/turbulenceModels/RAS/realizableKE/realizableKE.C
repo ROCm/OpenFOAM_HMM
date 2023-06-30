@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ tmp<volScalarField> realizableKE<BasicTurbulenceModel>::rCmu
     const volScalarField& magS
 )
 {
-    tmp<volSymmTensorField> tS = dev(symm(gradU));
+    tmp<volSymmTensorField> tS = devSymm(gradU);
     const volSymmTensorField& S = tS();
 
     volScalarField W
@@ -63,7 +63,7 @@ tmp<volScalarField> realizableKE<BasicTurbulenceModel>::rCmu
 
     volScalarField phis
     (
-        (1.0/3.0)*acos(min(max(sqrt(6.0)*W, -scalar(1)), scalar(1)))
+        (1.0/3.0)*acos(clamp(sqrt(6.0)*W, scalarMinMax(-1, 1)))
     );
     volScalarField As(sqrt(6.0)*cos(phis));
     volScalarField Us(sqrt(S2/2.0 + magSqr(skew(gradU))));
@@ -92,7 +92,7 @@ template<class BasicTurbulenceModel>
 void realizableKE<BasicTurbulenceModel>::correctNut()
 {
     tmp<volTensorField> tgradU = fvc::grad(this->U_);
-    volScalarField S2(2*magSqr(dev(symm(tgradU()))));
+    volScalarField S2(2*magSqr(devSymm(tgradU())));
     volScalarField magS(sqrt(S2));
     correctNut(tgradU(), S2, magS);
 }
@@ -266,16 +266,18 @@ void realizableKE<BasicTurbulenceModel>::correct()
     volScalarField divU(fvc::div(fvc::absolute(this->phi(), U)));
 
     tmp<volTensorField> tgradU = fvc::grad(U);
-    volScalarField S2(2*magSqr(dev(symm(tgradU()))));
+    volScalarField S2(2*magSqr(devSymm(tgradU())));
     volScalarField magS(sqrt(S2));
 
     volScalarField eta(magS*k_/epsilon_);
     volScalarField C1(max(eta/(scalar(5) + eta), scalar(0.43)));
 
-    volScalarField G(this->GName(), nut*(tgradU() && dev(twoSymm(tgradU()))));
+    volScalarField G(this->GName(), nut*(tgradU() && devTwoSymm(tgradU())));
 
     // Update epsilon and G at the wall
     epsilon_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    epsilon_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
     // SAF: limiting thermo->nu(). If psiThermo is used rho might be < 0
     // temporarily when p < 0 then nu < 0 which needs limiting

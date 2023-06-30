@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,31 +35,86 @@ Description
 #include "SlicedGeometricField.H"
 #include "slicedFvPatchFields.H"
 #include "slicedSurfaceFields.H"
+#include "slicedVolFields.H"
+
+#include "areaFaMesh.H"
+#include "areaFields.H"
+#include "edgeFields.H"
+#include "slicedAreaFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    argList::addBoolOption
+    (
+        "finite-area",
+        "Test finite-area mesh/fields"
+    );
     #include "setRootCase.H"
 
     #include "createTime.H"
     #include "createMesh.H"
 
-    Info<< "Reading field p\n" << endl;
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
+    if (args.found("finite-area"))
+    {
+        autoPtr<faMesh> faMeshPtr(faMesh::TryNew(mesh));
 
-    //Info<< min(p, p);
+        if (!faMeshPtr)
+        {
+            Info<< "Stop: no finiteArea" << nl;
+            return 0;
+        }
+
+        auto& aMesh = faMeshPtr();
+
+        Info<< "Test with finiteArea" << nl;
+
+        (void)aMesh.areaCentres(),
+        (void)aMesh.faceAreaNormals();
+
+        vectorField flatBoundary(aMesh.nBoundaryEdges(), Zero);
+
+        {
+            const auto& bfld = aMesh.faceAreaNormals().boundaryField();
+
+            forAll(aMesh.boundary(), patchi)
+            {
+                const auto& src = bfld[patchi];
+                const auto& p = aMesh.boundary()[patchi];
+
+                vectorList::subList out = p.boundarySlice(flatBoundary);
+
+                if (out.size() == src.size())
+                {
+                    out = src;
+                }
+            }
+        }
+        flatBoundary *= 100;
+
+
+        slicedAreaVectorField foo
+        (
+            IOobject
+            (
+                "centres",
+                runTime.timeName(),
+                aMesh.thisDb(),
+                IOobject::NO_REGISTER
+            ),
+            aMesh,
+            dimLength,
+            aMesh.areaCentres(),
+            flatBoundary
+        );
+
+        Info<< "Weird combination of centres and normals!" << nl << nl;
+        foo.writeData(Info.stream());
+
+        Info<< "Done" << nl;
+        return 0;
+    }
 
     Info<< "Reading field U\n" << endl;
     volVectorField U
@@ -67,15 +123,13 @@ int main(int argc, char *argv[])
         (
             "U",
             runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
+            mesh.thisDb(),
+            IOobject::MUST_READ
         ),
         mesh
     );
 
-    SlicedGeometricField<vector, fvPatchField, slicedFvPatchField, volMesh>
-    C
+    slicedVolVectorField C
     (
         IOobject
         (
@@ -92,14 +146,7 @@ int main(int argc, char *argv[])
     Info<< C << endl;
     Info<< (C & U) << endl;
 
-    SlicedGeometricField
-    <
-         vector,
-         fvsPatchField,
-         slicedFvsPatchField,
-         surfaceMesh
-    >
-    Sf
+    slicedSurfaceVectorField Sf
     (
         IOobject
         (

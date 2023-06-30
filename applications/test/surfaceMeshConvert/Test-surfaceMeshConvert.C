@@ -510,7 +510,7 @@ int main(int argc, char *argv[])
                     runTime,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 std::move(surf)
             );

@@ -35,10 +35,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef profilingTrigger_H
-#define profilingTrigger_H
+#ifndef Foam_profilingTrigger_H
+#define Foam_profilingTrigger_H
 
-#include "string.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

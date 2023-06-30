@@ -176,6 +176,15 @@ Foam::faBoundaryMesh::faBoundaryMesh
 {}
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+void Foam::faBoundaryMesh::clear()
+{
+    faPatchList::clear();
+    groupIDsPtr_.reset(nullptr);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::faBoundaryMesh::calcGeometry()
@@ -300,7 +309,7 @@ Foam::label Foam::faBoundaryMesh::nNonProcessor() const
 {
     const faPatchList& patches = *this;
 
-    label nonProc = 0;
+    label count = 0;
 
     for (const faPatch& p : patches)
     {
@@ -309,10 +318,28 @@ Foam::label Foam::faBoundaryMesh::nNonProcessor() const
             break;
         }
 
-        ++nonProc;
+        ++count;
     }
 
-    return nonProc;
+    return count;
+}
+
+
+Foam::label Foam::faBoundaryMesh::nProcessorPatches() const
+{
+    const faPatchList& patches = *this;
+
+    label count = 0;
+
+    for (const faPatch& p : patches)
+    {
+        if (isA<processorFaPatch>(p))
+        {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 
@@ -509,7 +536,7 @@ Foam::labelList Foam::faBoundaryMesh::indices
         {
             const auto iter = groupPatchIDs().cfind(matcher);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Hash ids associated with the group
                 ids.insert(iter.val());
@@ -909,14 +936,14 @@ bool Foam::faBoundaryMesh::writeData(Ostream& os) const
 bool Foam::faBoundaryMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Allow/disallow compression?
     // 1. keep readable
     // 2. save some space
     // ??? streamOpt.compression(IOstreamOption::UNCOMPRESSED);
-    return regIOobject::writeObject(streamOpt, valid);
+    return regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

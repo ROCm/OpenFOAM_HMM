@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,20 +27,40 @@ License
 \*---------------------------------------------------------------------------*/
 
 #undef UNARY_FUNCTION
+#undef UNARY_FUNCTION_TRANSFORM
+#undef UNARY_FUNCTION_INTERFACE
 
 #undef UNARY_OPERATOR
+#undef UNARY_OPERATOR_TRANSFORM
+#undef UNARY_OPERATOR_INTERFACE
 
 #undef BINARY_FUNCTION
+#undef BINARY_FUNCTION_TRANSFORM
+#undef BINARY_FUNCTION_INTERFACE
 
+#undef BINARY_TYPE_FUNCTION
 #undef BINARY_TYPE_FUNCTION_SF
 #undef BINARY_TYPE_FUNCTION_FS
-#undef BINARY_TYPE_FUNCTION
+#undef BINARY_FUNCTION_TRANSFORM_SF
+#undef BINARY_FUNCTION_INTERFACE_SF
+#undef BINARY_FUNCTION_TRANSFORM_FS
+#undef BINARY_FUNCTION_INTERFACE_FS
 
 #undef BINARY_OPERATOR
-
+#undef BINARY_TYPE_OPERATOR
 #undef BINARY_TYPE_OPERATOR_SF
 #undef BINARY_TYPE_OPERATOR_FS
-#undef BINARY_TYPE_OPERATOR
+
+#undef TERNARY_FUNCTION
+#undef TERNARY_FUNCTION_TRANSFORM
+#undef TERNARY_FUNCTION_INTERFACE
+#undef TERNARY_TYPE_FUNCTION
+#undef TERNARY_TYPE_FUNCTION_FFS
+#undef TERNARY_TYPE_FUNCTION_FSF
+#undef TERNARY_TYPE_FUNCTION_SFF
+#undef TERNARY_TYPE_FUNCTION_SSF
+#undef TERNARY_TYPE_FUNCTION_SFS
+#undef TERNARY_TYPE_FUNCTION_FSS
 
 #undef TEMPLATE
 

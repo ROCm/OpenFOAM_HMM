@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,12 +39,8 @@ Foam::calculatedProcessorFvPatchField<Type>::calculatedProcessorFvPatchField
 :
     coupledFvPatchField<Type>(p, iF),
     procInterface_(refCast<const lduPrimitiveProcessorInterface>(interface)),
-    sendBuf_(interface.faceCells().size()),
-    receiveBuf_(interface.faceCells().size()),
-    scalarSendBuf_(interface.faceCells().size()),
-    scalarReceiveBuf_(interface.faceCells().size()),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1)
+    sendRequest_(-1),
+    recvRequest_(-1)
 {}
 
 
@@ -56,13 +52,8 @@ Foam::calculatedProcessorFvPatchField<Type>::calculatedProcessorFvPatchField
 :
     coupledFvPatchField<Type>(ptf),
     procInterface_(ptf.procInterface_),
-    sendBuf_(procInterface_.faceCells().size()),
-    receiveBuf_(procInterface_.faceCells().size()),
-    scalarSendBuf_(procInterface_.faceCells().size()),
-    scalarReceiveBuf_(procInterface_.faceCells().size()),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1)
-
+    sendRequest_(-1),
+    recvRequest_(-1)
 {}
 
 
@@ -75,47 +66,30 @@ Foam::calculatedProcessorFvPatchField<Type>::calculatedProcessorFvPatchField
 :
     coupledFvPatchField<Type>(ptf, iF),
     procInterface_(ptf.procInterface_),
-    sendBuf_(procInterface_.faceCells().size()),
-    receiveBuf_(procInterface_.faceCells().size()),
-    scalarSendBuf_(procInterface_.faceCells().size()),
-    scalarReceiveBuf_(procInterface_.faceCells().size()),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1)
+    sendRequest_(-1),
+    recvRequest_(-1)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+bool Foam::calculatedProcessorFvPatchField<Type>::all_ready() const
+{
+    return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
+}
+
+
+template<class Type>
 bool Foam::calculatedProcessorFvPatchField<Type>::ready() const
 {
-    if
-    (
-        this->outstandingSendRequest_ >= 0
-     && this->outstandingSendRequest_ < UPstream::nRequests()
-    )
+    const bool ok = UPstream::finishedRequest(recvRequest_);
+    if (ok)
     {
-        if (!UPstream::finishedRequest(this->outstandingSendRequest_))
-        {
-            return false;
-        }
+        recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
-    this->outstandingSendRequest_ = -1;
-
-    if
-    (
-        this->outstandingRecvRequest_ >= 0
-     && this->outstandingRecvRequest_ < UPstream::nRequests()
-    )
-    {
-        if (!UPstream::finishedRequest(this->outstandingRecvRequest_))
-        {
-            return false;
-        }
-    }
-    this->outstandingRecvRequest_ = -1;
-
-    return true;
+    return ok;
 }
 
 
@@ -126,10 +100,10 @@ Foam::calculatedProcessorFvPatchField<Type>::patchNeighbourField() const
     if (!this->ready())
     {
         FatalErrorInFunction
-            << "On patch of size " << procInterface_.faceCells().size()
+            << "Outstanding request on patch of size "
+            << procInterface_.faceCells().size()
             << " between proc " << procInterface_.myProcNo()
             << " and " << procInterface_.neighbProcNo()
-            << " outstanding request."
             << abort(FatalError);
     }
     return *this;
@@ -142,7 +116,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         if (!is_contiguous<Type>::value)
         {
@@ -156,7 +130,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
         {
             const Field<Type>& iF = this->internalField();
             const labelList& fc = procInterface_.faceCells();
-            sendBuf_.setSize(fc.size());
+            sendBuf_.resize_nocopy(fc.size());
             forAll(fc, i)
             {
                 sendBuf_[i] = iF[fc[i]];
@@ -164,11 +138,12 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
         }
 
         // Receive straight into *this
-        this->setSize(sendBuf_.size());
-        outstandingRecvRequest_ = UPstream::nRequests();
+        this->resize_nocopy(sendBuf_.size());
+
+        recvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
             this->data_bytes(),
             this->size_bytes(),
@@ -176,10 +151,10 @@ void Foam::calculatedProcessorFvPatchField<Type>::initEvaluate
             procInterface_.comm()
         );
 
-        outstandingSendRequest_ = UPstream::nRequests();
+        sendRequest_ = UPstream::nRequests();
         UOPstream::write
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
             sendBuf_.cdata_bytes(),
             sendBuf_.size_bytes(),
@@ -196,18 +171,12 @@ void Foam::calculatedProcessorFvPatchField<Type>::evaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        if
-        (
-            outstandingRecvRequest_ >= 0
-         && outstandingRecvRequest_ < UPstream::nRequests()
-        )
-        {
-            UPstream::waitRequest(outstandingRecvRequest_);
-        }
-        outstandingSendRequest_ = -1;
-        outstandingRecvRequest_ = -1;
+        // Require receive data.
+        // Only update the send request state.
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
 }
 
@@ -225,44 +194,40 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-    // Bypass patchInternalField since uses fvPatch addressing
+    if (!this->all_ready())
+    {
+        FatalErrorInFunction
+            << "Outstanding request(s) on interface "
+            //<< interface_.name()
+            << abort(FatalError);
+    }
 
+    // Bypass patchInternalField since uses fvPatch addressing
     const labelList& fc = lduAddr.patchAddr(patchId);
 
-    scalarSendBuf_.setSize(fc.size());
+    scalarSendBuf_.resize_nocopy(fc.size());
     forAll(fc, i)
     {
         scalarSendBuf_[i] = psiInternal[fc[i]];
     }
 
-    if (!this->ready())
-    {
-        FatalErrorInFunction
-            << "On patch " //<< interface_.name()
-            << " outstanding request."
-            << abort(FatalError);
-    }
+    scalarRecvBuf_.resize_nocopy(scalarSendBuf_.size());
 
-
-
-    scalarReceiveBuf_.setSize(scalarSendBuf_.size());
-    outstandingRecvRequest_ = UPstream::nRequests();
-
+    recvRequest_ = UPstream::nRequests();
     UIPstream::read
     (
-        Pstream::commsTypes::nonBlocking,
+        UPstream::commsTypes::nonBlocking,
         procInterface_.neighbProcNo(),
-        scalarReceiveBuf_.data_bytes(),
-        scalarReceiveBuf_.size_bytes(),
+        scalarRecvBuf_.data_bytes(),
+        scalarRecvBuf_.size_bytes(),
         procInterface_.tag(),
         procInterface_.comm()
     );
 
-    outstandingSendRequest_ = UPstream::nRequests();
-
+    sendRequest_ = UPstream::nRequests();
     UOPstream::write
     (
-        Pstream::commsTypes::nonBlocking,
+        UPstream::commsTypes::nonBlocking,
         procInterface_.neighbProcNo(),
         scalarSendBuf_.cdata_bytes(),
         scalarSendBuf_.size_bytes(),
@@ -270,10 +235,7 @@ void Foam::calculatedProcessorFvPatchField<Type>::initInterfaceMatrixUpdate
         procInterface_.comm()
     );
 
-    const_cast<lduInterfaceField&>
-    (
-        static_cast<const lduInterfaceField&>(*this)
-    ).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -323,27 +285,20 @@ void Foam::calculatedProcessorFvPatchField<Type>::updateInterfaceMatrix
         return;
     }
 
-
-    if
-    (
-        outstandingRecvRequest_ >= 0
-     && outstandingRecvRequest_ < UPstream::nRequests()
-    )
+    if (UPstream::parRun())
     {
-        UPstream::waitRequest(outstandingRecvRequest_);
+        // Require receive data.
+        // Only update the send request state.
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
-    // Recv finished so assume sending finished as well.
-    outstandingSendRequest_ = -1;
-    outstandingRecvRequest_ = -1;
 
-    // Consume straight from scalarReceiveBuf_. Note use of our own
+
+    // Consume straight from receive buffer. Note use of our own
     // helper to avoid using fvPatch addressing
-    addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
+    addToInternalField(result, !add, coeffs, scalarRecvBuf_);
 
-    const_cast<lduInterfaceField&>
-    (
-        static_cast<const lduInterfaceField&>(*this)
-    ).updatedMatrix() = true;
+    this->updatedMatrix(true);
 }
 
 

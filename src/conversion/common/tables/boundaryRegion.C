@@ -184,7 +184,7 @@ void Foam::boundaryRegion::readDict
             registry,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -216,7 +216,7 @@ void Foam::boundaryRegion::writeDict
             registry,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

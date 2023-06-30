@@ -170,14 +170,14 @@ bool Foam::patchDistMethods::exact::correct
     );
 
     // Take over hits
-    label nHits = 0;
+    // label nHits = 0;
     forAll(info, celli)
     {
         if (info[celli].hit())
         {
             const point& cc = mesh_.cellCentres()[celli];
             y[celli] = info[celli].point().dist(cc);
-            nHits++;
+            // ++nHits;
         }
         //else
         //{

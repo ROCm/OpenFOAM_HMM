@@ -88,21 +88,15 @@ Foam::advectiveFvPatchField<Type>::advectiveFvPatchField
     fieldInf_(Zero),
     lInf_(-GREAT)
 {
-    if (dict.found("value"))
+    // Use 'value' supplied, or set to internal field
+    if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchField<Type>::operator=(this->patchInternalField());
+        this->extrapolateInternal();  // Zero-gradient patch values
     }
 
     this->refValue() = *this;
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = 0;
 
     if (dict.readIfPresent("lInf", lInf_))
     {
@@ -156,23 +150,13 @@ template<class Type>
 Foam::tmp<Foam::scalarField>
 Foam::advectiveFvPatchField<Type>::advectionSpeed() const
 {
-    const surfaceScalarField& phi =
-        this->db().objectRegistry::template lookupObject<surfaceScalarField>
-        (phiName_);
+    const auto& phip =
+        this->patch().template lookupPatchField<surfaceScalarField>(phiName_);
 
-    fvsPatchField<scalar> phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            phiName_
-        );
-
-    if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const fvPatchScalarField& rhop =
-            this->patch().template lookupPatchField<volScalarField, scalar>
-            (
-                rhoName_
-            );
+        const auto& rhop =
+            this->patch().template lookupPatchField<volScalarField>(rhoName_);
 
         return phip/(rhop*this->patch().magSf());
     }
@@ -349,7 +333,7 @@ void Foam::advectiveFvPatchField<Type>::write(Ostream& os) const
         os.writeEntry("lInf", lInf_);
     }
 
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

@@ -24,7 +24,7 @@ if (mesh.changing())
     wordList pcorrTypes
     (
         p.boundaryField().size(),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     // Set BCs of pcorr to fixed-value for patches at which p is fixed
@@ -94,7 +94,7 @@ if (mesh.changing())
             {
                 if (refCells[zoneId] != -1)
                 {
-                    validCells.append(refCells[zoneId]);
+                    validCells.push_back(refCells[zoneId]);
                 }
             }
 

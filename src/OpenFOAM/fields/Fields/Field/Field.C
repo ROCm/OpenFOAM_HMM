@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -179,20 +179,32 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::Field<Type>::Field(const entry& e, const label len)
 {
-    assign(e, len);
+    Field<Type>::assign(e, len);
 }
 
 
 template<class Type>
 Foam::Field<Type>::Field
 (
-    const word& keyword,
+    const word& key,
     const dictionary& dict,
     const label len,
-    enum keyType::option matchOpt
+    IOobjectOption::readOption readOpt
 )
 {
-    assign(keyword, dict, len, matchOpt);
+    if (!Field<Type>::assign(key, dict, len, readOpt))
+    {
+        if (IOobjectOption::isReadOptional(readOpt))
+        {
+            // Lazy read: init with zero value
+            if (len > 0) this->resize(len, Zero);
+        }
+        else
+        {
+            // No read: set length only
+            if (len > 0) this->resize(len);
+        }
+    }
 }
 
 
@@ -213,7 +225,7 @@ void Foam::Field<Type>::assign(const entry& e, const label len)
             // Resize to expected length (or -1 : retain current length)
             if (len >= 0)
             {
-                this->resize(len);
+                this->resize_nocopy(len);
             }
             operator=(pTraits<Type>(is));
         }
@@ -239,7 +251,7 @@ void Foam::Field<Type>::assign(const entry& e, const label len)
                 else
                 {
                     FatalIOErrorInFunction(is)
-                        << "size " << lenRead
+                        << "Size " << lenRead
                         << " is not equal to the expected length " << len
                         << exit(FatalIOError);
                 }
@@ -257,18 +269,39 @@ void Foam::Field<Type>::assign(const entry& e, const label len)
 
 
 template<class Type>
-void Foam::Field<Type>::assign
+bool Foam::Field<Type>::assign
 (
-    const word& keyword,
+    const word& key,
     const dictionary& dict,
     const label len,
-    enum keyType::option matchOpt
+    IOobjectOption::readOption readOpt
 )
 {
-    if (len)
+    if (!len)
     {
-        assign(dict.lookupEntry(keyword, matchOpt), len);
+        return true;
     }
+    else if (readOpt != IOobjectOption::NO_READ)
+    {
+        const entry* eptr = dict.findEntry(key, keyType::LITERAL);
+
+        if (eptr)
+        {
+            Field<Type>::assign(*eptr, len);
+            return true;
+        }
+
+        // Missing (mandatory or optional)
+        if (IOobjectOption::isReadRequired(readOpt))
+        {
+            FatalIOErrorInFunction(dict)
+                << "Required entry '" << key << "' missing in dictionary "
+                << dict.relativeName() << nl
+                << exit(FatalIOError);
+        }
+    }
+
+    return false;
 }
 
 
@@ -622,6 +655,49 @@ void Foam::Field<Type>::replace
 {
     TFOR_ALL_F_OP_FUNC_S_S(Type, *this, ., replace, const direction, d,
         cmptType, c)
+}
+
+
+template<class Type>
+void Foam::Field<Type>::clamp_min(const Type& lower)
+{
+    // Use free function max() [sic] to impose component-wise clamp_min
+    // std::for_each
+    for (auto& val : *this)
+    {
+        val = max(val, lower);
+    }
+}
+
+template<class Type>
+void Foam::Field<Type>::clamp_max(const Type& upper)
+{
+    // Use free function min() [sic] to impose component-wise clamp_max
+    // std::for_each
+    for (auto& val : *this)
+    {
+        val = min(val, upper);
+    }
+}
+
+
+template<class Type>
+void Foam::Field<Type>::clamp_range(const Type& lower, const Type& upper)
+{
+    // Note: no checks for bad/invalid clamping ranges
+
+    // Use free functions min(), max() to impose component-wise clamping
+    // std::for_each
+    for (auto& val : *this)
+    {
+        val = min(max(val, lower), upper);
+    }
+}
+
+template<class Type>
+void Foam::Field<Type>::clamp_range(const MinMax<Type>& range)
+{
+    Field<Type>::clamp_range(range.min(), range.max());
 }
 
 

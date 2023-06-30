@@ -1376,7 +1376,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
 
                 const auto oldFaceFnd = splitFaceToIndex.cfind(oldFacei);
 
-                if (oldFaceFnd.found())
+                if (oldFaceFnd.good())
                 {
                     labelPair& twoFaces = facePairs[oldFaceFnd.val()];
                     if (twoFaces[0] == -1)
@@ -1718,7 +1718,7 @@ Foam::meshRefinement::meshRefinement
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         labelList(mesh_.nFaces(), -1)
     ),
@@ -2406,27 +2406,27 @@ Foam::label Foam::meshRefinement::appendPatch
     addPatchFields<volScalarField>
     (
         mesh,
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volVectorField>
     (
         mesh,
-        calculatedFvPatchField<vector>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volSphericalTensorField>
     (
         mesh,
-        calculatedFvPatchField<sphericalTensor>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volSymmTensorField>
     (
         mesh,
-        calculatedFvPatchField<symmTensor>::typeName
+        fvPatchFieldBase::calculatedType()
     );
     addPatchFields<volTensorField>
     (
         mesh,
-        calculatedFvPatchField<tensor>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 
     // Surface fields
@@ -2434,27 +2434,27 @@ Foam::label Foam::meshRefinement::appendPatch
     addPatchFields<surfaceScalarField>
     (
         mesh,
-        calculatedFvPatchField<scalar>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceVectorField>
     (
         mesh,
-        calculatedFvPatchField<vector>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceSphericalTensorField>
     (
         mesh,
-        calculatedFvPatchField<sphericalTensor>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceSymmTensorField>
     (
         mesh,
-        calculatedFvPatchField<symmTensor>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     addPatchFields<surfaceTensorField>
     (
         mesh,
-        calculatedFvPatchField<tensor>::typeName
+        fvsPatchFieldBase::calculatedType()
     );
     return patchi;
 }
@@ -2574,7 +2574,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
 //            mesh_,
 //            ppPtr(),
 //            dictionary(),       // optional field values
-//            calculatedFvPatchField<scalar>::typeName,
+//            fvPatchFieldBase::calculatedType(),
 //            true
 //        );
 
@@ -3590,12 +3590,12 @@ void Foam::meshRefinement::dumpRefinementLevel() const
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         const labelList& cellLevel = meshCutter_.cellLevel();
@@ -3621,7 +3621,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pMesh,
             dimensionedScalar(dimless, Zero)

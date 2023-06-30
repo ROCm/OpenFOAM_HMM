@@ -94,7 +94,7 @@ Foam::nearWallDist::nearWallDist(const Foam::fvMesh& mesh)
     (
         mesh.boundary(),
         mesh.V(),           // Dummy internal field,
-        calculatedFvPatchScalarField::typeName
+        fvPatchFieldBase::calculatedType()
     ),
     mesh_(mesh)
 {
@@ -125,7 +125,7 @@ void Foam::nearWallDist::correct()
                 patchi,
                 fvPatchField<scalar>::New
                 (
-                    calculatedFvPatchScalarField::typeName,
+                    fvPatchFieldBase::calculatedType(),
                     bnd[patchi],
                     V
                 )

@@ -131,6 +131,7 @@ void Foam::faceAreaWeightAMI::calcAddressing
 
     bool continueWalk = true;
     DynamicList<label> nonOverlapFaces;
+
     do
     {
         nbrFaces.clear();
@@ -212,11 +213,12 @@ bool Foam::faceAreaWeightAMI::processSourceFace
 
     label maxNeighbourFaces = nbrFaces.size();
 
-    do
+    while (!nbrFaces.empty())
     {
-        // process new target face
-        label tgtFacei = nbrFaces.remove();
-        visitedFaces.append(tgtFacei);
+        // Process new target face as LIFO
+        label tgtFacei = nbrFaces.back();
+        nbrFaces.pop_back();
+        visitedFaces.push_back(tgtFacei);
 
         scalar interArea = 0;
         vector interCentroid(Zero);
@@ -238,8 +240,7 @@ bool Foam::faceAreaWeightAMI::processSourceFace
 
             maxNeighbourFaces = max(maxNeighbourFaces, nbrFaces.size());
         }
-
-    } while (nbrFaces.size() > 0);
+    }
 
     if (debug > 1)
     {

@@ -468,13 +468,13 @@ int main(int argc, char *argv[])
 
                 for (auto& val : A)
                 {
-                    val.Re() = rndGen.GaussNormal<scalar>();
-                    val.Im() = rndGen.GaussNormal<scalar>();
+                    val.real(rndGen.GaussNormal<scalar>());
+                    val.imag(rndGen.GaussNormal<scalar>());
                 }
                 for (auto& val : B)
                 {
-                    val.Re() = rndGen.GaussNormal<scalar>();
-                    val.Im() = rndGen.GaussNormal<scalar>();
+                    val.real(rndGen.GaussNormal<scalar>());
+                    val.imag(rndGen.GaussNormal<scalar>());
                 }
 
                 Info<< nl << "# (A.T()).T() = A:" << nl;
@@ -893,8 +893,8 @@ int main(int argc, char *argv[])
 
             for (auto& val : A)
             {
-                val.Re() = rndGen.GaussNormal<scalar>();
-                val.Im() = rndGen.GaussNormal<scalar>();
+                val.real(rndGen.GaussNormal<scalar>());
+                val.imag(rndGen.GaussNormal<scalar>());
             }
 
             Info<< "# SquareMatrix<complex>.symmetric():" << nl

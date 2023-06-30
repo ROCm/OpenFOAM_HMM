@@ -53,7 +53,7 @@ Foam::syringePressureFvPatchScalarField::syringePressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     Ap_(dict.get<scalar>("Ap")),
     Sp_(dict.get<scalar>("Sp")),
     VsI_(dict.get<scalar>("VsI")),
@@ -200,17 +200,13 @@ void Foam::syringePressureFvPatchScalarField::updateCoeffs()
     scalar t = db().time().value();
     scalar deltaT = db().time().deltaTValue();
 
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
-
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         ams_ = ams0_ + deltaT*sum((*this*psi_)*phip);
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
         ams_ = ams0_ + deltaT*sum(phip);
     }
@@ -234,7 +230,7 @@ void Foam::syringePressureFvPatchScalarField::updateCoeffs()
 
 void Foam::syringePressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntry("Ap", Ap_);
     os.writeEntry("Sp", Sp_);
@@ -248,7 +244,7 @@ void Foam::syringePressureFvPatchScalarField::write(Ostream& os) const
     os.writeEntry("ams", ams_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

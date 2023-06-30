@@ -25,11 +25,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef clampedPlateFaPatchFields_H
-#define clampedPlateFaPatchFields_H
+#ifndef Foam_clampedPlateFaPatchFields_H
+#define Foam_clampedPlateFaPatchFields_H
 
 #include "clampedPlateFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(clampedPlate)
+makeFaPatchTypeFieldTypedefs(clampedPlate);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

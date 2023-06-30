@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2021,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -157,7 +157,7 @@ CrankNicolsonDdtScheme<Type>::ddt0_
                     (
                         name,
                         mesh().time().timeName(),
-                        mesh(),
+                        mesh().thisDb(),
                         IOobject::NO_READ,
                         IOobject::AUTO_WRITE
                     ),
@@ -360,7 +360,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + dt.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
@@ -393,6 +393,11 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
             (rDtCoef*dt)*(mesh().V() - mesh().V0())
           - mesh().V0()*offCentre_(ddt0.internalField())
         )/mesh().V();
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
     }
 
     return tdtdt;
@@ -417,7 +422,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -447,7 +452,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
             );
         }
 
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -465,6 +470,13 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
                 ) - offCentre_(ff(ddt0.boundaryField()))
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -505,7 +517,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -535,7 +547,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
             );
         }
 
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -555,6 +567,13 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
                 ) - offCentre_(ff(ddt0.boundaryField()))
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -595,7 +614,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -629,7 +648,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
             );
         }
 
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -651,6 +670,13 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
                 ) - offCentre_(ff(ddt0.boundaryField()))
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -696,7 +722,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
     (
         "ddt(" + alpha.name() + ',' + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     dimensionedScalar rDtCoef = rDtCoef_(ddt0);
@@ -738,7 +764,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
             );
         }
 
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -772,6 +798,13 @@ CrankNicolsonDdtScheme<Type>::fvcDdt
                 ) - offCentre_(ff(ddt0.boundaryField()))
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -1218,7 +1251,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), mesh().Sf() & Uf.oldTime())
            *(
@@ -1280,7 +1313,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime())
            *(
@@ -1357,7 +1390,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -1421,7 +1454,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtUfCorr
                 (
                     "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -1514,7 +1547,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(rhoU0, phi.oldTime(), rho.oldTime())
                *(
@@ -1574,7 +1607,7 @@ CrankNicolsonDdtScheme<Type>::fvcDdtPhiCorr
                 (
                     "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), rho.oldTime())
                *(
@@ -1627,10 +1660,10 @@ tmp<surfaceScalarField> CrankNicolsonDdtScheme<Type>::meshPhi
             (
                 mesh().phi().name(),
                 mesh().time().timeName(),
-                mesh(),
+                mesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             coef_(meshPhi0)*mesh().phi() - offCentre_(meshPhi0())
         )

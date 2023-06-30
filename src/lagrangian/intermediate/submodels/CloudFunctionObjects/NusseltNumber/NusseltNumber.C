@@ -64,25 +64,28 @@ void Foam::NusseltNumber<CloudType>::postEvolve
     const auto& tc =
         static_cast<const ThermoCloud<KinematicCloud<Cloud<parcelType>>>&>(c);
 
-    if (!c.template foundObject<IOField<scalar>>("Nu"))
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("Nu");
+
+    if (!resultPtr)
     {
-        auto* NuPtr =
-            new IOField<scalar>
+        resultPtr = new IOField<scalar>
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "Nu",
-                    c.time().timeName(),
-                    c,
-                    IOobject::NO_READ
-                )
-            );
+                "Nu",
+                c.time().timeName(),
+                c,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            )
+        );
 
-        NuPtr->store();
+        resultPtr->store();
     }
+    auto& Nu = *resultPtr;
 
-    auto& Nu = c.template lookupObjectRef<IOField<scalar>>("Nu");
-    Nu.setSize(c.size());
+    Nu.resize(c.size());
 
     const auto& heatTransfer = tc.heatTransfer();
     typename parcelType::trackingData& nctd =

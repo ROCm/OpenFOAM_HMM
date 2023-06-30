@@ -51,8 +51,8 @@ alphatPhaseChangeWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    dmdt_(p.size(), 0),
-    mDotL_(p.size(), 0)
+    dmdt_(p.size(), Zero),
+    mDotL_(p.size(), Zero)
 {}
 
 
@@ -65,19 +65,9 @@ alphatPhaseChangeWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    dmdt_(p.size(), 0),
-    mDotL_(p.size(), 0)
-{
-    if (dict.found("dmdt"))
-    {
-        dmdt_ = scalarField("dmdt", dict, p.size());
-    }
-
-    if (dict.found("mDotL"))
-    {
-        mDotL_ = scalarField("mDotL", dict, p.size());
-    }
-}
+    dmdt_("dmdt", dict, p.size(), IOobjectOption::LAZY_READ),
+    mDotL_("mDotL", dict, p.size(), IOobjectOption::LAZY_READ)
+{}
 
 
 alphatPhaseChangeWallFunctionFvPatchScalarField::
@@ -128,7 +118,7 @@ write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     dmdt_.writeEntry("dmdt", os);
     mDotL_.writeEntry("mDotL", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

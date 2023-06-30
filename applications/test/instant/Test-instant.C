@@ -62,20 +62,20 @@ int main(int argc, char *argv[])
 {
     DynamicList<instant> times;
 
-    times.append(instant{});
-    times.append({12, "abc"});
-    times.append(instant{3.14159});
-    times.append({300.456, "def"});
-    times.append({454.456, "xyz"});
-    times.append({10, "ten"});
-    times.append({15, "fifteen"});
+    times.emplace_back();
+    times.emplace_back(12, "abc");
+    times.emplace_back(3.14159);
+    times.emplace_back(300.456, "def");
+    times.emplace_back(454.456, "xyz");
+    times.emplace_back(10, "ten");
+    times.push_back({15, "fifteen"});
 
     {
         word timeName("twenty");
 
-        Info<<"move append: " << timeName << nl;
-        times.append({20, std::move(timeName)});
-        Info<<"after append: " << timeName << nl;
+        Info<<"move append: <" << timeName << '>' << nl;
+        times.emplace_back(20, std::move(timeName));
+        Info<<"after append: <" << timeName << '>' << nl;
     }
 
     Info<< nl << "times:" << times << nl;
@@ -97,12 +97,12 @@ int main(int argc, char *argv[])
     }
 
     DynamicList<fileNameInstant> files;
-    files.append(fileNameInstant{});
-    files.append({12, "twelve"});
-    files.append({3.14, "/path/almost-pi"});
-    files.append({300, "/dev/value"});
-    files.append({454, "/tmp/xyz"});
-    files.append({10, "ten"});
+    files.emplace_back();
+    files.emplace_back(12, "twelve");
+    files.emplace_back(3.14, "/path/almost-pi");
+    files.emplace_back(300, "/dev/value");
+    files.emplace_back(454, "/tmp/xyz");
+    files.emplace_back(10, "ten");
 
     Info<< nl << "files:" << files << nl;
     sort(files);

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ Usage
     \table
         Property     | Description                  | Required | Default
         uniformValue | uniform value                | yes |
+        value        | initial field value          | optional |
     \endtable
 
     Example of the boundary condition specification:
@@ -53,6 +54,11 @@ Note
     able to describe time and spatial varying functions.
     The example above gives the usage for supplying a constant value.
 
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the \c uniformValue is evaluated.
+    In some cases (eg, coded or expression entries with references to other
+    fields) this can be problematic and the \c value entry will be needed.
+
 See also
     Foam::Function1Types
     Foam::fixedValueFvPatchField
@@ -62,8 +68,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformFixedValueFvPatchField_H
-#define uniformFixedValueFvPatchField_H
+#ifndef Foam_uniformFixedValueFvPatchField_H
+#define Foam_uniformFixedValueFvPatchField_H
 
 #include "fixedValueFvPatchFields.H"
 #include "PatchFunction1.H"
@@ -84,8 +90,8 @@ class uniformFixedValueFvPatchField
 {
     // Private Data
 
-        //- Value
-        autoPtr<PatchFunction1<Type>> uniformValue_;
+        //- Function providing the value
+        autoPtr<PatchFunction1<Type>> refValueFunc_;
 
 
 public:
@@ -163,7 +169,7 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
         // Mapping functions
 

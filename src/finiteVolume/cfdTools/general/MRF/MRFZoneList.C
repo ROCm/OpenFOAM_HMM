@@ -195,7 +195,7 @@ Foam::tmp<Foam::volVectorField> Foam::MRFZoneList::DDt
             (
                 "MRFZoneList:acceleration",
                 U.mesh().time().timeName(),
-                U.mesh()
+                U.mesh().thisDb()
             ),
             U.mesh(),
             dimensionedVector(U.dimensions()/dimTime, Zero)

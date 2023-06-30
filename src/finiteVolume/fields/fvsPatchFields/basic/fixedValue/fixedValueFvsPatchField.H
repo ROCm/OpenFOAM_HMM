@@ -53,7 +53,6 @@ class fixedValueFvsPatchField
 :
     public fvsPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -69,6 +68,14 @@ public:
             const DimensionedField<Type, surfaceMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        fixedValueFvsPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, surfaceMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and dictionary
         fixedValueFvsPatchField
         (
@@ -77,8 +84,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedValueFvsPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValue patch field
+        //- onto a new patch
         fixedValueFvsPatchField
         (
             const fixedValueFvsPatchField<Type>&,
@@ -122,17 +129,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
         // Evaluation functions

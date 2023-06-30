@@ -103,13 +103,13 @@ void Foam::Detail::MeshedSurfaceIOAllocator::clear()
 bool Foam::Detail::MeshedSurfaceIOAllocator::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     return
     (
-        points_.writeObject(streamOpt, valid)
-     && faces_.writeObject(streamOpt, valid)
+        points_.writeObject(streamOpt, writeOnProc)
+     && faces_.writeObject(streamOpt, writeOnProc)
     );
 }
 

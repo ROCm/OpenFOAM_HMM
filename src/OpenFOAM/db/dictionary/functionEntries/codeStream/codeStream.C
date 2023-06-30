@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,22 +81,17 @@ bool Foam::functionEntries::codeStream::doingMasterOnlyReading
     // Fallback value
     bool masterOnly = regIOobject::masterOnlyReading;
 
-    const auto* iodictPtr = isA<baseIOdictionary>(dict.topDict());
+    const auto* rioPtr = isA<regIOobject>(dict.topDict());
 
-    if (iodictPtr)
+    if (rioPtr)
     {
-        masterOnly = iodictPtr->globalObject();
+        masterOnly = rioPtr->global();
+    }
 
-        DebugPout
-            << "codeStream : baseIOdictionary:" << dict.name()
-            << " master-only-reading:" << masterOnly << endl;
-    }
-    else
-    {
-        DebugPout
-            << "codeStream : not a baseIOdictionary:" << dict.name()
-            << " master-only-reading:" << masterOnly << endl;
-    }
+    DebugPout
+        << "codeStream : " << (rioPtr ? "IO" : "plain")
+        << " dictionary:" << dict.name()
+        << " master-only-reading:" << masterOnly << endl;
 
     return masterOnly;
 }
@@ -117,14 +112,16 @@ Foam::functionEntries::codeStream::getFunction
     std::string sha1Str(context.sha1().str(true));
     dynamicCode dynCode("codeStream" + sha1Str, sha1Str);
 
+
+    const dictionary& topDict = parentDict.topDict();
+    const bool masterOnly = doingMasterOnlyReading(topDict);
+
     // Load library if not already loaded
     // Version information is encoded in the libPath (encoded with the SHA1)
     const fileName libPath = dynCode.libPath();
 
-    // see if library is loaded
+    // See if library is loaded
     void* lib = nullptr;
-
-    const dictionary& topDict = parentDict.topDict();
 
     if (isA<baseIOdictionary>(topDict))
     {
@@ -151,180 +148,79 @@ Foam::functionEntries::codeStream::getFunction
     }
 
 
-    // create library if required
+    // Indicates NFS filesystem
+    const bool isNFS = (IOobject::fileModificationSkew > 0);
+
+    // Create library if required
+    if
+    (
+        lib == nullptr
+     && (UPstream::master() || !isNFS)
+     && !dynCode.upToDate(context)
+    )
+    {
+        // Filter with this context
+        dynCode.reset(context);
+
+        // Compile filtered C template
+        dynCode.addCompileFile(codeTemplateC);
+
+        // define Make/options
+        dynCode.setMakeOptions
+        (
+            "EXE_INC = -g \\\n"
+          + context.options()
+          + "\n\nLIB_LIBS = \\\n"
+            "    -lOpenFOAM \\\n"
+          + context.libs()
+        );
+
+        if (!dynCode.copyOrCreateFiles(true))
+        {
+            FatalIOErrorInFunction(parentDict)
+                << "Failed writing files for" << nl
+                << dynCode.libRelPath() << nl
+                << exit(FatalIOError);
+        }
+
+        if (!dynCode.wmakeLibso())
+        {
+            FatalIOErrorInFunction(parentDict)
+                << "Failed wmake " << dynCode.libRelPath() << nl
+                << exit(FatalIOError);
+        }
+    }
+
+
+    //- Only block if we're not doing master-only reading.
+    //  (flag set by regIOobject::read, baseIOdictionary constructor)
+    if (!masterOnly && returnReduceOr(lib == nullptr))
+    {
+        // Broadcast distributed...
+
+        dynamicCode::waitForFile(libPath, context.dict());
+    }
+
     if (!lib)
     {
-        const bool create =
-            Pstream::master()
-         || (IOobject::fileModificationSkew <= 0);   // not NFS
-
-        if (create)
-        {
-            if (!dynCode.upToDate(context))
-            {
-                // filter with this context
-                dynCode.reset(context);
-
-                // compile filtered C template
-                dynCode.addCompileFile(codeTemplateC);
-
-                // define Make/options
-                dynCode.setMakeOptions
-                (
-                    "EXE_INC = -g \\\n"
-                  + context.options()
-                  + "\n\nLIB_LIBS = \\\n"
-                    "    -lOpenFOAM \\\n"
-                  + context.libs()
-                );
-
-                if (!dynCode.copyOrCreateFiles(true))
-                {
-                    FatalIOErrorInFunction(parentDict)
-                        << "Failed writing files for" << nl
-                        << dynCode.libRelPath() << nl
-                        << exit(FatalIOError);
-                }
-            }
-
-            if (!dynCode.wmakeLibso())
-            {
-                FatalIOErrorInFunction(parentDict)
-                    << "Failed wmake " << dynCode.libRelPath() << nl
-                    << exit(FatalIOError);
-            }
-        }
-
-        //- Only block if we're not doing master-only reading. (flag set by
-        //  regIOobject::read, baseIOdictionary constructor)
-        if
-        (
-           !doingMasterOnlyReading(topDict)
-         && IOobject::fileModificationSkew > 0
-        )
-        {
-            //- Since the library has only been compiled on the master the
-            //  other nodes need to pick this library up through NFS
-            //  We do this by just polling a few times using the
-            //  fileModificationSkew.
-
-            off_t mySize = Foam::fileSize(libPath);
-            off_t masterSize = mySize;
-            Pstream::broadcast(masterSize);
-
-            for
-            (
-                label iter = 0;
-                iter < IOobject::maxFileModificationPolls;
-                ++iter
-            )
-            {
-                DebugPout
-                    << "on processor " << Pstream::myProcNo()
-                    << "masterSize:" << masterSize
-                    << " and localSize:" << mySize
-                    << endl;
-
-                if (mySize == masterSize)
-                {
-                    break;
-                }
-                else if (mySize > masterSize)
-                {
-                    FatalIOErrorInFunction(context.dict())
-                        << "Excessive size when reading (NFS mounted) library "
-                        << nl << libPath << nl
-                        << "on processor " << Pstream::myProcNo()
-                        << " detected size " << mySize
-                        << " whereas master size is " << masterSize
-                        << " bytes." << nl
-                        << "If your case is NFS mounted increase"
-                        << " fileModificationSkew or maxFileModificationPolls;"
-                        << nl << "If your case is not NFS mounted"
-                        << " (so distributed) set fileModificationSkew"
-                        << " to 0"
-                        << exit(FatalIOError);
-                }
-                else
-                {
-                    DebugPout
-                        << "Local file " << libPath
-                        << " not of same size (" << mySize
-                        << ") as master ("
-                        << masterSize << "). Waiting for "
-                        << IOobject::fileModificationSkew
-                        << " seconds." << endl;
-
-                    Foam::sleep(IOobject::fileModificationSkew);
-
-                    // Recheck local size
-                    mySize = Foam::fileSize(libPath);
-                }
-            }
-
-
-            // Finished doing iterations. Do final check
-            if (mySize != masterSize)
-            {
-                FatalIOErrorInFunction(context.dict())
-                    << "Cannot read (NFS mounted) library " << nl
-                    << libPath << nl
-                    << "on processor " << Pstream::myProcNo()
-                    << " detected size " << mySize
-                    << " whereas master size is " << masterSize
-                    << " bytes." << nl
-                    << "If your case is NFS mounted increase"
-                    << " fileModificationSkew or maxFileModificationPolls;"
-                    << nl << "If your case is not NFS mounted"
-                    << " (so distributed) set fileModificationSkew"
-                    << " to 0"
-                    << exit(FatalIOError);
-            }
-
-            DebugPout
-                << "on processor " << Pstream::myProcNo()
-                << " after waiting: have masterSize:" << masterSize
-                << " and localSize:" << mySize << endl;
-        }
-
         if (isA<baseIOdictionary>(topDict))
         {
-            // Cached access to libs, with cleanup upon termination
-            DebugPout
-                << "Opening cached dictionary:" << libPath << endl;
-
             lib = libs(parentDict).open(libPath, false);
-
-            if (!lib)
-            {
-                FatalIOErrorInFunction(parentDict)
-                    << "Failed loading library " << libPath << nl
-                    << "Did you add all libraries to the 'libs' entry"
-                    << " in system/controlDict?"
-                    << exit(FatalIOError);
-            }
         }
         else
         {
-            // Uncached opening of libPath
-            DebugPout
-                << "Opening uncached dictionary:" << libPath << endl;
-
-            lib = Foam::dlOpen(libPath, true);
+            lib = Foam::dlOpen(libPath, false);
         }
     }
 
-    bool haveLib = lib;
-    if (!doingMasterOnlyReading(topDict))
-    {
-        Pstream::reduceAnd(haveLib);
-    }
 
-    if (!haveLib)
+    if (masterOnly ? !lib : returnReduceOr(!lib))
     {
         FatalIOErrorInFunction(parentDict)
-            << "Failed loading library " << libPath
+            << "Failed loading library " << dynCode.libRelPath()
             << " on some processors."
+            << "Did you add all libraries to the 'libs' entry"
+            << " in system/controlDict?"
             << exit(FatalIOError);
     }
 
@@ -341,7 +237,8 @@ Foam::functionEntries::codeStream::getFunction
     {
         FatalIOErrorInFunction(parentDict)
             << "Failed looking up symbol " << dynCode.codeName()
-            << " in library " << lib << exit(FatalIOError);
+            << " in library " << dynCode.libRelPath()
+            << exit(FatalIOError);
     }
 
     return function;

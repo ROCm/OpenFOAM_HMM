@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2021,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -200,6 +200,39 @@ Description
     </li>
 
     </ol>
+
+
+    Also support for multi-level decomposition by specifying inter-level
+    communication weights:
+
+    \verbatim
+    numberOfSubdomains  2048;
+    coeffs
+    {
+        // Divide into 64 clusters, each of 32 cores
+        domains (64 32);
+        // Inside a cluster the communication weight is 1% of that inbetween
+        // clusters
+        domainWeights (1 0.01);
+    }
+    \endverbatim
+
+    Alternatively the first-level decomposition can be left out by assuming
+    weights are 1 for that level:
+
+    \verbatim
+    numberOfSubdomains  2048;
+    coeffs
+    {
+        // Divide into 2048/32 clusters
+        domains (32);
+        // Inside a cluster the communication weight is 1% of that inbetween
+        // clusters
+        domainWeights (0.01);
+    }
+    \endverbatim
+
+
 
 Note
     \c gpart can be found in the current search path by adding the respective

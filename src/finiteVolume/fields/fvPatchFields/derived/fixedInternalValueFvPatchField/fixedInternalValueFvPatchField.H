@@ -100,8 +100,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedInternalValueFvPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedInternalValue patch field
+        //- onto a new patch
         fixedInternalValueFvPatchField
         (
             const fixedInternalValueFvPatchField<Type>&,

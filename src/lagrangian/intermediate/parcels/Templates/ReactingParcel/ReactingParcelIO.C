@@ -106,14 +106,14 @@ void Foam::ReactingParcel<ParcelType>::readFields
     const CompositionType& compModel
 )
 {
-    bool valid = c.size();
+    const bool readOnProc = c.size();
 
     ParcelType::readFields(c);
 
     IOField<scalar> mass0
     (
         c.fieldIOobject("mass0", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, mass0);
 
@@ -151,7 +151,7 @@ void Foam::ReactingParcel<ParcelType>::readFields
                 "Y" + phaseTypes[j] + stateLabels[j],
                  IOobject::MUST_READ
             ),
-            valid
+            readOnProc
         );
 
         label i = 0;
@@ -184,6 +184,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
     ParcelType::writeFields(c);
 
     const label np = c.size();
+    const bool writeOnProc = c.size();
 
     {
         IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
@@ -195,7 +196,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
 
             ++i;
         }
-        mass0.write(np > 0);
+        mass0.write(writeOnProc);
 
         // Write the composition fractions
         const wordList& phaseTypes = compModel.phaseTypes();
@@ -225,7 +226,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
                 ++i;
             }
 
-            Y.write(np > 0);
+            Y.write(writeOnProc);
         }
     }
 }
@@ -337,8 +338,9 @@ void Foam::ReactingParcel<ParcelType>::writeObjects
     ParcelType::writeObjects(c, obr);
 
     const label np = c.size();
+    const bool writeOnProc = c.size();
 
-    if (np > 0)
+    if (writeOnProc)
     {
         auto& mass0 = cloud::createIOField<scalar>("mass0", np, obr);
 

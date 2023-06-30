@@ -71,6 +71,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: NO_READ
         basicSymmetryFaPatchField
         (
             const faPatch&,
@@ -78,7 +79,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given basicSymmetryFaPatchField onto a new patch
+        //- Construct by mapping given basicSymmetryFaPatchField
+        //- onto a new patch
         basicSymmetryFaPatchField
         (
             const basicSymmetryFaPatchField<Type>&,

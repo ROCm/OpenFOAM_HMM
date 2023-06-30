@@ -90,7 +90,7 @@ public:
 
 class noOp
 :
-    public uniformOp<zero::null>
+    public uniformOp<Foam::zero>
 {
 public:
 
@@ -106,9 +106,9 @@ public:
         noOp() = default;
 
         //- Construct from base
-        noOp(const uniformOp<zero::null>& op)
+        noOp(const uniformOp<Foam::zero>& op)
         :
-            uniformOp<zero::null>(op)
+            uniformOp<Foam::zero>(op)
         {}
 
 
@@ -135,7 +135,7 @@ public:
 
 class areaOp
 :
-    public uniformOp<zero::null>
+    public uniformOp<Foam::zero>
 {
 public:
 
@@ -151,9 +151,9 @@ public:
         areaOp() = default;
 
         //- Construct from base
-        areaOp(const uniformOp<zero::null>& op)
+        areaOp(const uniformOp<Foam::zero>& op)
         :
-            uniformOp<zero::null>(op)
+            uniformOp<Foam::zero>(op)
         {}
 
 
@@ -179,7 +179,7 @@ public:
 
 class volumeOp
 :
-    public uniformOp<zero::null>
+    public uniformOp<Foam::zero>
 {
 public:
 
@@ -195,9 +195,9 @@ public:
         volumeOp() = default;
 
         //- Construct from base
-        volumeOp(const uniformOp<zero::null>& op)
+        volumeOp(const uniformOp<Foam::zero>& op)
         :
-            uniformOp<zero::null>(op)
+            uniformOp<Foam::zero>(op)
         {}
 
 
@@ -310,7 +310,7 @@ public:
 template<unsigned N>
 class listOp
 :
-    public uniformOp<zero::null>
+    public uniformOp<Foam::zero>
 {
 public:
 
@@ -350,9 +350,9 @@ public:
         listOp() = default;
 
         //- Construct from base
-        listOp(const uniformOp<zero::null>& op)
+        listOp(const uniformOp<Foam::zero>& op)
         :
-            uniformOp<zero::null>(op)
+            uniformOp<Foam::zero>(op)
         {}
 
 

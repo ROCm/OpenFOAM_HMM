@@ -38,7 +38,7 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
     const DimensionedField<Type, areaMesh>& iF
 )
 :
-    faPatchField<Type>(p, iF, Field<Type>(0))
+    faPatchField<Type>(p, iF, Field<Type>())
 {}
 
 
@@ -51,7 +51,7 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
     const faPatchFieldMapper&
 )
 :
-    faPatchField<Type>(p, iF, Field<Type>(0))
+    faPatchField<Type>(p, iF, Field<Type>())
 {
     if (!isType<emptyFaPatch>(p))
     {
@@ -74,7 +74,7 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
     const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF, Field<Type>(0))
+    faPatchField<Type>(p, iF, Field<Type>())
 {
     if (!isA<emptyFaPatch>(p))
     {
@@ -95,12 +95,7 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
     const emptyFaPatchField<Type>& ptf
 )
 :
-    faPatchField<Type>
-    (
-        ptf.patch(),
-        ptf.internalField(),
-        Field<Type>(0)
-    )
+    faPatchField<Type>(ptf.patch(), ptf.internalField(), Field<Type>())
 {}
 
 
@@ -111,7 +106,7 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
     const DimensionedField<Type, areaMesh>& iF
 )
 :
-    faPatchField<Type>(ptf.patch(), iF, Field<Type>(0))
+    faPatchField<Type>(ptf.patch(), iF, Field<Type>())
 {}
 
 

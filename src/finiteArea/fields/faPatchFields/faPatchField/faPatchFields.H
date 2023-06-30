@@ -23,6 +23,9 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+    Declarations for faPatchField types
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_faPatchFields_H
@@ -30,8 +33,6 @@ License
 
 #include "faPatchField.H"
 #include "faPatchFieldsFwd.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

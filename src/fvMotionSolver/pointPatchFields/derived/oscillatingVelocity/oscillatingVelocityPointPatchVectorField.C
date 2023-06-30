@@ -165,7 +165,7 @@ void oscillatingVelocityPointPatchVectorField::write(Ostream& os) const
     os.writeEntry("amplitude", amplitude_);
     os.writeEntry("omega", omega_);
     p0_.writeEntry("p0", os);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

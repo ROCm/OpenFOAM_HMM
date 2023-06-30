@@ -54,11 +54,11 @@ Foam::tmp<Foam::volScalarField> Foam::resolutionIndexModel::V() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimVolume,
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     tV.ref().primitiveFieldRef() = mesh_.V();
@@ -99,12 +99,13 @@ bool Foam::resolutionIndexModel::read(const dictionary& dict)
                 resultName_,
                 mesh_.time().timeName(),
                 mesh_,
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE
+                IOobject::LAZY_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         mesh_.objectRegistry::store(indexPtr);

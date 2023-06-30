@@ -163,7 +163,7 @@ bool setField
                 mesh.thisDb(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false  // No register
+                IOobject::NO_REGISTER
             ),
             mesh
         );
@@ -270,9 +270,8 @@ void evaluate
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         );
-        io.typeHeaderOk<IOobject>(false);
 
-        if (!io.hasHeaderClass() || io.isHeaderClass<IOobject>())
+        if (!io.typeHeaderOk<regIOobject>(false))
         {
             FatalErrorInFunction
                 << "Field '" << fieldName

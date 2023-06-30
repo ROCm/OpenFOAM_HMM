@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 )
 :
     cyclicAMILduInterfaceField(),
-    coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
+    coupledFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     cyclicAMIPatch_(refCast<const cyclicAMIFvPatch>(p, dict))
 {
     if (!isA<cyclicAMIFvPatch>(p))
@@ -68,7 +68,8 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
             << exit(FatalIOError);
     }
 
-    if (!dict.found("value"))
+    // Use 'value' supplied, or set to coupled or internal field
+    if (!this->readValueEntry(dict))
     {
         if (this->coupled())
         {
@@ -76,7 +77,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
         }
         else
         {
-            fvPatchField<Type>::operator=(this->patchInternalField());
+            this->extrapolateInternal();  // Zero-gradient patch values
         }
     }
 }
@@ -98,6 +99,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
     if (!isA<cyclicAMIFvPatch>(this->patch()))
     {
         FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()
@@ -168,7 +170,7 @@ Foam::cyclicAMIFvPatchField<Type>::patchNeighbourField() const
 
     if (doTransform())
     {
-        tpnf.ref() = transform(forwardT(), tpnf());
+        transform(tpnf.ref(), forwardT(), tpnf());
     }
 
     return tpnf;
@@ -439,7 +441,7 @@ template<class Type>
 void Foam::cyclicAMIFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

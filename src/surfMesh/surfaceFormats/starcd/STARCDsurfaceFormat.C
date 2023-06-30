@@ -178,7 +178,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
         {
             // Convert cellTableId to zoneId
             const auto iterGroup = lookup.cfind(cellTableId);
-            if (iterGroup.found())
+            if (iterGroup.good())
             {
                 if (zoneId != *iterGroup)
                 {
@@ -194,7 +194,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
                 const auto iterTableName = cellTableLookup.cfind(cellTableId);
 
-                if (iterTableName.found())
+                if (iterTableName.good())
                 {
                     dynNames.append(*iterTableName);
                 }

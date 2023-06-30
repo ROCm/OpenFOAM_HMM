@@ -163,6 +163,11 @@ void Foam::faMesh::initPatch() const
             mesh().points()
         )
     );
+    // Could set some basic primitive data here...
+    // nEdges_ = patchPtr_->nEdges();
+    // nInternalEdges_ = patchPtr_->nInternalEdges();
+    // nFaces_ = patchPtr_->size();
+    // nPoints_ = patchPtr_->nPoints();
     bndConnectPtr_.reset(nullptr);
     haloMapPtr_.reset(nullptr);
     haloFaceCentresPtr_.reset(nullptr);
@@ -306,7 +311,7 @@ bool Foam::faMesh::init(const bool doInit)
     }
 
     // Create global mesh data
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         (void)globalData();
     }
@@ -345,7 +350,7 @@ Foam::faMesh::faMesh
     faSchemes(mesh()),
     edgeInterpolation(*this),
     faSolution(mesh()),
-    data(mesh()),   // Always NO_READ, NO_WRITE
+    data(faMesh::thisDb()),   // Always NO_READ, NO_WRITE
     faceLabels_
     (
         IOobject
@@ -353,7 +358,7 @@ Foam::faMesh::faMesh
             "faceLabels",
             time().findInstance(meshDir(), "faceLabels"),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -372,13 +377,13 @@ Foam::faMesh::faMesh
                 faceLabels_.instance()
             ),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         ),
         *this
     ),
-    comm_(Pstream::worldComm),
+    comm_(UPstream::worldComm),
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
@@ -416,21 +421,33 @@ Foam::faMesh::faMesh
         faMesh::init(false);  // do not init lower levels
     }
 
-    if (doInit && fileHandler().isFile(pMesh.time().timePath()/"S0"))
+    if (doInit)
     {
-        S0Ptr_ = new DimensionedField<scalar, areaMesh>
+        // Read some optional fields
+        // - logic as per fvMesh
+
+        IOobject rio
         (
-            IOobject
-            (
-                "S0",
-                time().timeName(),
-                faMesh::meshSubDir,
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            *this
+            "name",
+            time().timeName(),
+            faMesh::meshSubDir,
+            faMesh::thisDb(),
+            IOobject::LAZY_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         );
+
+        // Read old surface areas (if present)
+        rio.resetHeader("S0");
+        if (returnReduceOr(rio.typeHeaderOk<regIOobject>(false)))
+        {
+            S0Ptr_ = new DimensionedField<scalar, areaMesh>
+            (
+                rio,
+                *this,
+                dimensionedScalar(dimArea, Zero)
+            );
+        }
     }
 }
 
@@ -456,7 +473,7 @@ Foam::faMesh::faMesh
     faSchemes(mesh(), io.readOpt()),
     edgeInterpolation(*this),
     faSolution(mesh(), io.readOpt()),
-    data(mesh()),   // Always NO_READ, NO_WRITE
+    data(faMesh::thisDb()),   // Always NO_READ, NO_WRITE
     faceLabels_
     (
         IOobject
@@ -464,7 +481,7 @@ Foam::faMesh::faMesh
             "faceLabels",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -477,14 +494,14 @@ Foam::faMesh::faMesh
             "faBoundary",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         *this,
         label(0)
     ),
-    comm_(Pstream::worldComm),
+    comm_(UPstream::worldComm),
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
@@ -512,7 +529,13 @@ Foam::faMesh::faMesh
     haloMapPtr_(nullptr),
     haloFaceCentresPtr_(nullptr),
     haloFaceNormalsPtr_(nullptr)
-{}
+{
+    // Not yet much for primitive mesh data possible...
+    nPoints_ = 0;
+    nEdges_ = 0;
+    nInternalEdges_ = 0;
+    nFaces_ = faceLabels_.size();
+}
 
 
 Foam::faMesh::faMesh
@@ -535,7 +558,7 @@ Foam::faMesh::faMesh
     ),
     data
     (
-        mesh(),
+        faMesh::thisDb(),
         static_cast<const data&>(baseMesh)
     ),
     faceLabels_
@@ -545,7 +568,7 @@ Foam::faMesh::faMesh
             "faceLabels",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
@@ -558,14 +581,14 @@ Foam::faMesh::faMesh
             "faBoundary",
             mesh().facesInstance(),
             faMesh::meshSubDir,
-            mesh(),
+            faMesh::thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
         *this,
         label(0)
     ),
-    comm_(Pstream::worldComm),
+    comm_(UPstream::worldComm),
     curTimeIndex_(time().timeIndex()),
 
     patchPtr_(nullptr),
@@ -593,7 +616,13 @@ Foam::faMesh::faMesh
     haloMapPtr_(nullptr),
     haloFaceCentresPtr_(nullptr),
     haloFaceNormalsPtr_(nullptr)
-{}
+{
+    // Not yet much for primitive mesh data possible...
+    nPoints_ = 0;
+    nEdges_ = 0;
+    nInternalEdges_ = 0;
+    nFaces_ = faceLabels_.size();
+}
 
 
 Foam::faMesh::faMesh(const polyPatch& pp, const bool doInit)
@@ -663,21 +692,33 @@ Foam::faMesh::faMesh
         faMesh::init(false);  // do not init lower levels
     }
 
-    if (doInit && fileHandler().isFile(pMesh.time().timePath()/"S0"))
+    if (doInit)
     {
-        S0Ptr_ = new DimensionedField<scalar, areaMesh>
+        // Read old surface areas (if present)
+        // - logic as per fvMesh
+
+        IOobject rio
         (
-            IOobject
-            (
-                "S0",
-                time().timeName(),
-                faMesh::meshSubDir,
-                mesh(),
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            *this
+            "name",
+            time().timeName(),
+            faMesh::meshSubDir,
+            faMesh::thisDb(),
+            IOobject::LAZY_READ,
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         );
+
+        // Read old surface areas (if present)
+        rio.resetHeader("S0");
+        if (returnReduceOr(rio.typeHeaderOk<regIOobject>(false)))
+        {
+            S0Ptr_ = new DimensionedField<scalar, areaMesh>
+            (
+                rio,
+                *this,
+                dimensionedScalar(dimArea, Zero)
+            );
+        }
     }
 }
 
@@ -857,7 +898,7 @@ Foam::faMesh::S00() const
             (
                 "S00",
                 time().timeName(),
-                mesh(),
+                faMesh::thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -985,7 +1026,7 @@ bool Foam::faMesh::movePoints()
                 (
                     "S0",
                     time().timeName(),
-                    mesh(),
+                    faMesh::thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
                     IOobject::NO_REGISTER
@@ -1044,7 +1085,7 @@ Foam::boolList& Foam::faMesh::correctPatchPointNormals() const
 }
 
 
-bool Foam::faMesh::write(const bool valid) const
+bool Foam::faMesh::write(const bool writeOnProc) const
 {
     faceLabels_.write();
     boundary_.write();

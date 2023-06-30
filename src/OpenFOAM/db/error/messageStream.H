@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2021 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +54,8 @@ SourceFiles
 #define Foam_messageStream_H
 
 #include "label.H"
-#include "string.H"
+#include "word.H"
+#include <string>
 #include <iostream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -170,6 +171,17 @@ public:
         //- Return std::ostream for output operations.
         std::ostream& stdStream();
 
+        //- Report deprecation (after specified API version) with
+        //- 'From function-name, source file, line number'.
+        //  \return OSstream for further operations
+        OSstream& deprecated
+        (
+            const int afterVersion,
+            const char* functionName,
+            const char* sourceFileName,
+            const int sourceFileLineNumber = 0
+        );
+
         //- Implicit cast to OSstream for << operations
         operator OSstream&()
         {
@@ -186,11 +198,10 @@ public:
         //  \return OSstream for further operations
         OSstream& operator()
         (
-            const string& functionName
+            const std::string& functionName
         );
 
         //- Report 'From function-name, source file, line number'
-        //- Print basic message
         //  \return OSstream for further operations
         OSstream& operator()
         (
@@ -203,7 +214,7 @@ public:
         //  \return OSstream for further operations
         OSstream& operator()
         (
-            const string& functionName,
+            const std::string& functionName,
             const char* sourceFileName,
             const int sourceFileLineNumber = 0
         );
@@ -216,7 +227,7 @@ public:
             const char* functionName,
             const char* sourceFileName,
             const int sourceFileLineNumber,
-            const string& ioFileName,
+            const std::string& ioFileName,
             const label ioStartLineNumber = -1,
             const label ioEndLineNumber = -1
         );
@@ -327,6 +338,11 @@ extern messageStream SeriousError;
 //- Report a warning using Foam::Warning
 //  for FUNCTION_NAME in file __FILE__ at line __LINE__
 #define WarningInFunction WarningIn(FUNCTION_NAME)
+
+//- Report a warning using Foam::Warning
+//  for FUNCTION_NAME in file __FILE__ at line __LINE__
+#define DeprecatedInFunction(afterVersion)                                     \
+    ::Foam::Warning.deprecated(afterVersion, FUNCTION_NAME, __FILE__, __LINE__)
 
 
 //- Report an IO warning using Foam::Warning

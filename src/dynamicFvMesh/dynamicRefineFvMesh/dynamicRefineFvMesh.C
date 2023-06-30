@@ -174,9 +174,9 @@ void Foam::dynamicRefineFvMesh::readDict()
                 "dynamicMeshDict",
                 time().constant(),
                 *this,
-                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         ).optionalSubDict(typeName + "Coeffs")
     );
@@ -216,7 +216,7 @@ void Foam::dynamicRefineFvMesh::mapFields(const mapPolyMesh& mpm)
             const label oldCelli = cellMap[celli];
             if (oldCelli >= 0 && reverseCellMap[oldCelli] >= 0)
             {
-                // Found master cell. 
+                // Found master cell.
                 nSubCells[oldCelli]++;
             }
         }
@@ -1293,9 +1293,9 @@ bool Foam::dynamicRefineFvMesh::updateTopology()
                 "dynamicMeshDict",
                 time().constant(),
                 *this,
-                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         ).optionalSubDict(typeName + "Coeffs")
     );
@@ -1486,7 +1486,7 @@ bool Foam::dynamicRefineFvMesh::update()
 bool Foam::dynamicRefineFvMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     // Force refinement data to go to the current time directory.
@@ -1494,9 +1494,9 @@ bool Foam::dynamicRefineFvMesh::writeObject
 
     bool writeOk =
     (
-        //dynamicFvMesh::writeObject(streamOpt, valid)
-        dynamicMotionSolverListFvMesh::writeObject(streamOpt, valid)
-     && meshCutter_.write(valid)
+        //dynamicFvMesh::writeObject(streamOpt, writeOnProc)
+        dynamicMotionSolverListFvMesh::writeObject(streamOpt, writeOnProc)
+     && meshCutter_.write(writeOnProc)
     );
 
     if (dumpLevel_)
@@ -1509,8 +1509,8 @@ bool Foam::dynamicRefineFvMesh::writeObject
                 time().timeName(),
                 *this,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             *this,
             dimensionedScalar(dimless, Zero)

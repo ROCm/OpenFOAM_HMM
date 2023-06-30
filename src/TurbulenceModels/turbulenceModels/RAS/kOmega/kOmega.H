@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,9 +36,11 @@ Description
 
     References:
     \verbatim
-        Wilcox, D. C. (1998).
-        Turbulence modeling for CFD
-        (Vol. 2, pp. 103-217). La Canada, CA: DCW industries.
+        Wilcox, D. C. (1988).
+        Reassessment of the scale-determining
+        equation for advanced turbulence models.
+        AIAA Journal, 26(11), 1299-1310.
+        DOI:10.2514/3.10041
     \endverbatim
 
     The default model coefficients are

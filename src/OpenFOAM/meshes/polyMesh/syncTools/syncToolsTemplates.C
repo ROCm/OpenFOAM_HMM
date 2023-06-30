@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,9 +46,9 @@ void Foam::syncTools::combine
 {
     auto iter = pointValues.find(index);
 
-    if (iter.found())
+    if (iter.good())
     {
-        cop(*iter, val);
+        cop(iter.val(), val);
     }
     else
     {
@@ -68,9 +68,9 @@ void Foam::syncTools::combine
 {
     auto iter = edgeValues.find(index);
 
-    if (iter.found())
+    if (iter.good())
     {
-        cop(*iter, val);
+        cop(iter.val(), val);
     }
     else
     {
@@ -111,26 +111,36 @@ void Foam::syncTools::syncPointMap
         {
             const auto fnd = pointValues.cfind(sharedPtLabels[i]);
 
-            if (fnd.found())
+            if (fnd.good())
             {
                 combine
                 (
                     sharedPointValues,
                     cop,
                     sharedPtAddr[i],    // index
-                    *fnd                // value
+                    fnd.val()           // value
                 );
             }
         }
     }
 
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        DynamicList<label> neighbProcs;
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        // Presize according to number of processor patches
+        // (global topology information may not yet be available...)
+        DynamicList<label> neighbProcs(patches.nProcessorPatches());
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Send
+        // Sample and send.
+        // Reduce communication by only sending non-zero data,
+        // but with multiply-connected processor/processor
+        // (eg, processorCyclic) also need to send zero information
+        // to keep things synchronised
+
+        // If data needs to be sent (index corresponding to neighbProcs)
+        DynamicList<bool> isActiveSend(neighbProcs.capacity());
+
         for (const polyPatch& pp : patches)
         {
             const auto* ppp = isA<processorPolyPatch>(pp);
@@ -141,7 +151,6 @@ void Foam::syncTools::syncPointMap
                 const label nbrProci = procPatch.neighbProcNo();
 
                 // Get data per patchPoint in neighbouring point numbers.
-
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
 
@@ -153,20 +162,53 @@ void Foam::syncTools::syncPointMap
                 {
                     const auto iter = pointValues.cfind(meshPts[i]);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
-                        patchInfo.insert(nbrPts[i], *iter);
+                        patchInfo.insert(nbrPts[i], iter.val());
                     }
                 }
 
-                neighbProcs.append(nbrProci);
-                UOPstream toNbr(nbrProci, pBufs);
-                toNbr << patchInfo;
+
+                const bool hasSendData = (!patchInfo.empty());
+
+                // Neighbour connectivity (push_uniq)
+                // - record if send is required (non-empty data)
+                {
+                    label nbrIndex = neighbProcs.find(nbrProci);
+                    if (nbrIndex < 0)
+                    {
+                        nbrIndex = neighbProcs.size();
+                        neighbProcs.push_back(nbrProci);
+                        isActiveSend.push_back(false);
+                    }
+
+                    if (hasSendData)
+                    {
+                        isActiveSend[nbrIndex] = true;
+                    }
+                }
+
+
+                // Send to neighbour
+                {
+                    UOPstream toNbr(nbrProci, pBufs);
+                    toNbr << patchInfo;
+                }
+            }
+        }
+
+        // Eliminate unnecessary sends
+        forAll(neighbProcs, nbrIndex)
+        {
+            if (!isActiveSend[nbrIndex])
+            {
+                pBufs.clearSend(neighbProcs[nbrIndex]);
             }
         }
 
         // Limit exchange to involved procs
         pBufs.finishedNeighbourSends(neighbProcs);
+
 
         // Receive and combine.
         for (const polyPatch& pp : patches)
@@ -178,8 +220,17 @@ void Foam::syncTools::syncPointMap
                 const auto& procPatch = *ppp;
                 const label nbrProci = procPatch.neighbProcNo();
 
-                UIPstream fromNbr(nbrProci, pBufs);
-                Map<T> nbrPatchInfo(fromNbr);
+                if (!pBufs.recvDataCount(nbrProci))
+                {
+                    // Nothing to receive
+                    continue;
+                }
+
+                Map<T> nbrPatchInfo(0);
+                {
+                    UIPstream fromNbr(nbrProci, pBufs);
+                    fromNbr >> nbrPatchInfo;
+                }
 
                 // Transform
                 top(procPatch, nbrPatchInfo);
@@ -227,14 +278,14 @@ void Foam::syncTools::syncPointMap
 
                 const auto point0Fnd = pointValues.cfind(meshPtsA[e[0]]);
 
-                if (point0Fnd.found())
+                if (point0Fnd.good())
                 {
                     half0Values.insert(i, *point0Fnd);
                 }
 
                 const auto point1Fnd = pointValues.cfind(meshPtsB[e[1]]);
 
-                if (point1Fnd.found())
+                if (point1Fnd.good())
                 {
                     half1Values.insert(i, *point1Fnd);
                 }
@@ -250,7 +301,7 @@ void Foam::syncTools::syncPointMap
 
                 const auto half0Fnd = half0Values.cfind(i);
 
-                if (half0Fnd.found())
+                if (half0Fnd.good())
                 {
                     combine
                     (
@@ -263,7 +314,7 @@ void Foam::syncTools::syncPointMap
 
                 const auto half1Fnd = half1Values.cfind(i);
 
-                if (half1Fnd.found())
+                if (half1Fnd.good())
                 {
                     combine
                     (
@@ -287,14 +338,14 @@ void Foam::syncTools::syncPointMap
 
         // Reduce on master.
 
-        if (Pstream::parRun())
+        if (UPstream::parRun())
         {
-            if (Pstream::master())
+            if (UPstream::master())
             {
                 // Receive the edges using shared points from other procs
-                for (const int proci : Pstream::subProcs())
+                for (const int proci : UPstream::subProcs())
                 {
-                    IPstream fromProc(Pstream::commsTypes::scheduled, proci);
+                    IPstream fromProc(UPstream::commsTypes::scheduled, proci);
                     Map<T> nbrValues(fromProc);
 
                     // Merge neighbouring values with my values
@@ -315,8 +366,8 @@ void Foam::syncTools::syncPointMap
                 // Send to master
                 OPstream toMaster
                 (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
+                    UPstream::commsTypes::scheduled,
+                    UPstream::masterNo()
                 );
                 toMaster << sharedPointValues;
             }
@@ -340,9 +391,9 @@ void Foam::syncTools::syncPointMap
             // Do I have a value for my shared point
             const auto sharedFnd = sharedPointValues.cfind(iter.key());
 
-            if (sharedFnd.found())
+            if (sharedFnd.good())
             {
-                pointValues.set(*iter, *sharedFnd);
+                pointValues.set(iter.val(), sharedFnd.val());
             }
         }
     }
@@ -368,12 +419,22 @@ void Foam::syncTools::syncEdgeMap
     // Swap proc patch info
     // ~~~~~~~~~~~~~~~~~~~~
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        DynamicList<label> neighbProcs;
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        // Presize according to number of processor patches
+        // (global topology information may not yet be available...)
+        DynamicList<label> neighbProcs(patches.nProcessorPatches());
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
-        // Send
+        // Sample and send.
+        // Reduce communication by only sending non-zero data,
+        // but with multiply-connected processor/processor
+        // (eg, processorCyclic) also need to send zero information
+        // to keep things synchronised
+
+        // If data needs to be sent (index corresponding to neighbProcs)
+        DynamicList<bool> isActiveSend(neighbProcs.capacity());
+
         for (const polyPatch& pp : patches)
         {
             const auto* ppp = isA<processorPolyPatch>(pp);
@@ -384,7 +445,6 @@ void Foam::syncTools::syncEdgeMap
                 const label nbrProci = procPatch.neighbProcNo();
 
                 // Get data per patch edge in neighbouring edge.
-
                 const edgeList& edges = procPatch.edges();
                 const labelList& meshPts = procPatch.meshPoints();
                 const labelList& nbrPts = procPatch.neighbPoints();
@@ -393,20 +453,52 @@ void Foam::syncTools::syncEdgeMap
 
                 for (const edge& e : edges)
                 {
-                    const edge meshEdge(meshPts[e[0]], meshPts[e[1]]);
+                    const edge meshEdge(meshPts, e);
 
                     const auto iter = edgeValues.cfind(meshEdge);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
-                        const edge nbrEdge(nbrPts[e[0]], nbrPts[e[1]]);
-                        patchInfo.insert(nbrEdge, *iter);
+                        const edge nbrEdge(nbrPts, e);
+                        patchInfo.insert(nbrEdge, iter.val());
                     }
                 }
 
-                neighbProcs.append(nbrProci);
-                UOPstream toNbr(nbrProci, pBufs);
-                toNbr << patchInfo;
+
+                const bool hasSendData = (!patchInfo.empty());
+
+                // Neighbour connectivity (push_uniq)
+                // and record if send is required (non-empty data)
+                {
+                    label nbrIndex = neighbProcs.find(nbrProci);
+                    if (nbrIndex < 0)
+                    {
+                        nbrIndex = neighbProcs.size();
+                        neighbProcs.push_back(nbrProci);
+                        isActiveSend.push_back(false);
+                    }
+
+                    if (hasSendData)
+                    {
+                        isActiveSend[nbrIndex] = true;
+                    }
+                }
+
+
+                // Send to neighbour
+                {
+                    UOPstream toNbr(nbrProci, pBufs);
+                    toNbr << patchInfo;
+                }
+            }
+        }
+
+        // Eliminate unnecessary sends
+        forAll(neighbProcs, nbrIndex)
+        {
+            if (!isActiveSend[nbrIndex])
+            {
+                pBufs.clearSend(neighbProcs[nbrIndex]);
             }
         }
 
@@ -422,10 +514,17 @@ void Foam::syncTools::syncEdgeMap
             if (ppp && pp.nEdges())
             {
                 const auto& procPatch = *ppp;
+                const label nbrProci = procPatch.neighbProcNo();
 
-                EdgeMap<T> nbrPatchInfo;
+                if (!pBufs.recvDataCount(nbrProci))
                 {
-                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
+                    // Nothing to receive
+                    continue;
+                }
+
+                EdgeMap<T> nbrPatchInfo(0);
+                {
+                    UIPstream fromNbr(nbrProci, pBufs);
                     fromNbr >> nbrPatchInfo;
                 }
 
@@ -490,9 +589,9 @@ void Foam::syncTools::syncEdgeMap
 
                     const auto iter = edgeValues.cfind(meshEdge0);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
-                        half0Values.insert(edgei, *iter);
+                        half0Values.insert(edgei, iter.val());
                     }
                 }
                 {
@@ -501,9 +600,9 @@ void Foam::syncTools::syncEdgeMap
 
                     const auto iter = edgeValues.cfind(meshEdge1);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
-                        half1Values.insert(edgei, *iter);
+                        half1Values.insert(edgei, iter.val());
                     }
                 }
             }
@@ -521,7 +620,7 @@ void Foam::syncTools::syncEdgeMap
 
                 const auto half1Fnd = half1Values.cfind(edgei);
 
-                if (half1Fnd.found())
+                if (half1Fnd.good())
                 {
                     const edge& e0 = edgesA[twoEdges[0]];
                     const edge meshEdge0(meshPtsA[e0[0]], meshPtsA[e0[1]]);
@@ -537,7 +636,7 @@ void Foam::syncTools::syncEdgeMap
 
                 const auto half0Fnd = half0Values.cfind(edgei);
 
-                if (half0Fnd.found())
+                if (half0Fnd.good())
                 {
                     const edge& e1 = edgesB[twoEdges[1]];
                     const edge meshEdge1(meshPtsB[e1[0]], meshPtsB[e1[1]]);
@@ -591,11 +690,11 @@ void Foam::syncTools::syncEdgeMap
 
             const auto v0Fnd = meshToShared.cfind(v0);
 
-            if (v0Fnd.found())
+            if (v0Fnd.good())
             {
                 const auto v1Fnd = meshToShared.cfind(v1);
 
-                if (v1Fnd.found())
+                if (v1Fnd.good())
                 {
                     const edge meshEdge(v0, v1);
 
@@ -607,7 +706,7 @@ void Foam::syncTools::syncEdgeMap
 
                     const auto edgeFnd = edgeValues.cfind(meshEdge);
 
-                    if (edgeFnd.found())
+                    if (edgeFnd.good())
                     {
                         // edge exists in edgeValues. See if already in map
                         // (since on same processor, e.g. cyclic)
@@ -630,14 +729,14 @@ void Foam::syncTools::syncEdgeMap
     //  shared edge).
     // Reduce this on the master.
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        if (Pstream::master())
+        if (UPstream::master())
         {
             // Receive the edges using shared points from other procs
-            for (const int proci : Pstream::subProcs())
+            for (const int proci : UPstream::subProcs())
             {
-                IPstream fromProc(Pstream::commsTypes::scheduled, proci);
+                IPstream fromProc(UPstream::commsTypes::scheduled, proci);
                 EdgeMap<T> nbrValues(fromProc);
 
                 // Merge neighbouring values with my values
@@ -659,8 +758,8 @@ void Foam::syncTools::syncEdgeMap
             {
                 OPstream toMaster
                 (
-                    Pstream::commsTypes::scheduled,
-                    Pstream::masterNo()
+                    UPstream::commsTypes::scheduled,
+                    UPstream::masterNo()
                 );
                 toMaster << sharedEdgeValues;
             }
@@ -683,7 +782,7 @@ void Foam::syncTools::syncEdgeMap
         // Do I have a value for the shared edge?
         const auto sharedFnd = sharedEdgeValues.cfind(sharedEdge);
 
-        if (sharedFnd.found())
+        if (sharedFnd.good())
         {
             combine
             (
@@ -747,9 +846,9 @@ void Foam::syncTools::syncPointList
     {
         const auto iter = mpm.cfind(meshPoints[i]);
 
-        if (iter.found())
+        if (iter.good())
         {
-            cppFld[*iter] = pointValues[i];
+            cppFld[iter.val()] = pointValues[i];
         }
     }
 
@@ -768,9 +867,9 @@ void Foam::syncTools::syncPointList
     {
         const auto iter = mpm.cfind(meshPoints[i]);
 
-        if (iter.found())
+        if (iter.good())
         {
-            pointValues[i] = cppFld[*iter];
+            pointValues[i] = cppFld[iter.val()];
         }
     }
 }
@@ -906,7 +1005,7 @@ void Foam::syncTools::syncEdgeList
     {
         const label meshEdgei = meshEdges[i];
         const auto iter = mpm.cfind(meshEdgei);
-        if (iter.found())
+        if (iter.good())
         {
             const label cppEdgei = iter();
             const edge& cppE = cppEdges[cppEdgei];
@@ -951,8 +1050,8 @@ void Foam::syncTools::syncEdgeList
     forAll(meshEdges, i)
     {
         label meshEdgei = meshEdges[i];
-        Map<label>::const_iterator iter = mpm.find(meshEdgei);
-        if (iter != mpm.end())
+        const auto iter = mpm.cfind(meshEdgei);
+        if (iter.good())
         {
             label cppEdgei = iter();
             const edge& cppE = cppEdges[cppEdgei];
@@ -1005,7 +1104,7 @@ void Foam::syncTools::syncBoundaryFaceList
         if
         (
             is_contiguous<T>::value
-         && Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking
+         && UPstream::defaultCommsType == UPstream::commsTypes::nonBlocking
         )
         {
             const label startRequest = UPstream::nRequests();
@@ -1031,7 +1130,7 @@ void Foam::syncTools::syncBoundaryFaceList
 
                     UIPstream::read
                     (
-                        Pstream::commsTypes::nonBlocking,
+                        UPstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
                         fld.data_bytes(),
                         fld.size_bytes()
@@ -1057,7 +1156,7 @@ void Foam::syncTools::syncBoundaryFaceList
 
                     UOPstream::write
                     (
-                        Pstream::commsTypes::nonBlocking,
+                        UPstream::commsTypes::nonBlocking,
                         procPatch.neighbProcNo(),
                         fld.cdata_bytes(),
                         fld.size_bytes()
@@ -1103,7 +1202,7 @@ void Foam::syncTools::syncBoundaryFaceList
         else
         {
             DynamicList<label> neighbProcs;
-            PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+            PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
             // Send
             for (const polyPatch& pp : patches)
@@ -1115,6 +1214,9 @@ void Foam::syncTools::syncBoundaryFaceList
                     const auto& procPatch = *ppp;
                     const label nbrProci = procPatch.neighbProcNo();
 
+                    // Neighbour connectivity
+                    neighbProcs.push_uniq(nbrProci);
+
                     const SubList<T> fld
                     (
                         faceValues,
@@ -1122,7 +1224,6 @@ void Foam::syncTools::syncBoundaryFaceList
                         pp.start()-boundaryOffset
                     );
 
-                    neighbProcs.append(nbrProci);
                     UOPstream toNbr(nbrProci, pBufs);
                     toNbr << fld;
                 }
@@ -1140,11 +1241,13 @@ void Foam::syncTools::syncBoundaryFaceList
                 if (ppp && pp.size())
                 {
                     const auto& procPatch = *ppp;
+                    const label nbrProci = procPatch.neighbProcNo();
 
-                    List<T> recvFld(pp.size());
-
-                    UIPstream fromNbr(procPatch.neighbProcNo(), pBufs);
-                    fromNbr >> recvFld;
+                    List<T> recvFld;
+                    {
+                        UIPstream fromNbr(nbrProci, pBufs);
+                        fromNbr >> recvFld;
+                    }
 
                     top(procPatch, recvFld);
 
@@ -1263,7 +1366,7 @@ void Foam::syncTools::syncFaceList
 
                 UIPstream::read
                 (
-                    Pstream::commsTypes::nonBlocking,
+                    UPstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
                     recvInfo.data_bytes(),
                     recvInfo.size_bytes()
@@ -1298,7 +1401,7 @@ void Foam::syncTools::syncFaceList
 
                 UOPstream::write
                 (
-                    Pstream::commsTypes::nonBlocking,
+                    UPstream::commsTypes::nonBlocking,
                     procPatch.neighbProcNo(),
                     sendInfo.cdata_bytes(),
                     sendInfo.size_bytes()
@@ -1307,7 +1410,7 @@ void Foam::syncTools::syncFaceList
         }
 
         // Wait for all comms to finish
-        Pstream::waitRequests(startRequest);
+        UPstream::waitRequests(startRequest);
 
         // Combine with existing data
         for (const polyPatch& pp : patches)

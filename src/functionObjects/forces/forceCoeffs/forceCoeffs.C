@@ -76,7 +76,8 @@ Foam::volVectorField& Foam::functionObjects::forceCoeffs::forceCoeff()
                 time_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedVector(dimless, Zero)
@@ -104,7 +105,8 @@ Foam::volVectorField& Foam::functionObjects::forceCoeffs::momentCoeff()
                 time_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedVector(dimless, Zero)

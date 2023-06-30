@@ -64,14 +64,7 @@ Foam::energyJumpFvPatchScalarField::energyJumpFvPatchScalarField
 :
     fixedJumpFvPatchField<scalar>(p, iF)
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         evaluate(Pstream::commsTypes::blocking);
     }
@@ -140,7 +133,7 @@ void Foam::energyJumpFvPatchScalarField::updateCoeffs()
 void Foam::energyJumpFvPatchScalarField::write(Ostream& os) const
 {
     fixedJumpFvPatchField<scalar>::write(os);
-    this->writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

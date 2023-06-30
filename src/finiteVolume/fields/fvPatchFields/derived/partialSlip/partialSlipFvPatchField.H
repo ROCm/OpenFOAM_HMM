@@ -166,13 +166,10 @@ public:
 
     // Member Functions
 
-        // Access/attributes
+        //- False: this patch field is not altered by assignment
+        virtual bool assignable() const { return false; }
 
-            //- This patch field is not altered by assignment
-            virtual bool assignable() const
-            {
-                return false;
-            }
+        // Access
 
             virtual Field<Type>& refValue()
             {

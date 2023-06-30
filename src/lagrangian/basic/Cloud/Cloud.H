@@ -222,7 +222,7 @@ public:
             IOobject fieldIOobject
             (
                 const word& fieldName,
-                IOobjectOption::readOption rOpt
+                IOobjectOption::readOption rOpt = IOobjectOption::NO_READ
             ) const;
 
             //- Check lagrangian data field
@@ -269,7 +269,7 @@ public:
             virtual bool writeObject
             (
                 IOstreamOption streamOpt,
-                const bool valid
+                const bool writeOnProc
             ) const;
 
             //- Write positions to \<cloudName\>_positions.obj file

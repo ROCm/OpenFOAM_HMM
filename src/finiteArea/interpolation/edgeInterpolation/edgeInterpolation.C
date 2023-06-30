@@ -205,11 +205,11 @@ void Foam::edgeInterpolation::makeLPN() const
         IOobject
         (
             "lPN",
-            faMesh_.time().constant(),
-            faMesh_(),
+            mesh().time().constant(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimLength
@@ -286,11 +286,11 @@ void Foam::edgeInterpolation::makeWeights() const
         IOobject
         (
             "weightingFactors",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedScalar(dimless, 1)
@@ -366,11 +366,11 @@ void Foam::edgeInterpolation::makeDeltaCoeffs() const
         IOobject
         (
             "differenceFactors_",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedScalar(dimless/dimLength, SMALL)
@@ -460,11 +460,11 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
         IOobject
         (
             "correctionVectors",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimless
@@ -529,11 +529,7 @@ void Foam::edgeInterpolation::makeCorrectionVectors() const
     if (owner.size() > 0)
     {
         scalarField sinAlpha(deltaCoeffs*mag(CorrVecs.internalField()));
-
-        forAll(sinAlpha, edgeI)
-        {
-            sinAlpha[edgeI] = max(-1, min(sinAlpha[edgeI], 1));
-        }
+        sinAlpha.clamp_range(-1, 1);
 
         NonOrthogCoeff = max(Foam::asin(sinAlpha)*180.0/M_PI);
     }
@@ -571,11 +567,11 @@ void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
         IOobject
         (
             "skewCorrectionVectors",
-            mesh()().pointsInstance(),
-            mesh()(),
+            mesh().pointsInstance(),
+            mesh().thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh(),
         dimensionedVector(dimless, Zero)

@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
             wordRe wre(wres1[rnd.position<label>(0,last)]);
 
             // Append
-            wres1.append(wre);
+            wres1.push_back(wre);
         }
 
         // Add some entropy

@@ -59,7 +59,6 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
     forAll(toProc, i)
     {
         label proci = toProc[i];
-
         nSend[proci]++;
     }
 
@@ -69,8 +68,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
 
     forAll(nSend, proci)
     {
-        sendMap[proci].setSize(nSend[proci]);
-
+        sendMap[proci].resize_nocopy(nSend[proci]);
         nSend[proci] = 0;
     }
 
@@ -78,49 +76,10 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
     forAll(toProc, i)
     {
         label proci = toProc[i];
-
         sendMap[proci][nSend[proci]++] = i;
     }
 
-    // 4. Send over how many I need to receive
-    labelList recvSizes;
-    Pstream::exchangeSizes(sendMap, recvSizes);
-
-
-    // Determine receive map
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList constructMap(Pstream::nProcs());
-
-    // Local transfers first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label constructSize = constructMap[Pstream::myProcNo()].size();
-
-    forAll(constructMap, proci)
-    {
-        if (proci != Pstream::myProcNo())
-        {
-            label nRecv = recvSizes[proci];
-
-            constructMap[proci].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; i++)
-            {
-                constructMap[proci][i] = constructSize++;
-            }
-        }
-    }
-
-    return autoPtr<mapDistribute>::New
-    (
-        constructSize,
-        std::move(sendMap),
-        std::move(constructMap)
-    );
+    return autoPtr<mapDistribute>::New(std::move(sendMap));
 }
 
 
@@ -139,8 +98,8 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("one", dimless, 1.0),
-        zeroGradientFvPatchScalarField::typeName
+        dimensionedScalar(word::null, dimless, 1.0),
+        fvPatchFieldBase::zeroGradientType()
     );
 
     const conformationSurfaces& geometry = geometryToConformTo_;
@@ -767,7 +726,7 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
             runTime_,
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     ),
     meshCutter_

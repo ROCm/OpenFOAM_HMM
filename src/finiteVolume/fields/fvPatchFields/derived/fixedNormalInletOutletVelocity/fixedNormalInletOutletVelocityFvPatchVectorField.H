@@ -188,15 +188,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Attributes
-
-            //- Return true: this patch field is altered by assignment
-            virtual bool assignable() const
-            {
-                return true;
-            }
+        //- True: this patch field is altered by assignment.
+        virtual bool assignable() const { return true; }
 
 
         // Access

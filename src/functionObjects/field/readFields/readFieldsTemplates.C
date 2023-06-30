@@ -36,11 +36,11 @@ License
 template<class FieldType>
 bool Foam::functionObjects::readFields::loadAndStore(const IOobject& io)
 {
-    if (FieldType::typeName == io.headerClassName())
+    if (io.isHeaderClass<FieldType>())
     {
         // Store field on mesh database
         Log << "    Reading " << io.name()
-            << " (" << FieldType::typeName << ')' << endl;
+            << " (" << io.headerClassName() << ')' << endl;
 
         mesh_.objectRegistry::store(new FieldType(io, mesh_));
         return true;

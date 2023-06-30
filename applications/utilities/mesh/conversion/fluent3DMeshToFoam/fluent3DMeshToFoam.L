@@ -1063,7 +1063,7 @@ int main(int argc, char *argv[])
 
         const auto iter = fluentToFoamType.cfind(type);
 
-        if (iter.found())
+        if (iter.good())
         {
             // See if we have a periodic and can derive the other side.
             word neighbPatchName;

@@ -140,7 +140,7 @@ Foam::fv::VoFSolidificationMeltingSource::VoFSolidificationMeltingSource
         ),
         mesh,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     curTimeIndex_(-1)
 {

@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef coupledFaePatchField_H
-#define coupledFaePatchField_H
+#ifndef Foam_coupledFaePatchField_H
+#define Foam_coupledFaePatchField_H
 
 #include "faePatchField.H"
 #include "coupledFaPatch.H"
@@ -58,7 +58,6 @@ class coupledFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -74,7 +73,7 @@ public:
             const DimensionedField<Type, edgeMesh>&
         );
 
-        //- Construct from patch and internal field and patch field
+        //- Construct from patch, internal field and patch field
         coupledFaePatchField
         (
             const faPatch&,
@@ -87,7 +86,9 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "value" entry (default: optional)
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping the given coupledFaePatchField onto a new patch

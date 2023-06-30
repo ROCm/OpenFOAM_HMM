@@ -59,6 +59,14 @@ SourceFiles
 #include "globalIndex.H"
 #include "uint.H"
 
+// Include MPI without any C++ bindings
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
+
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #include "zoltan.h"
 #include <mpi.h>

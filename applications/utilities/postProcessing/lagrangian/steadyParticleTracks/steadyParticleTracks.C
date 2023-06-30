@@ -97,7 +97,7 @@ IOobjectList preFilterFields
         for (const word& fldName : allNames)
         {
             const auto iter = cloudObjects.cfind(fldName);
-            if (!pred(fldName) || !iter.found())
+            if (!pred(fldName) || !iter.good())
             {
                 continue;  // reject
             }
@@ -107,12 +107,12 @@ IOobjectList preFilterFields
             if
             (
                 //OR: fieldTypes::basic.found(io.headerClassName())
-                io.headerClassName() == IOField<label>::typeName
-             || io.headerClassName() == IOField<scalar>::typeName
-             || io.headerClassName() == IOField<vector>::typeName
-             || io.headerClassName() == IOField<sphericalTensor>::typeName
-             || io.headerClassName() == IOField<symmTensor>::typeName
-             || io.headerClassName() == IOField<tensor>::typeName
+                io.isHeaderClass<IOField<label>>()
+             || io.isHeaderClass<IOField<scalar>>()
+             || io.isHeaderClass<IOField<vector>>()
+             || io.isHeaderClass<IOField<sphericalTensor>>()
+             || io.isHeaderClass<IOField<symmTensor>>()
+             || io.isHeaderClass<IOField<tensor>>()
             )
             {
                 // Transfer from cloudObjects -> filteredObjects
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
         "file",
         "Alternative particleTrackDict dictionary"
     );
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
 
                 const auto iter = trackTable.cfind(key);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     particleToTrack[np] = *iter;
                 }

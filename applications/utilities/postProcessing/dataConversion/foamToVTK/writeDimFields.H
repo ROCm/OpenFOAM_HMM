@@ -5,38 +5,19 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-InNamespace
-    Foam
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Read dimensioned fields from disk
+    Code chunk for reading dimensioned fields from disk
     and write with vtk::internalWriter
-
-SourceFiles
-    writeDimFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeDimFields_H
-#define writeDimFields_H
+#ifndef FoamToVTK_writeDimFields_H
+#define FoamToVTK_writeDimFields_H
 
 #include "readFields.H"
 #include "foamVtkInternalWriter.H"
@@ -47,76 +28,30 @@ namespace Foam
 {
 
 template<class GeoField>
-bool writeDimField
-(
-    autoPtr<vtk::internalWriter>& internalWriter,
-    const tmp<GeoField>& tfield
-)
-{
-    if (!tfield)
-    {
-        return false;
-    }
-
-    const auto& field = tfield();
-
-    if (internalWriter)
-    {
-        internalWriter->write(field);
-    }
-
-    tfield.clear();
-    return true;
-}
-
-
-template<class GeoField>
-bool writeDimField
-(
-    autoPtr<vtk::internalWriter>& internalWriter,
-    const autoPtr<volPointInterpolation>& pInterp,
-    const tmp<GeoField>& tfield
-)
-{
-    if (!tfield)
-    {
-        return false;
-    }
-
-    const auto& field = tfield();
-
-    if (internalWriter && pInterp)
-    {
-        internalWriter->write(field, *pInterp);
-    }
-
-    tfield.clear();
-    return true;
-}
-
-
-template<class GeoField>
 label writeDimFields
 (
     autoPtr<vtk::internalWriter>& internalWriter,
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
+    // Sanity test
+    if (!internalWriter) return 0;
+
     label count = 0;
 
     for (const word& fieldName : objects.sortedNames<GeoField>())
     {
-        if
-        (
-            writeDimField<GeoField>
-            (
-                internalWriter,
-                getField<GeoField>(proxy, objects, fieldName, syncPar)
-            )
-        )
+        tmp<GeoField> tfield =
+            getField<GeoField>(proxy, objects, fieldName, syncPar, cache);
+
+        if (tfield)
         {
+            internalWriter->write(tfield());
+
+            tfield.clear();
             ++count;
         }
     }
@@ -133,22 +68,25 @@ label writeDimFields
 
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
+    // Sanity test
+    if (!internalWriter || !pInterp) return 0;
+
     label count = 0;
 
     for (const word& fieldName : objects.sortedNames<GeoField>())
     {
-        if
-        (
-            writeDimField<GeoField>
-            (
-                internalWriter, pInterp,
-                getField<GeoField>(proxy, objects, fieldName, syncPar)
-            )
-        )
+        tmp<GeoField> tfield =
+            getField<GeoField>(proxy, objects, fieldName, syncPar, cache);
+
+        if (tfield)
         {
+            internalWriter->write(tfield(), *pInterp);
+
+            tfield.clear();
             ++count;
         }
     }
@@ -163,9 +101,13 @@ label writeAllDimFields
 
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
+    // Sanity test
+    if (!internalWriter) return 0;
+
     #undef  foamToVtk_WRITE_FIELD
     #define foamToVtk_WRITE_FIELD(FieldType)    \
         writeDimFields<FieldType>               \
@@ -173,7 +115,8 @@ label writeAllDimFields
             internalWriter,                     \
             proxy,                              \
             objects,                            \
-            syncPar                             \
+            syncPar,                            \
+            cache                               \
         )
 
     label count = 0;
@@ -195,9 +138,13 @@ label writeAllDimFields
 
     const fvMeshSubsetProxy& proxy,
     const IOobjectList& objects,
-    const bool syncPar
+    const bool syncPar,
+    objectRegistry* cache
 )
 {
+    // Sanity test
+    if (!internalWriter || !pInterp) return 0;
+
     #undef  foamToVtk_WRITE_FIELD
     #define foamToVtk_WRITE_FIELD(FieldType)    \
         writeDimFields<FieldType>               \
@@ -205,7 +152,8 @@ label writeAllDimFields
             internalWriter, pInterp,            \
             proxy,                              \
             objects,                            \
-            syncPar                             \
+            syncPar,                            \
+            cache                               \
         )
 
     label count = 0;

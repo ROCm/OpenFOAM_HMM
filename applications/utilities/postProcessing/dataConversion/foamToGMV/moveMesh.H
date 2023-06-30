@@ -7,7 +7,7 @@
         mesh,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false  // no register
+        IOobject::NO_REGISTER
     );
 
     if (io.typeHeaderOk<pointIOField>(true, false))

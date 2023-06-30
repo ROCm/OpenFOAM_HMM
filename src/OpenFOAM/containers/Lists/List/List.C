@@ -46,12 +46,25 @@ void Foam::List<T>::doResize(const label len)
     if (len > 0)
     {
         // With sign-check to avoid spurious -Walloc-size-larger-than
-        T* nv = new T[len];
-
         const label overlap = min(this->size_, len);
 
-        if (overlap)
+        if (!overlap)
         {
+            // Can discard old content before allocating new storage.
+            // - when used as storage for DynamicList, it is possible to have
+            //   a zero-sized List with a non-null data pointer.
+
+            if (this->v_) delete[] this->v_;
+            this->size_ = len;
+            this->v_ = new T[len];
+        }
+        else
+        {
+            // Recover old (overlapping) content when resizing
+
+            T* nv = new T[len];
+
+            // ie, std::copy(this->v_, this->v_ + overlap, nv);
             #ifdef USEMEMCPY
             if (is_contiguous<T>::value)
             {
@@ -69,11 +82,11 @@ void Foam::List<T>::doResize(const label len)
                     nv[i] = std::move(vp[i]);
                 }
             }
-        }
 
-        clear();
-        this->size_ = len;
-        this->v_ = nv;
+            delete[] this->v_;
+            this->size_ = len;
+            this->v_ = nv;
+        }
     }
     else
     {

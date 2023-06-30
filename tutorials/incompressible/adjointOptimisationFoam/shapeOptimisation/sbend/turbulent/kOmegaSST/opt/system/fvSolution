@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -35,7 +35,7 @@ solvers
         tolerance        1e-9;
         relTol           0.01;
     };
-    "U|Ua|nuTilda|nuaTilda|yWall|da|k|ka|omega|wa" 
+    "U|Ua|nuTilda|nuaTilda|yWall|da|k|ka|omega|wa"
     {
         solver           PBiCGStab;
         preconditioner   DILU;

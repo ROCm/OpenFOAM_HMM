@@ -84,19 +84,19 @@ public:
 
     // Constructors
 
-        //- Default construct, with invalid point labels (-1)
+        //- Default construct, with invalid vertex labels (-1)
         inline triFace();
 
-        //- Construct from three point labels
+        //- Construct from three vertex labels
         inline triFace(const label p0, const label p1, const label p2) noexcept;
 
-        //- Construct from an initializer list of three point labels
+        //- Construct from an initializer list of three vertex labels
         inline explicit triFace(std::initializer_list<label> list);
 
-        //- Copy construct from a list of three point labels.
+        //- Copy construct from a list of three  vertex labels.
         inline explicit triFace(const labelUList& list);
 
-        //- Copy construct from a subset of point labels
+        //- Copy construct from a subset of vertex labels
         inline triFace
         (
             const labelUList& list,
@@ -135,20 +135,17 @@ public:
         //- True if vertices are unique and non-negative.
         inline bool good() const noexcept;
 
-        //- True if vertices are unique and non-negative.
-        bool valid() const noexcept { return good(); }
-
 
     // Other
 
-        //- 'Collapse' face by marking duplicate point labels.
-        //  Duplicates point labels are marked with '-1'
+        //- 'Collapse' face by marking duplicate vertex labels.
+        //  Duplicates vertex labels are marked with '-1'
         //  (the lower vertex is retained).
         //  Return the collapsed size.
         inline label collapse();
 
         //- Flip the face in-place.
-        //  The starting points of the original and flipped face are identical.
+        //  The starting vertex of the original and flipped face are identical.
         inline void flip();
 
         //- Return the points corresponding to this face
@@ -191,12 +188,12 @@ public:
         inline label nTriangles() const noexcept;
 
         //- Return face with reverse direction
-        //  The starting points of the original and reverse face are identical.
+        //  The starting vertex of the original and reverse face are identical.
         inline triFace reverseFace() const;
 
-        //- Find local index on face for the point label, same as find()
+        //- Find local vertex on face for the vertex label, same as find()
         //  \return position in face (0,1,2) or -1 if not found.
-        inline label which(const label pointLabel) const;
+        inline label which(const label vertex) const;
 
         //- Next vertex on face
         inline label nextLabel(const label i) const;
@@ -377,6 +374,9 @@ public:
 
 
     // Housekeeping
+
+        //- Same as good()
+        bool valid() const noexcept { return good(); }
 
         //- Identical to edge()
         Foam::edge faceEdge(label edgei) const { return this->edge(edgei); }

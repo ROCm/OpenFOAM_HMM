@@ -424,9 +424,9 @@ Foam::interpolationLookUpTable<Type>::operator[](const label i) const
 
 
 template<class Type>
-bool Foam::interpolationLookUpTable<Type>::found(const word& fieldName) const
+bool Foam::interpolationLookUpTable<Type>::contains(const word& fieldName) const
 {
-    return fieldIndices_.found(fieldName);
+    return fieldIndices_.contains(fieldName);
 }
 
 

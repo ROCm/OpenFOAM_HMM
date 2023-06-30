@@ -94,7 +94,7 @@ public:
         {}
 
         //- Disable writing objects
-        virtual bool writeObject(IOstreamOption, const bool valid) const
+        virtual bool writeObject(IOstreamOption, const bool writeOnProc) const
         {
             return true;
         }

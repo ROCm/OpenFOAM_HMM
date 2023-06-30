@@ -113,7 +113,7 @@ Foam::mappedVariableThicknessWallPolyPatch::mappedVariableThicknessWallPolyPatch
 )
 :
     mappedWallPolyPatch(name, dict, index, bm, patchType),
-    thickness_(scalarField("thickness", dict, this->size()))
+    thickness_("thickness", dict, this->size())
 {}
 
 
@@ -154,13 +154,6 @@ Foam::mappedVariableThicknessWallPolyPatch::mappedVariableThicknessWallPolyPatch
 :
     mappedWallPolyPatch(pp, bm, index, mapAddressing, newStart),
     thickness_(pp.size())
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::mappedVariableThicknessWallPolyPatch::
-~mappedVariableThicknessWallPolyPatch()
 {}
 
 

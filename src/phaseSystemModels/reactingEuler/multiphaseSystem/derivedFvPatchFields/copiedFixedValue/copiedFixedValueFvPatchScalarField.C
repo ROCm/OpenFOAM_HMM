@@ -101,7 +101,7 @@ void Foam::copiedFixedValueFvPatchScalarField::updateCoeffs()
 
     operator==
     (
-        patch().lookupPatchField<volScalarField, scalar>(sourceFieldName_)
+        patch().lookupPatchField<volScalarField>(sourceFieldName_)
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();
@@ -112,7 +112,7 @@ void Foam::copiedFixedValueFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     os.writeEntry("sourceFieldName", sourceFieldName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

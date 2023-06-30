@@ -73,11 +73,12 @@ Foam::coupledFaPatchField<Type>::coupledFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
-    const dictionary& dict
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
 )
 :
     lduInterfaceField(refCast<const lduInterface>(p, dict)),
-    faPatchField<Type>(p, iF, dict)
+    faPatchField<Type>(p, iF, dict, requireValue)
 {}
 
 
@@ -130,8 +131,12 @@ void Foam::coupledFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     Field<Type>::operator=
     (
-        this->patch().weights()*this->patchInternalField()
-      + (1.0 - this->patch().weights())*patchNeighbourField()
+        lerp
+        (
+            this->patchNeighbourField(),
+            this->patchInternalField(),
+            this->patch().weights()
+        )
     );
 }
 
@@ -178,7 +183,7 @@ template<class Type>
 void Foam::coupledFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

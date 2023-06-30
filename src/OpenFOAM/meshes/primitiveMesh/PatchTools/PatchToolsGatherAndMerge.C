@@ -92,7 +92,7 @@ void Foam::PatchTools::gatherAndMerge
 
     labelList boundaryPoints;
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         const globalIndex localPointAddr
         (
@@ -117,7 +117,7 @@ void Foam::PatchTools::gatherAndMerge
     }
 
 
-    if (Pstream::parRun() && Pstream::master())
+    if (UPstream::parRun() && UPstream::master())
     {
         labelList pointToUnique;
 
@@ -206,7 +206,7 @@ void Foam::PatchTools::gatherAndMerge
 {
     typedef typename FaceList::value_type FaceType;
 
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         // Renumber the points/faces into unique points
         globalPointsPtr = mesh.globalData().mergePoints

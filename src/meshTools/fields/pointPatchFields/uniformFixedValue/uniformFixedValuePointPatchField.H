@@ -28,7 +28,14 @@ Class
     Foam::uniformFixedValuePointPatchField
 
 Description
-    Enables the specification of a uniform fixed value boundary condition.
+    Enables the specification of a uniform fixed value condition.
+
+Usage
+    \table
+        Property     | Description                  | Required | Default
+        uniformValue | uniform value                | yes |
+        value        | initial field value          | optional |
+    \endtable
 
     Example of the boundary condition specification:
     \verbatim
@@ -39,17 +46,23 @@ Description
     }
     \endverbatim
 
-    The uniformValue entry is a Function1 type, able to describe time
-    varying functions.  The example above gives the usage for supplying a
-    constant value.
+Note
+    The uniformValue entry is a PatchFunction1 type,
+    able to describe time and spatial varying functions.
+    The example above gives the usage for supplying a constant value.
+
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the \c uniformValue is evaluated.
+    In some cases (eg, coded or expression entries with references to other
+    fields) this can be problematic and the \c value entry will be needed.
 
 SourceFiles
     uniformFixedValuePointPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef uniformFixedValuePointPatchField_H
-#define uniformFixedValuePointPatchField_H
+#ifndef Foam_uniformFixedValuePointPatchField_H
+#define Foam_uniformFixedValuePointPatchField_H
 
 #include "fixedValuePointPatchField.H"
 #include "PatchFunction1.H"
@@ -59,10 +72,8 @@ SourceFiles
 namespace Foam
 {
 
-class polyPatch;
-
 /*---------------------------------------------------------------------------*\
-          Class uniformFixedValuePointPatchField Declaration
+              Class uniformFixedValuePointPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -70,14 +81,15 @@ class uniformFixedValuePointPatchField
 :
     public fixedValuePointPatchField<Type>
 {
+    // Private Data
+
+        //- Function providing the value
+        autoPtr<PatchFunction1<Type>> refValueFunc_;
+
+
     // Private Member Functions
 
         static const polyPatch& getPatch(const pointPatch&);
-
-
-    // Private data
-
-        autoPtr<PatchFunction1<Type>> uniformValue_;
 
 
 public:
@@ -103,7 +115,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         uniformFixedValuePointPatchField
         (
             const uniformFixedValuePointPatchField<Type>&,
@@ -155,16 +167,7 @@ public:
         }
 
 
-    // Member functions
-
-        // Access
-
-            //- Return the uniform value
-            const Function1<Type>& uniformValue() const
-            {
-                return uniformValue_;
-            }
-
+    // Member Functions
 
         // Mapping functions
 

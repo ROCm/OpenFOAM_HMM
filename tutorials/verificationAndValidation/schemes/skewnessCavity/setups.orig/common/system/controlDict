@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -71,8 +71,7 @@ functions
                     IOobject::NO_READ
                 ),
                 mesh(),
-                dimensionedVector(dimless/dimLength, Zero),
-                calculatedFvPatchField<vector>::typeName
+                dimensionedVector(dimless/dimLength, Zero)
             );
 
             Cc2.primitiveFieldRef() = Cc.primitiveField();
@@ -102,8 +101,7 @@ functions
                     IOobject::NO_READ
                 ),
                 mesh(),
-                dimensionedScalar(dimless, Zero),
-                calculatedFvPatchField<scalar>::typeName
+                dimensionedScalar(dimless, Zero)
             );
 
             volScalarField magError
@@ -116,8 +114,7 @@ functions
                     IOobject::NO_READ
                 ),
                 mesh(),
-                dimensionedScalar(dimless, Zero),
-                calculatedFvPatchField<scalar>::typeName
+                dimensionedScalar(dimless, Zero)
             );
 
             const dimensionedScalar root2(dimless/sqr(dimLength), Foam::sqrt(2.0));

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -268,6 +268,34 @@ struct compareOp
     }
 };
 
+
+//- Linear interpolation (cf. std::lerp)
+template<class T>
+struct lerpOp
+{
+    FOAM_NODISCARD T operator()(const T& a, const T& b, const scalar t) const
+    {
+        return lerp(a, b, t);
+    }
+};
+
+
+//- Linear interpolation (lerp) with interpolation value defined on construct
+template<class T>
+struct lerpOp1
+{
+    const scalar value;
+
+    lerpOp1(scalar v) : value(v) {}
+
+    FOAM_NODISCARD T operator()(const T& a, const T& b) const
+    {
+        return lerp(a, b, value);
+    }
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Deprecated(2020-11) use nameOp (word.H)
 //  \deprecated(2020-11) use nameOp

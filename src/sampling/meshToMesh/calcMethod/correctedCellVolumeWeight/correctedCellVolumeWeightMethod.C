@@ -70,13 +70,13 @@ void Foam::correctedCellVolumeWeightMethod::calculateAddressing
     List<DynamicList<scalar>> tgtToSrcWght(tgt_.nCells());
     List<DynamicList<point>> tgtToSrcVec(tgt_.nCells());
 
-    // list of tgt cell neighbour cells
-    DynamicList<label> nbrTgtCells(10);
+    // List of tgt cell neighbour cells
+    DynamicList<label> queuedCells(10);
 
-    // list of tgt cells currently visited for srcCellI to avoid multiple hits
-    DynamicList<label> visitedTgtCells(10);
+    // List of tgt cells currently visited for srcCellI to avoid multiple hits
+    DynamicList<label> visitedCells(10);
 
-    // list to keep track of tgt cells used to seed src cells
+    // List to keep track of tgt cells used to seed src cells
     labelList seedCells(src_.nCells(), -1);
     seedCells[srcCellI] = tgtCellI;
 
@@ -86,17 +86,19 @@ void Foam::correctedCellVolumeWeightMethod::calculateAddressing
 
     do
     {
-        nbrTgtCells.clear();
-        visitedTgtCells.clear();
+        queuedCells.clear();
+        visitedCells.clear();
 
-        // append initial target cell and neighbours
-        nbrTgtCells.append(tgtCellI);
-        appendNbrCells(tgtCellI, tgt_, visitedTgtCells, nbrTgtCells);
+        // Initial target cell and neighbours
+        queuedCells.push_back(tgtCellI);
+        appendNbrCells(tgtCellI, tgt_, visitedCells, queuedCells);
 
-        do
+        while (!queuedCells.empty())
         {
-            tgtCellI = nbrTgtCells.remove();
-            visitedTgtCells.append(tgtCellI);
+            // Process new target cell as LIFO
+            tgtCellI = queuedCells.back();
+            queuedCells.pop_back();
+            visitedCells.push_back(tgtCellI);
 
             Tuple2<scalar, point> vol = interVolAndCentroid
             (
@@ -116,13 +118,12 @@ void Foam::correctedCellVolumeWeightMethod::calculateAddressing
                 tgtToSrcWght[tgtCellI].append(vol.first());
                 tgtToSrcVec[tgtCellI].append(vol.second()-srcCc[srcCellI]);
 
-                appendNbrCells(tgtCellI, tgt_, visitedTgtCells, nbrTgtCells);
+                appendNbrCells(tgtCellI, tgt_, visitedCells, queuedCells);
 
                 // accumulate intersection volume
                 V_ += vol.first();
             }
         }
-        while (!nbrTgtCells.empty());
 
         mapFlag[srcCellI] = false;
 
@@ -134,7 +135,7 @@ void Foam::correctedCellVolumeWeightMethod::calculateAddressing
             tgtCellI,
             srcCellIDs,
             mapFlag,
-            visitedTgtCells,
+            visitedCells,
             seedCells
         );
     }

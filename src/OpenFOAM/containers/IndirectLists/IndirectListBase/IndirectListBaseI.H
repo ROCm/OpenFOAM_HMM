@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +99,7 @@ inline bool Foam::IndirectListBase<T, Addr>::uniform() const
 
 
 template<class T, class Addr>
-inline bool Foam::IndirectListBase<T, Addr>::found
+inline bool Foam::IndirectListBase<T, Addr>::contains
 (
     const T& val,
     label pos

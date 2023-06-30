@@ -69,16 +69,17 @@ Foam::labelList Foam::manualDecomp::decompose
     const scalarField& pointWeights
 ) const
 {
-    labelIOList finalDecomp
+    labelList finalDecomp
     (
-        IOobject
+        labelIOList::readContents
         (
-            dataFile_,
-            mesh.facesInstance(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobject
+            (
+                dataFile_,
+                mesh.facesInstance(),
+                mesh.thisDb(),
+                IOobject::MUST_READ
+            )
         )
     );
 
@@ -95,21 +96,21 @@ Foam::labelList Foam::manualDecomp::decompose
             << exit(FatalError);
     }
 
-    const label minVal = min(finalDecomp);
-    const label maxVal = max(finalDecomp);
 
-    if (minVal < 0 || maxVal >= nDomains_)
+    const MinMax<label> range = minMax(finalDecomp);
+
+    if (range.min() < 0 || range.max() >= nDomains_)
     {
         FatalErrorInFunction
             << "According to the decomposition, cells assigned to "
             << "impossible processor numbers.  Min processor = "
-            << minVal << " Max processor = " << maxVal
+            << range.min() << " Max processor = " << range.max()
             << ".\n" << "Manual decomposition data read from file "
             << dataFile_ << "." << endl
             << exit(FatalError);
     }
 
-    return std::move(finalDecomp);
+    return finalDecomp;
 }
 
 

@@ -59,7 +59,7 @@ Foam::expressions::exprResultGlobals::exprResultGlobals
             obr.time(),
             IOobject::READ_IF_PRESENT,
             IOobject::AUTO_WRITE,
-            true  // register
+            IOobject::REGISTER
         )
     ),
     variables_(),
@@ -204,11 +204,11 @@ Foam::expressions::exprResultGlobals::get
     {
         const auto tableIter = variables_.cfind(scopeName);
 
-        if (tableIter.found())
+        if (tableIter.good())
         {
             const auto resultIter = (*tableIter).cfind(name);
 
-            if (resultIter.found())
+            if (resultIter.good())
             {
                 return *(*resultIter);
             }
@@ -240,7 +240,7 @@ Foam::expressions::exprResultGlobals::addValue
 
     auto iter = tbl.find(name);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         tbl.set(name, new exprResult(value));
         iter = tbl.find(name);
@@ -322,7 +322,7 @@ bool Foam::expressions::exprResultGlobals::removeValue
 {
     auto iter = variables_.find(scope);
 
-    return (iter.found() && (*iter).erase(name));
+    return (iter.good() && iter.val().erase(name));
 }
 
 

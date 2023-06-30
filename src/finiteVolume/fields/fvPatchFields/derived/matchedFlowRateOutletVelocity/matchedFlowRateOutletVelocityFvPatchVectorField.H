@@ -82,11 +82,11 @@ class matchedFlowRateOutletVelocityFvPatchVectorField
         //- Inlet patch name from which the corresponding flow rate is obtained
         word inletPatchName_;
 
-        //- Is volumetric?
-        bool volumetric_;
-
         //- Name of the density field used to normalize the mass flux
         word rhoName_;
+
+        //- Is volumetric?
+        bool volumetric_;
 
 
     // Private member functions

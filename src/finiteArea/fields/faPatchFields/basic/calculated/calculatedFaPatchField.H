@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedFaPatchField_H
-#define calculatedFaPatchField_H
+#ifndef Foam_calculatedFaPatchField_H
+#define Foam_calculatedFaPatchField_H
 
 #include "faPatchField.H"
 
@@ -56,11 +57,10 @@ class calculatedFaPatchField
 :
     public faPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("calculated");
+    TypeName("calculated");  // fieldTypes::calculatedTypeName_()
 
 
     // Constructors
@@ -77,10 +77,12 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "value" entry (default: optional)
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         calculatedFaPatchField
         (
             const calculatedFaPatchField<Type>&,
@@ -124,17 +126,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
         // Evaluation functions

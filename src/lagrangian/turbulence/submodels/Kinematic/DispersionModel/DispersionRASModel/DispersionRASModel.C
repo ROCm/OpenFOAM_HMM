@@ -98,8 +98,8 @@ Foam::DispersionRASModel<CloudType>::DispersionRASModel
 :
     DispersionModel<CloudType>(owner),
     kPtr_(nullptr),
-    ownK_(false),
     epsilonPtr_(nullptr),
+    ownK_(false),
     ownEpsilon_(false)
 {}
 
@@ -112,8 +112,8 @@ Foam::DispersionRASModel<CloudType>::DispersionRASModel
 :
     DispersionModel<CloudType>(dm),
     kPtr_(dm.kPtr_),
-    ownK_(dm.ownK_),
     epsilonPtr_(dm.epsilonPtr_),
+    ownK_(dm.ownK_),
     ownEpsilon_(dm.ownEpsilon_)
 {
     dm.ownK_ = false;
@@ -138,20 +138,22 @@ void Foam::DispersionRASModel<CloudType>::cacheFields(const bool store)
     if (store)
     {
         tmp<volScalarField> tk = this->kModel();
-        if (tk.isTmp())
+        if (tk.movable())
         {
+            // Take ownership
             kPtr_ = tk.ptr();
             ownK_ = true;
         }
         else
         {
-            kPtr_ = &tk();
+            kPtr_ = &tk.cref();
             ownK_ = false;
         }
 
         tmp<volScalarField> tepsilon = this->epsilonModel();
-        if (tepsilon.isTmp())
+        if (tepsilon.movable())
         {
+            // Take ownership
             epsilonPtr_ = tepsilon.ptr();
             ownEpsilon_ = true;
         }
@@ -163,12 +165,12 @@ void Foam::DispersionRASModel<CloudType>::cacheFields(const bool store)
     }
     else
     {
-        if (ownK_ && kPtr_)
+        if (ownK_)
         {
             deleteDemandDrivenData(kPtr_);
             ownK_ = false;
         }
-        if (ownEpsilon_ && epsilonPtr_)
+        if (ownEpsilon_)
         {
             deleteDemandDrivenData(epsilonPtr_);
             ownEpsilon_ = false;

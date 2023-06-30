@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hexRef8Data_H
-#define hexRef8Data_H
+#ifndef Foam_hexRef8Data_H
+#define Foam_hexRef8Data_H
 
 #include "labelIOList.H"
 #include "uniformDimensionedFields.H"
@@ -71,7 +71,9 @@ class hexRef8Data
         autoPtr<refinementHistory> refHistoryPtr_;
 
 
-    // Private Member Functions
+public:
+
+    // Generated Methods
 
         //- No copy construct
         hexRef8Data(const hexRef8Data&) = delete;
@@ -80,12 +82,10 @@ class hexRef8Data
         void operator=(const hexRef8Data&) = delete;
 
 
-public:
-
     // Constructors
 
-        //- Construct read. Has special provision for only some processors
-        //- having the files so can be used in redistribution.
+        //- Construct from IOobject, reading if MUST_READ or LAZY_READ.
+        //- Use sync() if used in redistributing to different number of ranks
         explicit hexRef8Data(const IOobject& io);
 
         //- Construct as subset
@@ -114,7 +114,7 @@ public:
     // Member Functions
 
         //- Parallel synchronise. This enforces valid objects on all processors
-        //  (even if they don't have a mesh). Used by redistributePar.
+        //- (even if they don't have a mesh). Used by redistributePar.
         void sync(const IOobject& io);
 
         //- Update local numbering for changed mesh.

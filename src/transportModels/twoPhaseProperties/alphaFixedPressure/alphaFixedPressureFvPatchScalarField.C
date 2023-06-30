@@ -69,17 +69,11 @@ alphaFixedPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    // The 'value' is optional (handled below)
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     p_("p", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(p_);
     }
@@ -146,8 +140,7 @@ void Foam::alphaFixedPressureFvPatchScalarField::updateCoeffs()
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(db().time());
 
-    const fvPatchField<scalar>& rho =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+    const auto& rho = patch().lookupPatchField<volScalarField>("rho");
 
     operator==(p_ - rho*(g.value() & patch().Cf()));
 
@@ -160,9 +153,9 @@ void Foam::alphaFixedPressureFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     p_.writeEntry("p", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

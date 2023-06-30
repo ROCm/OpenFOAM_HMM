@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,6 @@ SourceFiles
 #include "ListPolicy.H"
 
 #include <iterator>
-#include <type_traits>
 #include <vector>  // i.e, std::vector
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -66,14 +65,13 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 class labelRange;
 
 template<class T> class List;
 template<class T> class SubList;
 template<class T> class UList;
 template<class T> class IndirectList;
+template<class T> class UIndirectList;
 template<class T, class Addr> class IndirectListBase;
 
 template<class T> Istream& operator>>(Istream&, UList<T>&);
@@ -324,11 +322,11 @@ public:
         //  \return position in list or -1 if not found.
         label rfind(const T& val, label pos = -1) const;
 
-        //- True if the value if found in the list.
+        //- Is the value contained in the list?
+        //  Linear search from start pos until the end of the list.
         //  Any occurrences before the start pos are ignored.
-        //  Linear search.
         //  \return true if found.
-        inline bool found(const T& val, label pos = 0) const;
+        inline bool contains(const T& val, label pos = 0) const;
 
 
     // Edit
@@ -406,6 +404,10 @@ public:
         //- Return an iterator to end traversing the UList
         inline iterator end() noexcept;
 
+        //- Return iterator at offset i from begin,
+        //- clamped to [0,size] range
+        inline iterator begin(const label i) noexcept;
+
 
     // Random access iterator (const)
 
@@ -420,6 +422,14 @@ public:
 
         //- Return const_iterator to end traversing the constant UList
         inline const_iterator end() const noexcept;
+
+        //- Return const_iterator at offset i from begin,
+        //- clamped to [0,size] range
+        inline const_iterator cbegin(const label i) const noexcept;
+
+        //- Return const_iterator at offset i from begin,
+        //- clamped to [0,size] range
+        inline const_iterator begin(const label i) const noexcept;
 
 
     // Reverse iterators (non-const)
@@ -448,11 +458,11 @@ public:
 
     // STL member functions
 
-        //- The number of elements in the UList
-        inline label size() const noexcept;
+        //- True if List is empty (ie, size() is zero)
+        bool empty() const noexcept { return !size_; }
 
-        //- True if the UList is empty (ie, size() is zero)
-        inline bool empty() const noexcept;
+        //- The number of elements in the List
+        label size() const noexcept { return size_; }
 
         //- The size of the largest possible UList
         static constexpr label max_size() noexcept { return labelMax; }
@@ -598,6 +608,12 @@ public:
         //- Access last element of the list, position [size()-1]
         //FOAM_DEPRECATED_FOR(2022-10, "back()")
         const T& last() const { return back(); };
+
+        //- Same as contains()
+        bool found(const T& val, label pos = 0) const
+        {
+            return this->contains(val, pos);
+        }
 };
 
 

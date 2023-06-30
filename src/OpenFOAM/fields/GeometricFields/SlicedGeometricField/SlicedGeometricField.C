@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SlicedGeometricField.H"
-#include "processorFvPatch.H"
 
 // * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * * //
 
@@ -38,41 +37,67 @@ template
     template<class> class SlicedPatchField,
     class GeoMesh
 >
-Foam::tmp<Foam::FieldField<PatchField, Type>>
+bool
 Foam::SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
-slicedBoundaryField
+isBoundaryAddressing
 (
     const Mesh& mesh,
-    const Field<Type>& completeField,
-    const bool preserveCouples,
-    const bool preserveProcessorOnly
+    const label fieldSize
 )
 {
+    label maxAddress(0);
+
+    if (!mesh.boundary().empty())
+    {
+        const auto& p = mesh.boundary().back();
+        maxAddress = (p.start() + p.size());
+    }
+
+    // If field size appear to not include internal field
+    return (fieldSize < maxAddress);
+}
+
+
+template
+<
+    class Type,
+    template<class> class PatchField,
+    template<class> class SlicedPatchField,
+    class GeoMesh
+>
+Foam::tmp<Foam::FieldField<PatchField, Type>>
+Foam::SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
+makeBoundary
+(
+    const Mesh& mesh,
+    const Field<Type>& completeOrBoundaryField,
+    const bool preserveCouples,
+    const bool preserveProcessorOnly,
+    const bool isBoundaryOnly
+) const
+{
+    typedef typename
+        SlicedPatchField<Type>::processorPatchType
+        processorPatchType;
+
     auto tbf = tmp<FieldField<PatchField, Type>>::New(mesh.boundary().size());
     auto& bf = tbf.ref();
 
     forAll(mesh.boundary(), patchi)
     {
+        const auto& p = mesh.boundary()[patchi];
+
         if
         (
-            preserveCouples
-         && mesh.boundary()[patchi].coupled()
-         && (
-               !preserveProcessorOnly
-            || isA<processorFvPatch>(mesh.boundary()[patchi])
-            )
+            preserveCouples && p.coupled()
+         && (!preserveProcessorOnly || isA<processorPatchType>(p))
         )
         {
             // For coupled patched construct the correct patch field type
             bf.set
             (
                 patchi,
-                PatchField<Type>::New
-                (
-                    mesh.boundary()[patchi].type(),
-                    mesh.boundary()[patchi],
-                    *this
-                )
+                PatchField<Type>::New(p.type(), p, *this)
             );
 
             // Initialize the values on the coupled patch to those of the slice
@@ -81,9 +106,10 @@ slicedBoundaryField
             // evaluation e.g. in the case of processor and cyclic patches.
             bf[patchi] = SlicedPatchField<Type>
             (
-                mesh.boundary()[patchi],
+                p,
                 DimensionedField<Type, GeoMesh>::null(),
-                completeField
+                completeOrBoundaryField,
+                isBoundaryOnly
             );
         }
         else
@@ -93,9 +119,10 @@ slicedBoundaryField
                 patchi,
                 new SlicedPatchField<Type>
                 (
-                    mesh.boundary()[patchi],
+                    p,
                     DimensionedField<Type, GeoMesh>::null(),
-                    completeField
+                    completeOrBoundaryField,
+                    isBoundaryOnly
                 )
             );
         }
@@ -114,30 +141,27 @@ template
 >
 Foam::tmp<Foam::FieldField<PatchField, Type>>
 Foam::SlicedGeometricField<Type, PatchField, SlicedPatchField, GeoMesh>::
-slicedBoundaryField
+makeBoundary
 (
     const Mesh& mesh,
     const FieldField<PatchField, Type>& bField,
     const bool preserveCouples
-)
+) const
 {
     auto tbf = tmp<FieldField<PatchField, Type>>::New(mesh.boundary().size());
     auto& bf = tbf.ref();
 
     forAll(mesh.boundary(), patchi)
     {
-        if (preserveCouples && mesh.boundary()[patchi].coupled())
+        const auto& p = mesh.boundary()[patchi];
+
+        if (preserveCouples && p.coupled())
         {
             // For coupled patched construct the correct patch field type
             bf.set
             (
                 patchi,
-                PatchField<Type>::New
-                (
-                    mesh.boundary()[patchi].type(),
-                    mesh.boundary()[patchi],
-                    *this
-                )
+                PatchField<Type>::New(p.type(), p, *this)
             );
 
             // Assign field
@@ -151,7 +175,7 @@ slicedBoundaryField
                 patchi,
                 new SlicedPatchField<Type>
                 (
-                    mesh.boundary()[patchi],
+                    p,
                     DimensionedField<Type, GeoMesh>::null(),
                     bField[patchi]
                 )
@@ -177,7 +201,7 @@ SlicedGeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& completeField,
     const bool preserveCouples
 )
@@ -186,9 +210,11 @@ SlicedGeometricField
     (
         io,
         mesh,
-        ds,
+        dims,
         Field<Type>(),
-        slicedBoundaryField(mesh, completeField, preserveCouples)
+        // preserveProcessorOnly = false
+        // isBoundaryOnly = false
+        makeBoundary(mesh, completeField, preserveCouples)
     )
 {
     // Set internalField to the slice of the complete field
@@ -213,7 +239,7 @@ SlicedGeometricField
 (
     const IOobject& io,
     const Mesh& mesh,
-    const dimensionSet& ds,
+    const dimensionSet& dims,
     const Field<Type>& completeIField,
     const Field<Type>& completeBField,
     const bool preserveCouples,
@@ -224,14 +250,15 @@ SlicedGeometricField
     (
         io,
         mesh,
-        ds,
+        dims,
         Field<Type>(),
-        slicedBoundaryField
+        makeBoundary
         (
             mesh,
             completeBField,
             preserveCouples,
-            preserveProcessorOnly
+            preserveProcessorOnly,
+            isBoundaryAddressing(mesh, completeBField.size())
         )
     )
 {
@@ -266,7 +293,7 @@ SlicedGeometricField
         gf.mesh(),
         gf.dimensions(),
         Field<Type>(),
-        slicedBoundaryField(gf.mesh(), gf.boundaryField(), preserveCouples)
+        makeBoundary(gf.mesh(), gf.boundaryField(), preserveCouples)
     )
 {
     // Set internalField to the internal field
@@ -295,7 +322,8 @@ SlicedGeometricField
         gf.mesh(),
         gf.dimensions(),
         Field<Type>(),
-        slicedBoundaryField(gf.mesh(), gf.boundaryField(), true)
+        // preserveCouples = true
+        makeBoundary(gf.mesh(), gf.boundaryField(), true)
     )
 {
     // Set internalField to the internal field

@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef products_H
-#define products_H
+#ifndef Foam_products_H
+#define Foam_products_H
 
 #include "direction.H"
 #include "pTraits.H"

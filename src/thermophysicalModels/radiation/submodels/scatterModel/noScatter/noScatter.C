@@ -67,7 +67,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::noScatter::sigmaEff() const
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless/dimLength, Zero)

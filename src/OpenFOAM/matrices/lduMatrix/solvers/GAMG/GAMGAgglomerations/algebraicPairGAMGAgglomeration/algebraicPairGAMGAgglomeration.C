@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016 OpenCFD Ltd.
+    Copyright (C) 2016,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,15 +55,19 @@ Foam::algebraicPairGAMGAgglomeration::algebraicPairGAMGAgglomeration
 :
     pairGAMGAgglomeration(matrix.mesh(), controlDict)
 {
-    const lduMesh& mesh = matrix.mesh();
-
     if (matrix.hasLower())
     {
-        agglomerate(mesh, max(mag(matrix.upper()), mag(matrix.lower())));
+        agglomerate
+        (
+            nCellsInCoarsestLevel_,
+            0,
+            max(mag(matrix.upper()), mag(matrix.lower())),
+            true
+        );
     }
     else
     {
-        agglomerate(mesh, mag(matrix.upper()));
+        agglomerate(nCellsInCoarsestLevel_, 0, mag(matrix.upper()), true);
     }
 }
 

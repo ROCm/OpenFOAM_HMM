@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValueFaePatchField_H
-#define fixedValueFaePatchField_H
+#ifndef Foam_fixedValueFaePatchField_H
+#define Foam_fixedValueFaePatchField_H
 
 #include "faePatchField.H"
 
@@ -57,7 +57,6 @@ class fixedValueFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -73,16 +72,26 @@ public:
             const DimensionedField<Type, edgeMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        fixedValueFaePatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and dictionary
         fixedValueFaePatchField
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
-        //- Construct by mapping the given fixedValueFaePatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValue patch field
+        //- onto a new patch
         fixedValueFaePatchField
         (
             const fixedValueFaePatchField<Type>&,
@@ -129,24 +138,19 @@ public:
     virtual ~fixedValueFaePatchField() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
 
+    // Other
 
         //- Write
         virtual void write(Ostream&) const;
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&) {}
 

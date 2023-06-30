@@ -71,24 +71,17 @@ Foam::inletOutletFvPatchField<Type>::inletOutletFvPatchField
     mixedFvPatchField<Type>(p, iF),
     phiName_(dict.getOrDefault<word>("phi", "phi"))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 
-    this->refValue() = Field<Type>("inletValue", dict, p.size());
-
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchField<Type>::operator=(this->refValue());
-    }
-
+    // Require inletValue (MUST_READ)
+    this->refValue().assign("inletValue", dict, p.size());
     this->refGrad() = Zero;
-    this->valueFraction() = 0.0;
+    this->valueFraction() = 0;
+
+    if (!this->readValueEntry(dict))
+    {
+        fvPatchField<Type>::extrapolateInternal();
+    }
 }
 
 
@@ -126,12 +119,9 @@ void Foam::inletOutletFvPatchField<Type>::updateCoeffs()
     }
 
     const Field<scalar>& phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
-        (
-            phiName_
-        );
+        this->patch().template lookupPatchField<surfaceScalarField>(phiName_);
 
-    this->valueFraction() = 1.0 - pos0(phip);
+    this->valueFraction() = neg(phip);
 
     mixedFvPatchField<Type>::updateCoeffs();
 }
@@ -143,7 +133,7 @@ void Foam::inletOutletFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->refValue().writeEntry("inletValue", os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

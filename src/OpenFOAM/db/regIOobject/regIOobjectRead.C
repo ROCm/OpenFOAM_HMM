@@ -83,7 +83,7 @@ bool Foam::regIOobject::readHeaderOk
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::regIOobject::readStream(const bool valid)
+void Foam::regIOobject::readStream(const bool readOnProc)
 {
     if (readOpt() == IOobject::NO_READ)
     {
@@ -117,7 +117,7 @@ void Foam::regIOobject::readStream(const bool valid)
             }
         }
 
-        isPtr_ = fileHandler().readStream(*this, objPath, type(), valid);
+        isPtr_ = fileHandler().readStream(*this, objPath, type(), readOnProc);
     }
 }
 
@@ -125,7 +125,7 @@ void Foam::regIOobject::readStream(const bool valid)
 Foam::Istream& Foam::regIOobject::readStream
 (
     const word& expectName,
-    const bool valid
+    const bool readOnProc
 )
 {
     if (IFstream::debug)
@@ -140,14 +140,14 @@ Foam::Istream& Foam::regIOobject::readStream
     // Construct IFstream if not already constructed
     if (!isPtr_)
     {
-        readStream(valid);
+        readStream(readOnProc);
 
         // Check the className of the regIOobject
         // dictionary is an allowable name in case the actual class
         // instantiated is a dictionary
         if
         (
-            valid
+            readOnProc
          && expectName.size()
          && headerClassName() != expectName
          && headerClassName() != "dictionary"

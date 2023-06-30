@@ -64,7 +64,7 @@ postPro1
     // Default colours
     colours
     {
-        ${..colourScheme.paraview};
+        ${../colourScheme/paraview};
     }
 
     // Line data

@@ -257,7 +257,7 @@ void Foam::lumpedPointMovement::readDict(const dictionary& dict)
     }
 
     relax_ = dict.getOrDefault<scalar>("relax", 1);
-    scalarMinMax::zero_one().inplaceClip(relax_);
+    relax_ = clamp(relax_, zero_one{});
 
     forcesDict_.merge(dict.subOrEmptyDict("forces"));
 

@@ -29,17 +29,33 @@ License
 #include "wedgeFaPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    makeFaPatchFields(wedge);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Specialisations * * * * * * * * * * * * * * //
 
-makeFaPatchFields(wedge);
+template<>
+Foam::tmp<Foam::scalarField>
+Foam::wedgeFaPatchField<Foam::scalar>::snGrad() const
+{
+    return tmp<scalarField>::New(size(), Zero);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+template<>
+void Foam::wedgeFaPatchField<Foam::scalar>::evaluate(const Pstream::commsTypes)
+{
+    if (!updated())
+    {
+        updateCoeffs();
+    }
+
+    this->operator==(patchInternalField());
+}
+
 
 // ************************************************************************* //

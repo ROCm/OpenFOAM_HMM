@@ -40,11 +40,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dlLibraryTable_H
-#define dlLibraryTable_H
+#ifndef Foam_dlLibraryTable_H
+#define Foam_dlLibraryTable_H
 
-#include "DynamicList.H"
 #include "fileName.H"
+#include "DynamicList.H"
 #include "InfoProxy.H"
 #include <memory>
 
@@ -55,7 +55,8 @@ namespace Foam
 
 // Forward Declarations
 class dlLibraryTable;
-Ostream& operator<<(Ostream& os, const InfoProxy<dlLibraryTable>& info);
+Ostream& operator<<(Ostream&, const InfoProxy<dlLibraryTable>&);
+
 
 /*---------------------------------------------------------------------------*\
                        Class dlLibraryTable Declaration
@@ -217,10 +218,10 @@ public:
     // Member Functions
 
         //- True if there are no libraries loaded by the table
-        bool empty() const;
+        bool empty() const noexcept;
 
         //- The number of libraries loaded by the table
-        label size() const;
+        label size() const noexcept;
 
         //- Names of the libraries in use
         List<fileName> loaded() const;
@@ -308,12 +309,9 @@ public:
 
     // Info
 
-        //- Return info proxy.
-        //  Used to print library table information to a stream
-        InfoProxy<dlLibraryTable> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- used to print library table information to a stream
+        InfoProxy<dlLibraryTable> info() const noexcept { return *this; }
 };
 
 

@@ -79,8 +79,8 @@ pressureInletOutletParSlipVelocityFvPatchVectorField
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
-    fvPatchVectorField::operator=(vectorField("value", dict, p.size()));
+    fvPatchFieldBase::readDict(dict);
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
     refValue() = *this;
     refGrad() = Zero;
     valueFraction() = 0.0;
@@ -121,11 +121,7 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
-
-    const fvsPatchField<scalar>& phip =
-        patch().patchField<surfaceScalarField, scalar>(phi);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     tmp<vectorField> n = patch().nf();
     const Field<scalar>& magSf = patch().magSf();
@@ -134,14 +130,13 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
     vectorField Ut(patchInternalField());
     Ut -= n()*(Ut & n());
 
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phip.internalField().dimensions() == dimVolume/dimTime)
     {
         refValue() = Ut + n*phip/magSf;
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phip.internalField().dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         refValue() = Ut + n*phip/(rhop*magSf);
     }
@@ -155,7 +150,7 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::updateCoeffs()
             << exit(FatalError);
     }
 
-    valueFraction() = 1.0 - pos0(phip);
+    valueFraction() = neg(phip);
 
     mixedFvPatchVectorField::updateCoeffs();
 }
@@ -166,10 +161,10 @@ void Foam::pressureInletOutletParSlipVelocityFvPatchVectorField::write
     Ostream& os
 ) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

@@ -736,7 +736,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         {
             const auto iter = globalMasterToLocalMaster.cfind(globali);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Matched to existing master
                 pointToMaster.insert(pointi, *iter);
@@ -1133,7 +1133,7 @@ void Foam::fvMeshDistribute::findCouples
 
             const auto iter = map.cfind(myData);
 
-            if (iter.found())
+            if (iter.good())
             {
                 label nbrBFacei = *iter;
 
@@ -1239,7 +1239,7 @@ void Foam::fvMeshDistribute::findCouples
                     );
                     auto fnd = map.find(key);
 
-                    if (!fnd.found())
+                    if (!fnd.good())
                     {
                         // Insert
                         map.emplace(key, meshi, bFacei);
@@ -2159,8 +2159,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     // ~~~~~~~~~~~~~~~~~
 
     labelList nSendCells(countCells(distribution));
-    labelList nRevcCells(Pstream::nProcs());
-    Pstream::allToAll(nSendCells, nRevcCells);
+    labelList nRecvCells(Pstream::nProcs());
+    UPstream::allToAll(nSendCells, nRecvCells);
 
     // Allocate buffers
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
@@ -2382,22 +2382,17 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
     UPstream::parRun(oldParRun);  // Restore parallel state
 
-
-    // Start sending&receiving from buffers
+    if (debug)
     {
-        if (debug)
-        {
-            Pout<< "Starting sending" << endl;
-        }
+        Pout<< "Starting sending" << endl;
+    }
 
-        labelList recvSizes;
-        pBufs.finishedSends(recvSizes);
+    pBufs.finishedSends();
 
-        if (debug)
-        {
-            Pout<< "Finished sending and receiving : " << flatOutput(recvSizes)
-                << endl;
-        }
+    if (debug)
+    {
+        Pout<< "Finished sending and receiving : "
+            << flatOutput(pBufs.recvDataCounts()) << endl;
     }
 
 
@@ -2547,17 +2542,17 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     );
     PtrList<PtrList<volTensorField::Internal>> dtfs(Pstream::nProcs());
 
-    forAll(nRevcCells, sendProc)
+    forAll(nRecvCells, sendProc)
     {
         // Did processor sendProc send anything to me?
-        if (sendProc != Pstream::myProcNo() && nRevcCells[sendProc] > 0)
+        if (sendProc != Pstream::myProcNo() && nRecvCells[sendProc] > 0)
         {
             if (debug)
             {
                 Pout<< nl
                     << "RECEIVING FROM DOMAIN " << sendProc
                     << " cells to receive:"
-                    << nRevcCells[sendProc]
+                    << nRecvCells[sendProc]
                     << nl << endl;
             }
 

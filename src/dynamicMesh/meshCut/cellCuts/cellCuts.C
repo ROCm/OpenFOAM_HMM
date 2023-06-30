@@ -181,7 +181,7 @@ void Foam::cellCuts::syncProc()
 
                     const auto iter = faceSplitCut_.cfind(facei);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         const face& f = mesh().faces()[facei];
                         const labelList& fEdges = mesh().faceEdges()[facei];
@@ -2109,7 +2109,7 @@ bool Foam::cellCuts::validLoop
 
             const auto iter = faceSplitCut_.cfind(meshFacei);
 
-            if (!iter.found())
+            if (!iter.good())
             {
                 // Face not yet cut so insert.
                 newFaceSplitCut.insert(meshFacei, cutEdge);

@@ -82,14 +82,16 @@ bool Foam::functionObjects::writeCellVolumes::write()
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(mesh_.V().dimensions(), Zero),
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 
     V.ref() = mesh_.V();
+
+    // Without correctBoundaryConditions() - boundary faces have zero volume
 
     Log << type() << " " << name() << " write:" << nl
         << "    writing cell-volumes field " << V.name()

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,6 +71,12 @@ Foam::dictionary Foam::faPatchData::dict(const bool withEdgeLabels) const
     }
 
     return patchDict;
+}
+
+
+bool Foam::faPatchData::good() const
+{
+    return (!name_.empty() && !type_.empty());
 }
 
 

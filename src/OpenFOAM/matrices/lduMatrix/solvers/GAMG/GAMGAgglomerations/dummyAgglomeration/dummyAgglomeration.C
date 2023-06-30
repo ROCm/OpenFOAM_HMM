@@ -74,7 +74,7 @@ Foam::dummyAgglomeration::dummyAgglomeration
     }
 
     // Shrink the storage of the levels to those created
-    compactLevels(nLevels_);
+    compactLevels(nLevels_, true);
 }
 
 

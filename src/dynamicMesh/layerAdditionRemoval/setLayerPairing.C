@@ -117,7 +117,7 @@ bool Foam::layerAdditionRemoval::setLayerPairing() const
         oppositeFace lidFace =
             cells[mc[facei]].opposingFace(mf[facei], faces);
 
-        if (!lidFace.found())
+        if (!lidFace.good())
         {
             // This is not a valid layer; cannot continue
             nFaceErrors++;

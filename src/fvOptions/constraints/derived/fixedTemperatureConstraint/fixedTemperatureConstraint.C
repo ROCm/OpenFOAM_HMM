@@ -148,7 +148,7 @@ bool Foam::fv::fixedTemperatureConstraint::read(const dictionary& dict)
 {
     if (fv::cellSetOption::read(dict))
     {
-        if (coeffs_.found(Tuniform_->name()))
+        if (Tuniform_ && coeffs_.found(Tuniform_->name(), keyType::LITERAL))
         {
             Tuniform_.reset
             (

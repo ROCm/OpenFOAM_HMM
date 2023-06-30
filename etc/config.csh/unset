@@ -189,8 +189,8 @@ if ($?DYLD_LIBRARY_PATH) then
     if ("${DYLD_LIBRARY_PATH}" == "") unsetenv DYLD_LIBRARY_PATH
 endif
 
-# Remove any shadow env variables
-unsetenv FOAM_DYLD_LIBRARY_PATH FOAM_LD_LIBRARY_PATH
+# Remove shadow env variables
+unsetenv FOAM_LD_LIBRARY_PATH
 
 #------------------------------------------------------------------------------
 # Cleanup aliases

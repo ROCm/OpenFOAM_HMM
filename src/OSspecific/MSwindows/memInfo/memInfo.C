@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2016-2017 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,13 +48,13 @@ Foam::memInfo::memInfo()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::memInfo::valid() const
+bool Foam::memInfo::good() const noexcept
 {
     return peak_ > 0;
 }
 
 
-void Foam::memInfo::clear()
+void Foam::memInfo::clear() noexcept
 {
     peak_ = size_ = rss_ = 0;
     free_ = 0;

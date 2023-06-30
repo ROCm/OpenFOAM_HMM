@@ -309,7 +309,7 @@ void Foam::faMeshTools::writeProcAddressing
     const faMesh& mesh,
     const mapDistributePolyMesh& map,
     const bool decompose,
-    autoPtr<fileOperation>&& writeHandler,
+    refPtr<fileOperation>& writeHandler,
     const faMesh* procMesh
 )
 {
@@ -398,11 +398,7 @@ void Foam::faMeshTools::writeProcAddressing
         );
     }
 
-    autoPtr<fileOperation> defaultHandler;
-    if (writeHandler)
-    {
-        defaultHandler = fileHandler(std::move(writeHandler));
-    }
+    auto oldHandler = fileOperation::fileHandler(writeHandler);
 
 
     // If we want procAddressing, need to manually write it ourselves
@@ -434,11 +430,11 @@ void Foam::faMeshTools::writeProcAddressing
         // Reconstruct: "procAddressing" only meaningful for rank 0
         // and written into base (serial) location (if at all).
 
-        if (Pstream::master())
+        if (UPstream::master())
         {
-            const bool oldParRun = Pstream::parRun(false);
+            const bool oldParRun = UPstream::parRun(false);
             procAddrMap.write();
-            Pstream::parRun(oldParRun);
+            UPstream::parRun(oldParRun);
         }
     }
 
@@ -448,10 +444,7 @@ void Foam::faMeshTools::writeProcAddressing
     const bool pointOk = pointMap.write();
     const bool patchOk = patchMap.write();
 
-    if (defaultHandler)
-    {
-        writeHandler = fileHandler(std::move(defaultHandler));
-    }
+    writeHandler = fileOperation::fileHandler(oldHandler);
 
     if (!edgeOk || !faceOk || !pointOk || !patchOk)
     {

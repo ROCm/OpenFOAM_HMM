@@ -156,11 +156,10 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
 
     const scalarField pb(p.oldTime().boundaryField()[patchi]);
 
-    const fvsPatchField<scalar>& phi =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phi = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     // Calculate the current mass flow rate
-    if (phi.internalField().dimensions() != dimDensity*dimVelocity*dimArea)
+    if (phi.internalField().dimensions() != dimMass/dimTime)
     {
         FatalErrorInFunction
             <<"phi is not a mass flux." << exit(FatalError);
@@ -179,8 +178,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
 
     const scalarField gamma(thermoPtr->gamma()().boundaryField()[patchi]);
 
-    const fvPatchField<scalar>& rho =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+    const auto& rho = patch().lookupPatchField<volScalarField>(rhoName_);
 
     const scalarField Mb(mag(Ub)/sqrt(gamma*pb/rho));
 
@@ -246,7 +244,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::outletMachNumberPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("pBack", pBack_);
     os.writeEntryIfDifferent<scalar>("c1", 0, c1_);
     os.writeEntryIfDifferent<scalar>("A1", 0, A1_);
@@ -258,7 +256,7 @@ void Foam::outletMachNumberPressureFvPatchScalarField::write(Ostream& os) const
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<scalar>("M", 0, M_);
 
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

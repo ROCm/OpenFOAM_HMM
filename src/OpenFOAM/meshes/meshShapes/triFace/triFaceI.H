@@ -221,9 +221,9 @@ inline Foam::triFace Foam::triFace::reverseFace() const
 }
 
 
-inline Foam::label Foam::triFace::which(const label pointLabel) const
+inline Foam::label Foam::triFace::which(const label vertex) const
 {
-    return FixedList<label, 3>::find(pointLabel);
+    return FixedList<label, 3>::find(vertex);
 }
 
 

@@ -53,13 +53,13 @@ int main(int argc, char *argv[])
         (
             "U",
             runTime.timeName(),
-            mesh,
+            pMesh.thisDb(),
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE
+            IOobject::NO_WRITE
         ),
         pMesh,
-        dimensionedVector(dimLength, Zero),
-        pointPatchVectorField::calculatedType()
+        dimensionedVector(dimLength, Zero)
+        // pointPatchFieldBase::calculatedType()
     );
 
     pointVectorField V(U + 2*U);

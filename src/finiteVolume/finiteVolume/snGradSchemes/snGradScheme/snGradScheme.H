@@ -172,15 +172,11 @@ public:
             return false;
         }
 
-        //- Return the explicit correction to the snGrad
-        //- for the given field
+        //- Return the explicit correction to the snGrad for the given field
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction(const GeometricField<Type, fvPatchField, volMesh>&) const
         {
-            return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-            (
-                nullptr
-            );
+            return nullptr;
         }
 
         //- Return the snGrad of the given cell field

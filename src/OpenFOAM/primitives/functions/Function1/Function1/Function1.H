@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,7 +119,11 @@ protected:
 
 public:
 
-    typedef Type returnType;
+    // Data Types
+
+        //- The return type
+        typedef Type returnType;
+
 
     //- Runtime type information
     TypeName("Function1")
@@ -196,12 +200,20 @@ public:
             const bool mandatory = true
         );
 
-        //- An optional selector
+        //- An optional selector, with fallback redirection
         static autoPtr<Function1<Type>> NewIfPresent
         (
             const word& entryName,
             const dictionary& dict,
-            const word& redirectType = word::null,
+            const word& redirectType,
+            const objectRegistry* obrPtr = nullptr
+        );
+
+        //- An optional selector, without fallback redirection
+        static autoPtr<Function1<Type>> NewIfPresent
+        (
+            const word& entryName,
+            const dictionary& dict,
             const objectRegistry* obrPtr = nullptr
         );
 

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2012-2018 Bernhard Gschaider <bgschaid@hfd-research.com>
+    Copyright (C) 2012-2018 Bernhard Gschaider
     Copyright (C) 2019 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -44,10 +44,10 @@ bool Foam::expressions::exprResultStack::pushChecked
 
     if (!resultField.empty())
     {
-        val = resultField.first();
+        val = resultField.front();
     }
 
-    this->ref<T>().append(val);
+    this->ref<T>().push_back(val);
 
     return true;
 }
@@ -71,8 +71,8 @@ bool Foam::expressions::exprResultStack::popChecked
 
     if (!oldField.empty())
     {
-        val = oldField.last();
-        oldField.resize(oldField.size()-1);
+        val = oldField.back();
+        oldField.pop_back();
     }
 
     result.setSingleValue(val);

@@ -42,9 +42,9 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    flowRate_(),
+    flowRate_(nullptr),
     rhoName_("rho"),
-    rhoInlet_(0.0),
+    rhoInlet_(0),
     volumetric_(false),
     extrapolateProfile_(false)
 {}
@@ -58,7 +58,8 @@ flowRateInletVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<vector>(p, iF, dict, false),
+    fixedValueFvPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
+    flowRate_(nullptr),
     rhoName_("rho"),
     rhoInlet_(dict.getOrDefault<scalar>("rhoInlet", -VGREAT)),
     volumetric_(false),
@@ -67,35 +68,30 @@ flowRateInletVelocityFvPatchVectorField
         dict.getOrDefault<Switch>("extrapolateProfile", false)
     )
 {
-    if (dict.found("volumetricFlowRate"))
+    flowRate_ =
+        Function1<scalar>::NewIfPresent("volumetricFlowRate", dict, &db());
+
+    if (flowRate_)
     {
         volumetric_ = true;
-        flowRate_ =
-            Function1<scalar>::New("volumetricFlowRate", dict, &db());
-    }
-    else if (dict.found("massFlowRate"))
-    {
-        volumetric_ = false;
-        flowRate_ = Function1<scalar>::New("massFlowRate", dict, &db());
-        rhoName_ = dict.getOrDefault<word>("rho", "rho");
     }
     else
+    {
+        dict.readIfPresent("rho", rhoName_);
+        flowRate_ =
+            Function1<scalar>::NewIfPresent("massFlowRate", dict, &db());
+    }
+
+    if (!flowRate_)
     {
         FatalIOErrorInFunction(dict)
             << "Please supply either 'volumetricFlowRate' or"
-            << " 'massFlowRate' and 'rho'" << nl
+            << " 'massFlowRate' (optional: with 'rho')" << nl
             << exit(FatalIOError);
     }
 
-    // Value field require if mass based
-    if (dict.found("value"))
-    {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
+    // Value field required if mass based
+    if (!this->readValueEntry(dict))
     {
         evaluate(Pstream::commsTypes::blocking);
     }
@@ -218,8 +214,8 @@ void Foam::flowRateInletVelocityFvPatchVectorField::updateCoeffs()
         // Mass flow-rate
         if (db().foundObject<volScalarField>(rhoName_))
         {
-            const fvPatchField<scalar>& rhop =
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            const auto& rhop =
+                patch().lookupPatchField<volScalarField>(rhoName_);
 
             updateValues(rhop);
         }
@@ -255,7 +251,7 @@ void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
     {
         os.writeEntry("extrapolateProfile", extrapolateProfile_);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

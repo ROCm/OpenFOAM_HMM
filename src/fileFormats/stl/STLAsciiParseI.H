@@ -35,7 +35,7 @@ inline void Foam::Detail::STLAsciiParse::beginSolid(word solidName)
     }
 
     auto iter = nameLookup_.cfind(solidName);
-    if (iter.found())
+    if (iter.good())
     {
         if (groupId_ != iter.val())
         {

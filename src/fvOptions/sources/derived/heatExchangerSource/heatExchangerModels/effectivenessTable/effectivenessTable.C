@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -321,7 +321,7 @@ void Foam::heatExchangerModels::effectivenessTable::write
             // Secondary Cp as a function of the starting secondary temperature
             const scalar secondaryCp = secondaryCpPtr_->value(secondaryInletT_);
             const scalar secondaryOutletT =
-                Qt_/(secondaryMassFlowRate_*secondaryCp) + secondaryInletT_;
+                secondaryInletT_ - Qt_/(secondaryMassFlowRate_*secondaryCp);
 
             if (log)
             {

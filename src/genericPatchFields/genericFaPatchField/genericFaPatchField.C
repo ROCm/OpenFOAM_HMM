@@ -41,7 +41,7 @@ Foam::genericFaPatchField<Type>::genericFaPatchField
     parent_bctype(p, iF)
 {
     FatalErrorInFunction
-        << "Trying to construct genericFaPatchField on patch "
+        << "Trying to construct generic patchField on patch "
         << this->patch().name()
         << " of field " << this->internalField().name() << nl
         << abort(FatalError);
@@ -63,7 +63,7 @@ Foam::genericFaPatchField<Type>::genericFaPatchField
     const word& patchName = this->patch().name();
     const IOobject& io = this->internalField();
 
-    if (!dict.found("value"))
+    if (!dict.findEntry("value", keyType::LITERAL))
     {
         reportMissingEntry("value", patchName, io);
     }
@@ -108,7 +108,7 @@ void Foam::genericFaPatchField<Type>::write(Ostream& os) const
 {
     // Handle "value" separately
     genericPatchFieldBase::writeGeneric(os, true);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 
@@ -148,7 +148,7 @@ Foam::genericFaPatchField<Type>::valueInternalCoeffs
 ) const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFaPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (
@@ -169,7 +169,7 @@ Foam::genericFaPatchField<Type>::valueBoundaryCoeffs
 ) const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFaPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (
@@ -187,7 +187,7 @@ Foam::tmp<Foam::Field<Type>>
 Foam::genericFaPatchField<Type>::gradientInternalCoeffs() const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFaPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (
@@ -205,7 +205,7 @@ Foam::tmp<Foam::Field<Type>>
 Foam::genericFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
     FatalErrorInFunction
-        << "Cannot be called for a genericFaPatchField";
+        << "Cannot be called for a generic patchField";
 
     genericFatalSolveError
     (

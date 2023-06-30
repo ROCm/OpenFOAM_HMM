@@ -62,25 +62,28 @@ void Foam::WeberNumberReacting<CloudType>::postEvolve
 {
     const auto& c = this->owner();
 
-    if (!c.template foundObject<IOField<scalar>>("We"))
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("We");
+
+    if (!resultPtr)
     {
-        IOField<scalar>* WePtr =
-            new IOField<scalar>
+        resultPtr = new IOField<scalar>
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "We",
-                    c.time().timeName(),
-                    c,
-                    IOobject::NO_READ
-                )
-            );
+                "We",
+                c.time().timeName(),
+                c,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            )
+        );
 
-        WePtr->store();
+        resultPtr->store();
     }
+    auto& We = *resultPtr;
 
-    auto& We = c.template lookupObjectRef<IOField<scalar>>("We");
-    We.setSize(c.size());
+    We.resize(c.size());
 
     const auto& thermo = c.db().template lookupObject<SLGThermo>("SLGThermo");
     const auto& liquids = thermo.liquids();

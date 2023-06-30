@@ -66,6 +66,23 @@ Foam::label Foam::UPtrList<T>::squeezeNull()
 
 
 template<class T>
+void Foam::UPtrList<T>::trimTrailingNull()
+{
+    label newLen = this->size();
+
+    for (label i = newLen-1; i >= 0 && !ptrs_[i]; --i)
+    {
+        --newLen;
+    }
+
+    // Or mutable?
+    // const_cast<Detail::PtrListDetail<T>&>(ptrs_).setAddressableSize(newLen);
+
+    ptrs_.setAddressableSize(newLen);
+}
+
+
+template<class T>
 void Foam::UPtrList<T>::reorder(const labelUList& oldToNew, const bool check)
 {
     const label len = this->size();
@@ -177,6 +194,22 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& list)
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
+template<class T>
+void Foam::sort(UPtrList<T>& list)
+{
+    std::stable_sort
+    (
+        list.begin_ptr(),
+        list.end_ptr(),
+        // Compare less, with nullptr protect and sort nullptr to end
+        [](const T* const a, const T* const b) -> bool
+        {
+            return (a && b) ? (*a < *b) : !b;
+        }
+    );
+}
+
+
 template<class T, class Compare>
 void Foam::sort(UPtrList<T>& list, const Compare& comp)
 {
@@ -186,14 +219,6 @@ void Foam::sort(UPtrList<T>& list, const Compare& comp)
         list.end_ptr(),
         typename UPtrList<T>::template value_compare<Compare>(comp)
     );
-}
-
-
-template<class T>
-void Foam::sort(UPtrList<T>& list)
-{
-    // ie, lessOp<T>() or std::less<T>()
-    Foam::sort(list, [](const T& a, const T& b) { return (a < b); });
 }
 
 

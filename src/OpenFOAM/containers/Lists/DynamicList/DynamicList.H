@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ class DynamicList
 
         //- Copy assignment from another list
         template<class ListType>
-        inline void assignDynList(const ListType& list);
+        inline void doAssignDynList(const ListType& list);
 
         //- Alter the size of the underlying storage
         //  The 'nocopy' option will not attempt to recover old content
@@ -133,6 +133,9 @@ public:
         //  Also constructs from DynamicList with different sizing parameters.
         inline explicit DynamicList(const UList<T>& lst);
 
+        //- Copy construct subset of list
+        inline DynamicList(const UList<T>& list, const labelUList& indices);
+
         //- Construct from a FixedList
         template<unsigned N>
         inline explicit DynamicList(const FixedList<T, N>& lst);
@@ -166,7 +169,7 @@ public:
         static constexpr label min_size() noexcept { return SizeMin; }
 
         //- Size of the underlying storage.
-        inline label capacity() const noexcept;
+        label capacity() const noexcept { return capacity_; }
 
         //- Number of contiguous bytes of the underlying storage.
         //  \note Only meaningful for contiguous data
@@ -255,6 +258,11 @@ public:
         //- Transfer contents of any sized DynamicList into this.
         template<int AnySizeMin>
         inline void transfer(DynamicList<T, AnySizeMin>& list);
+
+        //- Construct an element at the end of the list,
+        //- return reference to the new list element
+        template<class... Args>
+        inline T& emplace_back(Args&&... args);
 
         //- Copy append an element to the end of this list.
         inline void push_back(const T& val);

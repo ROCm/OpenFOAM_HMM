@@ -611,7 +611,7 @@ void Foam::featurePointConformer::reIndexPointPairs
 
         const auto newIndexIter = oldToNewIndices.cfind(currentIndex);
 
-        if (newIndexIter.found())
+        if (newIndexIter.good())
         {
             featurePointVertices_[vI].index() = *newIndexIter;
         }

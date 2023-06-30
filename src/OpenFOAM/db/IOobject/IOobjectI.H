@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -145,8 +145,20 @@ inline Foam::IOobject::IOobject
 :
     IOobject(io)
 {
-    readOpt(rOpt);
-    writeOpt(wOpt);
+    IOobjectOption::readOpt(rOpt);
+    IOobjectOption::writeOpt(wOpt);
+}
+
+
+inline Foam::IOobject::IOobject
+(
+    const IOobject& io,
+    IOobjectOption::registerOption regOpt
+)
+:
+    IOobject(io)
+{
+    IOobjectOption::registerObject(regOpt);
 }
 
 

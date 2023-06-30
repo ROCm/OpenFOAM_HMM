@@ -72,7 +72,7 @@ Foam::fv::leastSquaresGrad<Type>::calcGrad
             ),
             mesh,
             dimensioned<GradType>(vsf.dimensions()/dimLength, Zero),
-            extrapolatedCalculatedFvPatchField<GradType>::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
     GradFieldType& lsGrad = tlsGrad.ref();

@@ -119,8 +119,8 @@ void Foam::faceZoneToFaceZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Adding all faces from faceZone " << setName_
-                    << " ..." << endl;
+                Info<< "    Adding all faces from face zone: "
+                    << setName_ << " ..." << endl;
             }
 
             // Load the set
@@ -145,8 +145,8 @@ void Foam::faceZoneToFaceZone::applyToSet
         {
             if (verbose_)
             {
-                Info<< "    Removing all faces from faceZone " << setName_
-                    << " ..." << endl;
+                Info<< "    Removing all faces from face zone: "
+                    << setName_ << " ..." << endl;
             }
 
             // Load the set

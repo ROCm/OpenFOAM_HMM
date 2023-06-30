@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "pTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -262,7 +261,7 @@ inline std::streamsize Foam::UList<T>::size_bytes() const noexcept
 
 
 template<class T>
-inline bool Foam::UList<T>::found(const T& val, label pos) const
+inline bool Foam::UList<T>::contains(const T& val, label pos) const
 {
     return (this->find(val, pos) >= 0);
 }
@@ -345,6 +344,29 @@ Foam::UList<T>::cbegin() const noexcept
     return v_;
 }
 
+
+template<class T>
+inline typename Foam::UList<T>::iterator
+Foam::UList<T>::begin(const label i) noexcept
+{
+    return (v_ + (i < 0 ? 0 : size_ < i ? size_ : i));
+}
+
+template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::begin(const label i) const noexcept
+{
+    return (v_ + (i < 0 ? 0 : size_ < i ? size_ : i));
+}
+
+template<class T>
+inline typename Foam::UList<T>::const_iterator
+Foam::UList<T>::cbegin(const label i) const noexcept
+{
+    return (v_ + (i < 0 ? 0 : size_ < i ? size_ : i));
+}
+
+
 template<class T>
 inline typename Foam::UList<T>::iterator
 Foam::UList<T>::end() noexcept
@@ -413,20 +435,6 @@ template<class T>
 inline void Foam::UList<T>::setAddressableSize(const label n) noexcept
 {
     size_ = n;
-}
-
-
-template<class T>
-inline Foam::label Foam::UList<T>::size() const noexcept
-{
-    return size_;
-}
-
-
-template<class T>
-inline bool Foam::UList<T>::empty() const noexcept
-{
-    return !size_;
 }
 
 

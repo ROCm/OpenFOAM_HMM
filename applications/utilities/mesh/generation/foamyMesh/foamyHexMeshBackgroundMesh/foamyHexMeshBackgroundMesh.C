@@ -603,7 +603,7 @@ int main(int argc, char *argv[])
                 fvm.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             fvm,
             dimensionedScalar(dimLength, Zero)
@@ -668,7 +668,7 @@ int main(int argc, char *argv[])
                 fvm.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             pointMesh::New(fvm),
             dimensionedScalar(dimLength, Zero)

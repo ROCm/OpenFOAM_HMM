@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef lduPrimitiveProcessorInterface_H
-#define lduPrimitiveProcessorInterface_H
+#ifndef Foam_lduPrimitiveProcessorInterface_H
+#define Foam_lduPrimitiveProcessorInterface_H
 
 #include "GAMGInterface.H"
 #include "processorLduInterface.H"
@@ -58,6 +58,7 @@ class lduPrimitiveProcessorInterface
 {
     // Private Data
 
+        //- Addressing
         const labelList faceCells_;
 
         //- My processor rank in communicator
@@ -76,17 +77,16 @@ class lduPrimitiveProcessorInterface
         const label comm_;
 
 
-    // Private Member Functions
-
-
-        //- No copy assignment
-        void operator=(const lduPrimitiveProcessorInterface&) = delete;
-
-
 public:
 
     //- Runtime type information
-    TypeName("calculatedProcessor");
+    TypeNameNoDebug("processorInterface");
+
+
+    // Generated Methods
+
+        //- No copy assignment
+        void operator=(const lduPrimitiveProcessorInterface&) = delete;
 
 
     // Constructors
@@ -107,6 +107,7 @@ public:
         (
             const lduPrimitiveProcessorInterface&
         );
+
 
     //- Destructor
     virtual ~lduPrimitiveProcessorInterface() = default;
@@ -163,46 +164,46 @@ public:
             ) const;
 
 
-        // Processor interface functions
+    // Processor interface functions
 
-            //- Return communicator used for sending
-            virtual label comm() const
-            {
-                return comm_;
-            }
+        //- Return communicator used for sending
+        virtual label comm() const
+        {
+            return comm_;
+        }
 
-            //- Return processor number (rank in communicator)
-            virtual int myProcNo() const
-            {
-                return myProcNo_;
-            }
+        //- Return processor number (rank in communicator)
+        virtual int myProcNo() const
+        {
+            return myProcNo_;
+        }
 
-            //- Return neighbour processor number (rank in communicator)
-            virtual int neighbProcNo() const
-            {
-                return neighbProcNo_;
-            }
+        //- Return neighbour processor number (rank in communicator)
+        virtual int neighbProcNo() const
+        {
+            return neighbProcNo_;
+        }
 
-            //- Return face transformation tensor
-            virtual const tensorField& forwardT() const
-            {
-                return forwardT_;
-            }
+        //- Return face transformation tensor
+        virtual const tensorField& forwardT() const
+        {
+            return forwardT_;
+        }
 
-            //- Return message tag used for sending
-            virtual int tag() const
-            {
-                return tag_;
-            }
+        //- Return message tag used for sending
+        virtual int tag() const
+        {
+            return tag_;
+        }
 
 
-        // Edit
+    // Edit
 
-            //- Return message tag used for sending
-            int& tag()
-            {
-                return tag_;
-            }
+        //- Message tag used for sending (modifiable)
+        int& tag()
+        {
+            return tag_;
+        }
 };
 
 

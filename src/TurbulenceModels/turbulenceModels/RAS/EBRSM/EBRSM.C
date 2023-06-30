@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -474,6 +474,8 @@ void EBRSM<BasicTurbulenceModel>::correct()
 
         // Update epsilon and G at the wall
         epsilon_.boundaryFieldRef().updateCoeffs();
+        // Push any changed cell values to coupled neighbours
+        epsilon_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
         // (M:Eq. C.14)
         tmp<fvScalarMatrix> epsEqn
@@ -524,7 +526,7 @@ void EBRSM<BasicTurbulenceModel>::correct()
                 k_
                *(
                     (g3_ - g3star_*mag(B))*S
-                  + g4_*dev(twoSymm(B & S))
+                  + g4_*devTwoSymm(B & S)
                   + g5_*twoSymm(B & W.T())
                 );
         }

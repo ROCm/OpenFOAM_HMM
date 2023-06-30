@@ -36,13 +36,14 @@ template<class Type>
 Foam::wordList
 Foam::regionModels::singleLayerRegion::mappedFieldAndInternalPatchTypes() const
 {
-    wordList bTypes(regionMesh().boundaryMesh().size());
+    wordList bTypes
+    (
+        regionMesh().boundaryMesh().size(),
+        fvPatchFieldBase::zeroGradientType()
+    );
 
-    bTypes = zeroGradientFvPatchField<Type>::typeName;
-
-    forAll(intCoupledPatchIDs_, i)
+    for (const label patchi : intCoupledPatchIDs_)
     {
-        const label patchi = intCoupledPatchIDs_[i];
         bTypes[patchi] = mappedFixedInternalValueFvPatchField<Type>::typeName;
     }
 
@@ -54,13 +55,14 @@ template<class Type>
 Foam::wordList
 Foam::regionModels::singleLayerRegion::mappedPushedFieldPatchTypes() const
 {
-    wordList bTypes(regionMesh().boundaryMesh().size());
+    wordList bTypes
+    (
+        regionMesh().boundaryMesh().size(),
+        fvPatchFieldBase::zeroGradientType()
+    );
 
-    bTypes = zeroGradientFvPatchField<Type>::typeName;
-
-    forAll(intCoupledPatchIDs_, i)
+    for (const label patchi : intCoupledPatchIDs_)
     {
-        const label patchi = intCoupledPatchIDs_[i];
         bTypes[patchi] =
             mappedFixedPushedInternalValueFvPatchField<Type>::typeName;
     }

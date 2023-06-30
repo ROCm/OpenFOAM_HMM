@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,9 @@ bool Foam::IOobject::typeHeaderOk
     const bool verbose
 )
 {
+    // Mark as not yet read. cf, IOobject::readHeader()
+    headerClassName_.clear();
+
     // Everyone check or just master
     const bool masterOnly
     (
@@ -58,7 +61,7 @@ bool Foam::IOobject::typeHeaderOk
     bool ok = false;
     fileName fName;
 
-    if (!masterOnly || Pstream::master())
+    if (!masterOnly || UPstream::master())
     {
         fName = typeFilePath<Type>(*this, search);
         ok = fp.readHeader(*this, fName, Type::typeName);
@@ -89,11 +92,11 @@ bool Foam::IOobject::typeHeaderOk
 template<class Type>
 void Foam::IOobject::warnNoRereading() const
 {
-    if (readOpt() == IOobject::MUST_READ_IF_MODIFIED)
+    if (readOpt() == IOobjectOption::READ_MODIFIED)
     {
         WarningInFunction
             << Type::typeName << ' ' << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED but "
+            << " constructed with READ_MODIFIED but "
             << Type::typeName << " does not support automatic rereading."
             << endl;
     }

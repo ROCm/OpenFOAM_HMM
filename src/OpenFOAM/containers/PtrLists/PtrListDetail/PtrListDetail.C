@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,38 +30,66 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-Foam::label Foam::Detail::PtrListDetail<T>::count() const
+Foam::label Foam::Detail::PtrListDetail<T>::count() const noexcept
 {
-    label ngood = 0;
+    label n = 0;
 
     for (const T* ptr : *this)
     {
         if (ptr)
         {
-            ++ngood;
+            ++n;
         }
     }
 
-    return ngood;
+    return n;
 }
 
 
 template<class T>
-Foam::label Foam::Detail::PtrListDetail<T>::findNull() const
+Foam::label Foam::Detail::PtrListDetail<T>::find_first() const
 {
-    // Same as  List<T*>::find(nullptr);
-    // except perhaps without pointer ambiguities...
+    return this->find_next(-1);
+}
 
-    label idx = 0;
 
-    for (const T* ptr : *this)
+template<class T>
+Foam::label Foam::Detail::PtrListDetail<T>::find_first_not() const
+{
+    return this->find_next_not(-1);
+}
+
+
+template<class T>
+Foam::label Foam::Detail::PtrListDetail<T>::find_next(label pos) const
+{
+    const label len = this->size();
+
+    // Start search after the given position (input of -1 is also valid)
+    for (++pos; pos < len; ++pos)
     {
-        if (!ptr)
+        if ((*this)[pos])
         {
-            return idx;
+            return pos;
         }
+    }
 
-        ++idx;
+    return -1;
+}
+
+
+template<class T>
+Foam::label Foam::Detail::PtrListDetail<T>::find_next_not(label pos) const
+{
+    const label len = this->size();
+
+    // Start search after the given position (input of -1 is also valid)
+    for (++pos; pos < len; ++pos)
+    {
+        if (!(*this)[pos])
+        {
+            return pos;
+        }
     }
 
     return -1;

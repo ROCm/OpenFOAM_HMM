@@ -343,12 +343,12 @@ Foam::triSurface::calcPatches(labelList& faceMap) const
     // Extend regions
     label maxRegion = patches_.size()-1;    // for non-compacted regions
 
-    if (faceMap.size())
+    if (!faceMap.empty())
     {
         maxRegion = max
         (
             maxRegion,
-            operator[](faceMap.last()).region()
+            operator[](faceMap.back()).region()
         );
     }
 

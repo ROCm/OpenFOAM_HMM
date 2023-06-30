@@ -142,7 +142,7 @@ Foam::sampledSurface::pointAverage
             pfld.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh,
         dimensioned<Type>(dimless, Zero)

@@ -113,7 +113,7 @@ Foam::temperatureDependentAlphaContactAngleFvPatchScalarField::theta
 {
     return theta0_->value
     (
-        patch().lookupPatchField<volScalarField, scalar>(TName_)
+        patch().lookupPatchField<volScalarField>(TName_)
     );
 }
 
@@ -126,7 +126,7 @@ void Foam::temperatureDependentAlphaContactAngleFvPatchScalarField::write
     alphaContactAngleTwoPhaseFvPatchScalarField::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     theta0_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

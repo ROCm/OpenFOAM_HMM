@@ -94,8 +94,7 @@ Foam::functionObjects::proudmanAcousticPower::a() const
             (
                 scopedName("a"),
                 mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ
+                mesh_
             ),
             mesh_,
             aRef_
@@ -170,7 +169,8 @@ Foam::functionObjects::proudmanAcousticPower::proudmanAcousticPower
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimPower/dimVolume, Zero)
@@ -189,7 +189,8 @@ Foam::functionObjects::proudmanAcousticPower::proudmanAcousticPower
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimless, Zero)

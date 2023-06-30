@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ Description
 #include "timer.H"
 #include "DynamicList.H"
 #include "CStringList.H"
+#include "stringOps.H"
 #include "IOstreams.H"
 #include "Pstream.H"
 
@@ -105,6 +106,52 @@ static inline void redirects(const bool bg)
         // This is correct.  1>&2 means dup2(2, 1);
         (void) ::dup2(STDERR_FILENO, STDOUT_FILENO);
     }
+}
+
+
+// Library loading is normally simply via dlopen(),
+// but SIP (System Integrity Protection) on Apple will generally
+// clear out the DYLD_LIBRARY_PATH set from shell scripts.
+// We thus have FOAM_LD_LIBRARY_PATH as a shadow parameter and use
+// that to attempt loading ourselves
+static inline void* loadLibrary(const Foam::fileName& libName)
+{
+    constexpr int ldflags = (RTLD_LAZY|RTLD_GLOBAL);
+
+#ifdef __APPLE__
+    const char* normal = nullptr;
+    const char* shadow = nullptr;
+
+    if
+    (
+        !libName.isAbsolute()
+     && ((normal = ::getenv("DYLD_LIBRARY_PATH"))    == nullptr || !*normal)
+     && ((shadow = ::getenv("FOAM_LD_LIBRARY_PATH")) != nullptr && *shadow)
+    )
+    {
+        // SIP appears to have cleared DYLD_LIBRARY_PATH but the
+        // shadow parameter is available
+
+        const Foam::string ldPaths(shadow);
+        const auto paths = Foam::stringOps::split<Foam::string>(ldPaths, ':');
+
+        for (const auto& p : paths)
+        {
+            if (p.length())  // Split removes empty, but be paranoid
+            {
+                const Foam::fileName fullPath(p.str()/libName);
+                void* handle = ::dlopen(fullPath.c_str(), ldflags);
+                if (handle)
+                {
+                    return handle;
+                }
+            }
+        }
+    }
+#endif
+
+    // Regular loading
+    return ::dlopen(libName.c_str(), ldflags);
 }
 
 
@@ -714,7 +761,7 @@ mode_t Foam::mode(const fileName& name, const bool followLink)
     if (!name.empty())
     {
         fileStat fileStatus(name, followLink);
-        if (fileStatus.valid())
+        if (fileStatus.good())
         {
             return fileStatus.status().st_mode;
         }
@@ -846,7 +893,7 @@ off_t Foam::fileSize(const fileName& name, const bool followLink)
     if (!name.empty())
     {
         fileStat fileStatus(name, followLink);
-        if (fileStatus.valid())
+        if (fileStatus.good())
         {
             return fileStatus.status().st_size;
         }
@@ -1305,14 +1352,14 @@ bool Foam::mvBak(const fileName& src, const std::string& ext)
     if (exists(src, false))
     {
         constexpr const int maxIndex = 99;
-        char index[3];
+        char index[4];
 
         for (int n = 0; n <= maxIndex; ++n)
         {
             fileName dstName(src + "." + ext);
             if (n)
             {
-                ::sprintf(index, "%02d", n);
+                ::snprintf(index, 4, "%02d", n);
                 dstName += index;
             }
 
@@ -1639,6 +1686,7 @@ int Foam::system(const std::string& command, const bool bg)
         return 0;
     }
 
+    // TBD: vfork is deprecated as of macOS 12.0
     const pid_t child_pid = ::vfork();   // NB: vfork, not fork!
 
     if (child_pid == -1)
@@ -1698,6 +1746,7 @@ int Foam::system(const CStringList& command, const bool bg)
     // The normal system() command has a fork buried in it that causes
     // issues with infiniband and openmpi etc.
 
+    // TBD: vfork is deprecated as of macOS 12.0
     const pid_t child_pid = ::vfork();
 
     if (child_pid == -1)
@@ -1750,16 +1799,13 @@ int Foam::system(const Foam::UList<Foam::string>& command, const bool bg)
 
 void* Foam::dlOpen(const fileName& libName, const bool check)
 {
-    constexpr int ldflags = (RTLD_LAZY|RTLD_GLOBAL);
-
     if (POSIX::debug)
     {
         std::cout
-            << "dlOpen(const fileName&)"
-            << " : dlopen of " << libName << std::endl;
+            << "dlopen() of " << libName << std::endl;
     }
 
-    void* handle = ::dlopen(libName.c_str(), ldflags);
+    void* handle = loadLibrary(libName);
 
     if (!handle)
     {
@@ -1769,13 +1815,12 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
         {
             // Try with 'lib' prefix
             libso = "lib" + libName;
-            handle = ::dlopen(libso.c_str(), ldflags);
+            handle = loadLibrary(libso);
 
             if (POSIX::debug)
             {
                 std::cout
-                    << "dlOpen(const fileName&)"
-                    << " : dlopen of " << libso << std::endl;
+                    << "   dlopen() as " << libso << std::endl;
             }
         }
         else
@@ -1788,13 +1833,12 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
         if (!handle && !libso.has_ext(EXT_SO))
         {
             libso.replace_ext(EXT_SO);
-            handle = ::dlopen(libso.c_str(), ldflags);
+            handle = loadLibrary(libso);
 
             if (POSIX::debug)
             {
                 std::cout
-                    << "dlOpen(const fileName&)"
-                    << " : dlopen of " << libso << std::endl;
+                    << "   dlopen() as " << libso << std::endl;
             }
         }
     }
@@ -1808,8 +1852,7 @@ void* Foam::dlOpen(const fileName& libName, const bool check)
     if (POSIX::debug)
     {
         std::cout
-            << "dlOpen(const fileName&)"
-            << " : dlopen of " << libName
+            << "dlopen() of " << libName
             << " handle " << handle << std::endl;
     }
 

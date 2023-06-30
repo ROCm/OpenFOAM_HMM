@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,17 +53,20 @@ timeVaryingUniformFixedValueFaPatchField
     const dictionary& dict
 )
 :
-    fixedValueFaPatchField<Type>(p, iF),
+    fixedValueFaPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     timeSeries_(dict)
 {
-   if (dict.found("value"))
-   {
-       faPatchField<Type>::operator==(Field<Type>("value", dict, p.size()));
-   }
-   else
-   {
-       updateCoeffs();
-   }
+    if (!this->readValueEntry(dict))
+    {
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
+
+        updateCoeffs();
+    }
+
+    DeprecatedInFunction(2212)
+        << "Use uniformFixedValue instead." << nl
+        << "    This boundary condition will be removed in the future" << endl;
 }
 
 
@@ -132,7 +136,7 @@ void Foam::timeVaryingUniformFixedValueFaPatchField<Type>::write
 {
     faPatchField<Type>::write(os);
     timeSeries_.write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

@@ -127,7 +127,7 @@ Foam::cyclicGAMGInterface::cyclicGAMGInterface
 
         const auto fnd = cellsToCoarseFace.cfind(cellPair);
 
-        if (fnd.found())
+        if (fnd.good())
         {
             // Already have coarse face
             dynFaceRestrictAddressing.append(fnd.val());
@@ -173,8 +173,8 @@ Foam::tmp<Foam::labelField> Foam::cyclicGAMGInterface::internalFieldTransfer
     const cyclicGAMGInterface& nbr = neighbPatch();
     const labelUList& nbrFaceCells = nbr.faceCells();
 
-    tmp<labelField> tpnf(new labelField(size()));
-    labelField& pnf = tpnf.ref();
+    auto tpnf = tmp<labelField>::New(size());
+    auto& pnf = tpnf.ref();
 
     forAll(pnf, facei)
     {

@@ -143,7 +143,7 @@ Foam::pointToCell::pointToCell
     if (!dict.readIfPresent("sets", names_))
     {
         names_.resize(1);
-        dict.readEntry("set", names_.first());
+        dict.readEntry("set", names_.front());
     }
 }
 
@@ -172,7 +172,7 @@ void Foam::pointToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding cells according to pointSet "
+            Info<< "    Adding cells according to point sets: "
                 << flatOutput(names_) << nl;
         }
 
@@ -185,7 +185,7 @@ void Foam::pointToCell::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing cells according to pointSet "
+            Info<< "    Removing cells according to point sets: "
                 << flatOutput(names_) << nl;
         }
 

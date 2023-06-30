@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +41,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicedFvsPatchField_H
-#define slicedFvsPatchField_H
+#ifndef Foam_slicedFvsPatchField_H
+#define Foam_slicedFvsPatchField_H
 
 #include "fvsPatchField.H"
+#include "processorFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class slicedFvsPatch Declaration
+                     Class slicedFvsPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -59,8 +61,11 @@ class slicedFvsPatchField
 :
     public fvsPatchField<Type>
 {
-
 public:
+
+    //- The mesh processor patch type
+    typedef processorFvPatch processorPatchType;
+
 
     //- Runtime type information
     TypeName("sliced");
@@ -73,7 +78,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, surfaceMesh>&,
-            const Field<Type>&
+            const Field<Type>& completeOrBoundaryField,
+            const bool isBoundaryOnly = false
         );
 
         //- Construct from patch and internal field
@@ -91,8 +97,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given slicedFvsPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given sliced patch field onto a new patch
         slicedFvsPatchField
         (
             const slicedFvsPatchField<Type>&,
@@ -125,20 +130,13 @@ public:
     virtual ~slicedFvsPatchField<Type>();
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&) {}
 

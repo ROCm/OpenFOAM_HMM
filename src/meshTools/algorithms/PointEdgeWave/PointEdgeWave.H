@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,6 +64,7 @@ SourceFiles
 #include "bitSet.H"
 #include "scalarField.H"
 #include "tensorField.H"
+#include "PstreamBuffers.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,6 +95,9 @@ protected:
 
         //- Reference to mesh
         const polyMesh& mesh_;
+
+        //- Buffers when updating processor patches
+        PstreamBuffers pBufs_;
 
         //- Track if point has changed
         bitSet changedPoint_;
@@ -127,7 +131,7 @@ public:
     // Constructors
 
         //- Construct with mesh reference and set initial sizes
-        PointEdgeWaveBase(const polyMesh& mesh);
+        explicit PointEdgeWaveBase(const polyMesh& mesh);
 
 
     // Static Functions

@@ -52,12 +52,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MeshedSurface_H
-#define MeshedSurface_H
+#ifndef Foam_MeshedSurface_H
+#define Foam_MeshedSurface_H
 
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 #include "PatchTools.H"
-#include "pointField.H"
 #include "face.H"
 #include "labelledTri.H"
 #include "bitSet.H"
@@ -76,8 +75,6 @@ namespace Foam
 class Time;
 class surfMesh;
 class polyBoundaryMesh;
-class Istream;
-class Ostream;
 
 template<class Face> class MeshedSurface;
 template<class Face> class MeshedSurfaceProxy;

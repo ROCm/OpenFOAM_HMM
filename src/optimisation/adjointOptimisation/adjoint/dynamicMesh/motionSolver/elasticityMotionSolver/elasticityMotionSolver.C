@@ -153,7 +153,7 @@ Foam::elasticityMotionSolver::elasticityMotionSolver
         ),
         fvMesh_,
         dimensionedScalar(dimless, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     ),
     exponent_(this->coeffDict().get<scalar>("exponent")),
     nSteps_(this->coeffDict().get<label>("steps")),

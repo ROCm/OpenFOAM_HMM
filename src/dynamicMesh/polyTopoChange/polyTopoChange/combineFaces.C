@@ -256,7 +256,7 @@ bool Foam::combineFaces::faceNeighboursValid
 
                 const auto iter = faceRegion.cfind(nbrI);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     neighbourRegions.insert(iter.val());
                 }
@@ -346,7 +346,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
                 auto regionFnd = regionToFaces.find(region);
 
-                if (regionFnd.found())
+                if (regionFnd.good())
                 {
                     labelList& setFaces = regionFnd();
                     label sz = setFaces.size();
@@ -890,7 +890,7 @@ void Foam::combineFaces::setUnrefinement
 
         const auto iter = masterToSet.cfind(masterFacei);
 
-        if (!iter.found())
+        if (!iter.good())
         {
             FatalErrorInFunction
                 << "Master face " << masterFacei

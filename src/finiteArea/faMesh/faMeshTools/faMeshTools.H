@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,6 +50,7 @@ namespace Foam
 {
 
 // Forward Declarations
+class fileOperation;
 class mapDistributePolyMesh;
 class polyMesh;
 class IOobject;
@@ -60,6 +61,26 @@ class IOobject;
 
 class faMeshTools
 {
+    // Private Member Functions
+
+    // Read mesh if available. Otherwise create empty mesh with same non-proc
+    // patches as proc0 mesh.
+    //  Has two modes of operation.
+    //  If the readHandler is non-nullptr, use it to decide on availability.
+    //  Requires:
+    //  - all processors to have all patches (and in same order).
+    //  - io.instance() set to facesInstance
+    static autoPtr<faMesh> loadOrCreateMeshImpl
+    (
+        const IOobject& io,
+        refPtr<fileOperation>* readHandlerPtr,  // Can be nullptr
+        const polyMesh& pMesh,
+        const bool decompose,  // Only used if readHandlerPtr == nullptr
+        const bool verbose = false
+    );
+
+
+
 public:
 
     //- Unregister the faMesh from its associated polyMesh
@@ -96,6 +117,19 @@ public:
         const bool verbose = false
     );
 
+    // Read mesh if available. Otherwise create empty mesh with same non-proc
+    // patches as proc0 mesh. Requires:
+    //  - all processors to have all patches (and in same order).
+    //  - io.instance() set to facesInstance
+    static autoPtr<faMesh> loadOrCreateMesh
+    (
+        const IOobject& io,
+        const polyMesh& pMesh,
+        //! Non-null reference if a mesh exists on given processor
+        refPtr<fileOperation>& readHandler,
+        const bool verbose = false
+    );
+
 
     //- Read decompose/reconstruct addressing
     static mapDistributePolyMesh readProcAddressing
@@ -121,7 +155,7 @@ public:
         const faMesh& mesh,
         const mapDistributePolyMesh& faDistMap,
         const bool decompose,
-        autoPtr<fileOperation>&& writeHandler,
+        refPtr<fileOperation>& writeHandler,
         const faMesh* procMesh = nullptr
     );
 

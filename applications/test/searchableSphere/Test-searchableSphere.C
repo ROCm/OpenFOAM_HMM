@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
         *dummyTimePtr,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false  // do not register
+        IOobject::NO_REGISTER
     );
 
     Info<< "Testing searchable sphere" << endl;

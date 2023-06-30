@@ -111,10 +111,10 @@ public:
                     (
                         "midPointWeights",
                         this->mesh().time().timeName(),
-                        this->mesh(),
+                        this->mesh().thisDb(),
                         IOobject::NO_READ,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     ),
                     this->mesh(),
                     dimensionedScalar("0.5", dimless, 0.5)

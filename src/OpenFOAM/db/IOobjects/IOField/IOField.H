@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,7 +40,6 @@ SourceFiles
 
 #include "Field.H"
 #include "regIOobject.H"
-#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,6 +57,9 @@ class IOField
     public Field<Type>
 {
     // Private Member Functions
+
+        //- Read with optional 'on-proc' value
+        void readFromStream(const bool readOnProc = true);
 
         //- Read if IOobject flags set. Return true if read.
         bool readContents();
@@ -80,7 +82,7 @@ public:
         explicit IOField(const IOobject& io);
 
         //- Construct from IOobject, with local processor conditional reading
-        IOField(const IOobject& io, const bool valid);
+        IOField(const IOobject& io, const bool readOnProc);
 
         //- Construct from IOobject and zero size (if not read)
         IOField(const IOobject& io, Foam::zero);
@@ -96,6 +98,12 @@ public:
 
         //- Construct by copying/moving tmp content
         IOField(const IOobject& io, const tmp<Field<Type>>& tfld);
+
+
+    // Factory Methods
+
+        //- Read and return contents. The IOobject will not be registered
+        static Field<Type> readContents(const IOobject& io);
 
 
     //- Destructor

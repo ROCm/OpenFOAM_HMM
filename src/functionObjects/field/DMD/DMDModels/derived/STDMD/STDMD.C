@@ -226,7 +226,9 @@ reducedKoopmanOperator()
         // Tests revealed that the distribution of "Q" does not affect
         // the final outcome of TSQR decomposition up to sign
 
+        // Don't clear storage on persistent buffer
         PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        pBufs.allowClearRecv(false);
 
         const label myProcNo = Pstream::myProcNo();
         const label procNoInSubset = myProcNo % nAgglomerationProcs_;
@@ -519,7 +521,7 @@ void Foam::DMDModels::STDMD::amplitudes()
             mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -975,7 +977,7 @@ bool Foam::DMDModels::STDMD::initialise(const RMatrix& z)
                     mesh_,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 nSnap
             );

@@ -24,18 +24,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelListList
-
-Description
-    A List of labelList.
-
-Typedef
-    Foam::labelListListList
-
-Description
-    A List of labelListList.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_labelList_H
@@ -49,11 +37,14 @@ Description
 
 namespace Foam
 {
-    // labelUList   = defined in UList.H
     // labelList    = defined in List.H
     // labelSubList = defined in SubList.H
+    // labelUList   = defined in UList.H
 
+    //! List of labelList
     typedef List<labelList> labelListList;
+
+    //! List of labelListList
     typedef List<labelListList> labelListListList;
 
 

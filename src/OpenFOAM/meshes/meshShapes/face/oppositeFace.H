@@ -93,10 +93,13 @@ public:
         }
 
         //- Does the opposite face exist?
-        bool found() const noexcept
+        bool good() const noexcept
         {
             return oppositeIndex_ >= 0;
         }
+
+        //- Does the opposite face exist?
+        bool found() const noexcept { return good(); }
 };
 
 

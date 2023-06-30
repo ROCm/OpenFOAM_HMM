@@ -276,7 +276,7 @@ inline void Foam::token::reset()
 
         case tokenType::COMPOUND:
         {
-            if (data_.compoundPtr->unique())
+            if (data_.compoundPtr->refCount::unique())
             {
                 delete data_.compoundPtr;
             }

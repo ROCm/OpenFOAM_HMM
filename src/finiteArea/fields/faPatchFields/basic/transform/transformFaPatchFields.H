@@ -23,21 +23,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::transformFaPatchFields
-
-Description
-
-SourceFiles
-    transformFaPatchFields.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef transformFaPatchFields_H
-#define transformFaPatchFields_H
+#ifndef Foam_transformFaPatchFields_H
+#define Foam_transformFaPatchFields_H
 
 #include "transformFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(transform)
+makeFaPatchTypeFieldTypedefs(transform);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

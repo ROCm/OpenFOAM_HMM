@@ -69,7 +69,7 @@ void Foam::polySurface::calculateZoneIds(const UList<surfZone>& zones)
         WarningInFunction
             << "More faces " << size() << " than zones " << off << endl;
 
-        SubList<label>(zoneIds_, size()-off, off) = zones.last().index();
+        SubList<label>(zoneIds_, size()-off, off) = zones.back().index();
     }
     else if (size() < off)
     {
@@ -93,7 +93,7 @@ Foam::polySurface::polySurface(const IOobject& io, bool doCheckIn)
             io.db(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         )
     ),
     MeshReference(faceList(), pointField()),
@@ -124,7 +124,7 @@ Foam::polySurface::polySurface
             obr,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            true
+            IOobject::REGISTER
         ),
         doCheckIn
     )
@@ -431,7 +431,7 @@ void Foam::polySurface::transfer
 //             << " ... extending final zone"
 //             << endl;
 //
-//         surfZones_.last().size() += count - nFaces();
+//         surfZones_.back().size() += count - nFaces();
 //     }
 //     else if (size() < count)
 //     {

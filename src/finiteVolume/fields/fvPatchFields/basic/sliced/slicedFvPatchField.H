@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,10 +47,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef slicedFvPatchField_H
-#define slicedFvPatchField_H
+#ifndef Foam_slicedFvPatchField_H
+#define Foam_slicedFvPatchField_H
 
 #include "fvPatchField.H"
+#include "processorFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +59,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class slicedFvPatch Declaration
+                     Class slicedFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -66,8 +67,11 @@ class slicedFvPatchField
 :
     public fvPatchField<Type>
 {
-
 public:
+
+    //- The mesh processor patch type
+    typedef processorFvPatch processorPatchType;
+
 
     //- Runtime type information
     TypeName("sliced");
@@ -80,7 +84,8 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const Field<Type>&
+            const Field<Type>& completeOrBoundaryField,
+            const bool isBoundaryOnly = false
         );
 
         //- Construct from patch and internal field. Assign value later.
@@ -98,8 +103,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given slicedFvPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given sliced patch field onto a new patch
         slicedFvPatchField
         (
             const slicedFvPatchField<Type>&,
@@ -132,23 +136,13 @@ public:
     virtual ~slicedFvPatchField<Type>();
 
 
-    // Member functions
+    // Member Functions
 
-        // Attributes
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
-
-            //- Return false: this patch field is not altered by assignment
-            virtual bool assignable() const
-            {
-                return false;
-            }
+        //- False: this patch field is not altered by assignment.
+        virtual bool assignable() const { return false; }
 
 
         // Evaluation functions
@@ -180,7 +174,7 @@ public:
             )
             {}
 
-            //- Evaluate the patch field, sets Updated to false
+            //- Evaluate the patch field, sets updated() to false
             virtual void evaluate
             (
                 const Pstream::commsTypes commsType =

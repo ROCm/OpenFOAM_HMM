@@ -42,10 +42,6 @@ SourceFiles
 #define Foam_regIOobject_H
 
 #include "IOobject.H"
-#include "refPtr.H"
-#include "tmp.H"
-#include "typeInfo.H"
-#include "stdFoam.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,8 +51,8 @@ namespace Foam
 {
 
 // Forward Declarations
-
 class dictionary;
+class regIOobject;
 
 namespace functionEntries
 {
@@ -114,7 +110,7 @@ private:
     // Private Member Functions
 
         //- Construct object stream, read header if not already constructed
-        void readStream(const bool valid);
+        void readStream(const bool readOnProc);
 
         //- No copy assignment
         void operator=(const regIOobject&) = delete;
@@ -147,7 +143,7 @@ public:
         regIOobject(const regIOobject& rio, bool registerCopy);
 
         //- Copy construct with new name, transferring registry registration
-        //- to the copy f registerCopy is true
+        //- to the copy if registerCopy is true
         regIOobject(const word& newName, const regIOobject&, bool registerCopy);
 
         //- Copy construct with new IO parameters
@@ -306,7 +302,7 @@ public:
             bool headerOk();
 
             //- Return Istream and check object type against that given
-            Istream& readStream(const word&, const bool valid = true);
+            Istream& readStream(const word&, const bool readOnProc = true);
 
             //- Close Istream
             void close();
@@ -347,11 +343,11 @@ public:
             virtual bool writeObject
             (
                 IOstreamOption streamOpt,
-                const bool valid
+                const bool writeOnProc
             ) const;
 
             //- Write using setting from DB
-            virtual bool write(const bool valid = true) const;
+            virtual bool write(const bool writeOnProc = true) const;
 
 
         // Other
@@ -378,10 +374,10 @@ public:
             IOstreamOption::streamFormat fmt,
             IOstreamOption::versionNumber ver,
             IOstreamOption::compressionType cmp,
-            const bool valid
+            const bool writeOnProc
         ) const
         {
-            return writeObject(IOstreamOption(fmt, ver, cmp), valid);
+            return writeObject(IOstreamOption(fmt, ver, cmp), writeOnProc);
         }
 };
 

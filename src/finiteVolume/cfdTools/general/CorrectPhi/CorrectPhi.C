@@ -60,7 +60,7 @@ void Foam::CorrectPhi
     wordList pcorrTypes
     (
         p.boundaryField().size(),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     // Set BCs of pcorr to fixed-value for patches at which p is fixed
@@ -140,7 +140,7 @@ void Foam::CorrectPhi
     wordList pcorrTypes
     (
         p.boundaryField().size(),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     // Set BCs of pcorr to fixed-value for patches at which p is fixed

@@ -61,25 +61,28 @@ void Foam::KinematicReynoldsNumber<CloudType>::postEvolve
 {
     auto& c = this->owner();
 
-    if (!c.template foundObject<IOField<scalar>>("Re"))
+    auto* resultPtr = c.template getObjectPtr<IOField<scalar>>("Re");
+
+    if (!resultPtr)
     {
-        auto* RePtr =
-            new IOField<scalar>
+        resultPtr = new IOField<scalar>
+        (
+            IOobject
             (
-                IOobject
-                (
-                    "Re",
-                    c.time().timeName(),
-                    c,
-                    IOobject::NO_READ
-                )
-            );
+                "Re",
+                c.time().timeName(),
+                c,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
+            )
+        );
 
-        RePtr->store();
+        resultPtr->store();
     }
+    auto& Re = *resultPtr;
 
-    auto& Re = c.template lookupObjectRef<IOField<scalar>>("Re");
-    Re.setSize(c.size());
+    Re.resize(c.size());
 
     label parceli = 0;
     forAllConstIters(c, parcelIter)

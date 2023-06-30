@@ -145,9 +145,9 @@ Foam::boxToCell::boxToCell
     if (!dict.readIfPresent("boxes", bbs_))
     {
         bbs_.resize(1);
-        if (!dict.readIfPresent("box", bbs_.first()))
+        if (!dict.readIfPresent("box", bbs_.front()))
         {
-            readBoxDim(dict, bbs_.first());
+            readBoxDim(dict, bbs_.front());
         }
     }
 }

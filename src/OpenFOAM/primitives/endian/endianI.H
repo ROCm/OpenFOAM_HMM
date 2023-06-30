@@ -40,7 +40,7 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-inline bool Foam::endian::isBig()
+inline bool Foam::endian::isBig() noexcept
 {
     const short testBig = 0x0100;
 
@@ -49,7 +49,7 @@ inline bool Foam::endian::isBig()
 }
 
 
-inline bool Foam::endian::isLittle()
+inline bool Foam::endian::isLittle() noexcept
 {
     const short testLittle = 0x0001;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,10 +61,11 @@ Foam::processorGAMGInterfaceField::processorGAMGInterfaceField
     GAMGInterfaceField(GAMGCp, fineInterface),
     procInterface_(refCast<const processorGAMGInterface>(GAMGCp)),
     doTransform_(false),
-    rank_(0)
+    rank_(0),
+    sendRequest_(-1),
+    recvRequest_(-1)
 {
-    const processorLduInterfaceField& p =
-        refCast<const processorLduInterfaceField>(fineInterface);
+    const auto& p = refCast<const processorLduInterfaceField>(fineInterface);
 
     doTransform_ = p.doTransform();
     rank_ = p.rank();
@@ -81,7 +82,9 @@ Foam::processorGAMGInterfaceField::processorGAMGInterfaceField
     GAMGInterfaceField(GAMGCp, doTransform, rank),
     procInterface_(refCast<const processorGAMGInterface>(GAMGCp)),
     doTransform_(doTransform),
-    rank_(rank)
+    rank_(rank),
+    sendRequest_(-1),
+    recvRequest_(-1)
 {}
 
 
@@ -104,26 +107,27 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && !UPstream::floatTransfer
     )
     {
         // Fast path.
-        scalarReceiveBuf_.setSize(scalarSendBuf_.size());
-        outstandingRecvRequest_ = UPstream::nRequests();
+        scalarRecvBuf_.resize_nocopy(scalarSendBuf_.size());
+
+        recvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
-            scalarReceiveBuf_.data_bytes(),
-            scalarReceiveBuf_.size_bytes(),
+            scalarRecvBuf_.data_bytes(),
+            scalarRecvBuf_.size_bytes(),
             procInterface_.tag(),
             comm()
         );
 
-        outstandingSendRequest_ = UPstream::nRequests();
+        sendRequest_ = UPstream::nRequests();
         UOPstream::write
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
             scalarSendBuf_.cdata_bytes(),
             scalarSendBuf_.size_bytes(),
@@ -136,7 +140,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
         procInterface_.compressedSend(commsType, scalarSendBuf_);
     }
 
-    const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -152,7 +156,7 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
-    if (updatedMatrix())
+    if (this->updatedMatrix())
     {
         return;
     }
@@ -162,46 +166,30 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     if
     (
         commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+     && !UPstream::floatTransfer
     )
     {
-        // Fast path.
-        if
-        (
-            outstandingRecvRequest_ >= 0
-         && outstandingRecvRequest_ < UPstream::nRequests()
-        )
-        {
-            UPstream::waitRequest(outstandingRecvRequest_);
-        }
-        // Recv finished so assume sending finished as well.
-        outstandingSendRequest_ = -1;
-        outstandingRecvRequest_ = -1;
+        // Fast path: consume straight from receive buffer
 
-        // Consume straight from scalarReceiveBuf_
-
-        // Transform according to the transformation tensor
-        transformCoupleField(scalarReceiveBuf_, cmpt);
-
-        // Multiply the field by coefficients and add into the result
-        addToInternalField(result, !add, faceCells, coeffs, scalarReceiveBuf_);
+        // Require receive data.
+        // Only update the send request state.
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
     else
     {
-        solveScalarField pnf
-        (
-            procInterface_.compressedReceive<solveScalar>
-            (
-                commsType,
-                coeffs.size()
-            )
-        );
-        transformCoupleField(pnf, cmpt);
-
-        addToInternalField(result, !add, faceCells, coeffs, pnf);
+        scalarRecvBuf_.resize_nocopy(coeffs.size());
+        procInterface_.compressedReceive(commsType, scalarRecvBuf_);
     }
 
-    const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;
+
+    // Transform according to the transformation tensor
+    transformCoupleField(scalarRecvBuf_, cmpt);
+
+    // Multiply the field by coefficients and add into the result
+    addToInternalField(result, !add, faceCells, coeffs, scalarRecvBuf_);
+
+    this->updatedMatrix(true);
 }
 
 

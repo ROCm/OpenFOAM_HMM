@@ -58,7 +58,6 @@ Usage
 #include "volFields.H"
 #include "pointFields.H"
 #include "surfaceFields.H"
-#include "string.H"
 
 using namespace Foam;
 
@@ -288,7 +287,7 @@ void rewriteField
             runTime,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
     const_cast<word&>(IOdictionary::typeName) = oldTypeName;
@@ -403,7 +402,6 @@ int main(int argc, char *argv[])
 
     timeSelector::addOptions();
 
-    argList::addOptionCompat("dry-run", {"test", 1806});
     argList::addDryRunOption
     (
         "Test only do not change any files"
@@ -426,7 +424,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    const bool dryrun = args.found("dry-run");
+    const bool dryrun = args.dryRun();
     if (dryrun)
     {
         Info<< "-dry-run option: no changes made" << nl << endl;
@@ -456,7 +454,7 @@ int main(int argc, char *argv[])
         runTime,
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (io.typeHeaderOk<IOPtrList<entry>>(false))
@@ -490,7 +488,7 @@ int main(int argc, char *argv[])
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         if (io.typeHeaderOk<IOPtrList<entry>>(false))

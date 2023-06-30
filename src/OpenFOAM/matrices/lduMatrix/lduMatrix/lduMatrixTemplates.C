@@ -35,16 +35,11 @@ Description
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::lduMatrix::H(const Field<Type>& psi) const
 {
-    tmp<Field<Type>> tHpsi
-    (
-        new Field<Type>(lduAddr().size(), Zero)
-    );
+    auto tHpsi = tmp<Field<Type>>::New(lduAddr().size(), Zero);
 
     if (lowerPtr_ || upperPtr_)
     {
-        Field<Type> & Hpsi = tHpsi.ref();
-
-        Type* __restrict__ HpsiPtr = Hpsi.begin();
+        Type* __restrict__ HpsiPtr = tHpsi.ref().begin();
 
         const Type* __restrict__ psiPtr = psi.begin();
 
@@ -88,8 +83,8 @@ Foam::lduMatrix::faceH(const Field<Type>& psi) const
         const labelUList& l = lduAddr().lowerAddr();
         const labelUList& u = lduAddr().upperAddr();
 
-        tmp<Field<Type>> tfaceHpsi(new Field<Type> (Lower.size()));
-        Field<Type> & faceHpsi = tfaceHpsi.ref();
+        auto tfaceHpsi = tmp<Field<Type>>::New(Lower.size());
+        auto& faceHpsi = tfaceHpsi.ref();
 
         for (label face=0; face<l.size(); face++)
         {

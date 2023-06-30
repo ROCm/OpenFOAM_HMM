@@ -195,8 +195,8 @@ void Foam::surfaceToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding points in relation to surface " << surfName_
-                << " ..." << endl;
+            Info<< "    Adding points in relation to surface "
+                << surfName_ << " ..." << endl;
         }
 
         combine(set, true);
@@ -205,8 +205,8 @@ void Foam::surfaceToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing points in relation to surface " << surfName_
-                << " ..." << endl;
+            Info<< "    Removing points in relation to surface "
+                << surfName_ << " ..." << endl;
         }
 
         combine(set, false);

@@ -267,10 +267,10 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
-        dimensionedScalar("one", dimless, 1.0)
+        dimensionedScalar("one", dimless, scalar(1))
     );
 
     return this->operator()(alpha, one, field, field.name());

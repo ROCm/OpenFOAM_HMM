@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedScalar_H
-#define dimensionedScalar_H
+#ifndef Foam_dimensionedScalar_H
+#define Foam_dimensionedScalar_H
 
 #include "dimensionedType.H"
 #include "scalar.H"

@@ -56,20 +56,13 @@ Foam::prghTotalPressureFvPatchScalarField::prghTotalPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     UName_(dict.getOrDefault<word>("U", "U")),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
     p0_("p0", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(p0_);
     }
@@ -154,13 +147,13 @@ void Foam::prghTotalPressureFvPatchScalarField::updateCoeffs()
     }
 
     const scalarField& rhop =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        patch().lookupPatchField<volScalarField>(rhoName_);
 
     const scalarField& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+        patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     const vectorField& Up =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+        patch().lookupPatchField<volVectorField>(UName_);
 
     const uniformDimensionedVectorField& g =
         meshObjects::gravity::New(db().time());
@@ -178,7 +171,7 @@ void Foam::prghTotalPressureFvPatchScalarField::updateCoeffs()
     operator==
     (
         p0_
-      - 0.5*rhop*(1.0 - pos0(phip))*magSqr(Up)
+      - 0.5*rhop*(neg(phip))*magSqr(Up)
       - rhop*((g.value() & patch().Cf()) - ghRef.value())
     );
 
@@ -188,12 +181,12 @@ void Foam::prghTotalPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::prghTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     p0_.writeEntry("p0", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

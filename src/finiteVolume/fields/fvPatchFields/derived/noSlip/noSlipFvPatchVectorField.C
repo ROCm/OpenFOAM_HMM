@@ -50,7 +50,7 @@ Foam::noSlipFvPatchVectorField::noSlipFvPatchVectorField
 :
     fixedValueFvPatchVectorField(p, iF, Zero)
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
 }
 
 
@@ -89,7 +89,7 @@ Foam::noSlipFvPatchVectorField::noSlipFvPatchVectorField
 
 void Foam::noSlipFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
 }
 
 

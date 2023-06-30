@@ -220,10 +220,10 @@ Foam::topoSetSource::addToUsageTable Foam::holeToFace::usage_
 //            fvm,
 //            IOobject::NO_READ,
 //            IOobject::NO_WRITE,
-//            false
+//            IOobject::NO_REGISTER
 //        ),
 //        fvm,
-//        dimensionedScalar("zero", dimless, scalar(0))
+//        dimensionedScalar(dimless, Zero)
 //    );
 //    forAll(labelFld, i)
 //    {
@@ -257,10 +257,10 @@ Foam::topoSetSource::addToUsageTable Foam::holeToFace::usage_
 //            fvm,
 //            IOobject::NO_READ,
 //            IOobject::NO_WRITE,
-//            false
+//            IOobject::NO_REGISTER
 //        ),
 //        fvm,
-//        dimensionedScalar("zero", dimless, scalar(0))
+//        dimensionedScalar(dimless, Zero)
 //    );
 //    for (label i = 0; i < mesh_.nInternalFaces(); i++)
 //    {
@@ -1102,20 +1102,21 @@ Foam::holeToFace::holeToFace
     erode_(dict.getOrDefault<bool>("erode", false))
 {
     // Look for 'sets' or 'set'
+    word setName;
     if (!dict.readIfPresent("faceSets", blockedFaceNames_))
     {
-        blockedFaceNames_.resize(1);
-        if (!dict.readEntry("faceSet", blockedFaceNames_.first()))
+        if (dict.readEntry("faceSet", setName))
         {
-            blockedFaceNames_.clear();
+            blockedFaceNames_.resize(1);
+            blockedFaceNames_.front() = std::move(setName);
         }
     }
     if (!dict.readIfPresent("cellSets", blockedCellNames_))
     {
-        blockedCellNames_.resize(1);
-        if (!dict.readEntry("cellSet", blockedCellNames_.first()))
+        if (dict.readEntry("cellSet", setName))
         {
-            blockedCellNames_.clear();
+            blockedCellNames_.resize(1);
+            blockedCellNames_.front() = std::move(setName);
         }
     }
 }
@@ -1129,7 +1130,7 @@ Foam::holeToFace::holeToFace
 :
     topoSetFaceSource(mesh),
     zonePoints_(expand(pointField(is))),
-    blockedFaceNames_(one(), word(checkIs(is))),
+    blockedFaceNames_(one{}, word(checkIs(is))),
     blockedCellNames_(),
     erode_(false)
 {}
@@ -1170,7 +1171,7 @@ void Foam::holeToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all faces to disconnect regions "
+            Info<< "    Adding all faces to disconnect regions: "
                 << flatOutput(zonePoints_) << " ..." << endl;
         }
 
@@ -1180,7 +1181,7 @@ void Foam::holeToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing all faces to disconnect regions "
+            Info<< "    Removing all faces to disconnect regions: "
                 << flatOutput(zonePoints_) << " ..." << endl;
         }
 
@@ -1282,7 +1283,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::holeToFace::calcClosure
         const edge meshE = edge(mp[e[0]], mp[e[1]]);
 
         auto iter = edgeMap.cfind(meshE);
-        if (iter.found())
+        if (iter.good())
         {
             // Found edge on patch connected to blocked face. Seed with the
             // (global) index of that blocked face
@@ -1327,7 +1328,7 @@ Foam::autoPtr<Foam::mapDistribute> Foam::holeToFace::calcClosure
 
 
     // Per closure face the seed face
-    closureToBlocked.setSize(pp.size());
+    closureToBlocked.resize_nocopy(pp.size());
     closureToBlocked = -1;
     forAll(allFaceInfo, facei)
     {

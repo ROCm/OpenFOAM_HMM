@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,10 +42,10 @@ inline constexpr Foam::PtrDynList<T, SizeMin>::PtrDynList() noexcept
 template<class T, int SizeMin>
 inline Foam::PtrDynList<T, SizeMin>::PtrDynList(const label len)
 :
-    PtrList<T>(len),
-    capacity_(len)
+    PtrList<T>(),
+    capacity_(0)
 {
-    PtrList<T>::setAddressableSize(0);
+    reserve(len);
 }
 
 
@@ -187,7 +187,7 @@ template<class T, int SizeMin>
 inline Foam::label Foam::PtrDynList<T, SizeMin>::squeezeNull()
 {
     const label newLen = UPtrList<T>::squeezeNull();
-    resize(newLen);
+    PtrList<T>::setAddressableSize(newLen);
     return newLen;
 }
 
@@ -217,10 +217,53 @@ inline void Foam::PtrDynList<T, SizeMin>::swap
 
 
 template<class T, int SizeMin>
-template<class... Args>
-inline void Foam::PtrDynList<T, SizeMin>::emplace_back(Args&&... args)
+inline void Foam::PtrDynList<T, SizeMin>::transfer(PtrList<T>& list)
 {
-    this->push_back(new T(std::forward<Args>(args)...));
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&list)
+    )
+    {
+        return;  // Self assignment is a no-op
+    }
+
+    // Take over storage, clear addressing for list
+    capacity_ = list.size();
+    PtrList<T>::transfer(list);
+}
+
+
+template<class T, int SizeMin>
+template<int AnySizeMin>
+inline void Foam::PtrDynList<T, SizeMin>::transfer
+(
+    PtrDynList<T, AnySizeMin>& list
+)
+{
+    if
+    (
+        static_cast<const PtrList<T>*>(this)
+     == static_cast<const PtrList<T>*>(&list)
+    )
+    {
+        return;  // Self assignment is a no-op
+    }
+
+    // Take over storage as-is (without shrink, without using SizeMin)
+    capacity_ = list.capacity();
+    PtrList<T>::transfer(list);
+    list.clearStorage();  // Ensure capacity=0
+}
+
+
+template<class T, int SizeMin>
+template<class... Args>
+inline T& Foam::PtrDynList<T, SizeMin>::emplace_back(Args&&... args)
+{
+    T* ptr = new T(std::forward<Args>(args)...);
+    this->push_back(ptr);
+    return *ptr;
 }
 
 
@@ -325,33 +368,16 @@ inline void Foam::PtrDynList<T, SizeMin>::pop_back(label n)
 
 
 template<class T, int SizeMin>
-inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::remove()
-{
-    // Location of last element and simultaneously the new size
-    const label idx = (this->size() - 1);
-
-    if (idx < 0)
-    {
-        return nullptr;  // List is empty
-    }
-
-    autoPtr<T> old(this->ptrs_[idx]);
-    this->ptrs_[idx] = nullptr;
-    PtrList<T>::setAddressableSize(idx);
-
-    return old;
-}
-
-
-template<class T, int SizeMin>
 template<class... Args>
-inline Foam::autoPtr<T> Foam::PtrDynList<T, SizeMin>::emplace
+inline T& Foam::PtrDynList<T, SizeMin>::emplace
 (
     const label i,
     Args&&... args
 )
 {
-    return this->set(i, new T(std::forward<Args>(args)...));
+    T* ptr = new T(std::forward<Args>(args)...);
+    (void)this->set(i, ptr);
+    return *ptr;
 }
 
 
@@ -486,14 +512,7 @@ inline void Foam::PtrDynList<T, SizeMin>::operator=
     PtrList<T>&& list
 )
 {
-    if (this == &list)
-    {
-        return;  // Self-assignment is a no-op
-    }
-
-    PtrList<T>::transfer(list);
-    capacity_ = PtrList<T>::size();
-    list.clearStorage();
+    this->transfer(list);
 }
 
 
@@ -503,14 +522,7 @@ inline void Foam::PtrDynList<T, SizeMin>::operator=
     PtrDynList<T, SizeMin>&& list
 )
 {
-    if (this == &list)
-    {
-        return;  // Self-assignment is a no-op
-    }
-
-    PtrList<T>::transfer(list);
-    capacity_ = list.capacity();
-    list.clearStorage();
+    this->transfer(list);
 }
 
 
@@ -521,18 +533,7 @@ inline void Foam::PtrDynList<T, SizeMin>::operator=
     PtrDynList<T, AnySizeMin>&& list
 )
 {
-    if
-    (
-        static_cast<const PtrList<T>*>(this)
-     == static_cast<const PtrList<T>*>(&list)
-    )
-    {
-        return;  // Self-assignment is a no-op
-    }
-
-    PtrList<T>::transfer(list);
-    capacity_ = list.capacity();
-    list.clearStorage();
+    this->transfer(list);
 }
 
 

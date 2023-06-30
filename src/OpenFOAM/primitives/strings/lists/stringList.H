@@ -23,30 +23,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::stringUList
-
-Description
-    A UList of strings.
-
-Typedef
-    Foam::stringList
-
-Description
-    A List of strings.
-
-Typedef
-    Foam::stringSubList
-
-Description
-    A SubList of strings.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef stringList_H
-#define stringList_H
+#ifndef Foam_stringList_H
+#define Foam_stringList_H
 
-#include "string.H"
+#include "word.H"
 #include "List.H"
 #include "SubList.H"
 
@@ -54,9 +36,9 @@ Description
 
 namespace Foam
 {
-    typedef UList<string> stringUList;
-    typedef List<string> stringList;
-    typedef SubList<string> stringSubList;
+    typedef List<string> stringList;        //!< List of string
+    typedef SubList<string> stringSubList;  //!< SubList of string
+    typedef UList<string> stringUList;      //!< UList of string
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

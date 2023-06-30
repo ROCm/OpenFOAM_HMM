@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -224,11 +224,44 @@ public:
         //- Set values of the diagonal
         inline void diag(const Vector<Cmpt>& v);
 
+        //- Add to the diagonal
+        inline void addDiag(const Vector<Cmpt>& v);
+
+        //- Subtract from the diagonal
+        inline void subtractDiag(const Vector<Cmpt>& v);
+
+        //- The L2-norm squared of the diagonal
+        inline scalar diagSqr() const;
+
 
     // Tensor Operations
 
         //- Return non-Hermitian transpose
-        inline const SymmTensor<Cmpt>& T() const;
+        const SymmTensor<Cmpt>& T() const noexcept { return *this; }
+
+        //- The determinate
+        inline Cmpt det() const;
+
+        //- The 2D determinant by excluding given direction
+        inline Cmpt det2D(const direction excludeCmpt) const;
+
+        //- Return adjunct matrix (transpose of cofactor matrix)
+        inline SymmTensor<Cmpt> adjunct() const;
+
+        //- Return cofactor matrix (transpose of adjunct matrix)
+        inline SymmTensor<Cmpt> cof() const;
+
+        //- Return 2D adjunct matrix by excluding given direction
+        inline SymmTensor<Cmpt> adjunct2D(const direction excludeCmpt) const;
+
+        //- Return inverse
+        inline SymmTensor<Cmpt> inv() const;
+
+        //- Return inverse, with (ad hoc) failsafe handling of 2D tensors
+        inline SymmTensor<Cmpt> safeInv() const;
+
+        //- Return inverse of 2D tensor (by excluding given direction)
+        inline SymmTensor<Cmpt> inv2D(const direction excludeCmpt) const;
 
 
     // Member Operators

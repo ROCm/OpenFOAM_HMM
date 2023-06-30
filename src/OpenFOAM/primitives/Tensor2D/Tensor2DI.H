@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -286,6 +286,17 @@ inline void Foam::Tensor2D<Cmpt>::diag(const Vector2D<Cmpt>& v)
 }
 
 
+template<class Cmpt>
+inline Foam::scalar Foam::Tensor2D<Cmpt>::diagSqr() const
+{
+    return
+    (
+        Foam::magSqr(this->xx())
+      + Foam::magSqr(this->yy())
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Member Operations * * * * * * * * * * * * * //
 
 template<class Cmpt>
@@ -296,6 +307,31 @@ inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::T() const
         xx(), yx(),
         xy(), yy()
     );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::Tensor2D<Cmpt>::det() const
+{
+    return (xx()*yy() - xy()*yx());
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::adjunct() const
+{
+    return Tensor2D<Cmpt>
+    (
+        yy(), -xy(),
+       -yx(),  xx()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::cof() const
+{
+    return this->adjunct().T();
 }
 
 
@@ -327,6 +363,26 @@ Foam::Tensor2D<Cmpt>::schur(const Tensor2D<Cmpt>& t2) const
         t1.xx()*t2.xx(), t1.xy()*t2.xy(),
         t1.yx()*t2.yx(), t1.yy()*t2.yy()
     );
+}
+
+
+// Invert without much error handling
+template<class Cmpt>
+inline Foam::Tensor2D<Cmpt> Foam::Tensor2D<Cmpt>::inv() const
+{
+    const Cmpt detval = this->det();
+
+    #ifdef FULLDEBUG
+    if (mag(detval) < SMALL)
+    {
+        FatalErrorInFunction
+            << "SymmTensor2D not properly invertible, determinant:"
+            << detval << " tensor:" << *this << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    return this->adjunct()/detval;
 }
 
 
@@ -430,37 +486,33 @@ inline Tensor2D<Cmpt> dev2(const Tensor2D<Cmpt>& t)
 template<class Cmpt>
 inline Cmpt det(const Tensor2D<Cmpt>& t)
 {
-    return t.xx()*t.yy() - t.xy()*t.yx();
+    return t.det();
 }
 
 
-//- Return the cofactor Tensor2D of a Tensor2D
+//- Return the cofactor of a Tensor2D
 template<class Cmpt>
 inline Tensor2D<Cmpt> cof(const Tensor2D<Cmpt>& t)
 {
-    return Tensor2D<Cmpt>
-    (
-        t.yy(), -t.yx(),
-       -t.xy(),  t.xx()
-    );
+    return t.cof();
 }
 
 
-//- Return the inverse of a Tensor2D using a given determinant
+//- Return the inverse of a Tensor2D, using given determinant value
 template<class Cmpt>
-inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t, const Cmpt dett)
+inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t, const Cmpt detval)
 {
     #ifdef FULLDEBUG
-    if (mag(dett) < SMALL)
+    if (mag(detval) < SMALL)
     {
         FatalErrorInFunction
-            << "Tensor2D is not invertible due to the zero determinant:"
-            << "det(Tensor2D) = " << mag(dett)
+            << "Tensor2D not properly invertible, determinant:"
+            << detval << " tensor:" << t << nl
             << abort(FatalError);
     }
     #endif
 
-    return cof(t).T()/dett;
+    return t.adjunct()/detval;
 }
 
 
@@ -468,7 +520,7 @@ inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t, const Cmpt dett)
 template<class Cmpt>
 inline Tensor2D<Cmpt> inv(const Tensor2D<Cmpt>& t)
 {
-    return inv(t, det(t));
+    return t.inv();
 }
 
 

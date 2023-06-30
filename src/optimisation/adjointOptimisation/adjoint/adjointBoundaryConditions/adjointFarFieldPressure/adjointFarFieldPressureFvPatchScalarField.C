@@ -73,10 +73,7 @@ adjointFarFieldPressureFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     adjointScalarBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
-    fvPatchField<scalar>::operator=
-    (
-        scalarField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -110,7 +107,7 @@ void Foam::adjointFarFieldPressureFvPatchScalarField::updateCoeffs()
 
     // Adjoint flux
     //const fvsPatchField<scalar>& phiap =
-    //    patch().lookupPatchField<surfaceScalarField, scalar>("phia");
+    //    patch().lookupPatchField<surfaceScalarField>("phia");
 
     // Primal velocity
     const fvPatchField<vector>& Up = boundaryContrPtr_->Ub();
@@ -252,9 +249,9 @@ Foam::adjointFarFieldPressureFvPatchScalarField::gradientBoundaryCoeffs() const
 
 void Foam::adjointFarFieldPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("solverName", adjointSolverName_);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

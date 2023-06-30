@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,6 +73,7 @@ int main(int argc, char *argv[])
         "Suppress surface checking/cleanup on the input surface"
     );
     argList::addOptionCompat("no-clean", {"noClean", -2006});
+    argList::addVerboseOption();
 
     argList::addOption
     (
@@ -86,6 +87,8 @@ int main(int argc, char *argv[])
     const auto minLen = args.get<scalar>(2);
     const auto minQuality = args.get<scalar>(3);
     const auto outFileName = args.get<fileName>(4);
+
+    const int optVerbose = args.verbose();
 
     Info<< "Reading surface " << inFileName << nl
         << "Collapsing all triangles with" << nl
@@ -106,7 +109,7 @@ int main(int argc, char *argv[])
     if (!args.found("no-clean"))
     {
         Info<< "Removing duplicate and illegal triangles ..." << nl << endl;
-        surf.cleanup(true);
+        surf.cleanup(optVerbose);
     }
 
     Info<< "Collapsing triangles to edges ..." << nl << endl;

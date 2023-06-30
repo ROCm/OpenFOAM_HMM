@@ -3,6 +3,7 @@ UPstreamAllToAll.C
 UPstreamBroadcast.C
 UPstreamGatherScatter.C
 UPstreamReduce.C
+UPstreamRequest.C
 
 UIPstreamRead.C
 UOPstreamWrite.C

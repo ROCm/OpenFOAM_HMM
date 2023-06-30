@@ -169,7 +169,7 @@ void fieldInterpolator::interpolate()
                         objects_[fieldName]->db(),
                         IOobject::NO_READ,
                         IOobject::NO_WRITE,
-                        false
+                        IOobject::NO_REGISTER
                     ),
                     fieldName,
                     selectedTimeNames,

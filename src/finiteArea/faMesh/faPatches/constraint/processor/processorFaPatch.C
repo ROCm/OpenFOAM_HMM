@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -135,12 +135,11 @@ void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
     // create a 1->1 map
 
     // Can not use faGlobalMeshData at this point yet
+    // - use polyMesh globalData instead
 
-    if
-    (
-        !Pstream::parRun()
-     || !boundaryMesh().mesh()().globalData().nGlobalPoints()
-    )
+    const auto& pMeshGlobalData = boundaryMesh().mesh().mesh().globalData();
+
+    if (!Pstream::parRun() || !pMeshGlobalData.nGlobalPoints())
     {
         // 1 -> 1 mapping
         nonGlobalPatchPointsPtr_.reset(new labelList(identity(nPoints())));
@@ -151,8 +150,7 @@ void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
         labelList& ngpp = *nonGlobalPatchPointsPtr_;
 
         // Get reference to shared points
-        const labelList& sharedPoints =
-            boundaryMesh().mesh()().globalData().sharedPointLabels();
+        const labelList& sharedPoints = pMeshGlobalData.sharedPointLabels();
 
         const labelList& faMeshPatchPoints = pointLabels();
 
@@ -180,7 +178,7 @@ void Foam::processorFaPatch::initGeometry(PstreamBuffers& pBufs)
 {
     if (Pstream::parRun())
     {
-        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        if (neighbProcNo() >= pBufs.nProcs())
         {
             FatalErrorInFunction
                 << "On patch " << name()
@@ -213,6 +211,7 @@ void Foam::processorFaPatch::calcGeometry(PstreamBuffers& pBufs)
                 >> neighbEdgeFaceCentres_;
         }
 
+        #ifdef FULLDEBUG
         const scalarField& magEl = magEdgeLengths();
 
         forAll(magEl, edgei)
@@ -222,21 +221,21 @@ void Foam::processorFaPatch::calcGeometry(PstreamBuffers& pBufs)
 
             if (mag(magEl[edgei] - nmagEl)/avEl > 1e-6)
             {
-                FatalErrorInFunction
+                WarningInFunction
                     << "edge " << edgei
                     << " length does not match neighbour by "
                     << 100*mag(magEl[edgei] - nmagEl)/avEl
-                    << "% -- possible edge ordering problem"
-                    << exit(FatalError);
+                    << "% -- possible edge ordering problem" << nl;
             }
         }
+        #endif
 
         calcTransformTensors
         (
             edgeCentres(),
             neighbEdgeCentres_,
             edgeNormals(),
-            neighbEdgeLengths_/mag(neighbEdgeLengths_)
+            neighbEdgeNormals()
         );
     }
 }
@@ -272,7 +271,7 @@ void Foam::processorFaPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
     if (Pstream::parRun())
     {
-        if (neighbProcNo() >= Pstream::nProcs(pBufs.comm()))
+        if (neighbProcNo() >= pBufs.nProcs())
         {
             FatalErrorInFunction
                 << "On patch " << name()
@@ -320,8 +319,8 @@ void Foam::processorFaPatch::updateMesh(PstreamBuffers& pBufs)
 
     if (Pstream::parRun())
     {
-        labelList nbrPatchEdge(nPoints());
-        labelList nbrIndexInEdge(nPoints());
+        labelList nbrPatchEdge;
+        labelList nbrIndexInEdge;
 
         {
             // Note cannot predict exact size since edgeList not (yet) sent as
@@ -365,6 +364,14 @@ void Foam::processorFaPatch::updateMesh(PstreamBuffers& pBufs)
 }
 
 
+Foam::tmp<Foam::vectorField> Foam::processorFaPatch::neighbEdgeNormals() const
+{
+    auto tresult = tmp<vectorField>::New(neighbEdgeLengths_);
+    tresult.ref().normalise();
+    return tresult;
+}
+
+
 const Foam::labelList& Foam::processorFaPatch::neighbPoints() const
 {
     if (!neighbPointsPtr_)
@@ -395,25 +402,19 @@ void Foam::processorFaPatch::makeWeights(scalarField& w) const
         // The face normals point in the opposite direction on the other side
         scalarField neighbEdgeCentresCn
         (
-            (
-                neighbEdgeLengths()
-               /mag(neighbEdgeLengths())
-            )
-          & (
-              neighbEdgeCentres()
-            - neighbEdgeFaceCentres()
-            )
+            neighbEdgeNormals()
+          & (neighbEdgeCentres() - neighbEdgeFaceCentres())
         );
 
         w = neighbEdgeCentresCn/
             (
-                (edgeNormals() & faPatch::delta())
-              + neighbEdgeCentresCn
+                (edgeNormals() & coupledFaPatch::delta())
+              + neighbEdgeCentresCn + VSMALL
             );
     }
     else
     {
-        w = 1.0;
+        w = scalar(1);
     }
 }
 
@@ -422,11 +423,13 @@ void Foam::processorFaPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     if (Pstream::parRun())
     {
-        dc = (1.0 - weights())/(edgeNormals() & faPatch::delta());
+        dc = (1.0 - weights())
+            /((edgeNormals() & coupledFaPatch::delta()) + VSMALL);
     }
     else
     {
-        dc = 1.0/(edgeNormals() & faPatch::delta());
+        dc = scalar(1)
+            /((edgeNormals() & coupledFaPatch::delta()) + VSMALL);
     }
 }
 
@@ -435,11 +438,11 @@ Foam::tmp<Foam::vectorField> Foam::processorFaPatch::delta() const
 {
     if (Pstream::parRun())
     {
-        // To the transformation if necessary
+        // Do the transformation if necessary
         if (parallel())
         {
             return
-                faPatch::delta()
+                coupledFaPatch::delta()
               - (
                     neighbEdgeCentres()
                   - neighbEdgeFaceCentres()
@@ -448,7 +451,7 @@ Foam::tmp<Foam::vectorField> Foam::processorFaPatch::delta() const
         else
         {
             return
-                faPatch::delta()
+                coupledFaPatch::delta()
               - transform
                 (
                     forwardT(),
@@ -461,7 +464,7 @@ Foam::tmp<Foam::vectorField> Foam::processorFaPatch::delta() const
     }
     else
     {
-        return faPatch::delta();
+        return coupledFaPatch::delta();
     }
 }
 
@@ -492,7 +495,9 @@ Foam::tmp<Foam::labelField> Foam::processorFaPatch::interfaceInternalField
     const labelUList& edgeFaces
 ) const
 {
-    return patchInternalField(internalData, edgeFaces);
+    auto tpfld = tmp<labelField>::New();
+    patchInternalField(internalData, edgeFaces, tpfld.ref());
+    return tpfld;
 }
 
 

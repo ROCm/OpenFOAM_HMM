@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SubStrings_H
-#define SubStrings_H
+#ifndef Foam_SubStrings_H
+#define Foam_SubStrings_H
 
 #include <regex>  // For std::sub_match
 #include <string>
@@ -88,6 +88,12 @@ public:
             return len;
         }
 
+        //- Retrieve element at pos, converted to a string type.
+        StringType str(size_t pos) const
+        {
+            return (*this)[pos].str();
+        }
+
         //- Append sub-string defined by begin/end iterators
         void append
         (
@@ -115,12 +121,6 @@ public:
         auto last() const -> decltype(this->back())
         {
             return this->back();
-        }
-
-        //- Get element at pos, converted to a string type.
-        StringType str(size_t pos) const
-        {
-            return (*this)[pos].str();
         }
 };
 

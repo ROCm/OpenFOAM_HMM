@@ -52,7 +52,7 @@ translatingWallVelocityFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<vector>(p, iF, dict, false),
+    fixedValueFvPatchField<vector>(p, iF, dict, IOobjectOption::NO_READ),
     U_(Function1<vector>::New("U", dict, &db()))
 {
     // Evaluate the wall velocity
@@ -119,9 +119,9 @@ void Foam::translatingWallVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::translatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     U_->writeData(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

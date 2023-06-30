@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,13 +96,13 @@ volScalarField dynamicKEqn<BasicTurbulenceModel>::Ce
 template<class BasicTurbulenceModel>
 volScalarField dynamicKEqn<BasicTurbulenceModel>::Ce() const
 {
-    const volSymmTensorField D(dev(symm(fvc::grad(this->U_))));
+    const volSymmTensorField D(devSymm(fvc::grad(this->U_)));
 
     volScalarField KK
     (
         0.5*(filter_(magSqr(this->U_)) - magSqr(filter_(this->U_)))
     );
-    KK.max(dimensionedScalar("small", KK.dimensions(), SMALL));
+    KK.clamp_min(SMALL);
 
     return Ce(D, KK);
 }
@@ -240,12 +240,12 @@ void dynamicKEqn<BasicTurbulenceModel>::correct()
     volScalarField divU(fvc::div(fvc::absolute(this->phi(), U)));
 
     tmp<volTensorField> tgradU(fvc::grad(U));
-    const volSymmTensorField D(dev(symm(tgradU())));
+    const volSymmTensorField D(devSymm(tgradU()));
     const volScalarField G(this->GName(), 2.0*nut*(tgradU() && D));
     tgradU.clear();
 
     volScalarField KK(0.5*(filter_(magSqr(U)) - magSqr(filter_(U))));
-    KK.max(dimensionedScalar("small", KK.dimensions(), SMALL));
+    KK.clamp_min(SMALL);
 
     tmp<fvScalarMatrix> kEqn
     (

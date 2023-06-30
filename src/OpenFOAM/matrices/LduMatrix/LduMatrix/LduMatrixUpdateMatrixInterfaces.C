@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,6 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                     commsType
                 );
             }
@@ -89,7 +88,6 @@ void Foam::LduMatrix<Type, DType, LUType>::initMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                     UPstream::commsTypes::blocking
                 );
             }
@@ -111,10 +109,66 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
     const bool add,
     const FieldField<Field, LUType>& interfaceCoeffs,
     const Field<Type>& psiif,
-    Field<Type>& result
+    Field<Type>& result,
+    const label startRequest
 ) const
 {
     const UPstream::commsTypes commsType = UPstream::defaultCommsType;
+
+    if
+    (
+        commsType == UPstream::commsTypes::nonBlocking
+     && UPstream::nPollProcInterfaces
+    )
+    {
+        // Wait for some interface requests to become available and
+        // consume them. No guarantee that the finished requests actually
+        // correspond to any particular interface, but it is reasonably
+        // probable that some interfaces will be able to start consumption
+        // without waiting for all requests.
+
+        DynamicList<int> indices;  // (work array)
+
+        for
+        (
+            bool pollingActive = (UPstream::nPollProcInterfaces < 0);
+            (
+                pollingActive
+             && UPstream::waitSomeRequests(startRequest, &indices)
+            );
+            /*nil*/
+        )
+        {
+            pollingActive = false;
+
+            forAll(interfaces_, interfacei)
+            {
+                auto* intf = interfaces_.get(interfacei);
+
+                if (intf && !intf->updatedMatrix())
+                {
+                    if (intf->ready())
+                    {
+                        intf->updateInterfaceMatrix
+                        (
+                            result,
+                            add,
+                            lduMesh_.lduAddr(),
+                            interfacei,
+                            psiif,
+                            interfaceCoeffs[interfacei],
+                            commsType
+                        );
+                    }
+                    else
+                    {
+                        pollingActive = true;
+                    }
+                }
+            }
+        }
+    }
+
 
     if
     (
@@ -122,17 +176,23 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
      || commsType == UPstream::commsTypes::nonBlocking
     )
     {
-        // Block until all sends/receives have been finished
+        // Wait until sends/receives have finished.
+        // - effectively a no-op (without waiting) if already completed.
         if (commsType == UPstream::commsTypes::nonBlocking)
         {
-            UPstream::waitRequests();
+            UPstream::waitRequests(startRequest);
         }
+
+        // Check/no-check for updatedMatrix() ?
+        const bool noCheck = (commsType == UPstream::commsTypes::blocking);
 
         forAll(interfaces_, interfacei)
         {
-            if (interfaces_.set(interfacei))
+            auto* intf = interfaces_.get(interfacei);
+
+            if (intf && (noCheck || !intf->updatedMatrix()))
             {
-                interfaces_[interfacei].updateInterfaceMatrix
+                intf->updateInterfaceMatrix
                 (
                     result,
                     add,
@@ -140,7 +200,6 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                     commsType
                 );
             }
@@ -167,7 +226,6 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                         interfacei,
                         psiif,
                         interfaceCoeffs[interfacei],
-                      //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                         commsType
                     );
                 }
@@ -181,7 +239,6 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                         interfacei,
                         psiif,
                         interfaceCoeffs[interfacei],
-                      //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
                         commsType
                     );
                 }
@@ -207,8 +264,7 @@ void Foam::LduMatrix<Type, DType, LUType>::updateMatrixInterfaces
                     interfacei,
                     psiif,
                     interfaceCoeffs[interfacei],
-                    //Amultiplier<Type, LUType>(interfaceCoeffs[interfacei]),
-                    Pstream::commsTypes::blocking
+                    UPstream::commsTypes::blocking
                 );
             }
         }

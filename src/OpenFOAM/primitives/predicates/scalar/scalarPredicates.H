@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -270,7 +270,7 @@ public:
 
     // Search
 
-        //- Index of the first match for the value.
+        //- Index of the first matching test for the value.
         //  Any occurrences before the start pos are ignored.
         //  Linear search.
         //  \return position in list or -1 if not found.
@@ -282,31 +282,31 @@ public:
         //  \return position in list or -1 if not found.
         label rfind(const scalar value, label pos = -1) const;
 
-        //- True if the value matches any in the list.
+        //- Matches \em any condition in the list after the offset position.
+        //  Linear search from start pos until the end of the list.
         //  Any occurrences before the start pos are ignored.
-        //  Linear search.
-        //  \return true if found.
-        inline bool found(const scalar value, label pos=0) const;
+        //
+        //  \return True if the value matches any condition in the (sub)list.
+        inline bool contains(const scalar value, label pos = 0) const;
 
-        //- Match any condition in the list.
+        //- Matches \em any condition in the list.
         //
         //  \return True if the value matches any condition in the list.
         inline bool match(const scalar value) const;
 
-        //- Match any condition in the list.
+        //- Matches \em any condition in the list.
         //
         //  \return True if the value matches any condition in the list.
         inline bool matchAny(const scalar value) const;
 
-        //- Match all conditions in the list.
+        //- Matches \em all conditions in the list.
         //
         //  \return True if the value matches all conditions in the list.
         inline bool matchAll(const scalar value) const;
 
         //- Extract list indices for all matches.
         //
-        //  \return The locations (indices) in the input list where match()
-        //      is true
+        //  \return The locations (indices) of the predicates that match
         inline labelList matching(const scalar value) const;
 
         //- Extract list indices for all matches.
@@ -324,8 +324,17 @@ public:
 
     // Member Operators
 
-        //- Identical to found(), match(), for use as a predicate.
-        inline bool operator()(const scalar value) const;
+        //- Identical to contains(), match(), for use as a predicate.
+        bool operator()(const scalar value) const { return matchAny(value); }
+
+
+    // Housekeeping
+
+        //- Same as contains()
+        bool found(const scalar value, label pos = 0) const
+        {
+            return this->contains(value, pos);
+        }
 };
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,6 +66,9 @@ Usage
 
     \param -writeFields '(\<fieldName\>)' \n
     Writes selected mesh quality measures as fields.
+
+    \param -write-edges \n
+    Write bad edges (possibly relevant for finite-area) in VTK format.
 
 \*---------------------------------------------------------------------------*/
 
@@ -142,6 +145,11 @@ int main(int argc, char *argv[])
         "surfaceFormat",
         "Reconstruct and write all faceSets and cellSets in selected format"
     );
+    argList::addBoolOption
+    (
+        "write-edges",
+        "Write bad edges (possibly relevant for finite-area) in vtk format"
+    );
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -153,6 +161,7 @@ int main(int argc, char *argv[])
     const bool allGeometry = args.found("allGeometry");
     const bool allTopology = args.found("allTopology");
     const bool meshQuality = args.found("meshQuality");
+    const bool optWriteEdges = args.found("write-edges");
 
     const word surfaceFormat = args.getOrDefault<word>("writeSets", "");
     const bool writeSets = surfaceFormat.size();
@@ -188,10 +197,11 @@ int main(int argc, char *argv[])
         if (!badFields.empty())
         {
             FatalErrorInFunction
-                << "Illegal field(s) " << flatOutput(badFields.sortedToc())
-                << nl
-                << "Valid fields are " << flatOutput(allFields.sortedToc())
-                << nl << exit(FatalError);
+                << "Illegal field(s): "
+                << flatOutput(badFields.sortedToc()) << nl
+                << "Valid fields: "
+                << flatOutput(allFields.sortedToc()) << nl
+                << exit(FatalError);
         }
     }
     else if (args.found("writeAllFields"))
@@ -207,34 +217,48 @@ int main(int argc, char *argv[])
     }
 
 
+    Info<< "Check mesh..." << nl;
+    Info().incrIndent();
+
     if (noTopology)
     {
-        Info<< "Disabling all topology checks." << nl << endl;
+        Info<< indent
+            << "Disabling all topology checks." << nl;
     }
     if (allTopology)
     {
-        Info<< "Enabling all (cell, face, edge, point) topology checks."
-            << nl << endl;
+        Info<< indent
+            << "Enabling all (cell, face, edge, point) topology checks." << nl;
     }
     if (allGeometry)
     {
-        Info<< "Enabling all geometry checks." << nl << endl;
+        Info<< indent
+            << "Enabling all geometry checks." << nl;
     }
     if (meshQuality)
     {
-        Info<< "Enabling user-defined geometry checks." << nl << endl;
+        Info<< indent
+            << "Enabling user-defined geometry checks." << nl;
     }
     if (writeSets)
     {
-        Info<< "Reconstructing and writing " << surfaceFormat
-            << " representation"
-            << " of all faceSets and cellSets." << nl << endl;
+        Info<< indent
+            << "Reconstructing and writing " << surfaceFormat
+            << " representation of all faceSets and cellSets." << nl;
     }
     if (selectedFields.size())
     {
-        Info<< "Writing mesh quality as fields " << selectedFields << nl
-            << endl;
+        Info<< indent
+            << "Writing mesh quality as fields "
+            << flatOutput(selectedFields.sortedToc()) << nl;
     }
+    if (optWriteEdges)
+    {
+        Info<< indent
+            << "Writing any bad edges in vtk format" << nl;
+    }
+    Info().decrIndent();
+    Info<< endl;
 
 
     PtrList<IOdictionary> qualDict(meshes.size());
@@ -270,9 +294,9 @@ int main(int argc, char *argv[])
     }
 
 
-    forAll(timeDirs, timeI)
+    forAll(timeDirs, timei)
     {
-        runTime.setTime(timeDirs[timeI], timeI);
+        runTime.setTime(timeDirs[timei], timei);
 
         // Get most changed of all meshes
         polyMesh::readUpdateState state = polyMesh::UNCHANGED;
@@ -284,7 +308,7 @@ int main(int argc, char *argv[])
 
         if
         (
-            !timeI
+            !timei
          || state == polyMesh::TOPO_CHANGE
          || state == polyMesh::TOPO_PATCH_CHANGE
         )
@@ -310,7 +334,8 @@ int main(int argc, char *argv[])
                         allTopology,
                         allGeometry,
                         surfWriter,
-                        setWriter
+                        setWriter,
+                        optWriteEdges
                     );
                 }
 

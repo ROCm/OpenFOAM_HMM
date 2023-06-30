@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -35,13 +35,13 @@ wall
     k
     {
         type            kqRWallFunction;
-        value           uniform $:internalField.k;
+        value           uniform $/internalField/k;
     }
 
     epsilon
     {
         type            epsilonWallFunction;
-        value           uniform $:internalField.epsilon;
+        value           uniform $/internalField/epsilon;
     }
 
     nut

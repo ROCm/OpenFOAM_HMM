@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -14,8 +14,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "<constant>/dynamicMeshDict"
-#include "<system>/blockMeshDict"
+__blockMeshDict
+{
+    #include "<system>/blockMeshDict"
+}
+
+// Sphere properties
+sphereProperties
+{
+    centreOfMass    (0 ${/__blockMeshDict/sphereCentreHeight} 0);
+    momentOfInertia (2e-3 2e-3 2e-3);
+    velocity        (0 -3.77 0);
+    mass            2.08e-3;  // sphere mass 0.15 kg, 5 degree wedge
+}
+
+#remove __blockMeshDict
+
+// ------------------------------------------------------------------------- //
 
 dimensions      [0 1 0 0 0 0 0];
 
@@ -44,13 +59,10 @@ boundaryField
     sphere
     {
         type            sixDoFRigidBodyDisplacement;
-        centreOfMass    (0 $:sphereCentreHeight 0);
-        momentOfInertia (2e-3 2e-3 2e-3);
-        velocity        (0 -3.77 0);
+        $/sphereProperties;
         accelerationRelaxation  1;
         accelerationDamping     1;
 
-        mass            2.08e-3;  // sphere mass 0.15 kg, 5 degree wedge
 //      rhoInf          -1;       // needed only for solvers solving for
                                   // kinematic pressure
         report          on;

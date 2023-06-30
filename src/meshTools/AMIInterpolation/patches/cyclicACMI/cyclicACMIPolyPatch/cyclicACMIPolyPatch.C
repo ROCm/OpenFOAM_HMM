@@ -326,8 +326,8 @@ void Foam::cyclicACMIPolyPatch::resetAMI(const UList<point>& points) const
     // Note:
     // - assumes that the non-overlap patches are decomposed using the same
     //   decomposition as the coupled patches (per side)
-    srcMask_ = min(scalar(1), max(scalar(0), AMI.srcWeightsSum()));
-    tgtMask_ = min(scalar(1), max(scalar(0), AMI.tgtWeightsSum()));
+    srcMask_ = clamp(AMI.srcWeightsSum(), zero_one{});
+    tgtMask_ = clamp(AMI.tgtWeightsSum(), zero_one{});
 
     if (debug)
     {
@@ -575,7 +575,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
             boundaryMesh().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dimensionedScalar("time", dimTime, -GREAT)
     ),
@@ -603,12 +603,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
     nonOverlapPatchID_(-1),
     srcMask_(),
     tgtMask_(),
-    srcScalePtr_
-    (
-        dict.found("scale")
-      ? PatchFunction1<scalar>::New(*this, "scale", dict)
-      : nullptr
-    ),
+    srcScalePtr_(PatchFunction1<scalar>::NewIfPresent(*this, "scale", dict)),
     AMITime_
     (
         IOobject
@@ -618,7 +613,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
             boundaryMesh().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dimensionedScalar("time", dimTime, -GREAT)
     ),
@@ -660,7 +655,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
             boundaryMesh().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dimensionedScalar("time", dimTime, -GREAT)
     ),
@@ -699,7 +694,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
             boundaryMesh().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dimensionedScalar("time", dimTime, -GREAT)
     ),
@@ -744,7 +739,7 @@ Foam::cyclicACMIPolyPatch::cyclicACMIPolyPatch
             boundaryMesh().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         dimensionedScalar("time", dimTime, -GREAT)
     ),

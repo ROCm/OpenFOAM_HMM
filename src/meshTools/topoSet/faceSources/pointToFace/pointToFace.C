@@ -189,7 +189,7 @@ Foam::pointToFace::pointToFace
     if (!dict.readIfPresent("sets", names_))
     {
         names_.resize(1);
-        dict.readEntry("set", names_.first());
+        dict.readEntry("set", names_.front());
     }
 }
 
@@ -218,7 +218,7 @@ void Foam::pointToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding faces according to pointSet "
+            Info<< "    Adding faces according to point sets: "
                 << flatOutput(names_) << nl;
         }
 
@@ -231,7 +231,7 @@ void Foam::pointToFace::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing faces according to pointSet "
+            Info<< "    Removing faces according to point sets: "
                 << flatOutput(names_) << nl;
         }
 

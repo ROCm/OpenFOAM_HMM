@@ -91,7 +91,9 @@ void Foam::globalIndex::gatherValues
 
     const label startOfRequests = UPstream::nRequests();
 
-    if (UPstream::myProcNo(comm) == procIDs[0])
+    const int masterProci = procIDs.size() ? procIDs[0] : 0;
+
+    if (UPstream::myProcNo(comm) == masterProci)
     {
         allValues.resize_nocopy(procIDs.size());
         allValues[0] = localValue;
@@ -126,7 +128,7 @@ void Foam::globalIndex::gatherValues
             UOPstream::write
             (
                 commsType,
-                procIDs[0],
+                masterProci,
                 reinterpret_cast<const char*>(&localValue),
                 sizeof(Type),
                 tag,
@@ -135,7 +137,7 @@ void Foam::globalIndex::gatherValues
         }
         else
         {
-            OPstream toMaster(commsType, procIDs[0], 0, tag, comm);
+            OPstream toMaster(commsType, masterProci, 0, tag, comm);
             toMaster << localValue;
         }
     }
@@ -176,9 +178,11 @@ void Foam::globalIndex::gather
 
     const label startOfRequests = UPstream::nRequests();
 
-    if (Pstream::myProcNo(comm) == procIDs[0])
+    const int masterProci = procIDs.size() ? procIDs[0] : 0;
+
+    if (UPstream::myProcNo(comm) == masterProci)
     {
-        allFld.resize_nocopy(off.last());  // == totalSize()
+        allFld.resize_nocopy(off.back());  // == totalSize()
 
         // Assign my local data - respect offset information
         // so that we can request 0 entries to be copied.
@@ -226,7 +230,7 @@ void Foam::globalIndex::gather
             UOPstream::write
             (
                 commsType,
-                procIDs[0],
+                masterProci,
                 fld.cdata_bytes(),
                 fld.size_bytes(),
                 tag,
@@ -235,7 +239,7 @@ void Foam::globalIndex::gather
         }
         else
         {
-            OPstream toMaster(commsType, procIDs[0], 0, tag, comm);
+            OPstream toMaster(commsType, masterProci, 0, tag, comm);
             toMaster << fld;
         }
     }
@@ -294,9 +298,11 @@ void Foam::globalIndex::gather
 
     const label startOfRequests = UPstream::nRequests();
 
-    if (Pstream::myProcNo(comm) == procIDs[0])
+    const int masterProci = procIDs.size() ? procIDs[0] : 0;
+
+    if (UPstream::myProcNo(comm) == masterProci)
     {
-        allFld.resize_nocopy(off.last());  // == totalSize()
+        allFld.resize_nocopy(off.back());  // == totalSize()
 
         // Assign my local data - respect offset information
         // so that we can request 0 entries to be copied
@@ -331,7 +337,7 @@ void Foam::globalIndex::gather
         }
         else
         {
-            OPstream toMaster(commsType, procIDs[0], 0, tag, comm);
+            OPstream toMaster(commsType, masterProci, 0, tag, comm);
             toMaster << fld;
         }
     }
@@ -877,7 +883,9 @@ void Foam::globalIndex::scatter
 
     const label startOfRequests = UPstream::nRequests();
 
-    if (Pstream::myProcNo(comm) == procIDs[0])
+    const int masterProci = procIDs.size() ? procIDs[0] : 0;
+
+    if (UPstream::myProcNo(comm) == masterProci)
     {
         for (label i = 1; i < procIDs.size(); ++i)
         {
@@ -929,7 +937,7 @@ void Foam::globalIndex::scatter
             UIPstream::read
             (
                 commsType,
-                procIDs[0],
+                masterProci,
                 fld.data_bytes(),
                 fld.size_bytes(),
                 tag,
@@ -938,7 +946,7 @@ void Foam::globalIndex::scatter
         }
         else
         {
-            IPstream fromMaster(commsType, procIDs[0], 0, tag, comm);
+            IPstream fromMaster(commsType, masterProci, 0, tag, comm);
             fromMaster >> fld;
         }
     }

@@ -1272,7 +1272,7 @@ void extrudeGeometricProperties
             regionMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         regionMesh.nFaces()
     );
@@ -1356,7 +1356,7 @@ void extrudeGeometricProperties
             regionMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         regionMesh.nCells()
     );
@@ -2389,10 +2389,10 @@ int main(int argc, char *argv[])
             runTime,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
-        Zero,
-        false
+        Foam::zero{},
+        false  // syncPar
     );
 
     // Add the new patches
@@ -2559,7 +2559,7 @@ int main(int argc, char *argv[])
             regionMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         extruder.cellToFaceMap()
     );
@@ -2575,7 +2575,7 @@ int main(int argc, char *argv[])
             regionMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         extruder.faceToFaceMap()
     );
@@ -2592,7 +2592,7 @@ int main(int argc, char *argv[])
             regionMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         extruder.faceToEdgeMap()
     );
@@ -2609,7 +2609,7 @@ int main(int argc, char *argv[])
             regionMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         extruder.pointToPointMap()
     );

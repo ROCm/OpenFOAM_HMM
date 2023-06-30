@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -100,8 +100,8 @@ castellatedMeshControls
     // ~~~~~~~~~~~~~~~~~~~~~
 
     // If local number of cells is >= maxLocalCells on any processor
-    // switches from from refinement followed by balancing
-    // (current method) to (weighted) balancing before refinement.
+    // algorithm switches from refinement followed by (weighted) balancing
+    // to (weighted) balancing followed by refinement.
     maxLocalCells 100000;
 
     // Overall cell limit (approximately). Refinement will stop immediately
@@ -123,8 +123,23 @@ castellatedMeshControls
     // Allow a certain level of imbalance during refining
     // (since balancing is quite expensive)
     // Expressed as fraction of perfect balance (= overall number of cells /
-    // nProcs). 0=balance always.
+    // nProcs). 0=balance always. Can be triggered by using maxCellUnbalance
     maxLoadUnbalance 0.10;
+
+    // Optional absolute unbalance start trigger. Used to avoid balancing
+    // in first refinement iterations since balancing is expensive for
+    // high core counts
+    // The trigger value is used for two checks:
+    // a: if on any processor the number of new added cells <= maxCellUnbalance
+    //    the balancing is skipped
+    // b: if on any processor the value 
+    //    (new cell count of proc - idealCellCount) <= maxCellUnbalance
+    //    the balancing is skipped
+    // Set to -1 to deactivate
+    //maxCellUnbalance 200000;
+
+    // Optional forcing balancing after the mesh is completely refined
+    //balanceAtEnd     false;
 
     // Number of buffer layers between different levels.
     // 1 means normal 2:1 refinement restriction, larger means slower

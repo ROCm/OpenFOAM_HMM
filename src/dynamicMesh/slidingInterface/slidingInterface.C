@@ -445,7 +445,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
             // Try to find the cut point in retired points
             const auto rpmIter = rpm.cfind(pointi);
 
-            if (rpmIter.found())
+            if (rpmIter.good())
             {
                 if (debug)
                 {
@@ -463,7 +463,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
 
                 const auto cpepmIter = cpepm.cfind(pointi);
 
-                if (cpepmIter.found())
+                if (cpepmIter.good())
                 {
                     // Pout<< "Need to re-create hit for point "
                     //     << cutPoints[pointi]

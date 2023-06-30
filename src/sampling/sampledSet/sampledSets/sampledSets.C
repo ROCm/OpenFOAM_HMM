@@ -155,7 +155,7 @@ void Foam::sampledSets::gatherAllSets()
 
     const PtrList<sampledSet>& localSets = *this;
 
-    gatheredSets_.clear();
+    gatheredSets_.free();
     gatheredSets_.resize(localSets.size());
     gatheredSorting_.resize_nocopy(localSets.size());
     globalIndices_.resize_nocopy(localSets.size());
@@ -234,7 +234,7 @@ Foam::IOobjectList Foam::sampledSets::preCheckFields(unsigned request)
         #define doLocalCode(InputType)                                        \
         {                                                                     \
             const auto iter = selected.find(InputType::typeName);             \
-            if (iter.found())                                                 \
+            if (iter.good())                                                  \
             {                                                                 \
                 selectedFieldNames_.append(iter.val().sortedToc());           \
             }                                                                 \
@@ -292,7 +292,7 @@ void Foam::sampledSets::initDict(const dictionary& dict, const bool initial)
         writers_.clear();
     }
 
-    const entry* eptr = dict.findEntry("sets");
+    const entry* eptr = dict.findEntry("sets", keyType::LITERAL);
 
     if (eptr && eptr->isDict())
     {
@@ -529,7 +529,7 @@ bool Foam::sampledSets::read(const dictionary& dict)
     samplePointScheme_ =
         dict.getOrDefault<word>("interpolationScheme", "cellPoint");
 
-    const entry* eptr = dict.findEntry("sets");
+    const entry* eptr = dict.findEntry("sets", keyType::LITERAL);
 
     if (eptr)
     {

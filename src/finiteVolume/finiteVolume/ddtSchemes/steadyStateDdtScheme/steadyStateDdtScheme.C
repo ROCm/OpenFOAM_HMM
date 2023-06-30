@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,7 +55,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+dt.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(dt.dimensions()/dimTime, Zero)
@@ -75,7 +76,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(vf.dimensions()/dimTime, Zero)
@@ -97,7 +98,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+rho.name()+','+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -119,7 +120,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+rho.name()+','+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -142,7 +143,7 @@ steadyStateDdtScheme<Type>::fvcDdt
         (
             "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
             mesh().time().timeName(),
-            mesh()
+            mesh().thisDb()
         ),
         mesh(),
         dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
@@ -250,7 +251,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -282,7 +283,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -317,7 +318,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
               + rho.name()
               + ',' + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -352,7 +353,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
               + rho.name()
               + ',' + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             mesh(),
             dimensioned<typename flux<Type>::type>
@@ -374,20 +375,25 @@ tmp<surfaceScalarField> steadyStateDdtScheme<Type>::meshPhi
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    return tmp<surfaceScalarField>::New
+    auto tphi
     (
-        IOobject
+        tmp<surfaceScalarField>::New
         (
-            "meshPhi",
-            mesh().time().timeName(),
+            IOobject
+            (
+                "meshPhi",
+                mesh().time().timeName(),
+                mesh().thisDb(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
+            ),
             mesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh(),
-        dimensionedScalar(dimVolume/dimTime, Zero)
+            dimensionedScalar(dimVolume/dimTime, Zero)
+        )
     );
+    tphi.ref().setOriented();
+    return tphi;
 }
 
 

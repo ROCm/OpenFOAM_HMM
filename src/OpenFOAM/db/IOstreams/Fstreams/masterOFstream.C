@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,6 @@ License
 #include "OSspecific.H"
 #include "PstreamBuffers.H"
 #include "masterUncollatedFileOperation.H"
-#include <algorithm>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -48,7 +47,7 @@ void Foam::masterOFstream::checkWrite
         return;
     }
 
-    mkDir(fName.path());
+    Foam::mkDir(fName.path());
 
     OFstream os
     (
@@ -90,19 +89,23 @@ void Foam::masterOFstream::checkWrite
 
 void Foam::masterOFstream::commit()
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
-        List<fileName> filePaths(Pstream::nProcs());
-        filePaths[Pstream::myProcNo()] = pathName_;
-        Pstream::gatherList(filePaths);
+        List<fileName> filePaths(UPstream::nProcs(comm_));
+        filePaths[UPstream::myProcNo(comm_)] = pathName_;
+        Pstream::gatherList(filePaths, UPstream::msgType(), comm_);
 
-        bool uniform = fileOperation::uniformFile(filePaths);
+        bool uniform =
+        (
+            UPstream::master(comm_)
+         && fileOperation::uniformFile(filePaths)
+        );
 
-        Pstream::broadcast(uniform);
+        Pstream::broadcast(uniform, comm_);
 
         if (uniform)
         {
-            if (Pstream::master() && valid_)
+            if (UPstream::master(comm_) && writeOnProc_)
             {
                 checkWrite(pathName_, this->str());
             }
@@ -111,49 +114,47 @@ void Foam::masterOFstream::commit()
             return;
         }
 
-        boolList procValid(UPstream::listGatherValues<bool>(valid_));
-
         // Different files
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(comm_, UPstream::commsTypes::nonBlocking);
 
-        // Send my buffer to master
-        if (!Pstream::master())
+        if (!UPstream::master(comm_))
         {
-            UOPstream os(Pstream::masterNo(), pBufs);
-            string s(this->str());
-            this->reset();
+            if (writeOnProc_)
+            {
+                // Send buffer to master
+                string s(this->str());
 
-            os.write(s.data(), s.length());
+                UOPstream os(UPstream::masterNo(), pBufs);
+                os.write(s.data(), s.length());
+            }
+            this->reset();  // Done with contents
         }
 
-        labelList recvSizes;
-        pBufs.finishedGathers(recvSizes);
+        pBufs.finishedGathers();
 
-        if (Pstream::master())
+
+        if (UPstream::master(comm_))
         {
-            // Write master data
-            if (procValid[Pstream::masterNo()])
+            if (writeOnProc_)
             {
-                checkWrite(filePaths[Pstream::masterNo()], this->str());
+                // Write master data
+                checkWrite(filePaths[UPstream::masterNo()], this->str());
             }
-            this->reset();
+            this->reset();  // Done with contents
 
-            // Find the max receive size
-            recvSizes[Pstream::masterNo()] = 0;
-            List<char> buf
-            (
-                *std::max_element(recvSizes.cbegin(), recvSizes.cend())
-            );
 
-            for (const int proci : Pstream::subProcs())
+            // Allocate large enough to read without resizing
+            List<char> buf(pBufs.maxRecvCount());
+
+            for (const int proci : UPstream::subProcs(comm_))
             {
-                UIPstream is(proci, pBufs);
+                const std::streamsize count(pBufs.recvDataCount(proci));
 
-                const std::streamsize count(recvSizes[proci]);
-                is.read(buf.data(), count);
-
-                if (procValid[proci])
+                if (count)
                 {
+                    UIPstream is(proci, pBufs);
+
+                    is.read(buf.data(), count);
                     checkWrite(filePaths[proci], buf.cdata(), count);
                 }
             }
@@ -175,10 +176,11 @@ void Foam::masterOFstream::commit()
 Foam::masterOFstream::masterOFstream
 (
     IOstreamOption::atomicType atomic,
+    const label comm,
     const fileName& pathName,
     IOstreamOption streamOpt,
     IOstreamOption::appendType append,
-    const bool valid
+    const bool writeOnProc
 )
 :
     OStringStream(streamOpt),
@@ -186,7 +188,8 @@ Foam::masterOFstream::masterOFstream
     atomic_(atomic),
     compression_(streamOpt.compression()),
     append_(append),
-    valid_(valid)
+    writeOnProc_(writeOnProc),
+    comm_(comm)
 {}
 
 

@@ -211,7 +211,7 @@ bool Foam::functionObjects::runTimeControls::runTimeControl::execute()
 
             auto conditionIter = groupMap_.cfind(groupi);
 
-            if (!conditionIter.found())
+            if (!conditionIter.good())
             {
                 FatalErrorInFunction
                     << "group " << groupi << " not found in map"

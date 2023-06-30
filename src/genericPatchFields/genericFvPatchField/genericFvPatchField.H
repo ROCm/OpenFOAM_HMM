@@ -88,7 +88,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         genericFvPatchField
         (
             const genericFvPatchField<Type>&,

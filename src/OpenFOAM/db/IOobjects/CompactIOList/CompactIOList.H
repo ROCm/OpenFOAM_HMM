@@ -51,8 +51,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 template<class T, class BaseType> class CompactIOList;
 
 template<class T, class BaseType> Istream& operator>>
@@ -129,7 +127,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
         virtual bool writeData(Ostream&) const;

@@ -140,10 +140,10 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
                 p.mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             p,
-            fvPatchField<scalar>::calculatedType()
+            fvPatchFieldBase::calculatedType()
         );
     }
 
@@ -332,7 +332,8 @@ bool Foam::functionObjects::pressure::calc()
                 p.mesh().time().timeName(),
                 p.mesh(),
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             coeff(calcPressure(p, rhoScale(p)))
         );

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedFaePatchField_H
-#define calculatedFaePatchField_H
+#ifndef Foam_calculatedFaePatchField_H
+#define Foam_calculatedFaePatchField_H
 
 #include "faePatchField.H"
 
@@ -57,11 +57,10 @@ class calculatedFaePatchField
 :
     public faePatchField<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("calculated");
+    TypeName("calculated");  // fieldTypes::calculatedTypeName_()
 
 
     // Constructors
@@ -78,10 +77,12 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         calculatedFaePatchField
         (
             const calculatedFaePatchField<Type>&,
@@ -91,10 +92,7 @@ public:
         );
 
         //- Construct as copy
-        calculatedFaePatchField
-        (
-            const calculatedFaePatchField<Type>&
-        );
+        calculatedFaePatchField(const calculatedFaePatchField<Type>&);
 
         //- Construct and return a clone
         virtual tmp<faePatchField<Type>> clone() const
@@ -128,18 +126,13 @@ public:
     virtual ~calculatedFaePatchField() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+        //- True: the patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
 
+    // Other
 
         //- Write
         virtual void write(Ostream&) const;

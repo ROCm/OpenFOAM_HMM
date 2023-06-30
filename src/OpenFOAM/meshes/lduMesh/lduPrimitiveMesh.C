@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
-    Copyright (C) 2019,2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,6 +116,8 @@ Foam::labelListList Foam::lduPrimitiveMesh::globalCellCells
     // Get the interface cells
     PtrList<labelList> nbrGlobalCells(interfaces.size());
     {
+        const label startOfRequests = UPstream::nRequests();
+
         // Initialise transfer of restrict addressing on the interface
         forAll(interfaces, inti)
         {
@@ -129,8 +131,7 @@ Foam::labelListList Foam::lduPrimitiveMesh::globalCellCells
             }
         }
 
-        // Wait for all
-        UPstream::waitRequests();
+        UPstream::waitRequests(startOfRequests);
 
         forAll(interfaces, inti)
         {
@@ -775,7 +776,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                         const auto fnd =
                             mergedMap.cfind(edge(agglom0, agglom1));
 
-                        if (fnd.found())
+                        if (fnd.good())
                         {
                             const labelPairList& elems = fnd();
 

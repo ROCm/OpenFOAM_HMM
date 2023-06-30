@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,19 +34,19 @@ License
 namespace Foam
 {
 
-    // Print range for debugging purposes
-    static Ostream& printRange(Ostream& os, const labelRange& range)
+// Print range for debugging purposes
+static Ostream& printRange(Ostream& os, const labelRange& range)
+{
+    if (range.empty())
     {
-        if (range.empty())
-        {
-            os  << "empty";
-        }
-        else
-        {
-            os  << range << " = " << range.first() << ":" << range.last();
-        }
-        return os;
+        os  << "empty";
     }
+    else
+    {
+        os  << range << " = " << range.min() << ':' << range.max();
+    }
+    return os;
+}
 
 } // End namespace Foam
 
@@ -141,7 +141,7 @@ bool Foam::labelRanges::add(const labelRange& range)
     }
     else if (this->empty())
     {
-        this->append(range);
+        this->push_back(range);
         return true;
     }
 
@@ -187,7 +187,7 @@ bool Foam::labelRanges::add(const labelRange& range)
 
 
     // not found: simply append
-    this->append(range);
+    this->push_back(range);
 
     return true;
 }
@@ -207,9 +207,9 @@ bool Foam::labelRanges::remove(const labelRange& range)
     {
         labelRange& currRange = list[elemi];
 
-        if (range.first() > currRange.first())
+        if (range.min() > currRange.min())
         {
-            if (range.last() < currRange.last())
+            if (range.max() < currRange.max())
             {
                 // Removal of range fragments of currRange
 
@@ -221,14 +221,14 @@ bool Foam::labelRanges::remove(const labelRange& range)
                 }
 
                 // left-hand-side fragment: insert before current range
-                label lower = currRange.first();
-                label upper = range.first() - 1;
+                label lower = currRange.min();
+                label upper = range.min() - 1;
 
                 labelRange fragment(lower, upper - lower + 1);
 
                 // right-hand-side fragment
-                lower = range.last() + 1;
-                upper = currRange.last();
+                lower = range.max() + 1;
+                upper = currRange.max();
 
                 currRange.reset(lower, upper - lower + 1);
                 currRange.clampSize();
@@ -247,7 +247,7 @@ bool Foam::labelRanges::remove(const labelRange& range)
                 // thus we are done
                 break;
             }
-            else if (range.first() <= currRange.last())
+            else if (range.min() <= currRange.max())
             {
                 // keep left-hand-side, remove right-hand-side
 
@@ -258,8 +258,8 @@ bool Foam::labelRanges::remove(const labelRange& range)
                     printRange(Info, currRange) << endl;
                 }
 
-                const label lower = currRange.first();
-                const label upper = range.first() - 1;
+                const label lower = currRange.min();
+                const label upper = range.min() - 1;
 
                 currRange.reset(lower, upper - lower + 1);
                 currRange.clampSize();
@@ -272,9 +272,9 @@ bool Foam::labelRanges::remove(const labelRange& range)
                 }
             }
         }
-        else if (range.first() <= currRange.first())
+        else if (range.min() <= currRange.min())
         {
-            if (range.last() >= currRange.first())
+            if (range.max() >= currRange.min())
             {
                 // remove left-hand-side, keep right-hand-side
 
@@ -285,8 +285,8 @@ bool Foam::labelRanges::remove(const labelRange& range)
                     printRange(Info, currRange) << endl;
                 }
 
-                const label lower = range.last() + 1;
-                const label upper = currRange.last();
+                const label lower = range.max() + 1;
+                const label upper = currRange.max();
 
                 currRange.reset(lower, upper - lower + 1);
                 currRange.clampSize();

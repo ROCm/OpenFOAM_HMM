@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorCyclicPointPatchField_H
-#define processorCyclicPointPatchField_H
+#ifndef Foam_processorCyclicPointPatchField_H
+#define Foam_processorCyclicPointPatchField_H
 
 #include "coupledPointPatchField.H"
 #include "processorCyclicPointPatch.H"
@@ -54,13 +55,16 @@ class processorCyclicPointPatchField
 :
     public coupledPointPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference to processor patch
         const processorCyclicPointPatch& procPatch_;
 
+        //- Send buffer for non-blocking communication
+        mutable Field<Type> sendBuf_;
+
         //- Receive buffer for non-blocking communication
-        mutable Field<Type> receiveBuf_;
+        mutable Field<Type> recvBuf_;
 
 
 public:
@@ -86,7 +90,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         processorCyclicPointPatchField
         (
             const processorCyclicPointPatchField<Type>&,
@@ -132,7 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~processorCyclicPointPatchField();
+    virtual ~processorCyclicPointPatchField() = default;
 
 
     // Member functions
@@ -149,10 +153,10 @@ public:
             virtual bool doTransform() const
             {
                 return
-                   !(
-                        pTraits<Type>::rank == 0
-                     || procPatch_.procPolyPatch().parallel()
-                    );
+                (
+                    pTraits<Type>::rank
+                 && !procPatch_.procPolyPatch().parallel()
+                );
             }
 
 

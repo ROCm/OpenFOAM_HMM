@@ -114,7 +114,7 @@ public:
         //- Return true if running parallel
         virtual bool coupled() const
         {
-            return Pstream::parRun();
+            return UPstream::parRun();
         }
 
         const processorPolyPatch& procPolyPatch() const

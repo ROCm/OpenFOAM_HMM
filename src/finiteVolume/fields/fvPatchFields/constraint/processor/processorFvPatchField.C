@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,12 +42,8 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 :
     coupledFvPatchField<Type>(p, iF),
     procPatch_(refCast<const processorFvPatch>(p)),
-    sendBuf_(0),
-    receiveBuf_(0),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1),
-    scalarSendBuf_(0),
-    scalarReceiveBuf_(0)
+    sendRequest_(-1),
+    recvRequest_(-1)
 {}
 
 
@@ -61,12 +57,8 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 :
     coupledFvPatchField<Type>(p, iF, f),
     procPatch_(refCast<const processorFvPatch>(p)),
-    sendBuf_(0),
-    receiveBuf_(0),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1),
-    scalarSendBuf_(0),
-    scalarReceiveBuf_(0)
+    sendRequest_(-1),
+    recvRequest_(-1)
 {}
 
 
@@ -78,14 +70,10 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
     const dictionary& dict
 )
 :
-    coupledFvPatchField<Type>(p, iF, dict, dict.found("value")),
+    coupledFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     procPatch_(refCast<const processorFvPatch>(p, dict)),
-    sendBuf_(0),
-    receiveBuf_(0),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1),
-    scalarSendBuf_(0),
-    scalarReceiveBuf_(0)
+    sendRequest_(-1),
+    recvRequest_(-1)
 {
     if (!isA<processorFvPatch>(p))
     {
@@ -98,10 +86,10 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
             << exit(FatalIOError);
     }
 
-    // If the value is not supplied set to the internal field
-    if (!dict.found("value"))
+    // Use 'value' supplied, or set to internal field
+    if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::operator=(this->patchInternalField());
+        this->extrapolateInternal();
     }
 }
 
@@ -117,26 +105,23 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 :
     coupledFvPatchField<Type>(ptf, p, iF, mapper),
     procPatch_(refCast<const processorFvPatch>(p)),
-    sendBuf_(0),
-    receiveBuf_(0),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1),
-    scalarSendBuf_(0),
-    scalarReceiveBuf_(0)
+    sendRequest_(-1),
+    recvRequest_(-1)
 {
     if (!isA<processorFvPatch>(this->patch()))
     {
         FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->internalField().name()
             << " in file " << this->internalField().objectPath()
             << exit(FatalError);
     }
-    if (debug && !ptf.ready())
+    if (debug && !ptf.all_ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name() << " outstanding request."
+            << "Outstanding request(s) on patch " << procPatch_.name()
             << abort(FatalError);
     }
 }
@@ -151,17 +136,17 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
     processorLduInterfaceField(),
     coupledFvPatchField<Type>(ptf),
     procPatch_(refCast<const processorFvPatch>(ptf.patch())),
+    sendRequest_(-1),
+    recvRequest_(-1),
     sendBuf_(std::move(ptf.sendBuf_)),
-    receiveBuf_(std::move(ptf.receiveBuf_)),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1),
+    recvBuf_(std::move(ptf.recvBuf_)),
     scalarSendBuf_(std::move(ptf.scalarSendBuf_)),
-    scalarReceiveBuf_(std::move(ptf.scalarReceiveBuf_))
+    scalarRecvBuf_(std::move(ptf.scalarRecvBuf_))
 {
-    if (debug && !ptf.ready())
+    if (debug && !ptf.all_ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name() << " outstanding request."
+            << "Outstanding request(s) on patch " << procPatch_.name()
             << abort(FatalError);
     }
 }
@@ -176,17 +161,13 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 :
     coupledFvPatchField<Type>(ptf, iF),
     procPatch_(refCast<const processorFvPatch>(ptf.patch())),
-    sendBuf_(0),
-    receiveBuf_(0),
-    outstandingSendRequest_(-1),
-    outstandingRecvRequest_(-1),
-    scalarSendBuf_(0),
-    scalarReceiveBuf_(0)
+    sendRequest_(-1),
+    recvRequest_(-1)
 {
-    if (debug && !ptf.ready())
+    if (debug && !ptf.all_ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name() << " outstanding request."
+            << "Outstanding request(s) on patch " << procPatch_.name()
             << abort(FatalError);
     }
 }
@@ -195,14 +176,33 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
+bool Foam::processorFvPatchField<Type>::all_ready() const
+{
+    return UPstream::finishedRequestPair(recvRequest_, sendRequest_);
+}
+
+
+template<class Type>
+bool Foam::processorFvPatchField<Type>::ready() const
+{
+    const bool ok = UPstream::finishedRequest(recvRequest_);
+    if (ok)
+    {
+        recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
+    }
+    return ok;
+}
+
+
+template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::processorFvPatchField<Type>::patchNeighbourField() const
 {
     if (debug && !this->ready())
     {
         FatalErrorInFunction
-            << "On patch " << procPatch_.name()
-            << " outstanding request."
+            << "Outstanding request on patch " << procPatch_.name()
             << abort(FatalError);
     }
     return *this;
@@ -215,14 +215,14 @@ void Foam::processorFvPatchField<Type>::initEvaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         this->patchInternalField(sendBuf_);
 
         if
         (
-            commsType == Pstream::commsTypes::nonBlocking
-         && !Pstream::floatTransfer
+            commsType == UPstream::commsTypes::nonBlocking
+         && (std::is_integral<Type>::value || !UPstream::floatTransfer)
         )
         {
             if (!is_contiguous<Type>::value)
@@ -233,11 +233,12 @@ void Foam::processorFvPatchField<Type>::initEvaluate
             }
 
             // Receive straight into *this
-            this->setSize(sendBuf_.size());
-            outstandingRecvRequest_ = UPstream::nRequests();
+            this->resize_nocopy(sendBuf_.size());
+
+            recvRequest_ = UPstream::nRequests();
             UIPstream::read
             (
-                Pstream::commsTypes::nonBlocking,
+                UPstream::commsTypes::nonBlocking,
                 procPatch_.neighbProcNo(),
                 this->data_bytes(),
                 this->size_bytes(),
@@ -245,10 +246,10 @@ void Foam::processorFvPatchField<Type>::initEvaluate
                 procPatch_.comm()
             );
 
-            outstandingSendRequest_ = UPstream::nRequests();
+            sendRequest_ = UPstream::nRequests();
             UOPstream::write
             (
-                Pstream::commsTypes::nonBlocking,
+                UPstream::commsTypes::nonBlocking,
                 procPatch_.neighbProcNo(),
                 sendBuf_.cdata_bytes(),
                 sendBuf_.size_bytes(),
@@ -270,26 +271,20 @@ void Foam::processorFvPatchField<Type>::evaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (Pstream::parRun())
+    if (UPstream::parRun())
     {
         if
         (
-            commsType == Pstream::commsTypes::nonBlocking
-         && !Pstream::floatTransfer
+            commsType == UPstream::commsTypes::nonBlocking
+         && (std::is_integral<Type>::value || !UPstream::floatTransfer)
         )
         {
-            // Fast path. Received into *this
+            // Fast path: received into *this
 
-            if
-            (
-                outstandingRecvRequest_ >= 0
-             && outstandingRecvRequest_ < UPstream::nRequests()
-            )
-            {
-                UPstream::waitRequest(outstandingRecvRequest_);
-            }
-            outstandingSendRequest_ = -1;
-            outstandingRecvRequest_ = -1;
+            // Require receive data.
+            // Only update the send request state.
+            UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+            if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
         }
         else
         {
@@ -332,7 +327,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 
     const labelUList& faceCells = lduAddr.patchAddr(patchId);
 
-    scalarSendBuf_.setSize(this->patch().size());
+    scalarSendBuf_.resize_nocopy(this->patch().size());
     forAll(scalarSendBuf_, facei)
     {
         scalarSendBuf_[facei] = psiInternal[faceCells[facei]];
@@ -340,36 +335,35 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 
     if
     (
-        commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+        commsType == UPstream::commsTypes::nonBlocking
+     && !UPstream::floatTransfer
     )
     {
         // Fast path.
-        if (debug && !this->ready())
+        if (debug && !this->all_ready())
         {
             FatalErrorInFunction
-                << "On patch " << procPatch_.name()
-                << " outstanding request."
+                << "Outstanding request(s) on patch " << procPatch_.name()
                 << abort(FatalError);
         }
 
+        scalarRecvBuf_.resize_nocopy(scalarSendBuf_.size());
 
-        scalarReceiveBuf_.setSize(scalarSendBuf_.size());
-        outstandingRecvRequest_ = UPstream::nRequests();
+        recvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            scalarReceiveBuf_.data_bytes(),
-            scalarReceiveBuf_.size_bytes(),
+            scalarRecvBuf_.data_bytes(),
+            scalarRecvBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
 
-        outstandingSendRequest_ = UPstream::nRequests();
+        sendRequest_ = UPstream::nRequests();
         UOPstream::write
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
             scalarSendBuf_.cdata_bytes(),
             scalarSendBuf_.size_bytes(),
@@ -382,7 +376,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         procPatch_.compressedSend(commsType, scalarSendBuf_);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -408,62 +402,34 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
 
     if
     (
-        commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+        commsType == UPstream::commsTypes::nonBlocking
+     && !UPstream::floatTransfer
     )
     {
-        // Fast path.
-        if
-        (
-            outstandingRecvRequest_ >= 0
-         && outstandingRecvRequest_ < UPstream::nRequests()
-        )
-        {
-            UPstream::waitRequest(outstandingRecvRequest_);
-        }
-        // Recv finished so assume sending finished as well.
-        outstandingSendRequest_ = -1;
-        outstandingRecvRequest_ = -1;
-        // Consume straight from scalarReceiveBuf_
+        // Fast path: consume straight from receive buffer
 
-        if (!std::is_arithmetic<Type>::value)
-        {
-            // Transform non-scalar data according to the transformation tensor
-            transformCoupleField(scalarReceiveBuf_, cmpt);
-        }
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField
-        (
-            result,
-            !add,
-            faceCells,
-            coeffs,
-            scalarReceiveBuf_
-        );
+        // Require receive data.
+        // Only update the send request state.
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
     else
     {
-        solveScalarField pnf
-        (
-            procPatch_.compressedReceive<solveScalar>
-            (
-                commsType,
-                this->size()
-            )()
-        );
-
-        if (!std::is_arithmetic<Type>::value)
-        {
-            // Transform non-scalar data according to the transformation tensor
-            transformCoupleField(pnf, cmpt);
-        }
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField(result, !add, faceCells, coeffs, pnf);
+        scalarRecvBuf_.resize_nocopy(this->size());
+        procPatch_.compressedReceive(commsType, scalarRecvBuf_);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
+
+    if (pTraits<Type>::rank)
+    {
+        // Transform non-scalar data according to the transformation tensor
+        transformCoupleField(scalarRecvBuf_, cmpt);
+    }
+
+    // Multiply the field by coefficients and add into the result
+    this->addToInternalField(result, !add, faceCells, coeffs, scalarRecvBuf_);
+
+    this->updatedMatrix(true);
 }
 
 
@@ -479,7 +445,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-    sendBuf_.setSize(this->patch().size());
+    sendBuf_.resize_nocopy(this->patch().size());
 
     const labelUList& faceCells = lduAddr.patchAddr(patchId);
 
@@ -490,36 +456,35 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
 
     if
     (
-        commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+        commsType == UPstream::commsTypes::nonBlocking
+     && (std::is_integral<Type>::value || !UPstream::floatTransfer)
     )
     {
         // Fast path.
-        if (debug && !this->ready())
+        if (debug && !this->all_ready())
         {
             FatalErrorInFunction
-                << "On patch " << procPatch_.name()
-                << " outstanding request."
+                << "Outstanding request(s) on patch " << procPatch_.name()
                 << abort(FatalError);
         }
 
+        recvBuf_.resize_nocopy(sendBuf_.size());
 
-        receiveBuf_.setSize(sendBuf_.size());
-        outstandingRecvRequest_ = UPstream::nRequests();
+        recvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
-            receiveBuf_.data_bytes(),
-            receiveBuf_.size_bytes(),
+            recvBuf_.data_bytes(),
+            recvBuf_.size_bytes(),
             procPatch_.tag(),
             procPatch_.comm()
         );
 
-        outstandingSendRequest_ = UPstream::nRequests();
+        sendRequest_ = UPstream::nRequests();
         UOPstream::write
         (
-            Pstream::commsTypes::nonBlocking,
+            UPstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
             sendBuf_.cdata_bytes(),
             sendBuf_.size_bytes(),
@@ -532,7 +497,7 @@ void Foam::processorFvPatchField<Type>::initInterfaceMatrixUpdate
         procPatch_.compressedSend(commsType, sendBuf_);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = false;
+    this->updatedMatrix(false);
 }
 
 
@@ -557,79 +522,31 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
 
     if
     (
-        commsType == Pstream::commsTypes::nonBlocking
-     && !Pstream::floatTransfer
+        commsType == UPstream::commsTypes::nonBlocking
+     && (std::is_integral<Type>::value || !UPstream::floatTransfer)
     )
     {
-        // Fast path.
-        if
-        (
-            outstandingRecvRequest_ >= 0
-         && outstandingRecvRequest_ < UPstream::nRequests()
-        )
-        {
-            UPstream::waitRequest(outstandingRecvRequest_);
-        }
-        // Recv finished so assume sending finished as well.
-        outstandingSendRequest_ = -1;
-        outstandingRecvRequest_ = -1;
+        // Fast path: consume straight from receive buffer
 
-        // Consume straight from receiveBuf_
-
-        // Transform according to the transformation tensor
-        transformCoupleField(receiveBuf_);
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField(result, !add, faceCells, coeffs, receiveBuf_);
+        // Require receive data.
+        // Only update the send request state.
+        UPstream::waitRequest(recvRequest_); recvRequest_ = -1;
+        if (UPstream::finishedRequest(sendRequest_)) sendRequest_ = -1;
     }
     else
     {
-        Field<Type> pnf
-        (
-            procPatch_.compressedReceive<Type>(commsType, this->size())()
-        );
-
-        // Transform according to the transformation tensor
-        transformCoupleField(pnf);
-
-        // Multiply the field by coefficients and add into the result
-        this->addToInternalField(result, !add, faceCells, coeffs, pnf);
+        recvBuf_.resize_nocopy(this->size());
+        procPatch_.compressedReceive(commsType, recvBuf_);
     }
 
-    const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
-}
 
+    // Transform according to the transformation tensor
+    transformCoupleField(recvBuf_);
 
-template<class Type>
-bool Foam::processorFvPatchField<Type>::ready() const
-{
-    if
-    (
-        outstandingSendRequest_ >= 0
-     && outstandingSendRequest_ < UPstream::nRequests()
-    )
-    {
-        if (!UPstream::finishedRequest(outstandingSendRequest_))
-        {
-            return false;
-        }
-    }
-    outstandingSendRequest_ = -1;
+    // Multiply the field by coefficients and add into the result
+    this->addToInternalField(result, !add, faceCells, coeffs, recvBuf_);
 
-    if
-    (
-        outstandingRecvRequest_ >= 0
-     && outstandingRecvRequest_ < UPstream::nRequests()
-    )
-    {
-        if (!UPstream::finishedRequest(outstandingRecvRequest_))
-        {
-            return false;
-        }
-    }
-    outstandingRecvRequest_ = -1;
-
-    return true;
+    this->updatedMatrix(true);
 }
 
 

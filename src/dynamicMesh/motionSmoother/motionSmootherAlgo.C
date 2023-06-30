@@ -789,7 +789,7 @@ Foam::tmp<Foam::pointField> Foam::motionSmootherAlgo::curPoints() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         scale_*displacement_,
         actualPatchFieldTypes,

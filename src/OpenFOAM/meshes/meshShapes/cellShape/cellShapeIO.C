@@ -115,9 +115,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const cellShape& s)
 
 
 template<>
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<cellShape>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<cellShape>& iproxy
+)
 {
-    const cellShape& cs = ip.t_;
+    const auto& cs = *iproxy;
 
     if (isNull(cs.model()))
     {
@@ -125,7 +129,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<cellShape>& ip)
     }
     else
     {
-        os  << cs.model().info() << endl;
+        os  << cs.model().info() << nl;
     }
 
     os  << "\tGeom:\tpoint\tlabel\txyz\n";

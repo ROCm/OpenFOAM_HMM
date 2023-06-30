@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::vector2DFieldIOField
-
-Description
-    vector2DFieldField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef vector2DFieldIOField_H
-#define vector2DFieldIOField_H
+#ifndef Foam_vector2DFieldIOField_H
+#define Foam_vector2DFieldIOField_H
 
 #include "vector2DField.H"
 #include "CompactIOField.H"
@@ -41,7 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of vector2DField
     typedef IOField<vector2DField> vector2DFieldIOField;
+
+    //! Compact IO for a Field of vector2DField
     typedef CompactIOField<vector2DField, vector2D> vector2DFieldCompactIOField;
 }
 

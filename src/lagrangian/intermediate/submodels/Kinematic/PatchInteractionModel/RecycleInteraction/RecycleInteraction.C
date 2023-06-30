@@ -246,11 +246,13 @@ void Foam::RecycleInteraction<CloudType>::postEvolve()
 
         pBufs.finishedSends();
 
-        if (!returnReduceOr(pBufs.hasRecvData()))
-        {
-            // No parcels to recycle
-            return;
-        }
+        // Not looping, so no early exit needed
+        //
+        // if (!returnReduceOr(pBufs.hasRecvData()))
+        // {
+        //     // No parcels to recycle
+        //     return;
+        // }
 
         // Retrieve from receive buffers
         for (const int proci : pBufs.allProcs())

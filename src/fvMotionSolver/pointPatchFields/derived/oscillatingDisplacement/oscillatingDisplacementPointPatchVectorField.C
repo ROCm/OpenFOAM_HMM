@@ -121,7 +121,7 @@ void oscillatingDisplacementPointPatchVectorField::write(Ostream& os) const
     pointPatchField<vector>::write(os);
     os.writeEntry("amplitude", amplitude_);
     os.writeEntry("omega", omega_);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

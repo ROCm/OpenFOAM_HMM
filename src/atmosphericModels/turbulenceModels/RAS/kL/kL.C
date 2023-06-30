@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,7 +89,7 @@ tmp<volScalarField> kL<BasicTurbulenceModel>::epsilonCanopy() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(sqr(dimLength)/pow3(dimTime), Zero)
@@ -136,7 +136,7 @@ tmp<volScalarField> kL<BasicTurbulenceModel>::canopyHeight() const
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(dimLength, Zero)
@@ -430,7 +430,7 @@ void kL<BasicTurbulenceModel>::correct()
     const volScalarField::Internal G
     (
         this->GName(),
-        nut.v()*2*magSqr(dev(symm(tgradU.cref().v())))
+        nut.v()*2*magSqr(devSymm(tgradU.cref().v()))
     );
     tgradU.clear();
 

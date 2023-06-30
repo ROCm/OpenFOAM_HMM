@@ -40,7 +40,20 @@ edgeNormalFixedValueFaPatchVectorField
 )
 :
     fixedValueFaPatchVectorField(p, iF),
-    refValue_(p.size(), 0)
+    refValue_(p.size(), Zero)
+{}
+
+
+Foam::edgeNormalFixedValueFaPatchVectorField::
+edgeNormalFixedValueFaPatchVectorField
+(
+    const faPatch& p,
+    const DimensionedField<vector, areaMesh>& iF,
+    const scalar refValue
+)
+:
+    fixedValueFaPatchVectorField(p, iF),
+    refValue_(p.size(), refValue)
 {}
 
 
@@ -66,9 +79,13 @@ edgeNormalFixedValueFaPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFaPatchVectorField(p, iF, dict),
+    fixedValueFaPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     refValue_("refValue", dict, p.size())
-{}
+{
+    tmp<vectorField> tvalues(refValue_*patch().edgeNormals());
+
+    faPatchVectorField::operator=(tvalues);
+}
 
 
 Foam::edgeNormalFixedValueFaPatchVectorField::
@@ -128,29 +145,30 @@ void Foam::edgeNormalFixedValueFaPatchVectorField::updateCoeffs()
         return;
     }
 
-    operator==(refValue_*patch().edgeNormals());
+    tmp<vectorField> tvalues(refValue_*patch().edgeNormals());
+
+    faPatchVectorField::operator=(tvalues);
+    faPatchVectorField::updateCoeffs();
 }
 
 
 void Foam::edgeNormalFixedValueFaPatchVectorField::write(Ostream& os) const
 {
-    fixedValueFaPatchVectorField::write(os);
+    fixedValueFaPatchField<vector>::write(os);
     refValue_.writeEntry("refValue", os);
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-makeFaPatchTypeField
-(
-    faPatchVectorField,
-    edgeNormalFixedValueFaPatchVectorField
-);
-
-} // End namespace Foam
+    makeFaPatchTypeField
+    (
+        faPatchVectorField,
+        edgeNormalFixedValueFaPatchVectorField
+    );
+}
 
 
 // ************************************************************************* //

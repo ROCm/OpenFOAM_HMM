@@ -101,7 +101,8 @@ bool Foam::functionObjects::filmFlux::execute()
                 time_.timeName(),
                 filmMesh,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             filmMesh,
             dimensionedScalar(dimMass/dimTime, Zero)
@@ -125,11 +126,11 @@ bool Foam::functionObjects::filmFlux::execute()
             filmMesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         filmMesh,
         dimensionedScalar(dimLength, Zero),
-        zeroGradientFvPatchScalarField::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
 
     auto& heightc = height.ref();

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2018 OpenFOAM Foundation
-    Copyright (C) 2018-2020 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -415,12 +415,14 @@ void kEpsilonLopesdaCosta<BasicTurbulenceModel>::correct()
     volScalarField::Internal G
     (
         this->GName(),
-        nut.v()*(dev(twoSymm(tgradU().v())) && tgradU().v())
+        nut.v()*(devTwoSymm(tgradU().v()) && tgradU().v())
     );
     tgradU.clear();
 
     // Update epsilon and G at the wall
     epsilon_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    epsilon_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
     volScalarField::Internal magU(mag(U));
     volScalarField::Internal magU3(pow3(magU));

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,13 @@ template<class T>
 inline void Foam::UPtrList<T>::setAddressableSize(const label n) noexcept
 {
     ptrs_.setAddressableSize(n);
+}
+
+
+template<class T>
+inline Foam::label Foam::UPtrList<T>::find_next(label pos) const
+{
+    return ptrs_.find_next(pos);
 }
 
 
@@ -103,13 +110,6 @@ inline Foam::UPtrList<T>::UPtrList(UList<T>& list)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::label Foam::UPtrList<T>::size() const noexcept
-{
-    return ptrs_.size();
-}
-
-
-template<class T>
 inline bool Foam::UPtrList<T>::empty() const noexcept
 {
     return ptrs_.empty();
@@ -117,30 +117,71 @@ inline bool Foam::UPtrList<T>::empty() const noexcept
 
 
 template<class T>
+inline Foam::label Foam::UPtrList<T>::size() const noexcept
+{
+    return ptrs_.size();
+}
+
+
+template<class T>
+inline Foam::label Foam::UPtrList<T>::count() const noexcept
+{
+    return ptrs_.count();
+}
+
+
+template<class T>
 inline const T* Foam::UPtrList<T>::test(const label i) const
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    return ptrs_.get(i);
 }
 
 
 template<class T>
 inline const T* Foam::UPtrList<T>::get(const label i) const
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    return ptrs_.get(i);
 }
 
 
 template<class T>
 inline T* Foam::UPtrList<T>::get(const label i)
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    return ptrs_.get(i);
 }
 
 
 template<class T>
-inline const T* Foam::UPtrList<T>::set(const label i) const
+inline const T& Foam::UPtrList<T>::at(const label i) const
 {
-    return (i >= 0 && i < ptrs_.size()) ? ptrs_[i] : nullptr;
+    const T* ptr = ptrs_.get(i);
+
+    if (!ptr)
+    {
+        FatalErrorInFunction
+            << "Cannot dereference nullptr at index " << i
+            << " in range [0," << size() << ")\n"
+            << abort(FatalError);
+    }
+
+    return *ptr;
+}
+
+
+template<class T>
+inline T& Foam::UPtrList<T>::at(const label i)
+{
+    T* ptr = ptrs_.get(i);
+
+    if (!ptr)
+    {
+        FatalErrorInFunction
+            << "Cannot dereference nullptr at index " << i
+            << " in range [0," << size() << ")\n"
+            << abort(FatalError);
+    }
+
+    return *ptr;
 }
 
 
@@ -165,6 +206,13 @@ inline void Foam::UPtrList<T>::clear()
 
 
 template<class T>
+inline void Foam::UPtrList<T>::free()
+{
+    ptrs_.setNull();
+}
+
+
+template<class T>
 inline void Foam::UPtrList<T>::swap(UPtrList<T>& list)
 {
     ptrs_.swap(list.ptrs_);
@@ -181,28 +229,28 @@ inline void Foam::UPtrList<T>::transfer(UPtrList<T>& list)
 template<class T>
 inline T& Foam::UPtrList<T>::front()
 {
-    return this->operator[](0);
+    return this->at(0);
 }
 
 
 template<class T>
 inline const T& Foam::UPtrList<T>::front() const
 {
-    return this->operator[](0);
+    return this->at(0);
 }
 
 
 template<class T>
 inline T& Foam::UPtrList<T>::back()
 {
-    return this->operator[](this->size()-1);
+    return this->at(this->size()-1);
 }
 
 
 template<class T>
 inline const T& Foam::UPtrList<T>::back() const
 {
-    return this->operator[](this->size()-1);
+    return this->at(this->size()-1);
 }
 
 
@@ -240,386 +288,150 @@ inline void Foam::UPtrList<T>::checkNonNull() const
 template<class T>
 inline const T& Foam::UPtrList<T>::operator[](const label i) const
 {
-    const T* ptr = ptrs_[i];
-
-    if (!ptr)
-    {
-        FatalErrorInFunction
-            << "Cannot dereference nullptr at index " << i
-            << " in range [0," << size() << ")\n"
-            << abort(FatalError);
-    }
-
-    return *ptr;
+    return this->at(i);
 }
 
 
 template<class T>
 inline T& Foam::UPtrList<T>::operator[](const label i)
 {
-    T* ptr = ptrs_[i];
-
-    if (!ptr)
-    {
-        FatalErrorInFunction
-            << "Cannot dereference nullptr at index " << i
-            << " in range [0," << size() << ")\n"
-            << abort(FatalError);
-    }
-
-    return *ptr;
+    return this->at(i);
 }
 
 
-// * * * * * * * * * * * * * * * * iterator  * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * iterator base * * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::UPtrList<T>::iterator::
-iterator(T** ptr) noexcept
+template<bool Const>
+inline constexpr
+Foam::UPtrList<T>::Iterator<Const>::Iterator() noexcept
 :
-    ptr_(ptr)
+    list_(nullptr),
+    pos_(-1)
 {}
 
+
+template<class T>
+template<bool Const>
+inline Foam::UPtrList<T>::Iterator<Const>::Iterator
+(
+    list_type* list
+)
+:
+    list_(list),
+    pos_(-1)
+{
+    if (list_)
+    {
+        pos_ = list_->find_next(-1);
+    }
+}
+
+
+template<class T>
+template<bool Const>
+inline void Foam::UPtrList<T>::Iterator<Const>::increment()
+{
+    //TDB: extra safety?  if (iter.good())
+    {
+        pos_ = list_->find_next(pos_);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * STL iterator  * * * * * * * * * * * * * * //
 
 template<class T>
 inline T* Foam::UPtrList<T>::iterator::get() const
 {
-    return *ptr_;
+    return this->good() ? this->list_->get(this->pos_) : nullptr;
 }
 
 
 template<class T>
-inline T* Foam::UPtrList<T>::iterator::operator->() const
+inline T& Foam::UPtrList<T>::iterator::val() const
 {
-    return *ptr_;
+    return this->list_->at(this->pos_);
 }
 
-
-template<class T>
-inline T& Foam::UPtrList<T>::iterator::operator*() const
-{
-    return **ptr_;
-}
-
-
-template<class T>
-inline T& Foam::UPtrList<T>::iterator::operator[](label n) const
-{
-    return **(ptr_ + n);
-}
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator++() noexcept
+Foam::UPtrList<T>::iterator::operator++()
 {
-    ++ptr_;
+    this->increment();
     return *this;
 }
 
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator++(int) noexcept
+Foam::UPtrList<T>::iterator::operator++(int)
 {
     iterator iter(*this);
-    ++ptr_;
+    this->increment();
     return iter;
 }
 
 
-template<class T>
-inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator--() noexcept
-{
-    --ptr_;
-    return *this;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator--(int) noexcept
-{
-    iterator iter(*this);
-    --ptr_;
-    return iter;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator+=(label n) noexcept
-{
-    ptr_ += n;
-    return *this;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::iterator&
-Foam::UPtrList<T>::iterator::operator-=(label n) noexcept
-{
-    ptr_ -= n;
-    return *this;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator+(label n) const noexcept
-{
-    return iterator(ptr_ + n);
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::iterator::operator-(label n) const noexcept
-{
-    return iterator(ptr_ - n);
-}
-
-
-template<class T>
-inline Foam::label
-Foam::UPtrList<T>::iterator::
-operator-(const iterator& iter) const noexcept
-{
-    return (ptr_ - iter.ptr_);
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::
-operator==(const iterator& iter) const noexcept
-{
-    return ptr_ == iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::
-operator!=(const iterator& iter) const noexcept
-{
-    return ptr_ != iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::
-operator<(const iterator& iter) const noexcept
-{
-    return ptr_ < iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::
-operator>(const iterator& iter) const noexcept
-{
-    return ptr_ > iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::
-operator<=(const iterator& iter) const noexcept
-{
-    return ptr_ <= iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::iterator::
-operator>=(const iterator& iter) const noexcept
-{
-    return ptr_ >= iter.ptr_;
-}
-
-
-// * * * * * * * * * * * * * * * const_iterator  * * * * * * * * * * * * * * //
-
-template<class T>
-inline Foam::UPtrList<T>::const_iterator::
-const_iterator(const T* const* ptr) noexcept
-:
-    ptr_(ptr)
-{}
-
-
-template<class T>
-inline Foam::UPtrList<T>::const_iterator::
-const_iterator(const iterator& iter) noexcept
-:
-    ptr_(iter.ptr_)
-{}
-
+// * * * * * * * * * * * * * * * STL const_iterator  * * * * * * * * * * * * //
 
 template<class T>
 inline const T* Foam::UPtrList<T>::const_iterator::get() const
 {
-    return *ptr_;
+    return this->good() ? this->list_->get(this->pos_) : nullptr;
 }
 
 
 template<class T>
-inline const T* Foam::UPtrList<T>::const_iterator::operator->() const
+inline const T& Foam::UPtrList<T>::const_iterator::val() const
 {
-    return *ptr_;
-}
-
-
-template<class T>
-inline const T& Foam::UPtrList<T>::const_iterator::operator*() const
-{
-    return **ptr_;
-}
-
-
-template<class T>
-inline const T&
-Foam::UPtrList<T>::const_iterator::operator[](label n) const
-{
-    return **(ptr_ + n);
+    return this->list_->at(this->pos_);
 }
 
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator++() noexcept
+Foam::UPtrList<T>::const_iterator::operator++()
 {
-    ++ptr_;
+    this->increment();
     return *this;
 }
 
 
 template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator++(int) noexcept
+Foam::UPtrList<T>::const_iterator::operator++(int)
 {
     const_iterator iter(*this);
-    ++ptr_;
+    this->increment();
     return iter;
 }
 
 
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator--() noexcept
-{
-    --ptr_;
-    return *this;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator--(int) noexcept
-{
-    const_iterator iter(*this);
-    --ptr_;
-    return iter;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator+=(label n) noexcept
-{
-    ptr_ += n;
-    return *this;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator&
-Foam::UPtrList<T>::const_iterator::operator-=(label n) noexcept
-{
-    ptr_ -= n;
-    return *this;
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator+(label n) const noexcept
-{
-    return const_iterator(ptr_ + n);
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::const_iterator::operator-(label n) const noexcept
-{
-    return const_iterator(ptr_ - n);
-}
-
-
-template<class T>
-inline Foam::label
-Foam::UPtrList<T>::const_iterator::
-operator-(const const_iterator& iter) const noexcept
-{
-    return (ptr_ - iter.ptr_);
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::
-operator==(const const_iterator& iter) const noexcept
-{
-    return ptr_ == iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::
-operator!=(const const_iterator& iter) const noexcept
-{
-    return ptr_ != iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::
-operator<(const const_iterator& iter) const noexcept
-{
-    return ptr_ < iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::
-operator>(const const_iterator& iter) const noexcept
-{
-    return ptr_ > iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::
-operator<=(const const_iterator& iter) const noexcept
-{
-    return ptr_ <= iter.ptr_;
-}
-
-
-template<class T>
-inline bool Foam::UPtrList<T>::const_iterator::
-operator>=(const const_iterator& iter) const noexcept
-{
-    return ptr_ >= iter.ptr_;
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class T>
 inline typename Foam::UPtrList<T>::iterator
-Foam::UPtrList<T>::begin() noexcept
+Foam::UPtrList<T>::begin()
 {
-    return ptrs_.begin();
+    return iterator(Iterator<false>(this));
+}
+
+
+template<class T>
+inline typename Foam::UPtrList<T>::const_iterator
+Foam::UPtrList<T>::begin() const
+{
+    return const_iterator(Iterator<true>(this));
+}
+
+
+template<class T>
+inline typename Foam::UPtrList<T>::const_iterator
+Foam::UPtrList<T>::cbegin() const
+{
+    return const_iterator(Iterator<true>(this));
 }
 
 
@@ -627,31 +439,7 @@ template<class T>
 inline typename Foam::UPtrList<T>::iterator
 Foam::UPtrList<T>::end() noexcept
 {
-    return ptrs_.end();
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::cbegin() const noexcept
-{
-    return ptrs_.cbegin();
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::cend() const noexcept
-{
-    return ptrs_.cend();
-}
-
-
-template<class T>
-inline typename Foam::UPtrList<T>::const_iterator
-Foam::UPtrList<T>::begin() const noexcept
-{
-    return ptrs_.begin();
+    return iterator();
 }
 
 
@@ -659,7 +447,15 @@ template<class T>
 inline typename Foam::UPtrList<T>::const_iterator
 Foam::UPtrList<T>::end() const noexcept
 {
-    return ptrs_.end();
+    return UPtrList<T>::const_iterator();
+}
+
+
+template<class T>
+inline typename Foam::UPtrList<T>::const_iterator
+Foam::UPtrList<T>::cend() const noexcept
+{
+    return UPtrList<T>::const_iterator();
 }
 
 

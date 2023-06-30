@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +110,7 @@ tmp<volScalarField> SLTSDdtScheme<Type>::SLrDeltaT() const
             ),
             mesh(),
             dimensionedScalar(dimless/dimTime, Zero),
-            extrapolatedCalculatedFvPatchScalarField::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 
@@ -165,7 +166,7 @@ SLTSDdtScheme<Type>::fvcDdt
     (
         "ddt("+dt.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
@@ -183,6 +184,11 @@ SLTSDdtScheme<Type>::fvcDdt
         tdtdt.ref().primitiveFieldRef() =
             rDeltaT.primitiveField()*dt.value()*(1.0 - mesh().V0()/mesh().V());
 
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
         return tdtdt;
     }
     else
@@ -194,7 +200,7 @@ SLTSDdtScheme<Type>::fvcDdt
                 ddtIOobject,
                 mesh(),
                 dimensioned<Type>(dt.dimensions()/dimTime, Zero),
-                calculatedFvPatchField<Type>::typeName
+                fvPatchFieldBase::calculatedType()
             )
         );
     }
@@ -214,12 +220,12 @@ SLTSDdtScheme<Type>::fvcDdt
     (
         "ddt("+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -237,6 +243,13 @@ SLTSDdtScheme<Type>::fvcDdt
                 )
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -266,12 +279,12 @@ SLTSDdtScheme<Type>::fvcDdt
     (
         "ddt("+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -289,6 +302,13 @@ SLTSDdtScheme<Type>::fvcDdt
                 )
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -318,12 +338,12 @@ SLTSDdtScheme<Type>::fvcDdt
     (
         "ddt("+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -344,6 +364,13 @@ SLTSDdtScheme<Type>::fvcDdt
                 )
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -374,12 +401,12 @@ SLTSDdtScheme<Type>::fvcDdt
     (
         "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
+        tmp<GeometricField<Type, fvPatchField, volMesh>> tdtdt
         (
             new GeometricField<Type, fvPatchField, volMesh>
             (
@@ -409,6 +436,13 @@ SLTSDdtScheme<Type>::fvcDdt
                 )
             )
         );
+
+        // Different operation on boundary v.s. internal so re-evaluate
+        // coupled boundaries
+        tdtdt.ref().boundaryFieldRef().
+            template evaluateCoupled<coupledFvPatch>();
+
+        return tdtdt;
     }
     else
     {
@@ -606,7 +640,7 @@ SLTSDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phiUf0, phiCorr)
            *rDeltaT*phiCorr
@@ -638,7 +672,7 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr)
            *rDeltaT*phiCorr
@@ -681,7 +715,7 @@ SLTSDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(rhoU0, phiUf0, phiCorr, rho.oldTime())
                *rDeltaT*phiCorr
@@ -709,7 +743,7 @@ SLTSDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -768,7 +802,7 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -800,7 +834,7 @@ SLTSDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -837,10 +871,10 @@ tmp<surfaceScalarField> SLTSDdtScheme<Type>::meshPhi
             (
                 "meshPhi",
                 mesh().time().timeName(),
-                mesh(),
+                mesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh(),
             dimensionedScalar(dimVolume/dimTime, Zero)

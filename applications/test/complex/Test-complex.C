@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,9 @@ Description
 #include "complex.H"
 #include "complexFields.H"
 #include "scalarField.H"
+#include "diagTensor.H"
+#include "symmTensor.H"
+#include "symmTensor2D.H"
 #include "ListOps.H"
 #include "ops.H"
 
@@ -59,9 +62,24 @@ int main(int argc, char *argv[])
         << "complexVector::one  : " << complexVector::one << nl
         << nl;
 
+    {
+        const complex a(0, 1);
+        const complex b(20, 100);
+
+        Info<< "lerp of " << a << " : " << b << nl;
+
+        for (const double t : { 0.0, 0.5, 1.0, -0.5, 1.5 })
+        {
+            Info<< "    " << t << " = " << lerp(a, b, t) << nl;
+        }
+    }
+
     for (complex c : { complex{1, 0}, complex{1, 2}} )
     {
-        Info<< nl << "complex : " << c << nl;
+        Info<< nl << "complex : " << c
+            << " mag = " << c.magnitude()
+            << " norm = " << c.magSqr()
+            << nl;
 
         Info<< "sin: " << sin(c) << nl
             << "pow(3.0f): " << pow(c, 3.0f) << nl
@@ -130,6 +148,8 @@ int main(int argc, char *argv[])
 
         complexField cmplx(4);
 
+        zip(cmplx, reals, zero{});
+        zip(cmplx, 1, imags);
         zip(cmplx, reals, imags);
         Info<< nl
             << "zip " << reals << nl
@@ -145,6 +165,72 @@ int main(int argc, char *argv[])
         Info<< "unzip " << cmplx << nl
             << " => " << reals << nl
             << " => " << imags << nl;
+    }
+
+    {
+        SymmTensor<complex> st1(SymmTensor<complex>::uniform({3, 4}));
+
+        Info<< "symmTensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << nl;
+
+        SymmTensor<scalar> st2(SymmTensor<scalar>::uniform(5));
+
+        Info<< "symmTensor: " << st2 << nl
+            << "  tr: " << tr(st2) << nl
+            << "  diagSqr: " << st2.diagSqr() << nl
+            << "  magSqr: " << magSqr(st2) << nl
+            << "  mag: " << mag(st2) << nl;
+
+        st2 = Zero;
+
+        DiagTensor<complex> dt1(SphericalTensor<complex>({3, 4}));
+
+        Info<< "diagTensor: " << dt1 << nl
+            << "  tr: " << tr(dt1) << nl
+            << "  diagSqr: " << dt1.diagSqr() << nl
+            << "  magSqr: " << magSqr(dt1) << nl
+            << "  mag: " << mag(dt1) << nl;
+
+
+        // A bit ugly...
+        st1 = SphericalTensor<complex>({3, 4});
+
+        Info<< "symmTensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << nl;
+    }
+
+    {
+        SymmTensor2D<complex> st1(SymmTensor2D<complex>::uniform({3, 4}));
+
+        Info<< "symmTensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << nl;
+    }
+
+    {
+        Tensor<complex> st1(Tensor<complex>::uniform({3, 4}));
+
+        Info<< "tensor: " << st1 << nl
+            << "  tr: " << tr(st1) << nl
+            << "  diagSqr: " << st1.diagSqr() << nl
+            << "  magSqr: " << magSqr(st1) << nl
+            << "  mag: " << mag(st1) << endl;
+
+        Tensor<scalar> st2(Tensor<scalar>::uniform(5));
+
+        Info<< "Tensor: " << st2 << nl
+            << "  tr: " << tr(st2) << nl
+            << "  diagSqr: " << st2.diagSqr() << nl
+            << "  magSqr: " << magSqr(st2) << nl
+            << "  mag: " << mag(st2) << endl;
     }
 
     complexField fld1(3, complex(2.0, 1.0));
@@ -344,6 +430,24 @@ int main(int argc, char *argv[])
 
     // MinMax fails since there is no less comparison operator
     // Info<< "min/max = " << MinMax<complex>(fld1) << nl;
+
+
+    // Cross-product
+    {
+        const vector vec(1, 2, 3);
+        const vector realValue(4, 5, 6);
+        const vector imagValue(7, 8, 9);
+
+        complexVector cmplxVec(zip(realValue, imagValue));
+
+        Info<< "complexVector: " << cmplxVec << nl;
+        Info<< "cross: " << (vec ^ cmplxVec) << nl;
+
+        Info<< "cross real: " << (vec ^ realValue) << nl
+            << "cross imag: " << (vec ^ imagValue) << nl
+            << "cross     : "
+            << zip((vec ^ realValue), (vec ^ imagValue)) << nl;
+    }
 
     Info<< "\nEnd\n" << endl;
 

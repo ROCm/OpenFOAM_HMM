@@ -46,7 +46,7 @@ Foam::scalar Foam::waveModels::irregularWaveModel::timeCoeff
     const scalar t
 ) const
 {
-    return max(0, min(t/rampTime_, 1));
+    return clamp(t/rampTime_, zero_one{});
 }
 
 

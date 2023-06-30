@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicPointPatchField_H
-#define cyclicPointPatchField_H
+#ifndef Foam_cyclicPointPatchField_H
+#define Foam_cyclicPointPatchField_H
 
 #include "coupledPointPatchField.H"
 #include "cyclicPointPatch.H"
@@ -83,7 +83,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         cyclicPointPatchField
         (
             const cyclicPointPatchField<Type>&,
@@ -142,7 +142,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return !(cyclicPatch_.parallel() || pTraits<Type>::rank == 0);
+                return (pTraits<Type>::rank && !cyclicPatch_.parallel());
             }
 
             //- Return face transformation tensor

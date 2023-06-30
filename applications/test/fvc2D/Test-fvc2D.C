@@ -35,15 +35,18 @@ Description
 #include "vector2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 namespace Foam
 {
     typedef GeometricField<vector2D, fvPatchField, volMesh> volVector2DField;
+    typedef fvPatchField<vector2D> fvPatchVector2DField;
 
     defineTemplateTypeNameAndDebug(volVector2DField::Internal, 0);
     defineTemplateTypeNameAndDebug(volVector2DField, 0);
 
-    typedef fvPatchField<vector2D> fvPatchVector2DField;
-    makeFvPatchField(fvPatchVector2DField)
+    defineTemplateRunTimeSelectionTable(fvPatchVector2DField, patch);
+    defineTemplateRunTimeSelectionTable(fvPatchVector2DField, patchMapper);
+    defineTemplateRunTimeSelectionTable(fvPatchVector2DField, dictionary);
 }
 
 

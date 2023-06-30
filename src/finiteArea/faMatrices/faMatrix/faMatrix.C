@@ -29,6 +29,7 @@ License
 #include "areaFields.H"
 #include "edgeFields.H"
 #include "calculatedFaPatchFields.H"
+#include "extrapolatedCalculatedFaPatchFields.H"
 #include "zeroGradientFaPatchFields.H"
 #include "IndirectList.H"
 #include "UniformList.H"
@@ -610,7 +611,7 @@ void Foam::faMatrix<Type>::relax()
 template<class Type>
 Foam::tmp<Foam::scalarField> Foam::faMatrix<Type>::D() const
 {
-    tmp<scalarField> tdiag(new scalarField(diag()));
+    auto tdiag = tmp<scalarField>::New(diag());
     addCmptAvBoundaryDiag(tdiag.ref());
     return tdiag;
 }
@@ -619,20 +620,12 @@ Foam::tmp<Foam::scalarField> Foam::faMatrix<Type>::D() const
 template<class Type>
 Foam::tmp<Foam::areaScalarField> Foam::faMatrix<Type>::A() const
 {
-    tmp<areaScalarField> tAphi
+    auto tAphi = areaScalarField::New
     (
-        new areaScalarField
-        (
-            IOobject
-            (
-                "A("+psi_.name()+')',
-                psi_.instance(),
-                psi_.db()
-            ),
-            psi_.mesh(),
-            dimensions_/psi_.dimensions()/dimArea,
-            zeroGradientFaPatchScalarField::typeName
-        )
+        "A(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions_/psi_.dimensions()/dimArea,
+        faPatchFieldBase::extrapolatedCalculatedType()
     );
 
     tAphi.ref().primitiveFieldRef() = D()/psi_.mesh().S();
@@ -646,22 +639,14 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::faPatchField, Foam::areaMesh>>
 Foam::faMatrix<Type>::H() const
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh>> tHphi
+    auto tHphi = GeometricField<Type, faPatchField, areaMesh>::New
     (
-        new GeometricField<Type, faPatchField, areaMesh>
-        (
-            IOobject
-            (
-                "H("+psi_.name()+')',
-                psi_.instance(),
-                psi_.db()
-            ),
-            psi_.mesh(),
-            dimensions_/dimArea,
-            zeroGradientFaPatchScalarField::typeName
-        )
+        "H(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions_/dimArea,
+        faPatchFieldBase::extrapolatedCalculatedType()
     );
-    GeometricField<Type, faPatchField, areaMesh>& Hphi = tHphi.ref();
+    auto& Hphi = tHphi.ref();
 
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; ++cmpt)
@@ -698,23 +683,13 @@ Foam::faMatrix<Type>::flux() const
             << abort(FatalError);
     }
 
-    // construct GeometricField<Type, faePatchField, edgeMesh>
-    tmp<GeometricField<Type, faePatchField, edgeMesh>> tfieldFlux
+    auto tfieldFlux = GeometricField<Type, faePatchField, edgeMesh>::New
     (
-        new GeometricField<Type, faePatchField, edgeMesh>
-        (
-            IOobject
-            (
-                "flux("+psi_.name()+')',
-                psi_.instance(),
-                psi_.db()
-            ),
-            psi_.mesh(),
-            dimensions()
-        )
+        "flux(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions()
     );
-    GeometricField<Type, faePatchField, edgeMesh>& fieldFlux =
-        tfieldFlux.ref();
+    auto& fieldFlux = tfieldFlux.ref();
 
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
     {

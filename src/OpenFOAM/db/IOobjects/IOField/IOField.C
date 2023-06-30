@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,12 +31,24 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
+void Foam::IOField<Type>::readFromStream(const bool readOnProc)
+{
+    Istream& is = readStream(typeName, readOnProc);
+
+    if (readOnProc)
+    {
+        is >> *this;
+    }
+    close();
+}
+
+
+template<class Type>
 bool Foam::IOField<Type>::readContents()
 {
     if (isReadRequired() || (isReadOptional() && headerOk()))
     {
-        readStream(typeName) >> *this;
-        close();
+        readFromStream();
         return true;
     }
 
@@ -59,7 +71,7 @@ Foam::IOField<Type>::IOField(const IOobject& io)
 
 
 template<class Type>
-Foam::IOField<Type>::IOField(const IOobject& io, const bool valid)
+Foam::IOField<Type>::IOField(const IOobject& io, const bool readOnProc)
 :
     regIOobject(io)
 {
@@ -68,25 +80,12 @@ Foam::IOField<Type>::IOField(const IOobject& io, const bool valid)
 
     if (isReadRequired())
     {
-        Istream& is = readStream(typeName, valid);
-
-        if (valid)
-        {
-            is >> *this;
-        }
-        close();
+        readFromStream(readOnProc);
     }
     else if (isReadOptional())
     {
-        bool haveFile = headerOk();
-
-        Istream& is = readStream(typeName, haveFile && valid);
-
-        if (valid && haveFile)
-        {
-            is >> *this;
-        }
-        close();
+        const bool haveFile = headerOk();
+        readFromStream(readOnProc && haveFile);
     }
 }
 
@@ -178,6 +177,23 @@ Foam::IOFieldRef<Type>::IOFieldRef
     regIOobject(io),
     contentRef_(content)  // cref
 {}
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class Type>
+Foam::Field<Type> Foam::IOField<Type>::readContents(const IOobject& io)
+{
+    IOobject rio(io, IOobjectOption::NO_REGISTER);
+    if (rio.readOpt() == IOobjectOption::MUST_READ_IF_MODIFIED)
+    {
+        rio.readOpt(IOobjectOption::MUST_READ);
+    }
+
+    IOField<Type> reader(rio);
+
+    return Field<Type>(std::move(static_cast<Field<Type>&>(reader)));
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

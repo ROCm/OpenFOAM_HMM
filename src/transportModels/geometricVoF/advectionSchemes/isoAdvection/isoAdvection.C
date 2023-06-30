@@ -156,10 +156,10 @@ Foam::isoAdvection::isoAdvection
 
     if (porosityEnabled_)
     {
-        if (mesh_.foundObject<volScalarField>("porosity"))
-        {
-            porosityPtr_ = mesh_.getObjectPtr<volScalarField>("porosity");
+        porosityPtr_ = mesh_.getObjectPtr<volScalarField>("porosity");
 
+        if (porosityPtr_)
+        {
             if
             (
                 gMin(porosityPtr_->primitiveField()) <= 0
@@ -368,19 +368,18 @@ void Foam::isoAdvection::timeIntegratedFlux()
     const surfaceScalarField::Boundary& phib = phi_.boundaryField();
     const surfaceScalarField::Boundary& magSfb = mesh_.magSf().boundaryField();
     surfaceScalarField::Boundary& dVfb = dVf_.boundaryFieldRef();
-    const label nInternalFaces = mesh_.nInternalFaces();
 
     // Loop through boundary surface faces
     forAll(bsFaces_, i)
     {
         // Get boundary face index (in the global list)
         const label facei = bsFaces_[i];
-        const label patchi = boundaryMesh.patchID()[facei - nInternalFaces];
-        const label start = boundaryMesh[patchi].start();
+        const label patchi = boundaryMesh.patchID(facei);
 
         if (!phib[patchi].empty())
         {
-            const label patchFacei = facei - start;
+            const label patchFacei = boundaryMesh[patchi].whichFace(facei);
+
             const scalar phiP = phib[patchi][patchFacei];
 
             if (phiP >= 0)
@@ -498,7 +497,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
     if (Pstream::parRun())
     {
         DynamicList<label> neighProcs;
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Send
         for (const label patchi : procPatchLabels_)
@@ -507,8 +506,8 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
                 refCast<const processorPolyPatch>(patches[patchi]);
             const label nbrProci = procPatch.neighbProcNo();
 
-            neighProcs.append(nbrProci);
-            UOPstream toNbr(nbrProci, pBufs);
+            // Neighbour connectivity
+            neighProcs.push_uniq(nbrProci);
 
             const scalarField& pFlux = dVf.boundaryField()[patchi];
             const List<label>& surfCellFacesOnProcPatch =
@@ -520,6 +519,7 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
                 surfCellFacesOnProcPatch
             );
 
+            UOPstream toNbr(nbrProci, pBufs);
             toNbr << surfCellFacesOnProcPatch << dVfPatch;
         }
 
@@ -534,11 +534,14 @@ Foam::DynamicList<Foam::label>  Foam::isoAdvection::syncProcPatches
                 refCast<const processorPolyPatch>(patches[patchi]);
             const label nbrProci = procPatch.neighbProcNo();
 
-            UIPstream fromNeighb(nbrProci, pBufs);
             List<label> faceIDs;
             List<scalar> nbrdVfs;
 
-            fromNeighb >> faceIDs >> nbrdVfs;
+            {
+                UIPstream fromNbr(nbrProci, pBufs);
+                fromNbr >> faceIDs >> nbrdVfs;
+            }
+
             if (returnSyncedFaces)
             {
                 List<label> syncedFaceI(faceIDs);
@@ -601,7 +604,7 @@ void Foam::isoAdvection::checkIfOnProcPatch(const label facei)
     if (!mesh_.isInternalFace(facei))
     {
         const polyBoundaryMesh& pbm = mesh_.boundaryMesh();
-        const label patchi = pbm.patchID()[facei - mesh_.nInternalFaces()];
+        const label patchi = pbm.patchID(facei);
 
         if (isA<processorPolyPatch>(pbm[patchi]) && !pbm[patchi].empty())
         {
@@ -631,7 +634,7 @@ void Foam::isoAdvection::applyBruteForceBounding()
 
     if (dict_.getOrDefault("clip", true))
     {
-        alpha1_ = min(scalar(1), max(scalar(0), alpha1_));
+        alpha1_.clamp_range(zero_one{});
         alpha1Changed = true;
     }
 

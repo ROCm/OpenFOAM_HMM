@@ -27,7 +27,7 @@ Class
     Foam::clampedPlateFaPatchField
 
 Description
-    This BC provides a clamped BC. It sets zero fixe value and zeroGradient.
+    This BC provides a clamped BC. It sets zero fixed value and zeroGradient.
 
 Usage
     Example of the boundary condition specification:
@@ -91,6 +91,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: NO_READ
         clampedPlateFaPatchField
         (
             const faPatch&,
@@ -98,7 +99,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given clampedPlateFaPatchField<Type>
+        //- Construct by mapping the given clampedPlate patch field
         //- onto a new patch
         clampedPlateFaPatchField
         (
@@ -131,21 +132,20 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new clampedPlateFaPatchField<Type>(*this, iF)
             );
         }
 
 
-     //- Destructor
-    virtual ~clampedPlateFaPatchField()
-    {}
+    //- Destructor
+    virtual ~clampedPlateFaPatchField() = default;
 
 
     // Member Functions
@@ -169,25 +169,25 @@ public:
 
             //- Return the matrix diagonal coefficients corresponding to the
             //- evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueInternalCoeffs
+            virtual tmp<Field<Type>> valueInternalCoeffs
             (
                 const tmp<scalarField>&
             ) const;
 
             //- Return the matrix source coefficients corresponding to the
             //- evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueBoundaryCoeffs
+            virtual tmp<Field<Type>> valueBoundaryCoeffs
             (
                 const tmp<scalarField>&
             ) const;
 
             //- Return the matrix diagonal coefficients corresponding to the
             //- evaluation of the gradient of this patchField
-            virtual tmp<Field<Type> > gradientInternalCoeffs() const;
+            virtual tmp<Field<Type>> gradientInternalCoeffs() const;
 
             //- Return the matrix source coefficients corresponding to the
             //- evaluation of the gradient of this patchField
-            virtual tmp<Field<Type> > gradientBoundaryCoeffs() const;
+            virtual tmp<Field<Type>> gradientBoundaryCoeffs() const;
 
 
         // IO

@@ -450,13 +450,16 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::convectEddies
         }
     }
 
-    reduce(nRecycled, sumOp<label>());
-
-    if (debug && nRecycled > 0)
+    if (debug)
     {
-        Info<< "Patch: " << patch().patch().name()
-            << " recycled " << nRecycled << " eddies"
-            << endl;
+        reduce(nRecycled, sumOp<label>());
+
+        if (nRecycled)
+        {
+            Info<< "Patch: " << patch().patch().name()
+                << " recycled " << nRecycled << " eddies"
+                << endl;
+        }
     }
 }
 
@@ -492,11 +495,11 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
     Pstream::allGatherList(patchBBs);
 
     // Per processor indices into all segments to send
-    List<DynamicList<label>> dynSendMap(Pstream::nProcs());
+    List<DynamicList<label>> sendMap(UPstream::nProcs());
 
+    // Collect overlapping eddies
     forAll(eddies_, i)
     {
-        // Collect overlapping eddies
         const eddy& e = eddies_[i];
 
         // Eddy bounds
@@ -505,91 +508,41 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
         ebb.min() += x;
         ebb.max() += x;
 
-        forAll(patchBBs, procI)
+        forAll(patchBBs, proci)
         {
             // Not including intersection with local patch
-            if (procI != Pstream::myProcNo())
+            if (proci != Pstream::myProcNo())
             {
-                if (ebb.overlaps(patchBBs[procI]))
+                if (ebb.overlaps(patchBBs[proci]))
                 {
-                    dynSendMap[procI].append(i);
+                    sendMap[proci].push_back(i);
                 }
             }
         }
     }
 
-    labelListList sendMap(Pstream::nProcs());
-    forAll(sendMap, procI)
+
+    PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
+
+    forAll(sendMap, proci)
     {
-        sendMap[procI].transfer(dynSendMap[procI]);
-    }
-
-    // Send the number of eddies for local processors to receive
-    labelListList sendSizes(Pstream::nProcs());
-    sendSizes[Pstream::myProcNo()].setSize(Pstream::nProcs());
-    forAll(sendMap, procI)
-    {
-        sendSizes[Pstream::myProcNo()][procI] = sendMap[procI].size();
-    }
-    Pstream::allGatherList(sendSizes);
-
-    // Determine order of receiving
-    labelListList constructMap(Pstream::nProcs());
-
-    // Local segment first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label segmentI = constructMap[Pstream::myProcNo()].size();
-    forAll(constructMap, procI)
-    {
-        if (procI != Pstream::myProcNo())
+        if (proci != Pstream::myProcNo() && !sendMap[proci].empty())
         {
-            // What I need to receive is what other processor is sending to me
-            const label nRecv = sendSizes[procI][Pstream::myProcNo()];
-            constructMap[procI].setSize(nRecv);
+            UOPstream os(proci, pBufs);
 
-            for (label i = 0; i < nRecv; ++i)
-            {
-                constructMap[procI][i] = segmentI++;
-            }
+            os << UIndirectList<eddy>(eddies_, sendMap[proci]);
         }
     }
 
-    mapDistribute map(segmentI, std::move(sendMap), std::move(constructMap));
-
-    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
-
-    for (const int domain : Pstream::allProcs())
-    {
-        const labelList& sendElems = map.subMap()[domain];
-
-        if (domain != Pstream::myProcNo() && sendElems.size())
-        {
-            List<eddy> subEddies(UIndirectList<eddy>(eddies_, sendElems));
-
-            UOPstream toDomain(domain, pBufs);
-
-            toDomain<< subEddies;
-        }
-    }
-
-    // Start receiving
     pBufs.finishedSends();
 
-    // Consume
-    for (const int domain : Pstream::allProcs())
+    for (const int proci : pBufs.allProcs())
     {
-        const labelList& recvElems = map.constructMap()[domain];
-
-        if (domain != Pstream::myProcNo() && recvElems.size())
+        if (proci != Pstream::myProcNo() && pBufs.recvDataCount(proci))
         {
-            UIPstream str(domain, pBufs);
-            {
-                str >> overlappingEddies[domain];
-            }
+            UIPstream is(proci, pBufs);
+
+            is >> overlappingEddies[proci];
         }
     }
 
@@ -1001,10 +954,8 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::updateCoeffs()
             List<List<eddy>> overlappingEddies(Pstream::nProcs());
             calcOverlappingProcEddies(overlappingEddies);
 
-            forAll(overlappingEddies, procI)
+            for (const List<eddy>& eddies : overlappingEddies)
             {
-                const List<eddy>& eddies = overlappingEddies[procI];
-
                 if (eddies.size())
                 {
                     forAll(U, faceI)
@@ -1076,7 +1027,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
     {
         L_->writeData(os);
     }
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -522,10 +522,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         const face& f = mesh_.faces()[wallFaceIndex];
 
-        label patchi = mesh_.boundaryMesh().patchID()
-        [
-            wallFaceIndex - mesh_.nInternalFaces()
-        ];
+        const label patchi = mesh_.boundaryMesh().patchID(wallFaceIndex);
 
         referredWallFaces_[rWFI] = referredWallFace
         (
@@ -822,8 +819,7 @@ void Foam::InteractionLists<ParticleType>::buildMap
 
     forAll(nSend, proci)
     {
-        sendMap[proci].setSize(nSend[proci]);
-
+        sendMap[proci].resize_nocopy(nSend[proci]);
         nSend[proci] = 0;
     }
 
@@ -831,52 +827,10 @@ void Foam::InteractionLists<ParticleType>::buildMap
     forAll(toProc, i)
     {
         label proci = toProc[i];
-
         sendMap[proci][nSend[proci]++] = i;
     }
 
-    // 4. Send over how many I need to receive
-    labelList recvSizes;
-    Pstream::exchangeSizes(sendMap, recvSizes);
-
-
-    // Determine receive map
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    labelListList constructMap(Pstream::nProcs());
-
-    // Local transfers first
-    constructMap[Pstream::myProcNo()] = identity
-    (
-        sendMap[Pstream::myProcNo()].size()
-    );
-
-    label constructSize = constructMap[Pstream::myProcNo()].size();
-
-    forAll(constructMap, proci)
-    {
-        if (proci != Pstream::myProcNo())
-        {
-            const label nRecv = recvSizes[proci];
-
-            constructMap[proci].setSize(nRecv);
-
-            for (label i = 0; i < nRecv; i++)
-            {
-                constructMap[proci][i] = constructSize++;
-            }
-        }
-    }
-
-    mapPtr.reset
-    (
-        new mapDistribute
-        (
-            constructSize,
-            std::move(sendMap),
-            std::move(constructMap)
-        )
-    );
+    mapPtr.reset(new mapDistribute(std::move(sendMap)));
 }
 
 
@@ -988,14 +942,10 @@ void Foam::InteractionLists<ParticleType>::prepareWallDataToRefer()
             globalTransforms.transformIndex(wfiat)
         );
 
-        label patchi = mesh_.boundaryMesh().patchID()
-        [
-            wallFaceIndex - mesh_.nInternalFaces()
-        ];
+        const label patchi = mesh_.boundaryMesh().patchID(wallFaceIndex);
 
-        label patchFacei =
-            wallFaceIndex
-          - mesh_.boundaryMesh()[patchi].start();
+        const label patchFacei =
+            mesh_.boundaryMesh()[patchi].whichFace(wallFaceIndex);
 
         // Need to transform velocity when tensor transforms are
         // supported

@@ -53,7 +53,9 @@ void Foam::faMeshDecomposition::distributeFaces()
         (
             Time::controlDictName,
             time().rootPath(),
-            time().caseName()/("processor" + Foam::name(proci))
+            time().caseName()/("processor" + Foam::name(proci)),
+            false,  // No function objects
+            false   // No extra controlDict libs
         );
 
         polyMesh procFvMesh
@@ -74,7 +76,7 @@ void Foam::faMeshDecomposition::distributeFaces()
             procFvMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false  // not registered
+            IOobject::NO_REGISTER
         );
 
 
@@ -235,7 +237,9 @@ void Foam::faMeshDecomposition::decomposeMesh()
         (
             Time::controlDictName,
             time().rootPath(),
-            time().caseName()/("processor" + Foam::name(procI))
+            time().caseName()/("processor" + Foam::name(procI)),
+            false,  // No function objects
+            false   // No extra controlDict libs
         );
 
         polyMesh procFvMesh
@@ -256,7 +260,7 @@ void Foam::faMeshDecomposition::decomposeMesh()
             procFvMesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false  // not registered
+            IOobject::NO_REGISTER
         );
 
 
@@ -1012,17 +1016,14 @@ void Foam::faMeshDecomposition::decomposeMesh()
 
     for (label procI = 0; procI < nProcs(); procI++)
     {
-        fileName processorCasePath
-        (
-            time().caseName()/("processor" + Foam::name(procI))
-        );
-
         // create a database
         Time processorDb
         (
             Time::controlDictName,
             time().rootPath(),
-            processorCasePath
+            time().caseName()/("processor" + Foam::name(procI)),
+            false,  // No function objects
+            false   // No extra controlDict libs
         );
 
 
@@ -1134,17 +1135,14 @@ bool Foam::faMeshDecomposition::writeDecomposition()
     {
         // Create processor mesh without a boundary
 
-        fileName processorCasePath
-        (
-            time().caseName()/("processor" + Foam::name(procI))
-        );
-
         // create a database
         Time processorDb
         (
             Time::controlDictName,
             time().rootPath(),
-            processorCasePath
+            time().caseName()/("processor" + Foam::name(procI)),
+            false,  // No function objects
+            false   // No extra controlDict libs
         );
 
         // Read volume mesh
@@ -1326,7 +1324,7 @@ bool Foam::faMeshDecomposition::writeDecomposition()
             procMesh.thisDb(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false  // not registered
+            IOobject::NO_REGISTER
         );
 
         // pointProcAddressing

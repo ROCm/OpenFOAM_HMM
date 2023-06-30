@@ -53,7 +53,7 @@ SourceFiles
 #include "foamVtkPatchMeshWriter.H"
 #include "volFields.H"
 #include "pointFields.H"
-#include "PrimitivePatchInterpolation.H"
+#include "primitivePatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

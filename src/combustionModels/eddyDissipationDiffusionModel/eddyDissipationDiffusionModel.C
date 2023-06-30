@@ -91,7 +91,7 @@ eddyDissipationDiffusionModel<ReactionThermo, ThermoType>::rtDiff() const
             ),
             this->mesh(),
             dimensionedScalar(dimLength, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         )
     );
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,42 +51,10 @@ UNARY_FUNCTION(symmTensor, symmTensor, dev2)
 UNARY_FUNCTION(scalar, symmTensor, det)
 UNARY_FUNCTION(symmTensor, symmTensor, cof)
 
-void inv(Field<symmTensor>& tf, const UList<symmTensor>& tf1)
+void inv(Field<symmTensor>& result, const UList<symmTensor>& f1)
 {
-    if (tf.empty())
-    {
-        return;
-    }
-
-    // Attempting to identify 2-D cases
-    const scalar minThreshold = SMALL*magSqr(tf1[0]);
-    const Vector<bool> removeCmpts
-    (
-        magSqr(tf1[0].xx()) < minThreshold,
-        magSqr(tf1[0].yy()) < minThreshold,
-        magSqr(tf1[0].zz()) < minThreshold
-    );
-
-    if (removeCmpts.x() || removeCmpts.y() || removeCmpts.z())
-    {
-        symmTensor adjust(Zero);
-
-        if (removeCmpts.x()) adjust.xx() = 1;
-        if (removeCmpts.y()) adjust.yy() = 1;
-        if (removeCmpts.z()) adjust.zz() = 1;
-
-        symmTensorField tf1Plus(tf1);
-
-        tf1Plus += adjust;
-
-        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1Plus)
-
-        tf -= adjust;
-    }
-    else
-    {
-        TFOR_ALL_F_OP_FUNC_F(symmTensor, tf, =, inv, symmTensor, tf1)
-    }
+    // With 'failsafe' invert
+    TFOR_ALL_F_OP_F_FUNC(symmTensor, result, =, symmTensor, f1, safeInv)
 }
 
 tmp<symmTensorField> inv(const UList<symmTensor>& tf)
@@ -103,6 +71,8 @@ tmp<symmTensorField> inv(const tmp<symmTensorField>& tf)
     tf.clear();
     return tresult;
 }
+
+UNARY_FUNCTION(symmTensor, symmTensor, pinv)
 
 
 template<>
@@ -143,8 +113,6 @@ tmp<Field<symmTensor>> transformFieldMask<symmTensor>
 {
     return tstf;
 }
-
-UNARY_FUNCTION(symmTensor, symmTensor, pinv)
 
 
 // * * * * * * * * * * * * * * * global operators  * * * * * * * * * * * * * //

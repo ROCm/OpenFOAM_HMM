@@ -105,18 +105,15 @@ Foam::maxwellSlipUFvPatchVectorField::maxwellSlipUFvPatchVectorField
             << exit(FatalIOError);
     }
 
-    if (dict.found("value"))
+    if (this->readValueEntry(dict))
     {
-        fvPatchField<vector>::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
+        const auto* hasRefValue = dict.findEntry("refValue", keyType::LITERAL);
+        const auto* hasFrac = dict.findEntry("valueFraction", keyType::LITERAL);
 
-        if (dict.found("refValue") && dict.found("valueFraction"))
+        if (hasRefValue && hasFrac)
         {
-            this->refValue() = vectorField("refValue", dict, p.size());
-            this->valueFraction() =
-                scalarField("valueFraction", dict, p.size());
+            this->refValue().assign(*hasRefValue, p.size());
+            this->valueFraction().assign(*hasFrac, p.size());
         }
         else
         {
@@ -155,12 +152,9 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvPatchScalarField& pmu =
-        patch().lookupPatchField<volScalarField, scalar>(muName_);
-    const fvPatchScalarField& prho =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
-    const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
+    const auto& pmu = patch().lookupPatchField<volScalarField>(muName_);
+    const auto& prho = patch().lookupPatchField<volScalarField>(rhoName_);
+    const auto& ppsi = patch().lookupPatchField<volScalarField>(psiName_);
 
     Field<scalar> C1
     (
@@ -187,8 +181,8 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
 
     if (curvature_)
     {
-        const fvPatchTensorField& ptauMC =
-            patch().lookupPatchField<volTensorField, tensor>(tauMCName_);
+        const auto& ptauMC =
+            patch().lookupPatchField<volTensorField>(tauMCName_);
         vectorField n(patch().nf());
 
         refValue() -= C1/prho*transform(I - n*n, (n & ptauMC));
@@ -200,7 +194,7 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
 
 void Foam::maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("T", "T", TName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
@@ -215,7 +209,7 @@ void Foam::maxwellSlipUFvPatchVectorField::write(Ostream& os) const
     refValue().writeEntry("refValue", os);
     valueFraction().writeEntry("valueFraction", os);
 
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

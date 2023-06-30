@@ -28,15 +28,6 @@ License
 #include "zeroGradientFaPatchField.H"
 #include "faPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-template<class Type>
-const Foam::word& Foam::faPatchField<Type>::zeroGradientType()
-{
-    return Foam::zeroGradientFaPatchField<Type>::typeName;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -68,12 +59,12 @@ Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
-    const dictionary&
+    const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF)
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    faPatchField<Type>::operator=(this->patchInternalField());
+    faPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
 }
 
 
@@ -108,7 +99,7 @@ void Foam::zeroGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    this->operator==(this->patchInternalField());
+    faPatchField<Type>::extrapolateInternal();  // Zero-gradient patch values
     faPatchField<Type>::evaluate();
 }
 

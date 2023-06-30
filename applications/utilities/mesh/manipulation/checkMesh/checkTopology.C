@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ License
 #include "IOmanip.H"
 #include "emptyPolyPatch.H"
 #include "processorPolyPatch.H"
+#include "foamVtkLineWriter.H"
 #include "vtkCoordSetWriter.H"
 #include "vtkSurfaceWriter.H"
 #include "checkTools.H"
@@ -44,24 +45,34 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// NEWER CODE
+// ~~~~~~~~~~
+// Return true on error
 template<class PatchType>
-void Foam::checkPatch
+bool Foam::checkPatch
 (
     const bool allGeometry,
-    const word& name,
+    const std::string& name,
     const polyMesh& mesh,
     const PatchType& pp,
-    const labelList& meshFaces,
-    const labelList& meshEdges,
-    pointSet& points
+    const labelUList& meshEdges,
+    labelHashSet* pointSetPtr,
+    labelHashSet* badEdgesPtr
 )
 {
+    if (badEdgesPtr)
+    {
+        badEdgesPtr->clear();
+    }
+
     typedef typename PatchType::surfaceTopo TopoType;
+
+    bool foundError = false;
 
     const label globalSize = returnReduce(pp.size(), sumOp<label>());
 
     Info<< "    "
-        << setw(20) << name
+        << setw(20) << name.c_str()
         << setw(9) << globalSize
         << setw(9) << returnReduce(pp.nPoints(), sumOp<label>());
 
@@ -69,13 +80,169 @@ void Foam::checkPatch
     {
         Info<< setw(34) << "ok (empty)";
     }
-    else if (Pstream::parRun())
+    else if (UPstream::parRun())
     {
         // Parallel - use mesh edges
         // - no check for point-pinch
         // - no check for consistent orientation (if that is posible to
         //   check?)
 
+        // Count number of edge/face connections (globally)
+        labelList nEdgeConnections(mesh.nEdges(), Zero);
+
+        const labelListList& edgeFaces = pp.edgeFaces();
+
+        forAll(edgeFaces, edgei)
+        {
+            nEdgeConnections[meshEdges[edgei]] = edgeFaces[edgei].size();
+        }
+
+        // Synchronise across coupled edges
+        syncTools::syncEdgeList
+        (
+            mesh,
+            nEdgeConnections,
+            plusEqOp<label>(),
+            label(0)            // null value
+        );
+
+        label labelTyp = TopoType::MANIFOLD;
+        forAll(meshEdges, edgei)
+        {
+            const label meshEdgei = meshEdges[edgei];
+            const label numNbrs = nEdgeConnections[meshEdgei];
+            if (numNbrs == 1)
+            {
+                //if (pointSetPtr) pointSetPtr->insert(mesh.edges()[meshEdgei]);
+                labelTyp = max(labelTyp, TopoType::OPEN);
+            }
+            else if (numNbrs == 0 || numNbrs > 2)
+            {
+                if (pointSetPtr) pointSetPtr->insert(mesh.edges()[meshEdgei]);
+                if (badEdgesPtr) badEdgesPtr->insert(edgei);
+                labelTyp = max(labelTyp, TopoType::ILLEGAL);
+            }
+        }
+        reduce(labelTyp, maxOp<label>());
+
+        if (labelTyp == TopoType::MANIFOLD)
+        {
+            Info<< setw(34) << "ok (closed singly connected)";
+        }
+        else if (labelTyp == TopoType::OPEN)
+        {
+            Info<< setw(34) << "ok (non-closed singly connected)";
+        }
+        else
+        {
+            Info<< setw(34) << "multiply connected (shared edge)";
+        }
+
+        foundError = (labelTyp == TopoType::ILLEGAL);
+    }
+    else
+    {
+        const TopoType pTyp = pp.surfaceType(badEdgesPtr);
+
+        if (pTyp == TopoType::MANIFOLD)
+        {
+            if (pp.checkPointManifold(true, pointSetPtr))
+            {
+                Info<< setw(34) << "multiply connected (shared point)";
+            }
+            else
+            {
+                Info<< setw(34) << "ok (closed singly connected)";
+            }
+
+            if (pointSetPtr)
+            {
+                // Add points on non-manifold edges to make set complete
+                pp.checkTopology(false, pointSetPtr);
+            }
+        }
+        else
+        {
+            if (pointSetPtr)
+            {
+                pp.checkTopology(false, pointSetPtr);
+            }
+
+            if (pTyp == TopoType::OPEN)
+            {
+                Info<< setw(34) << "ok (non-closed singly connected)";
+            }
+            else
+            {
+                Info<< setw(34) << "multiply connected (shared edge)";
+            }
+        }
+
+        foundError = (pTyp == TopoType::ILLEGAL);
+    }
+
+    if (allGeometry)
+    {
+        boundBox bb(pp.box());
+        bb.reduce();
+
+        if (bb.good())
+        {
+            Info<< ' ' << bb;
+        }
+    }
+
+    return foundError;
+}
+
+
+// OLDER CODE
+// ~~~~~~~~~~
+// Return true on error
+template<class PatchType>
+bool Foam::checkPatch
+(
+    const bool allGeometry,
+    const std::string& name,
+    const polyMesh& mesh,
+    const PatchType& pp,
+    const labelUList& meshFaces,
+    const labelUList& meshEdges,
+    labelHashSet* pointSetPtr,
+    labelHashSet* badEdgesPtr
+)
+{
+    if (badEdgesPtr)
+    {
+        badEdgesPtr->clear();
+    }
+
+    typedef typename PatchType::surfaceTopo TopoType;
+
+    bool foundError = false;
+
+    const label globalSize = returnReduce(pp.size(), sumOp<label>());
+
+    Info<< "    "
+        << setw(20) << name.c_str()
+        << setw(9) << globalSize
+        << setw(9) << returnReduce(pp.nPoints(), sumOp<label>());
+
+    if (globalSize == 0)
+    {
+        Info<< setw(34) << "ok (empty)";
+    }
+    else if (UPstream::parRun())
+    {
+        // Parallel - use mesh edges
+        // - no check for point-pinch
+        // - no check for consistent orientation (if that is posible to
+        //   check?)
+
+        // OLDER CODE
+        // ~~~~~~~~~~
+        // Synchronise connected faces using global face numbering
+        //
         // (see addPatchCellLayer::globalEdgeFaces)
         // From mesh edge to global face labels. Non-empty sublists only for
         // pp edges.
@@ -88,12 +255,12 @@ void Foam::checkPatch
 
         forAll(edgeFaces, edgei)
         {
-            label meshEdgei = meshEdges[edgei];
+            const label meshEdgei = meshEdges[edgei];
             const labelList& eFaces = edgeFaces[edgei];
 
             // Store face and processor as unique tag.
             labelList& globalEFaces = globalEdgeFaces[meshEdgei];
-            globalEFaces.setSize(eFaces.size());
+            globalEFaces.resize(eFaces.size());
             forAll(eFaces, i)
             {
                 globalEFaces[i] = globalFaces.toGlobal(meshFaces[eFaces[i]]);
@@ -104,29 +271,30 @@ void Foam::checkPatch
             //    << endl;
         }
 
-        // Synchronise across coupled edges.
+        // Synchronise across coupled edges
         syncTools::syncEdgeList
         (
             mesh,
             globalEdgeFaces,
             ListOps::uniqueEqOp<label>(),
-            labelList()             // null value
+            labelList()         // null value
         );
 
-        
         label labelTyp = TopoType::MANIFOLD;
         forAll(meshEdges, edgei)
         {
             const label meshEdgei = meshEdges[edgei];
             const labelList& globalEFaces = globalEdgeFaces[meshEdgei];
-            if (globalEFaces.size() == 1)
+            const label numNbrs = globalEFaces.size();
+            if (numNbrs == 1)
             {
-                //points.insert(mesh.edges()[meshEdgei]);
+                //if (pointSetPtr) pointSetPtr->insert(mesh.edges()[meshEdgei]);
                 labelTyp = max(labelTyp, TopoType::OPEN);
             }
-            else if (globalEFaces.size() == 0 || globalEFaces.size() > 2)
+            else if (numNbrs == 0 || numNbrs > 2)
             {
-                points.insert(mesh.edges()[meshEdgei]);
+                if (pointSetPtr) pointSetPtr->insert(mesh.edges()[meshEdgei]);
+                if (badEdgesPtr) badEdgesPtr->insert(edgei);
                 labelTyp = max(labelTyp, TopoType::ILLEGAL);
             }
         }
@@ -138,61 +306,68 @@ void Foam::checkPatch
         }
         else if (labelTyp == TopoType::OPEN)
         {
-            Info<< setw(34)
-                << "ok (non-closed singly connected)";
+            Info<< setw(34) << "ok (non-closed singly connected)";
         }
         else
         {
-            Info<< setw(34)
-                << "multiply connected (shared edge)";
+            Info<< setw(34) << "multiply connected (shared edge)";
         }
+
+        foundError = (labelTyp == TopoType::ILLEGAL);
     }
     else
     {
-        TopoType pTyp = pp.surfaceType();
+        const TopoType pTyp = pp.surfaceType(badEdgesPtr);
 
         if (pTyp == TopoType::MANIFOLD)
         {
-            if (pp.checkPointManifold(true, &points))
+            if (pp.checkPointManifold(true, pointSetPtr))
             {
-                Info<< setw(34)
-                    << "multiply connected (shared point)";
+                Info<< setw(34) << "multiply connected (shared point)";
             }
             else
             {
                 Info<< setw(34) << "ok (closed singly connected)";
             }
 
-            // Add points on non-manifold edges to make set complete
-            pp.checkTopology(false, &points);
+            if (pointSetPtr)
+            {
+                // Add points on non-manifold edges to make set complete
+                pp.checkTopology(false, pointSetPtr);
+            }
         }
         else
         {
-            pp.checkTopology(false, &points);
+            if (pointSetPtr)
+            {
+                pp.checkTopology(false, pointSetPtr);
+            }
 
             if (pTyp == TopoType::OPEN)
             {
-                Info<< setw(34)
-                    << "ok (non-closed singly connected)";
+                Info<< setw(34) << "ok (non-closed singly connected)";
             }
             else
             {
-                Info<< setw(34)
-                    << "multiply connected (shared edge)";
+                Info<< setw(34) << "multiply connected (shared edge)";
             }
         }
+
+        foundError = (pTyp == TopoType::ILLEGAL);
     }
 
     if (allGeometry)
     {
-        const labelList& mp = pp.meshPoints();
+        boundBox bb(pp.box());
+        bb.reduce();
 
-        if (returnReduceOr(mp.size()))
+        if (bb.good())
         {
-            boundBox bb(pp.points(), mp, true); // reduce
             Info<< ' ' << bb;
         }
     }
+
+    return foundError;
 }
 
 
@@ -231,7 +406,8 @@ Foam::label Foam::checkTopology
     const bool allTopology,
     const bool allGeometry,
     autoPtr<surfaceWriter>& surfWriter,
-    autoPtr<coordSetWriter>& setWriter
+    autoPtr<coordSetWriter>& setWriter,
+    const bool writeBadEdges
 )
 {
     label noFailedChecks = 0;
@@ -524,7 +700,7 @@ Foam::label Foam::checkTopology
                 << mesh.time().timeName()/"cellToRegion"
                 << endl;
 
-            labelIOList ctr
+            IOListRef<label>
             (
                 IOobject
                 (
@@ -532,11 +708,11 @@ Foam::label Foam::checkTopology
                     mesh.time().timeName(),
                     mesh,
                     IOobject::NO_READ,
-                    IOobject::NO_WRITE
+                    IOobject::NO_WRITE,
+                    IOobject::NO_REGISTER
                 ),
                 rs
-            );
-            ctr.write();
+            ).write();
 
 
             // Points in multiple regions
@@ -651,7 +827,7 @@ Foam::label Foam::checkTopology
     }
 
     // Non-manifold points
-    pointSet points
+    pointSet nonManifoldPoints
     (
         mesh,
         "nonManifoldPoints",
@@ -670,18 +846,16 @@ Foam::label Foam::checkTopology
             << setw(20) << "Patch"
             << setw(9) << "Faces"
             << setw(9) << "Points"
-            << "Surface topology";
+            << "  Surface topology";
         if (allGeometry)
         {
-            Info<< " Bounding box";
+            Info<< "  Bounding box";
         }
         Info<< endl;
 
-        forAll(patches, patchi)
+        for (const polyPatch& pp : patches)
         {
-            const polyPatch& pp = patches[patchi];
-
-            if (!isA<processorPolyPatch>(pp))
+            if (!UPstream::parRun() || !isA<processorPolyPatch>(pp))
             {
                 checkPatch
                 (
@@ -689,11 +863,88 @@ Foam::label Foam::checkTopology
                     pp.name(),
                     mesh,
                     pp,
-                    identity(pp.size(), pp.start()),
+                    // identity(pp.size(), pp.start()),
                     pp.meshEdges(),
-                    points
+                   &nonManifoldPoints
                 );
                 Info<< endl;
+            }
+        }
+
+        // All non-processor boundary patches
+        {
+            const label nGlobalPatches
+            (
+                UPstream::parRun()
+              ? patches.nNonProcessor()
+              : patches.size()
+            );
+
+            labelList faceLabels
+            (
+                identity
+                (
+                    (
+                        patches.range(nGlobalPatches-1).end_value()
+                      - patches.start()
+                    ),
+                    patches.start()
+                )
+            );
+
+            uindirectPrimitivePatch pp
+            (
+                UIndirectList<face>(mesh.faces(), faceLabels),
+                mesh.points()
+            );
+
+            // Non-manifold
+            labelHashSet badEdges(pp.nEdges()/20);
+
+            bool hadBadEdges = checkPatch
+            (
+                allGeometry,
+                "\".*\"",
+                 mesh,
+                pp,
+                // faceLabels,
+                pp.meshEdges(mesh.edges(), mesh.pointEdges()),
+                nullptr,  // No point set
+               &badEdges
+            );
+            Info<< nl << endl;
+
+            if (writeBadEdges && hadBadEdges)
+            {
+                edgeList dumpEdges(pp.edges(), badEdges.sortedToc());
+
+                vtk::lineWriter writer
+                (
+                    pp.localPoints(),
+                    dumpEdges,
+                    fileName
+                    (
+                        mesh.time().globalPath()
+                      / ("checkMesh-illegal-edges")
+                    )
+                );
+
+                writer.writeGeometry();
+
+                // CellData
+                writer.beginCellData();
+                writer.writeProcIDs();
+
+                Info<< "Wrote "
+                    << returnReduce(dumpEdges.size(), sumOp<label>())
+                    << " bad edges: " << writer.output().name() << nl;
+                writer.close();
+            }
+            else if (hadBadEdges)
+            {
+                Info<< "Detected "
+                    << returnReduce(badEdges.size(), sumOp<label>())
+                    << " bad edges (possibly relevant for finite-area)" << nl;
             }
         }
 
@@ -729,9 +980,9 @@ Foam::label Foam::checkTopology
                     fz.name(),
                     mesh,
                     fz(),           // patch
-                    fz,             // mesh face labels
+                    // fz,             // mesh face labels
                     fz.meshEdges(), // mesh edge labels
-                    points
+                   &nonManifoldPoints
                 );
                 Info<< endl;
             }
@@ -761,17 +1012,20 @@ Foam::label Foam::checkTopology
         }
     }
 
-    const label nPoints = returnReduce(points.size(), sumOp<label>());
+
+    const label nPoints =
+        returnReduce(nonManifoldPoints.size(), sumOp<label>());
 
     if (nPoints)
     {
         Info<< "  <<Writing " << nPoints
-            << " conflicting points to set " << points.name() << endl;
-        points.instance() = mesh.pointsInstance();
-        points.write();
+            << " conflicting points to set " << nonManifoldPoints.name()
+            << endl;
+        nonManifoldPoints.instance() = mesh.pointsInstance();
+        nonManifoldPoints.write();
         if (setWriter && setWriter->enabled())
         {
-            mergeAndWrite(*setWriter, points);
+            mergeAndWrite(*setWriter, nonManifoldPoints);
         }
     }
 

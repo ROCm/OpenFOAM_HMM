@@ -299,8 +299,8 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //                "tetDualMesh"/polyMesh::meshSubDir,
 //                runTime_,
 //                IOobject::NO_READ,
-//                IOobject::AUTO_WRITE,
-//                false
+//                IOobject::NO_WRITE,
+//                IOobject::NO_REGISTER
 //            ),
 //            labelUIndList
 //            (
@@ -346,8 +346,8 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //                    "tetDualMesh"/polyMesh::meshSubDir,
 //                    runTime_,
 //                    IOobject::NO_READ,
-//                    IOobject::AUTO_WRITE,
-//                    false
+//                    IOobject::NO_WRITE,
+//                    IOobject::NO_REGISTER
 //                ),
 //                points
 //            );
@@ -605,7 +605,7 @@ void Foam::conformalVoronoiMesh::reorderProcessorPatches
                 runTime_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             patchNames,
             patchDicts
@@ -1098,7 +1098,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
             ),
             mesh,
             dimensionedScalar(dimLength, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         scalarField& cellSize = targetCellSize.primitiveFieldRef();
@@ -1124,7 +1124,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
         //     ),
         //     mesh,
         //     dimensionedScalar(dimLength, Zero),
-        //     zeroGradientFvPatchScalarField::typeName
+        //     fvPatchFieldBase::zeroGradientType()
         // );
 
         // targetCellVolume.primitiveFieldRef() = pow3(cellSize);
@@ -1143,7 +1143,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
         //     ),
         //     mesh,
         //     dimensionedScalar(dimVolume, Zero),
-        //     zeroGradientFvPatchScalarField::typeName
+        //     fvPatchFieldBase::zeroGradientType()
         // );
 
         // actualCellVolume.primitiveFieldRef() = mesh.cellVolumes();
@@ -1162,7 +1162,7 @@ void Foam::conformalVoronoiMesh::writeCellSizes
         //     ),
         //     mesh,
         //     dimensionedScalar(dimLength, Zero),
-        //     zeroGradientFvPatchScalarField::typeName
+        //     fvPatchFieldBase::zeroGradientType()
         // );
 
         // equivalentCellSize.primitiveFieldRef() = pow
@@ -1240,11 +1240,12 @@ void Foam::conformalVoronoiMesh::writeCellAlignments
 //            mesh.polyMesh::instance(),
 //            mesh,
 //            IOobject::NO_READ,
-//            IOobject::AUTO_WRITE
+//            IOobject::NO_WRITE,
+//            IOobject::NO_REGISTER
 //        ),
 //        mesh,
 //        tensor::I,
-//        zeroGradientFvPatchTensorField::typeName
+//        fvPatchFieldBase::zeroGradientType()
 //    );
 //
 //    tensorField& cellAlignment = cellAlignments.primitiveFieldRef();

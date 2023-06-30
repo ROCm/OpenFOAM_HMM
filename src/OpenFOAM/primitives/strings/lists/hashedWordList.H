@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,8 +142,8 @@ public:
         //  \return position in list or -1 if not found.
         inline label find(const word& val) const;
 
-        //- True if the value if found in the list (searches the hash).
-        inline bool found(const word& val) const;
+        //- Is the value contained in the list (searches the hash).
+        inline bool contains(const word& val) const;
 
 
     // Member Operators
@@ -156,7 +156,7 @@ public:
         //  \return position in list or -1 if not found.
         inline label operator[](const word& val) const;
 
-        //- Check hashed values for the specified name - same as found().
+        //- Check hashed values for the specified name - same as contains().
         //  Can be used as a unary predicate.
         inline bool operator()(const word& val) const;
 
@@ -181,6 +181,9 @@ public:
 
     // Housekeeping
 
+        //- Same as contains(), searches the hash.
+        bool found(const word& val) const { return this->contains(val); }
+
         //- Append an element if not already in the list.
         FOAM_DEPRECATED_FOR(2022-05, "push_uniq method")
         void append(const word& val) { this->push_uniq(val); }
@@ -192,11 +195,6 @@ public:
         //- Append an element if not already in the list.
         //FOAM_DEPRECATED_FOR(2022-10, "push_uniq method")
         label appendUniq(const word& val) { return this->push_uniq(val); }
-
-        //- Deprecated(2019-01) Is the specified name found in the list?
-        //  \deprecated(2019-01) - use found() method
-        FOAM_DEPRECATED_FOR(2019-01, "found() method")
-        bool contains(const word& val) const { return this->found(val); }
 };
 
 

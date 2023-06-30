@@ -87,14 +87,7 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
         this->jumpTable_ = Function1<Type>::New("jumpTable", dict, &this->db());
     }
 
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         this->evaluate(Pstream::commsTypes::blocking);
     }

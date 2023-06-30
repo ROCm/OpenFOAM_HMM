@@ -104,7 +104,7 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::segregated::K() const
         ),
         mesh,
         dimensionedScalar(dimLength),
-        zeroGradientFvPatchField<scalar>::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
     L.primitiveFieldRef() = cbrt(mesh.V());
     L.correctBoundaryConditions();

@@ -37,49 +37,16 @@ using namespace Foam::constant::mathematical;
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::wordList Foam::KinematicSurfaceFilm<CloudType>::interactionTypeNames_
+const Foam::Enum
+<
+    typename Foam::KinematicSurfaceFilm<CloudType>::interactionType
+>
+Foam::KinematicSurfaceFilm<CloudType>::interactionTypeNames
 ({
-    "absorb", "bounce", "splashBai"
+    { interactionType::absorb, "absorb" },
+    { interactionType::bounce, "bounce" },
+    { interactionType::splashBai, "splashBai" },
 });
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-template<class CloudType>
-typename Foam::KinematicSurfaceFilm<CloudType>::interactionType
-Foam::KinematicSurfaceFilm<CloudType>::interactionTypeEnum(const word& it) const
-{
-    forAll(interactionTypeNames_, i)
-    {
-        if (interactionTypeNames_[i] == it)
-        {
-            return interactionType(i);
-        }
-    }
-
-    FatalErrorInFunction
-        << "Unknown interaction type " << it
-        << ". Valid interaction types include: " << interactionTypeNames_
-        << abort(FatalError);
-
-    return interactionType(0);
-}
-
-
-template<class CloudType>
-Foam::word Foam::KinematicSurfaceFilm<CloudType>::interactionTypeStr
-(
-    const interactionType& it
-) const
-{
-    if (it >= interactionTypeNames_.size())
-    {
-        FatalErrorInFunction
-            << "Unknown interaction type enumeration" << abort(FatalError);
-    }
-
-    return interactionTypeNames_[it];
-}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -415,8 +382,8 @@ void Foam::KinematicSurfaceFilm<CloudType>::splashInteraction
     const scalar dBarSplash = 1/cbrt(6.0)*cbrt(mRatio/Ns)*d + ROOTVSMALL;
 
     // Cumulative diameter splash distribution
-    const scalar dMax = 0.9*cbrt(mRatio)*d;
-    const scalar dMin = 0.1*dMax;
+    const scalar dMax = dMaxSplash_ > 0 ? dMaxSplash_ : 0.9*cbrt(mRatio)*d;
+    const scalar dMin = dMinSplash_ > 0 ? dMinSplash_ : 0.1*dMax;
     const scalar K = exp(-dMin/dBarSplash) - exp(-dMax/dBarSplash);
 
     // Surface energy of secondary parcels [J]
@@ -457,7 +424,9 @@ void Foam::KinematicSurfaceFilm<CloudType>::splashInteraction
     const scalar logD = log(d);
     const scalar coeff2 = log(dNew[0]) - logD + ROOTVSMALL;
     scalar coeff1 = 0.0;
-    forAll(dNew, i)
+
+    // Note: loop from i = 1 to (p-1)
+    for (int i = 1; i < parcelsPerSplash_; ++i)
     {
         coeff1 += sqr(log(dNew[i]) - logD);
     }
@@ -527,27 +496,32 @@ Foam::KinematicSurfaceFilm<CloudType>::KinematicSurfaceFilm
     areaFilms_(),
     interactionType_
     (
-        interactionTypeEnum(this->coeffDict().getWord("interactionType"))
+        interactionTypeNames.get("interactionType", this->coeffDict())
     ),
     parcelTypes_(this->coeffDict().getOrDefault("parcelTypes", labelList())),
-    deltaWet_(0.0),
+    deltaWet_(Zero),
     splashParcelType_(0),
     parcelsPerSplash_(0),
-    Adry_(0.0),
-    Awet_(0.0),
-    Cf_(0.0),
+    dMaxSplash_(-1),
+    dMinSplash_(-1),
+    Adry_(Zero),
+    Awet_(Zero),
+    Cf_(Zero),
     nParcelsSplashed_(0)
 {
-    Info<< "    Applying " << interactionTypeStr(interactionType_)
+    Info<< "    Applying " << interactionTypeNames[interactionType_]
         << " interaction model" << endl;
 
-    if (interactionType_ == itSplashBai)
+    if (interactionType_ == interactionType::splashBai)
     {
         this->coeffDict().readEntry("deltaWet", deltaWet_);
         splashParcelType_ =
             this->coeffDict().getOrDefault("splashParcelType", -1);
         parcelsPerSplash_ =
             this->coeffDict().getOrDefault("parcelsPerSplash", 2);
+        dMinSplash_ = this->coeffDict().getOrDefault("dMinSplash", -1);
+        dMaxSplash_ = this->coeffDict().getOrDefault("dMaxSplash", -1);
+
         this->coeffDict().readEntry("Adry", Adry_);
         this->coeffDict().readEntry("Awet", Awet_);
         this->coeffDict().readEntry("Cf", Cf_);
@@ -573,12 +547,14 @@ Foam::KinematicSurfaceFilm<CloudType>::KinematicSurfaceFilm
     deltaWet_(sfm.deltaWet_),
     splashParcelType_(sfm.splashParcelType_),
     parcelsPerSplash_(sfm.parcelsPerSplash_),
+    dMaxSplash_(sfm.dMaxSplash_),
+    dMinSplash_(sfm.dMinSplash_),
     Adry_(sfm.Adry_),
     Awet_(sfm.Awet_),
     Cf_(sfm.Cf_),
     nParcelsSplashed_(sfm.nParcelsSplashed_)
 {
-    if (interactionType_ == itSplashBai)
+    if (interactionType_ == interactionType::splashBai)
     {
         init(initThermo);
     }
@@ -620,14 +596,14 @@ bool Foam::KinematicSurfaceFilm<CloudType>::transferParcel
 
         switch (interactionType_)
         {
-            case itBounce:
+            case interactionType::bounce:
             {
                 bounceInteraction(p, pp, facei, keepParticle);
 
                 break;
             }
 
-            case itAbsorb:
+            case interactionType::absorb:
             {
                 const scalar m = p.nParticle()*p.mass();
 
@@ -637,7 +613,7 @@ bool Foam::KinematicSurfaceFilm<CloudType>::transferParcel
                 break;
             }
 
-            case itSplashBai:
+            case interactionType::splashBai:
             {
                 const scalarField X(thermo_->size(), 1);
                 const scalar mu = thermo_->mu(pRef_, TRef_, X);
@@ -693,14 +669,14 @@ bool Foam::KinematicSurfaceFilm<CloudType>::transferParcel
 
         switch (interactionType_)
         {
-            case itBounce:
+            case interactionType::bounce:
             {
                 bounceInteraction(p, pp, facei, keepParticle);
 
                 break;
             }
 
-            case itAbsorb:
+            case interactionType::absorb:
             {
                 const scalar m = p.nParticle()*p.mass();
 
@@ -711,7 +687,7 @@ bool Foam::KinematicSurfaceFilm<CloudType>::transferParcel
                 break;
             }
 
-            case itSplashBai:
+            case interactionType::splashBai:
             {
                 auto& liqFilm =
                     refCast
@@ -725,13 +701,9 @@ bool Foam::KinematicSurfaceFilm<CloudType>::transferParcel
                 const scalar TRef = liqFilm.Tref();
 
                 const scalar mu = liqFilm.thermo().mu(pRef, TRef, X);
-                const scalar sigma =
-                    liqFilm.thermo().sigma(pRef, TRef, X);
+                const scalar sigma = liqFilm.thermo().sigma(pRef, TRef, X);
 
-                const bool dry
-                (
-                    film.h()[filmFacei] < this->deltaWet_
-                );
+                const bool dry = film.h()[filmFacei] < this->deltaWet_;
 
                 if (dry)
                 {

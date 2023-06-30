@@ -93,8 +93,8 @@ void Foam::zoneToCell::combine
 
         if (verbosity)
         {
-            Info<< "    Using zone " << zone.name()
-                << " with " << zone.size() << " cells." << endl;
+            Info<< "    Using zone " << zone.name() << " with "
+                << returnReduce(zone.size(), sumOp<label>()) << " cells" << nl;
         }
 
         for (const label celli : zone)
@@ -188,8 +188,7 @@ Foam::zoneToCell::zoneToCell
     if (!dict.readIfPresent("zones", zoneMatcher_))
     {
         zoneMatcher_.resize(1);
-        zoneMatcher_.first() =
-            dict.getCompat<wordRe>("zone", {{"name", 1806}});
+        zoneMatcher_.front() = dict.getCompat<wordRe>("zone", {{"name", 1806}});
     }
 }
 
@@ -222,7 +221,7 @@ void Foam::zoneToCell::zones(const wordRes& zonesSelector)
 void Foam::zoneToCell::zones(const wordRe& zoneName)
 {
     zoneMatcher_.resize(1);
-    zoneMatcher_.first() = zoneName;
+    zoneMatcher_.front() = zoneName;
     zoneIDs_.clear();
 }
 
@@ -238,7 +237,7 @@ void Foam::zoneToCell::zones(const label zoneID)
 {
     zoneMatcher_.clear();
     zoneIDs_.resize(1);
-    zoneIDs_.first() = zoneID;
+    zoneIDs_.front() = zoneID;
 }
 
 
@@ -252,7 +251,7 @@ void Foam::zoneToCell::applyToSet
     {
         if (verbose_ && !zoneMatcher_.empty())
         {
-            Info<< "    Adding all cells of cell zones "
+            Info<< "    Adding all cells of cell zones: "
                 << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 
@@ -262,7 +261,7 @@ void Foam::zoneToCell::applyToSet
     {
         if (verbose_ && !zoneMatcher_.empty())
         {
-            Info<< "    Removing all cells of cell zones "
+            Info<< "    Removing all cells of cell zones: "
                 << flatOutput(zoneMatcher_) << " ..." << endl;
         }
 

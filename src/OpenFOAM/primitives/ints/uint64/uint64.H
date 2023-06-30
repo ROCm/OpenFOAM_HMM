@@ -52,10 +52,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class Istream;
-class Ostream;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- A word representation of uint64 value
@@ -129,6 +125,10 @@ Ostream& operator<<(Ostream& os, const uint64_t val);
 #endif
 
 
+/*---------------------------------------------------------------------------*\
+                       Specialization pTraits<uint64_t>
+\*---------------------------------------------------------------------------*/
+
 //- Template specialization for pTraits<uint64_t>
 template<>
 class pTraits<uint64_t>
@@ -182,16 +182,10 @@ public:
     // Member Functions
 
         //- Return the value
-        operator uint64_t() const noexcept
-        {
-            return p_;
-        }
+        operator uint64_t() const noexcept { return p_; }
 
         //- Access the value
-        operator uint64_t&() noexcept
-        {
-            return p_;
-        }
+        operator uint64_t&() noexcept { return p_; }
 };
 
 

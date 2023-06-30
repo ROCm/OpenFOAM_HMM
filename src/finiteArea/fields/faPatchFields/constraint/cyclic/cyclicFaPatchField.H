@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicFaPatchField_H
-#define cyclicFaPatchField_H
+#ifndef Foam_cyclicFaPatchField_H
+#define Foam_cyclicFaPatchField_H
 
 #include "coupledFaPatchField.H"
 #include "cyclicLduInterfaceField.H"
@@ -62,7 +62,7 @@ class cyclicFaPatchField
     virtual public cyclicLduInterfaceField,
     public coupledFaPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the cyclic patch
         const cyclicFaPatch& cyclicPatch_;
@@ -98,7 +98,9 @@ public:
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! Evaluate (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping given cyclicFaPatchField onto a new patch
@@ -195,7 +197,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return !(cyclicPatch_.parallel() || pTraits<Type>::rank == 0);
+                return (pTraits<Type>::rank && !cyclicPatch_.parallel());
             }
 
             //- Return face transformation tensor

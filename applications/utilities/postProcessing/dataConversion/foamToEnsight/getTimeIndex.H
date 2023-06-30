@@ -42,7 +42,7 @@ label timeIndex = 0;
             runTime,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false   // no register
+            IOobject::NO_REGISTER
         );
 
         if (io.typeHeaderOk<IOdictionary>(true, false))

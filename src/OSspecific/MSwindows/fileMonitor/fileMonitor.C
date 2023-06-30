@@ -456,15 +456,12 @@ Foam::label Foam::fileMonitor::addWatch(const fileName& fName)
         Pout<< "fileMonitor : adding watch on file " << fName << endl;
     }
 
-    label watchFd;
+    label watchFd = state_.size();
 
-    if (freeWatchFds_.size())
+    if (!freeWatchFds_.empty())
     {
-        watchFd = freeWatchFds_.remove();
-    }
-    else
-    {
-        watchFd = state_.size();
+        watchFd = freeWatchFds_.back();
+        freeWatchFds_.pop_back();
     }
 
     watcher_->addWatch(watchFd, fName);

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,6 @@ License
 #include "electricPotential.H"
 #include "fvc.H"
 #include "fvm.H"
-#include "calculatedFvPatchField.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -45,27 +44,32 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::volScalarField&
-Foam::functionObjects::electricPotential::operandField()
+Foam::volScalarField& Foam::functionObjects::electricPotential::getOrReadField
+(
+    const word& fieldName
+) const
 {
-    if (!foundObject<volScalarField>(fieldName_))
+    auto* ptr = mesh_.getObjectPtr<volScalarField>(fieldName);
+
+    if (!ptr)
     {
-        auto tfldPtr = tmp<volScalarField>::New
+        ptr = new volScalarField
         (
             IOobject
             (
-                fieldName_,
+                fieldName,
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::MUST_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_
         );
-        store(fieldName_, tfldPtr);
+        mesh_.objectRegistry::store(ptr);
     }
 
-    return lookupObjectRef<volScalarField>(fieldName_);
+    return *ptr;
 }
 
 
@@ -79,7 +83,7 @@ Foam::functionObjects::electricPotential::sigma() const
         mesh_.time(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (phases_.size())
@@ -95,7 +99,7 @@ Foam::functionObjects::electricPotential::sigma() const
         (
             sigmaIO,
             tsigma,
-            calculatedFvPatchField<scalar>::typeName
+            fvPatchFieldBase::calculatedType()
         );
     }
 
@@ -104,7 +108,7 @@ Foam::functionObjects::electricPotential::sigma() const
         sigmaIO,
         mesh_,
         sigma_,
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 }
 
@@ -126,7 +130,7 @@ Foam::functionObjects::electricPotential::epsilonm() const
         mesh_.time(),
         IOobject::NO_READ,
         IOobject::NO_WRITE,
-        false
+        IOobject::NO_REGISTER
     );
 
     if (phases_.size())
@@ -142,7 +146,7 @@ Foam::functionObjects::electricPotential::epsilonm() const
         (
             epsilonrIO,
             epsilon0*tepsilonr,
-            calculatedFvPatchField<scalar>::typeName
+            fvPatchFieldBase::calculatedType()
         );
     }
 
@@ -151,7 +155,7 @@ Foam::functionObjects::electricPotential::epsilonm() const
         epsilonrIO,
         mesh_,
         epsilon0*epsilonr_,
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 }
 
@@ -197,23 +201,54 @@ Foam::functionObjects::electricPotential::electricPotential
             )
         )
     ),
-    fieldName_
+    Vname_
     (
         dict.getOrDefault<word>
         (
-            "field",
+            "V",
             IOobject::scopedName(typeName, "V")
         )
     ),
+    Ename_
+    (
+        dict.getOrDefault<word>
+        (
+            "E",
+            IOobject::scopedName(typeName, "E")
+        )
+    ),
     nCorr_(1),
-    writeDerivedFields_(false)
+    writeDerivedFields_(false),
+    electricField_(false)
 {
     read(dict);
 
     // Force creation of transported field so any BCs using it can
     // look it up
-    volScalarField& eV = operandField();
+    volScalarField& eV = getOrReadField(Vname_);
     eV.correctBoundaryConditions();
+
+    if (electricField_)
+    {
+        auto* ptr = getObjectPtr<volVectorField>(Ename_);
+
+        if (!ptr)
+        {
+            ptr = new volVectorField
+            (
+                IOobject
+                (
+                    Ename_,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                -fvc::grad(eV)
+            );
+            mesh_.objectRegistry::store(ptr);
+        }
+    }
 }
 
 
@@ -221,88 +256,89 @@ Foam::functionObjects::electricPotential::electricPotential
 
 bool Foam::functionObjects::electricPotential::read(const dictionary& dict)
 {
-    if (fvMeshFunctionObject::read(dict))
+    if (!fvMeshFunctionObject::read(dict))
     {
-        Log << type() << " read: " << name() << endl;
+        return false;
+    }
 
-        dict.readIfPresent("sigma", sigma_);
-        dict.readIfPresent("epsilonr", epsilonr_);
-        dict.readIfPresent("nCorr", nCorr_);
-        dict.readIfPresent("writeDerivedFields", writeDerivedFields_);
+    Log << type() << " read: " << name() << endl;
 
-        // If flow is multiphase
-        if (!phasesDict_.empty())
+    dict.readIfPresent("sigma", sigma_);
+    dict.readIfPresent("epsilonr", epsilonr_);
+    dict.readIfPresent("nCorr", nCorr_);
+    dict.readIfPresent("writeDerivedFields", writeDerivedFields_);
+    dict.readIfPresent("electricField", electricField_);
+
+    // If flow is multiphase
+    if (!phasesDict_.empty())
+    {
+        phaseNames_.setSize(phasesDict_.size());
+        phases_.setSize(phasesDict_.size());
+        sigmas_.setSize(phasesDict_.size());
+
+        if (writeDerivedFields_)
         {
-            phaseNames_.setSize(phasesDict_.size());
-            phases_.setSize(phasesDict_.size());
-            sigmas_.setSize(phasesDict_.size());
+            epsilonrs_.setSize(phasesDict_.size());
+        }
+
+        label phasei = 0;
+        for (const entry& dEntry : phasesDict_)
+        {
+            const word& key = dEntry.keyword();
+
+            if (!dEntry.isDict())
+            {
+                FatalIOErrorInFunction(phasesDict_)
+                    << "Entry " << key << " is not a dictionary" << nl
+                    << exit(FatalIOError);
+            }
+
+            const dictionary& subDict = dEntry.dict();
+
+            phaseNames_[phasei] = key;
+
+            sigmas_.set
+            (
+                phasei,
+                new dimensionedScalar
+                (
+                    sqr(dimCurrent)*pow3(dimTime)/(dimMass*pow3(dimLength)),
+                    subDict.getCheck<scalar>
+                    (
+                        "sigma",
+                        scalarMinMax::ge(SMALL)
+                    )
+                )
+            );
 
             if (writeDerivedFields_)
             {
-                epsilonrs_.setSize(phasesDict_.size());
-            }
-
-            label phasei = 0;
-            for (const entry& dEntry : phasesDict_)
-            {
-                const word& key = dEntry.keyword();
-
-                if (!dEntry.isDict())
-                {
-                    FatalIOErrorInFunction(phasesDict_)
-                        << "Entry " << key << " is not a dictionary" << nl
-                        << exit(FatalIOError);
-                }
-
-                const dictionary& subDict = dEntry.dict();
-
-                phaseNames_[phasei] = key;
-
-                sigmas_.set
+                epsilonrs_.set
                 (
                     phasei,
                     new dimensionedScalar
                     (
-                        sqr(dimCurrent)*pow3(dimTime)/(dimMass*pow3(dimLength)),
+                        dimless,
                         subDict.getCheck<scalar>
                         (
-                            "sigma",
+                            "epsilonr",
                             scalarMinMax::ge(SMALL)
                         )
                     )
                 );
-
-                if (writeDerivedFields_)
-                {
-                    epsilonrs_.set
-                    (
-                        phasei,
-                        new dimensionedScalar
-                        (
-                            dimless,
-                            subDict.getCheck<scalar>
-                            (
-                                "epsilonr",
-                                scalarMinMax::ge(SMALL)
-                            )
-                        )
-                    );
-                }
-
-                ++phasei;
             }
 
-            forAll(phaseNames_, i)
-            {
-                phases_.set
-                (
-                    i,
-                    mesh_.getObjectPtr<volScalarField>(phaseNames_[i])
-                );
-            }
+            ++phasei;
         }
 
-        return true;
+        forAll(phaseNames_, i)
+        {
+            phases_.set
+            (
+                i,
+                mesh_.getObjectPtr<volScalarField>(phaseNames_[i])
+            );
+        }
     }
 
     return false;
@@ -314,11 +350,11 @@ bool Foam::functionObjects::electricPotential::execute()
     Log << type() << " execute: " << name() << endl;
 
     tmp<volScalarField> tsigma = this->sigma();
-    const volScalarField& sigma = tsigma();
+    const auto& sigma = tsigma();
 
-    volScalarField& eV = operandField();
+    volScalarField& eV = getOrReadField(Vname_);
 
-    for (label i = 1; i <= nCorr_; ++i)
+    for (int i = 1; i <= nCorr_; ++i)
     {
         fvScalarMatrix eVEqn
         (
@@ -330,6 +366,12 @@ bool Foam::functionObjects::electricPotential::execute()
         eVEqn.solve();
     }
 
+    if (electricField_)
+    {
+        auto& E = lookupObjectRef<volVectorField>(Ename_);
+        E == -fvc::grad(eV);
+    }
+
     Log << endl;
 
     return true;
@@ -339,34 +381,22 @@ bool Foam::functionObjects::electricPotential::execute()
 bool Foam::functionObjects::electricPotential::write()
 {
     Log << type() << " write: " << name() << nl
-        << tab << fieldName_
+        << tab << Vname_
         << endl;
 
-    volScalarField& eV = operandField();
+    volScalarField& eV = getOrReadField(Vname_);
 
-    if (writeDerivedFields_)
+    if (electricField_)
     {
-        // Write the electric field
-        const volVectorField E
-        (
-            IOobject
-            (
-                IOobject::scopedName(typeName, "E"),
-                mesh_.time().timeName(),
-                mesh_.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            -fvc::grad(eV),
-            calculatedFvPatchField<vector>::typeName
-        );
+        const auto& E = lookupObject<volVectorField>(Ename_);
 
         Log << tab << E.name() << endl;
 
         E.write();
+    }
 
-
+    if (writeDerivedFields_)
+    {
         // Write the current density field
         tmp<volScalarField> tsigma = this->sigma();
 
@@ -379,10 +409,10 @@ bool Foam::functionObjects::electricPotential::write()
                 mesh_.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             -tsigma*fvc::grad(eV),
-            calculatedFvPatchField<vector>::typeName
+            fvPatchFieldBase::calculatedType()
         );
 
         Log << tab << eJ().name() << endl;
@@ -402,10 +432,10 @@ bool Foam::functionObjects::electricPotential::write()
                 mesh_.time(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
-            fvc::div(tepsilonm*E),
-            calculatedFvPatchField<scalar>::typeName
+            fvc::div(tepsilonm*(-fvc::grad(eV))),
+            fvPatchFieldBase::calculatedType()
         );
 
         Log << tab << erho().name() << endl;

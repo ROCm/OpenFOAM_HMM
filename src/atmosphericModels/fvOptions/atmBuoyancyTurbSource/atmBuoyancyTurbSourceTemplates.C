@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 ENERCON GmbH
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ void Foam::fv::atmBuoyancyTurbSource::atmBuoyancyTurbSourceEpsilon
     const volScalarField::Internal& GbyNu =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":GbyNu")
+            IOobject::scopedName(turbPtr->type(), "GbyNu")
         );
     const volScalarField::Internal G(GbyNu*Cmu_*sqr(k())/epsilon());
 
@@ -82,18 +82,18 @@ void Foam::fv::atmBuoyancyTurbSource::atmBuoyancyTurbSourceOmega
     const volScalarField::Internal& GbyNu =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":GbyNu")
+            IOobject::scopedName(turbPtr->type(), "GbyNu")
         );
     const volScalarField::Internal G(GbyNu*Cmu_*k()/omega());
     const volScalarField::Internal& gamma =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":gamma")
+            IOobject::scopedName(turbPtr->type(), "gamma")
         );
     const volScalarField::Internal& beta =
         mesh_.lookupObjectRef<volScalarField::Internal>
         (
-            word(turbPtr->type() + ":beta")
+            IOobject::scopedName(turbPtr->type(), "beta")
         );
 
     // (ARAL:Eq. 5, rhs-term:3)

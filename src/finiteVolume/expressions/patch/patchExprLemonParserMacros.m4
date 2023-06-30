@@ -6,7 +6,7 @@ divert(-1)dnl
 #     \\  /    A nd           | www.openfoam.com
 #      \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2021 OpenCFD Ltd.
+#     Copyright (C) 2019-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -79,6 +79,7 @@ dnl
 rule_driver_nullary(_scalar_, FACE_AREA, field_faceArea)dnl
 rule_driver_nullary(_vector_, POS, field_faceCentre)dnl  FACE_CENTRE
 rule_driver_nullary(_vector_, FACE_EXPR, field_areaNormal)dnl
+rule_driver_nullary(_vector_, FACE_NORMAL, field_unitNormal)dnl
 dnl
 rule_driver_inplace_unary(_scalar_, WEIGHT_AVERAGE, areaAverage)dnl
 rule_driver_inplace_unary(_vector_, WEIGHT_AVERAGE, areaAverage)dnl

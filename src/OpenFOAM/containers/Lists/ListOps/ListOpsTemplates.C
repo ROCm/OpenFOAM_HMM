@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -306,9 +306,9 @@ Foam::label Foam::inplaceMapValue
         label& value = iter.val();
 
         auto mapIter = mapper.find(value);
-        if (mapIter.found() && value != *mapIter)
+        if (mapIter.good() && value != mapIter.val())
         {
-            value = *mapIter;
+            value = mapIter.val();
             ++nChanged;
         }
     }
@@ -1095,7 +1095,8 @@ void Foam::ListOps::uniqueEqOp<T>::operator()
         {
             for (const T& val : y)
             {
-                if (!x.found(val))
+                // --> x.push_uniq(val)
+                if (!x.contains(val))
                 {
                     x.push_back(val);
                 }

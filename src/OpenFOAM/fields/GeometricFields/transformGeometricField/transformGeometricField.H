@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef transformGeometricField_H
-#define transformGeometricField_H
+#ifndef Foam_transformGeometricField_H
+#define Foam_transformGeometricField_H
 
 #include "transform.H"
 #include "GeometricField.H"

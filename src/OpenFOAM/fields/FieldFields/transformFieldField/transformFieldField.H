@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef transformFieldField_H
-#define transformFieldField_H
+#ifndef Foam_transformFieldField_H
+#define Foam_transformFieldField_H
 
 #include "transform.H"
 #include "tensorFieldField.H"

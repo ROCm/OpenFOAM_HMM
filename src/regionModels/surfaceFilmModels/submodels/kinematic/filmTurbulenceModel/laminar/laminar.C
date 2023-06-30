@@ -86,7 +86,7 @@ tmp<volVectorField> laminar::Us() const
             ),
             filmModel_.regionMesh(),
             dimensionedVector(dimVelocity, Zero),
-            extrapolatedCalculatedFvPatchVectorField::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 
@@ -136,7 +136,7 @@ tmp<fvVectorMatrix> laminar::Su(volVectorField& U) const
     // employ simple coeff-based model
     volScalarField Cs("Cs", Cf_*rhop*mag(Up - U));
     volScalarField Cw("Cw", mu/((1.0/3.0)*(delta + film.deltaSmall())));
-    Cw.min(5000.0);
+    Cw.clamp_max(5000.0);
 
     return
     (

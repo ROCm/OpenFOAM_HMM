@@ -47,7 +47,7 @@ mkdir -p machineB/fileHandler
 (   d=$PWD && \
     cd machineA/fileHandler && \
     runParallel -s multiRoot $application \
-    -fileHandler masterUncollated -ioRanks '(0 2)' \
+    -fileHandler masterUncollated -ioRanks '0,2' \
     -roots "(\"$d/machineA\" \"$d/machineB\" \"$d/machineB\")"
 )
 
@@ -60,13 +60,13 @@ runParallel foamFormatConvert -fileHandler uncollated
 
 #- Restart with multiple IO ranks
 runParallel -s multiCollated \
-    $application -fileHandler collated -ioRanks '(0 2)'
+    $application -fileHandler collated -ioRanks '0,2'
 
 #- Reconstruct the multi-rank format. Delete the collated directory
 #  since conflicts with the multi-collated directory
 rm -rf processors4
 runApplication -s multiCollated reconstructPar -latestTime \
-    -fileHandler collated -ioRanks '(0 2)'
+    -fileHandler collated -ioRanks '0,2'
 
 #- Convert the multi-rank format to uncollated
 runParallel -s uncollated foamFormatConvert -fileHandler uncollated
@@ -99,7 +99,7 @@ mkdir -p machineB/fileHandler
 (   d=$PWD && \
     cd machineA/fileHandler && \
     runParallel -s distributed_multiCollated $application \
-    -fileHandler collated -ioRanks '(0 2)' \
+    -fileHandler collated -ioRanks '0,2' \
     -roots "(\"$d/machineA\" \"$d/machineB\" \"$d/machineB\")"
 )
 

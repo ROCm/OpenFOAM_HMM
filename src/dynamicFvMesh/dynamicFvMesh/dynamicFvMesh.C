@@ -48,9 +48,9 @@ void Foam::dynamicFvMesh::readDict()
         "dynamicMeshDict",
         thisDb().time().constant(),
         thisDb(),
-        IOobject::MUST_READ_IF_MODIFIED,
+        IOobject::MUST_READ,
         IOobject::NO_WRITE,
-        false // Do not register
+        IOobject::NO_REGISTER
     );
 
     if (dictHeader.typeHeaderOk<IOdictionary>(false, false))

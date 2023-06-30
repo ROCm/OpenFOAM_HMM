@@ -81,21 +81,15 @@ Foam::variableHeightFlowRateFvPatchScalarField
     lowerBound_(dict.get<scalar>("lowerBound")),
     upperBound_(dict.get<scalar>("upperBound"))
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
+
+    if (!this->readValueEntry(dict))
+    {
+        // Fallback: set to the internal field
+        this->extrapolateInternal();
+    }
+
     this->refValue() = 0.0;
-
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchScalarField::operator=(this->patchInternalField());
-    }
-
     this->refGrad() = 0.0;
     this->valueFraction() = 0.0;
 }
@@ -137,8 +131,7 @@ void Foam::variableHeightFlowRateFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     scalarField alphap(this->patchInternalField());
 
@@ -175,11 +168,11 @@ void Foam::variableHeightFlowRateFvPatchScalarField::updateCoeffs()
 
 void Foam::variableHeightFlowRateFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntry("lowerBound", lowerBound_);
     os.writeEntry("upperBound", upperBound_);
-    this->writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

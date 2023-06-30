@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,14 +68,14 @@ int main(int argc, char *argv[])
     {
         scalar factor = pI/scalar(size);
 
-        pointList.append(0.99*point(factor, factor, factor));
-        pointFieldList[pI] = 0.99*point(factor, factor, factor);
+        pointList.push_back(0.99*point::uniform(factor));
+        pointFieldList[pI] = 0.99*point::uniform(factor);
     }
 
     for (label i=0; i<5; ++i)
     {
-        pointList.append(point(0.95, 0.95,0.95));
-        pointFieldList.append(point(0.95, 0.95,0.95));
+        pointList.emplace_back(0.95, 0.95, 0.95);
+        pointFieldList.emplace_back(0.95, 0.95, 0.95);
     }
 
     Info<< "Time to construct lists of points: "
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
 // Test point insertion
 
     label index = pointList.size();
-    pointList.append(p);
+    pointList.push_back(p);
 
     Info<< nl << "Inserting point " << p << " with index " << index << endl;
 
@@ -159,7 +160,7 @@ int main(int argc, char *argv[])
         << tree.findNearest(p, 0.4) << endl;
 
     index = pointList.size();
-    pointList.append(p);
+    pointList.push_back(p);
 
     Info<< "Inserting same point " << p << " with index " << index << endl;
 

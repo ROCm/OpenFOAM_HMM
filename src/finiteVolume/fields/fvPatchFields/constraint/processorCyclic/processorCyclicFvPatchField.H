@@ -53,8 +53,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef processorCyclicFvPatchField_H
-#define processorCyclicFvPatchField_H
+#ifndef Foam_processorCyclicFvPatchField_H
+#define Foam_processorCyclicFvPatchField_H
 
 #include "processorCyclicFvPatch.H"
 #include "processorFvPatchField.H"
@@ -162,7 +162,7 @@ public:
             //- Does the patch field perform the transformation
             virtual bool doTransform() const
             {
-                return !(procPatch_.parallel() || pTraits<Type>::rank == 0);
+                return (pTraits<Type>::rank && !procPatch_.parallel());
             }
 
             //- Return face transformation tensor

@@ -39,8 +39,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interpolationLookUpTable_H
-#define interpolationLookUpTable_H
+#ifndef Foam_interpolationLookUpTable_H
+#define Foam_interpolationLookUpTable_H
 
 #include "List.H"
 #include "ListOps.H"
@@ -162,7 +162,7 @@ public:
     // Member Functions
 
         //- Return true if the field exists in the table
-        bool found(const word& fieldName) const;
+        bool contains(const word& fieldName) const;
 
         //- Return the output list given a single input scalar
         const List<scalar>& lookUp(const scalar);
@@ -212,6 +212,14 @@ public:
         //- Return an element of List<scalar, Type>
         scalarField& operator[](const label);
 
+
+    // Housekeeping
+
+        //- Same as contains()
+        bool found(const word& fieldName) const
+        {
+            return this->contains(fieldName);
+        }
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

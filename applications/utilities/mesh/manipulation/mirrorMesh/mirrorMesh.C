@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 

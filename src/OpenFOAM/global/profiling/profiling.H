@@ -52,8 +52,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef profiling_H
-#define profiling_H
+#ifndef Foam_profiling_H
+#define Foam_profiling_H
 
 #include "profilingTrigger.H"
 #include "IOdictionary.H"
@@ -69,7 +69,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Ostream;
 class cpuInfo;
 class memInfo;
 class profilingInformation;
@@ -261,7 +260,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption /*ignore*/,
-            const bool valid
+            const bool writeOnProc
         ) const;
 };
 

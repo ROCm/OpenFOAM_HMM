@@ -109,7 +109,7 @@ Foam::extendedCellToFaceStencil::weightedSum
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensioned<Type>(fld.dimensions(), Zero)

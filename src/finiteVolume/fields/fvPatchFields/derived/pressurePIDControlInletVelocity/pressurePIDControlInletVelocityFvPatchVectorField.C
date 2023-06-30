@@ -222,10 +222,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
     const scalar deltaT(db().time().deltaTValue());
 
     // Get the flux field
-    const surfaceScalarField& phi
-    (
-        db().lookupObject<surfaceScalarField>(phiName_)
-    );
+    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
     // Update the old-time quantities
     if (timeIndex_ != db().time().timeIndex())
@@ -238,25 +235,24 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::updateCoeffs()
 
     // Get the density
     scalar rho = 1;
-    if (phi.dimensions() == dimVelocity*dimArea)
+    if (phi.dimensions() == dimVolume/dimTime)
     {
         // do nothing ...
     }
-    else if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    else if (phi.dimensions() == dimMass/dimTime)
     {
-        const fvPatchField<scalar>& rhoField =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
-        rho = gSum(rhoField*patch().magSf())/gSum(patch().magSf());
+        rho = gSum(rhop*patch().magSf())/gSum(patch().magSf());
     }
     else
     {
         FatalErrorInFunction
             << "The dimensions of the field " << phiName_
             << "are not recognised. The dimensions are " << phi.dimensions()
-            << ". The dimensions should be either " << dimVelocity*dimArea
+            << ". The dimensions should be either " << dimVolume/dimTime
             << " for an incompressible case, or "
-            << dimDensity*dimVelocity*dimArea << " for a compressible case."
+            << dimMass/dimTime << " for a compressible case."
             << exit(FatalError);
     }
 
@@ -371,7 +367,7 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::write
     os.writeEntry("error", error_);
     os.writeEntry("errorIntegral", errorIntegral_);
 
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

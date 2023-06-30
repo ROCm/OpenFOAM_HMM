@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
         Info<< "shuffled: " << vec2 << nl;
 
         // Vectors with some identical components
-        List<vector> vectors
+        vectorField vectors
         ({
             {1.1, 2.2, 3.3 },
             {2.2, 3.3, 4.4 },
@@ -191,8 +191,23 @@ int main(int argc, char *argv[])
         std::sort(vectors.begin(), vectors.end(), vector::less_zxy);
         Info<< "sorted zxy:";
         vectors.writeList(Info, 1) << nl;
-    }
 
+        vectorField vecCmptMag1(cmptMag(vectors));
+        Info<< "cmptMag:";
+        vecCmptMag1.writeList(Info, 1) << nl;
+
+        vectorField vecCmptMag2(vectors.size());
+        vecCmptMag2.replace(vector::X, mag(vectors.component(vector::X)));
+        vecCmptMag2.replace(vector::Y, mag(vectors.component(vector::Y)));
+        vecCmptMag2.replace(vector::Z, mag(vectors.component(vector::Z)));
+
+        Info<< "cmptMag:";
+        vecCmptMag2.writeList(Info, 1) << nl;
+
+        Info<< "mult:";
+        cmptMultiply(vecCmptMag2, vecCmptMag2, vector(2,3,4));
+        vecCmptMag2.writeList(Info, 1) << nl;
+    }
     // Basic tests for fields
     {
         scalarField sfld1

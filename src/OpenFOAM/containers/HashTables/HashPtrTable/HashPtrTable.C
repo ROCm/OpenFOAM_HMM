@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -147,6 +147,30 @@ void Foam::HashPtrTable<T, Key, Hash>::clear()
     }
 
     this->parent_type::clear();
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashPtrTable<T, Key, Hash>::merge
+(
+    HashPtrTable<T, Key, Hash>& source
+)
+{
+    // Use parent merge (of raw pointer entries)
+    // and by-pass any pointer deletions etc.
+    parent_type::merge(static_cast<parent_type&>(source));
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashPtrTable<T, Key, Hash>::merge
+(
+    HashPtrTable<T, Key, Hash>&& source
+)
+{
+    // Use parent merge (of raw pointer entries)
+    // and by-pass any pointer deletions etc.
+    parent_type::merge(static_cast<parent_type&>(source));
 }
 
 

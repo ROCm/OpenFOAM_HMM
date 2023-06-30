@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2021 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,6 +222,20 @@ Foam::Function1<Type>::NewIfPresent
 {
     // mandatory = false
     return Function1<Type>::New(entryName, dict, redirectType, obrPtr, false);
+}
+
+
+template<class Type>
+Foam::autoPtr<Foam::Function1<Type>>
+Foam::Function1<Type>::NewIfPresent
+(
+    const word& entryName,
+    const dictionary& dict,
+    const objectRegistry* obrPtr
+)
+{
+    // mandatory = false
+    return Function1<Type>::New(entryName, dict, word::null, obrPtr, false);
 }
 
 

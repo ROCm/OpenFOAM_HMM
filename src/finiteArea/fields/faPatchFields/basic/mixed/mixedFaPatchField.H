@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +28,17 @@ Class
     Foam::mixedFaPatchField
 
 Description
+    This boundary condition provides a base class for 'mixed' type boundary
+    conditions, i.e. conditions that mix fixed value and patch-normal gradient
+    conditions.
+
+Usage
+    \table
+        Property     | Description                          | Required | Default
+        refValue     | fixed value                          | yes |
+        refGradient  | patch normal gradient                | yes |
+        valueFraction | value weighting (0-1)               | yes |
+    \endtable
 
 Author
     Zeljko Tukovic, FMENA
@@ -37,8 +49,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mixedFaPatchField_H
-#define mixedFaPatchField_H
+#ifndef Foam_mixedFaPatchField_H
+#define Foam_mixedFaPatchField_H
 
 #include "faPatchField.H"
 
@@ -56,7 +68,7 @@ class mixedFaPatchField
 :
     public faPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Value field
         Field<Type> refValue_;
@@ -66,6 +78,20 @@ class mixedFaPatchField
 
         //- Fraction (0-1) of value used for boundary condition
         scalarField valueFraction_;
+
+protected:
+
+        //- Read the "refValue", "refGradient" and "valueFraction" entries
+        //- into their respective places.
+        //  The reading can be optional (default), mandatory etc.
+        //  If refValue is to be read, refGradient and valueFraction must
+        //  also exist.
+        //  \returns True on success
+        bool readMixedEntries
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
 
 
 public:
@@ -83,12 +109,24 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
+        //- Construct from patch and internal field,
+        //- initialise as zero-gradient
+        mixedFaPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const Foam::zero
+        );
+
         //- Construct from patch, internal field and dictionary
         mixedFaPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary&,
+            //! The "refValue", "refGradient", "valueFraction" entries
+            //! (default: mandatory)
+            IOobjectOption::readOption requireMixed = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping the given mixedFaPatchField onto a new patch
@@ -135,17 +173,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: the patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
         // Return defining fields
@@ -205,7 +236,8 @@ public:
             //- Evaluate the patch field
             virtual void evaluate
             (
-                const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::blocking
             );
 
             //- Return the matrix diagonal coefficients corresponding to the
@@ -235,7 +267,7 @@ public:
         virtual void write(Ostream&) const;
 
 
-    // Member operators
+    // Member Operators
 
         virtual void operator=(const UList<Type>&) {}
 

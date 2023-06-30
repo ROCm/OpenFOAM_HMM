@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2014 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,19 +35,22 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef GAMGProcAgglomeration_H
-#define GAMGProcAgglomeration_H
+#ifndef Foam_GAMGProcAgglomeration_H
+#define Foam_GAMGProcAgglomeration_H
 
 #include "runTimeSelectionTables.H"
 #include "labelList.H"
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward Declarations
 class GAMGAgglomeration;
 class lduMesh;
+class lduPrimitiveMesh;
 
 /*---------------------------------------------------------------------------*\
                     Class GAMGProcAgglomeration Declaration
@@ -54,13 +58,16 @@ class lduMesh;
 
 class GAMGProcAgglomeration
 {
-
 protected:
 
-    // Protected data
+    // Protected Data
 
         //- Reference to agglomeration
         GAMGAgglomeration& agglom_;
+
+        //- Allocated communicators
+        DynamicList<label> comms_;
+
 
     // Protected Member Functions
 
@@ -80,17 +87,8 @@ protected:
         //- Debug: calculate global cell-cells
         static labelListList globalCellCells(const lduMesh&);
 
-private:
-
-    // Private data
-
-    // Private Member Functions
-
-        //- No copy construct
-        GAMGProcAgglomeration(const GAMGProcAgglomeration&) = delete;
-
-        //- No copy assignment
-        void operator=(const GAMGProcAgglomeration&) = delete;
+        //- Clear/free allocated communicators
+        void clearCommunicators();
 
 
 public:
@@ -118,6 +116,13 @@ public:
         );
 
 
+    //- No copy construct
+    GAMGProcAgglomeration(const GAMGProcAgglomeration&) = delete;
+
+    //- No copy assignment
+    void operator=(const GAMGProcAgglomeration&) = delete;
+
+
     // Constructors
 
         //- Construct given agglomerator and controls
@@ -139,15 +144,14 @@ public:
         );
 
 
-    //- Destructor
+    //- Destructor. Clears allocated communicators
     virtual ~GAMGProcAgglomeration();
 
 
     // Member Functions
 
-        //- Modify agglomeration. Return true if modified
+        //- Modify agglomeration. \returns True if modified
         virtual bool agglomerate() = 0;
-
 };
 
 

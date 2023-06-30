@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -283,13 +283,13 @@ public:
         //- Check index is within valid range [0,size)
         inline void checkIndex(const label i) const;
 
-        //- Number of entries.
-        inline label size() const noexcept;
-
         //- True if the list is empty (ie, size() is zero).
-        inline bool empty() const noexcept;
+        bool empty() const noexcept { return !size_; }
 
-        //- The number of elements that can be stored with reallocating
+        //- Number of entries.
+        label size() const noexcept { return size_; }
+
+        //- Number of elements that can be stored without reallocating
         inline label capacity() const noexcept;
 
         //- True if all entries have identical values, and list is non-empty
@@ -409,6 +409,9 @@ public:
         //- A pointer to the raw storage, reinterpreted as byte data
         inline char* data_bytes() noexcept;
 
+        //- The number of integer blocks addressed in the raw storage
+        inline std::streamsize size_data() const noexcept;
+
         //- The number of bytes used in the raw storage
         //- including any unused padding.
         inline std::streamsize size_bytes() const noexcept;
@@ -510,8 +513,9 @@ public:
 
     // IOstream Operators
 
-        //- Return info proxy.
-        InfoProxy<PackedList<Width>> info() const
+        //- Return info proxy,
+        //- used to print information to  a stream
+        InfoProxy<PackedList<Width>> info() const noexcept
         {
             return *this;
         }

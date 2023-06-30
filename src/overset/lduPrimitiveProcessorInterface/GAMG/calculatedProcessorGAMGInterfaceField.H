@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedProcessorGAMGInterfaceField_H
-#define calculatedProcessorGAMGInterfaceField_H
+#ifndef Foam_calculatedProcessorGAMGInterfaceField_H
+#define Foam_calculatedProcessorGAMGInterfaceField_H
 
 #include "GAMGInterfaceField.H"
 #include "calculatedProcessorGAMGInterface.H"
@@ -55,7 +55,7 @@ class calculatedProcessorGAMGInterfaceField
     public GAMGInterfaceField,
     public processorLduInterfaceField
 {
-    // Private data
+    // Private Data
 
         //- Local reference cast into the processor interface
         const calculatedProcessorGAMGInterface& procInterface_;
@@ -69,17 +69,17 @@ class calculatedProcessorGAMGInterfaceField
 
         // Sending and receiving
 
-            //- Outstanding request
-            mutable label outstandingSendRequest_;
+            //- Current (non-blocking) send request
+            mutable label sendRequest_;
 
-            //- Outstanding request
-            mutable label outstandingRecvRequest_;
+            //- Current (non-blocking) recv request
+            mutable label recvRequest_;
 
             //- Scalar send buffer
             mutable solveScalarField scalarSendBuf_;
 
-            //- Scalar receive buffer
-            mutable solveScalarField scalarReceiveBuf_;
+            //- Scalar recv buffer
+            mutable solveScalarField scalarRecvBuf_;
 
 
 

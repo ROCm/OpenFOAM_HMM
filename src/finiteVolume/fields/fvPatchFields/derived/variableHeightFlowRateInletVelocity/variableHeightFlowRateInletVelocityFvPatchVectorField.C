@@ -109,8 +109,10 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
         return;
     }
 
-    scalarField alphap =
-        patch().lookupPatchField<volScalarField, scalar>(alphaName_);
+    scalarField alphap
+    (
+        patch().lookupPatchField<volScalarField>(alphaName_)
+    );
 
     alphap = max(alphap, scalar(0));
     alphap = min(alphap, scalar(1));
@@ -137,7 +139,7 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField::write
     fvPatchField<vector>::write(os);
     flowRate_->writeData(os);
     os.writeEntry("alpha", alphaName_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

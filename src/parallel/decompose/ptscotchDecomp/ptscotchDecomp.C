@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,12 +32,20 @@ License
 #include "Time.H"
 #include "PrecisionAdaptor.H"
 #include "OFstream.H"
+#include <cstdio>
 #include <limits>
+
+// Include MPI without any C++ bindings
+#ifndef MPICH_SKIP_MPICXX
+#define MPICH_SKIP_MPICXX
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX
+#endif
 
 // Avoid too many warnings from mpi.h
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 
-#include <cstdio>
 #include <mpi.h>
 #include "ptscotch.h"
 
@@ -395,6 +403,31 @@ Foam::label Foam::ptscotchDecomp::decompose
     }
     else
     {
+        // Check for optional domains/weights
+        List<SCOTCH_Num> domains;
+        List<scalar> dWeights;
+        if
+        (
+            coeffsDict_.readIfPresent
+            (
+                "domains",
+                domains,
+                keyType::LITERAL
+            )
+         && coeffsDict_.readIfPresent
+            (
+                "domainWeights",
+                dWeights,
+                keyType::LITERAL
+            )
+        )
+        {
+            WarningInFunction
+                << "Ignoring multi-level decomposition since"
+                << " not supported by ptscotch."
+                << " It is supported by scotch" << endl;
+        }
+
         if (debug & 2)
         {
             Pout<< "SCOTCH_archCmplt" << endl;

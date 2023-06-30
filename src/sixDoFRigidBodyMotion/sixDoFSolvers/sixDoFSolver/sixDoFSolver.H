@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2015 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,6 +128,9 @@ protected:
             const vector& fGlobal,
             const vector& tauGlobal
         );
+
+        //- Update the constraints to the object
+        inline void updateConstraints();
 
 
 public:

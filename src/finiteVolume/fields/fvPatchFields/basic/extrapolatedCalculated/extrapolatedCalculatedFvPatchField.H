@@ -49,8 +49,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef extrapolatedCalculatedFvPatchField_H
-#define extrapolatedCalculatedFvPatchField_H
+#ifndef Foam_extrapolatedCalculatedFvPatchField_H
+#define Foam_extrapolatedCalculatedFvPatchField_H
 
 #include "calculatedFvPatchField.H"
 
@@ -68,11 +68,11 @@ class extrapolatedCalculatedFvPatchField
 :
     public calculatedFvPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
     TypeName("extrapolatedCalculated");
+    // fieldTypes::extrapolatedCalculatedTypeName_()
 
 
     // Constructors
@@ -92,7 +92,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         extrapolatedCalculatedFvPatchField
         (
             const extrapolatedCalculatedFvPatchField<Type>&,

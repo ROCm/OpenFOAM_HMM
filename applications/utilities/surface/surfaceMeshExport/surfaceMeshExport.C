@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
         "clean",
         "Perform some surface checking/cleanup on the input surface"
     );
+    argList::addVerboseOption();
     argList::addOption
     (
         "name",
@@ -157,6 +158,8 @@ int main(int argc, char *argv[])
     const auto exportName = args.get<fileName>(1);
     const auto importName = args.getOrDefault<word>("name", "default");
 
+    const int optVerbose  = args.verbose();
+
     const word writeFileType
     (
         args.getOrDefault<word>("write-format", getExtension(exportName))
@@ -188,7 +191,7 @@ int main(int argc, char *argv[])
                 runTime,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             args.getOrDefault<fileName>("dict", "")
         );
@@ -273,7 +276,7 @@ int main(int argc, char *argv[])
 
     if (args.found("clean"))
     {
-        surf.cleanup(true);
+        surf.cleanup(optVerbose);
     }
 
     if (fromCsys)

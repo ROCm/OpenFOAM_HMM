@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,19 +117,16 @@ bool Foam::wallBoundedStreamLineParticle::move
 
         // Transfer particle data into trackingData.
         {
-            td.allPositions_.append(vectorList());
-            td.allPositions_.last().transfer(sampledPositions_);
+            td.allPositions_.emplace_back().transfer(sampledPositions_);
         }
 
         forAll(sampledScalars_, i)
         {
-            td.allScalars_[i].append(scalarList());
-            td.allScalars_[i].last().transfer(sampledScalars_[i]);
+            td.allScalars_[i].emplace_back().transfer(sampledScalars_[i]);
         }
         forAll(sampledVectors_, i)
         {
-            td.allVectors_[i].append(vectorList());
-            td.allVectors_[i].last().transfer(sampledVectors_[i]);
+            td.allVectors_[i].emplace_back().transfer(sampledVectors_[i]);
         }
     }
 

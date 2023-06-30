@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,12 +26,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "parProfiling.H"
-#include "addToRunTimeSelectionTable.H"
-#include "Pstream.H"
-#include "PstreamReduceOps.H"
 #include "profilingPstream.H"
-#include "Tuple2.H"
-#include "FixedList.H"
+#include "Pstream.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -61,8 +58,10 @@ Foam::functionObjects::parProfiling::parProfiling
     const dictionary& dict
 )
 :
-    functionObject(name)
+    functionObject(name),
+    reportLevel_(0)
 {
+    dict.readIfPresent("detail", reportLevel_);
     profilingPstream::enable();
 }
 
@@ -79,120 +78,10 @@ Foam::functionObjects::parProfiling::~parProfiling()
 
 void Foam::functionObjects::parProfiling::report()
 {
-    if (!profilingPstream::active())
+    if (UPstream::parRun() && UPstream::nProcs() > 1)
     {
-        return;
-    }
-
-    // (Time, Processor) for each of: min/max/sum
-    typedef FixedList<Tuple2<double, int>, 3> statData;
-    typedef FixedList<statData, 3> statDataTimes;
-
-    // Reduction: if x and y are unequal assign value.
-    auto statsEqOp = [](statDataTimes& xStats, const statDataTimes& yStats)
-    {
-        forAll(xStats, i)
-        {
-            statData& x = xStats[i];
-            const statData& y = yStats[i];
-
-            // 0: min, 1: max, 2: total (or avg)
-            if (x[0].first() > y[0].first())
-            {
-                x[0] = y[0];
-            }
-            if (x[1].first() < y[1].first())
-            {
-                x[1] = y[1];
-            }
-            x[2].first() += y[2].first();
-        }
-    };
-
-    statDataTimes times;
-
-    // Master time
-    {
-        const double total =
-        (
-            profilingPstream::times(profilingPstream::REDUCE)
-          + profilingPstream::times(profilingPstream::GATHER)
-          + profilingPstream::times(profilingPstream::SCATTER)
-            // Include broadcast with reduce instead of all-to-all
-          + profilingPstream::times(profilingPstream::BROADCAST)
-        );
-
-        times[0] = Tuple2<double, int>(total, Pstream::myProcNo());
-    }
-
-    // All time
-    {
-        const double total =
-        (
-            profilingPstream::times(profilingPstream::WAIT)
-          + profilingPstream::times(profilingPstream::ALL_TO_ALL)
-          + profilingPstream::times(profilingPstream::OTHER)
-        );
-
-        times[1] = Tuple2<double, int>(total, Pstream::myProcNo());
-    }
-
-    // Other time
-    {
-        const double total =
-        (
-            profilingPstream::times(profilingPstream::OTHER)
-        );
-
-        times[2] = Tuple2<double, int>(total, Pstream::myProcNo());
-    }
-
-    profilingPstream::suspend();
-
-    Pstream::combineGather(times, statsEqOp);
-
-    profilingPstream::resume();
-
-
-    if (Pstream::master())
-    {
-        Info<< type() << ':' << nl
-            << incrIndent;
-
-        {
-            const statData& stats = times[0];
-            double avg = stats[2].first()/Pstream::nProcs();
-
-            Info<< indent << "reduce    : avg = " << avg << 's' << nl
-                << indent << "            min = " << stats[0].first()
-                << "s (processor " << stats[0].second() << ')' << nl
-                << indent << "            max = " << stats[1].first()
-                << "s (processor " << stats[1].second() << ')' << nl;
-        }
-
-        {
-            const statData& stats = times[1];
-            double avg = stats[2].first()/Pstream::nProcs();
-
-            Info<< indent << "all-all   : avg = " << avg << 's' << nl
-                << indent << "            min = " << stats[0].first()
-                << "s (processor " << stats[0].second() << ')' << nl
-                << indent << "            max = " << stats[1].first()
-                << "s (processor " << stats[1].second() << ')' << nl;
-        }
-
-        {
-            const statData& stats = times[2];
-            double avg = stats[2].first()/Pstream::nProcs();
-
-            Info<< indent << "other     : avg = " << avg << 's' << nl
-                << indent << "            min = " << stats[0].first()
-                << "s (processor " << stats[0].second() << ')' << nl
-                << indent << "            max = " << stats[1].first()
-                << "s (processor " << stats[1].second() << ')' << nl;
-        }
-
-        Info<< decrIndent;
+        Info<< nl;
+        profilingPstream::report(reportLevel_);
     }
 }
 

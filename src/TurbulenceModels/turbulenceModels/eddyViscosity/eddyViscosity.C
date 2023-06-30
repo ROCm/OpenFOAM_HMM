@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2017 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +100,7 @@ Foam::eddyViscosity<BasicTurbulenceModel>::R() const
                 ->found(patchFieldTypes[i])
         )
         {
-            patchFieldTypes[i] = calculatedFvPatchField<symmTensor>::typeName;
+            patchFieldTypes[i] = fvPatchFieldBase::calculatedType();
         }
     }
 
@@ -114,9 +115,9 @@ Foam::eddyViscosity<BasicTurbulenceModel>::R() const
                 this->mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
-            ((2.0/3.0)*I)*tk() - (nut_)*dev(twoSymm(fvc::grad(this->U_))),
+            ((2.0/3.0)*I)*tk() - (nut_)*devTwoSymm(fvc::grad(this->U_)),
             patchFieldTypes
         )
     );

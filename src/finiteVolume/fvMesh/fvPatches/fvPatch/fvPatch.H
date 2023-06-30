@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,6 +33,8 @@ Description
 SourceFiles
     fvPatch.C
     fvPatchNew.C
+    fvPatchTemplates.C
+    fvPatchFvMeshTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -164,78 +166,79 @@ public:
 
     // Access
 
-            //- Return the polyPatch
-            const polyPatch& patch() const noexcept
-            {
-                return polyPatch_;
-            }
+        //- Return the polyPatch
+        const polyPatch& patch() const noexcept
+        {
+            return polyPatch_;
+        }
 
-            //- Return name
-            virtual const word& name() const
-            {
-                return polyPatch_.name();
-            }
+        //- Return name
+        virtual const word& name() const
+        {
+            return polyPatch_.name();
+        }
 
-            //- Return start label of this patch in the polyMesh face list
-            virtual label start() const
-            {
-                return polyPatch_.start();
-            }
+        //- The index of this patch in the boundary mesh
+        label index() const noexcept
+        {
+            return polyPatch_.index();
+        }
 
-            //- Return size
-            virtual label size() const
-            {
-                return polyPatch_.size();
-            }
+        //- The patch start within the polyMesh face list
+        label start() const noexcept
+        {
+            return polyPatch_.start();
+        }
 
-            //- Return true if this patch is coupled
-            virtual bool coupled() const
-            {
-                return polyPatch_.coupled();
-            }
+        //- Patch size is the number of faces, but can be overloaded
+        virtual label size() const
+        {
+            return polyPatch_.size();
+        }
 
-            //- Return true if the given type is a constraint type
-            static bool constraintType(const word& patchType);
+        //- Return true if this patch is coupled
+        virtual bool coupled() const
+        {
+            return polyPatch_.coupled();
+        }
 
-            //- Return a list of all the constraint patch types
-            static wordList constraintTypes();
+        //- Return true if the given type is a constraint type
+        static bool constraintType(const word& patchType);
 
-            //- Return the index of this patch in the fvBoundaryMesh
-            label index() const noexcept
-            {
-                return polyPatch_.index();
-            }
+        //- Return a list of all the constraint patch types
+        static wordList constraintTypes();
 
-            //- Return boundaryMesh reference
-            const fvBoundaryMesh& boundaryMesh() const noexcept
-            {
-                return boundaryMesh_;
-            }
+        //- Return boundaryMesh reference
+        const fvBoundaryMesh& boundaryMesh() const noexcept
+        {
+            return boundaryMesh_;
+        }
 
-            //- Slice List to patch, using the virtual patch size
-            template<class T>
-            const typename List<T>::subList patchSlice(const List<T>& l) const
-            {
-                return typename List<T>::subList(l, size(), start());
-            }
+        //- This patch slice from the complete list, which has size
+        //- mesh::nFaces(), using the virtual patch size.
+        template<class T>
+        const typename List<T>::subList
+        patchSlice(const List<T>& values) const
+        {
+            return typename List<T>::subList(values, size(), start());
+        }
 
-            //- Slice List to patch, using the underlying polyPatch information
-            template<class T>
-            const typename List<T>::subList patchRawSlice
+        //- This patch slice from the list of boundary values, which has size
+        //- mesh::nBoundaryFaces(), using the virtual patch size.
+        template<class T>
+        const typename List<T>::subList
+        boundarySlice(const List<T>& values) const
+        {
+            return typename List<T>::subList
             (
-                const List<T>& l
-            ) const
-            {
-                return typename List<T>::subList
-                (
-                    l,
-                    polyPatch_.size(),
-                    polyPatch_.start()
-                );
-            }
+                values,
+                size(),
+                polyPatch_.offset()
+            );
+        }
 
-            //- Return faceCells
-            virtual const labelUList& faceCells() const;
+        //- Return faceCells
+        virtual const labelUList& faceCells() const;
 
 
         // Access functions for geometrical data
@@ -246,13 +249,18 @@ public:
             //- Return neighbour cell centres
             tmp<vectorField> Cn() const;
 
-            //- Return face area vectors
+            //- Return face area vectors, like the fvMesh::Sf() method
             const vectorField& Sf() const;
 
-            //- Return face area magnitudes
+            //- Return face area magnitudes, like the fvMesh::magSf() method
             const scalarField& magSf() const;
 
-            //- Return face normals
+            //- Return face unit normals, like the fvMesh::unitSf() method.
+            //- Same as nf().
+            tmp<vectorField> unitSf() const;
+
+            //- Return face unit normals, like the fvMesh::unitSf() method
+            //- Same as unitSf().
             tmp<vectorField> nf() const;
 
             //- Return cell-centre to face-centre vector
@@ -274,31 +282,41 @@ public:
 
         // Evaluation Functions
 
-            //- Extract internal field next to patch using faceCells mapping
+            //- Extract internal field next to patch using specified addressing
+            // \param internalData The internal field to extract from
+            // \param addressing Addressing from patch into internal field
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the addressing size
             template<class Type>
             inline void patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& faceCells,
+                const UList<Type>& internalData,
+                const labelUList& addressing,
+                Field<Type>& pfld
+            ) const;
+
+            //- Extract internal field next to patch as patch field
+            //- using faceCells() mapping.
+            // \param internalData The internal field to extract from
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the faceCells() size
+            template<class Type>
+            void patchInternalField
+            (
+                const UList<Type>& internalData,
                 Field<Type>& pfld
             ) const;
 
             //- Return given internal field next to patch as patch field
-            template<class Type>
-            tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
-
-            //- Return given internal field next to patch as patch field
-            //- using provided addressing
+            //- using faceCells() mapping.
+            // \param internalData The internal field to extract from
             template<class Type>
             tmp<Field<Type>> patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& faceCells
+                const UList<Type>& internalData
             ) const;
-
-            //- Return given internal field next to patch as patch field
-            template<class Type>
-            void patchInternalField(const UList<Type>&, Field<Type>&) const;
 
             //- Return the patch field of the GeometricField
             //- corresponding to this patch.

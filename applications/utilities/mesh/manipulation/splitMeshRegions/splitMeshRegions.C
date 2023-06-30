@@ -57,7 +57,7 @@ Description
         -combineZones '((zoneA "zoneB.*")(none otherZone))
     This can be combined with e.g. 'cellZones' or 'cellZonesOnly'. The
     addZones option supplies the destination region name as first element in
-    the list. The combineZones option synthesises the region name e.g. 
+    the list. The combineZones option synthesises the region name e.g.
         zoneA_zoneB0_zoneB1
 
     - cellZonesOnly does not do a walk and uses the cellZones only. Use
@@ -114,7 +114,6 @@ Description
 #include "ReadFields.H"
 #include "mappedWallPolyPatch.H"
 #include "fvMeshTools.H"
-#include "zeroGradientFvPatchFields.H"
 #include "processorMeshes.H"
 
 using namespace Foam;
@@ -292,11 +291,11 @@ void addToInterface
 
     auto iter = regionsToSize.find(interface);
 
-    if (iter.found())
+    if (iter.good())
     {
         // Check if zone present
         auto zoneIter = iter().find(zoneID);
-        if (zoneIter.found())
+        if (zoneIter.good())
         {
             // Found zone. Increment count.
             ++(*zoneIter);
@@ -408,7 +407,7 @@ void getInterfaceSizes
 
                     auto masterIter = regionsToSize.find(slaveIter.key());
 
-                    if (masterIter.found())
+                    if (masterIter.good())
                     {
                         // Same inter-region
                         Map<label>& masterInfo = *masterIter;
@@ -419,7 +418,7 @@ void getInterfaceSizes
                             const label slaveSize = iter.val();
 
                             auto zoneIter = masterInfo.find(zoneID);
-                            if (zoneIter.found())
+                            if (zoneIter.good())
                             {
                                 *zoneIter += slaveSize;
                             }
@@ -913,7 +912,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         map().pointMap()
     );
@@ -932,7 +931,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         newMesh().nFaces()
     );
@@ -970,7 +969,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         map().cellMap()
     );
@@ -989,7 +988,7 @@ void createAndWriteRegion
             newMesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         labelList(nNewPatches, -1)
     );
@@ -1055,7 +1054,7 @@ labelList addRegionPatches
             mesh,
             patch1,
             dictionary(),   //optional per field value
-            calculatedFvPatchField<scalar>::typeName,
+            fvPatchFieldBase::calculatedType(),
             true            //validBoundary
         );
 
@@ -1076,7 +1075,7 @@ labelList addRegionPatches
             mesh,
             patch2,
             dictionary(),   //optional per field value
-            calculatedFvPatchField<scalar>::typeName,
+            fvPatchFieldBase::calculatedType(),
             true            //validBoundary
         );
 
@@ -1409,7 +1408,7 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             cellRegion
         );
@@ -1429,11 +1428,11 @@ void writeCellToRegion(const fvMesh& mesh, const labelList& cellRegion)
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         forAll(cellRegion, celli)
         {
@@ -1716,7 +1715,7 @@ int main(int argc, char *argv[])
                 mesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh
         );
@@ -1830,7 +1829,7 @@ int main(int argc, char *argv[])
             {
                 label ownCluster = clusterID[mesh.faceOwner()[facei]];
                 label neiCluster = clusterID[mesh.faceNeighbour()[facei]];
-                
+
                 if (ownCluster != neiCluster)
                 {
                     blockedFace[facei] = true;

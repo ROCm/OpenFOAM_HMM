@@ -83,7 +83,7 @@ tmp<volScalarField::Internal> noFilm::Srho() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
@@ -102,7 +102,7 @@ tmp<volScalarField::Internal> noFilm::Srho(const label i) const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
@@ -121,7 +121,7 @@ tmp<volScalarField::Internal> noFilm::Sh() const
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

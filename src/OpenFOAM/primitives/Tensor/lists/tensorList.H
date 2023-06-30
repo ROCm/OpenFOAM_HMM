@@ -23,22 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::tensorUList
-
-Description
-    A UList of tensors.
-
-Typedef
-    Foam::tensorList
-
-Description
-    A List of tensors.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensorList_H
-#define tensorList_H
+#ifndef Foam_tensorList_H
+#define Foam_tensorList_H
 
 #include "tensor.H"
 #include "List.H"
@@ -47,9 +35,8 @@ Description
 
 namespace Foam
 {
-    typedef UList<tensor> tensorUList;
-
-    typedef List<tensor> tensorList;
+    typedef List<tensor> tensorList;        //!< List of tensor
+    typedef UList<tensor> tensorUList;      //!< UList of tensor
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

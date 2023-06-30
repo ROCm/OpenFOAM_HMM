@@ -69,8 +69,9 @@ freeSurfaceVelocityFvPatchVectorField
 :
     fixedGradientFvPatchVectorField(p, iF)
 {
-    patchType() = dict.getOrDefault<word>("patchType", word::null);
-    fvPatchVectorField::operator=(patchInternalField());
+    fvPatchFieldBase::readDict(dict);
+    // Apply zero-gradient condition on start-up
+    this->extrapolateInternal();
 }
 
 
@@ -113,8 +114,8 @@ void Foam::freeSurfaceVelocityFvPatchVectorField::updateCoeffs()
 
 void Foam::freeSurfaceVelocityFvPatchVectorField::write(Ostream& os) const
 {
-    fixedGradientFvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fixedGradientFvPatchField<vector>::write(os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

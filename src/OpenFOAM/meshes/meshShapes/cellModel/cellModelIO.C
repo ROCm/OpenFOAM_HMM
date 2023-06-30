@@ -59,9 +59,13 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const cellModel& cm)
 
 
 template<>
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<cellModel>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<cellModel>& iproxy
+)
 {
-    const cellModel& cm = ip.t_;
+    const auto& cm = *iproxy;
 
     os  << "name = " << cm.name() << ", "
         << "index = " << cm.index() << ", "

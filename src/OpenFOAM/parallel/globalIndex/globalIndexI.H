@@ -27,7 +27,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ListOps.H"
-#include "labelRange.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -121,7 +120,7 @@ inline Foam::globalIndex::globalIndex
     const label comm
 )
 {
-    // one-sided: non-master only
+    // one-sided: non-master sizes only
     reset
     (
         UPstream::listGatherValues
@@ -137,14 +136,14 @@ inline Foam::globalIndex::globalIndex
 
 inline bool Foam::globalIndex::empty() const
 {
-    return offsets_.empty() || offsets_.last() == 0;
+    return offsets_.empty() || offsets_.back() == 0;
 }
 
 
 inline Foam::label Foam::globalIndex::totalSize() const
 {
     const label len = (offsets_.size() - 1);
-    return (len < 1) ? static_cast<label>(0) : offsets_[len];
+    return (len < 1) ? 0 : offsets_[len];
 }
 
 
@@ -163,7 +162,7 @@ inline Foam::labelList Foam::globalIndex::sizes() const
 inline Foam::label Foam::globalIndex::nProcs() const noexcept
 {
     const label len = (offsets_.size() - 1);
-    return (len < 1) ? static_cast<label>(0) : len;
+    return (len < 1) ? 0 : len;
 }
 
 
@@ -219,7 +218,7 @@ inline Foam::label Foam::globalIndex::localStart(const label proci) const
 
 inline Foam::label Foam::globalIndex::localStart() const
 {
-    return localStart(Pstream::myProcNo());
+    return localStart(UPstream::myProcNo());
 }
 
 
@@ -231,7 +230,7 @@ inline Foam::label Foam::globalIndex::localSize(const label proci) const
 
 inline Foam::label Foam::globalIndex::localSize() const
 {
-    return localSize(Pstream::myProcNo());
+    return localSize(UPstream::myProcNo());
 }
 
 
@@ -244,7 +243,7 @@ inline Foam::label Foam::globalIndex::maxSize() const
 
 inline Foam::label Foam::globalIndex::maxNonLocalSize() const
 {
-    return maxNonLocalSize(Pstream::myProcNo());
+    return maxNonLocalSize(UPstream::myProcNo());
 }
 
 
@@ -256,7 +255,7 @@ inline Foam::labelRange Foam::globalIndex::range(const label proci) const
 
 inline Foam::labelRange Foam::globalIndex::range() const
 {
-    return range(Pstream::myProcNo());
+    return range(UPstream::myProcNo());
 }
 
 
@@ -268,7 +267,7 @@ inline bool Foam::globalIndex::isLocal(const label proci, const label i) const
 
 inline bool Foam::globalIndex::isLocal(const label i) const
 {
-    return isLocal(Pstream::myProcNo(), i);
+    return isLocal(UPstream::myProcNo(), i);
 }
 
 
@@ -284,7 +283,7 @@ inline Foam::label Foam::globalIndex::toGlobal
 
 inline Foam::label Foam::globalIndex::toGlobal(const label i) const
 {
-    return toGlobal(Pstream::myProcNo(), i);
+    return toGlobal(UPstream::myProcNo(), i);
 }
 
 
@@ -306,7 +305,7 @@ inline Foam::labelList Foam::globalIndex::toGlobal
     const labelUList& labels
 ) const
 {
-    return toGlobal(Pstream::myProcNo(), labels);
+    return toGlobal(UPstream::myProcNo(), labels);
 }
 
 
@@ -327,7 +326,7 @@ inline void Foam::globalIndex::inplaceToGlobal
 
 inline void Foam::globalIndex::inplaceToGlobal(labelUList& labels) const
 {
-    inplaceToGlobal(Pstream::myProcNo(), labels);
+    inplaceToGlobal(UPstream::myProcNo(), labels);
 }
 
 
@@ -349,7 +348,7 @@ Foam::globalIndex::toLocal(const label proci, const label i) const
 
 inline Foam::label Foam::globalIndex::toLocal(const label i) const
 {
-    return toLocal(Pstream::myProcNo(), i);
+    return toLocal(UPstream::myProcNo(), i);
 }
 
 
@@ -363,7 +362,7 @@ inline Foam::label Foam::globalIndex::whichProcID(const label i) const
             << abort(FatalError);
     }
 
-    const label proci(Pstream::myProcNo());
+    const int proci = UPstream::myProcNo();
 
     return isLocal(proci, i) ? proci : findLower(offsets_, i+1);
 }
@@ -401,7 +400,7 @@ inline void Foam::globalIndex::reset
     const label comm
 )
 {
-    // one-sided: non-master only
+    // one-sided: non-master sizes only
     reset
     (
         UPstream::listGatherValues

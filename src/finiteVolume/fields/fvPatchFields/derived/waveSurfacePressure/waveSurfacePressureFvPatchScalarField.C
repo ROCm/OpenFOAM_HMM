@@ -155,8 +155,7 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     ddtSchemeType ddtScheme(ddtSchemeTypeNames_[ddtSchemeName]);
 
     // Retrieve the flux field from the database
-    const surfaceScalarField& phi =
-        db().lookupObject<surfaceScalarField>(phiName_);
+    const auto& phi = db().lookupObject<surfaceScalarField>(phiName_);
 
     // Cache the patch face-normal vectors
     tmp<vectorField> nf(patch().nf());
@@ -164,10 +163,9 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
     // Change in zeta due to flux
     vectorField dZetap(dt*nf()*phi.boundaryField()[patchi]/patch().magSf());
 
-    if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
+    if (phi.dimensions() == dimMass/dimTime)
     {
-        const scalarField& rhop =
-            patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+        const auto& rhop = patch().lookupPatchField<volScalarField>(rhoName_);
 
         dZetap /= rhop;
     }
@@ -227,11 +225,11 @@ void Foam::waveSurfacePressureFvPatchScalarField::updateCoeffs()
 
 void Foam::waveSurfacePressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("zeta", "zeta", zetaName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

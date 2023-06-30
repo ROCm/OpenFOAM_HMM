@@ -99,17 +99,6 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotAlphal() const
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
 {
-
-    volScalarField limitedAlpha1
-    (
-        min(max(mixture_.alpha1(), scalar(0)), scalar(1))
-    );
-
-    volScalarField limitedAlpha2
-    (
-        min(max(mixture_.alpha2(), scalar(0)), scalar(1))
-    );
-
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
     const twoPhaseMixtureEThermo& thermo =
@@ -124,11 +113,15 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
 
     volScalarField mDotE
     (
-        "mDotE", coeffE_*mixture_.rho1()*limitedAlpha1*max(T - TSat, T0)
+        "mDotE",
+        coeffE_*mixture_.rho1()*clamp(mixture_.alpha1(), zero_one{})
+      * max(T - TSat, T0)
     );
     volScalarField mDotC
     (
-        "mDotC", coeffC_*mixture_.rho2()*limitedAlpha2*max(TSat - T, T0)
+        "mDotC",
+        coeffC_*mixture_.rho2()*clamp(mixture_.alpha2(), zero_one{})
+      * max(TSat - T, T0)
     );
 
     if (mesh_.time().outputTime())
@@ -148,16 +141,6 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
 Foam::Pair<Foam::tmp<Foam::volScalarField>>
 Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
 {
-    volScalarField limitedAlpha1
-    (
-        min(max(mixture_.alpha1(), scalar(0)), scalar(1))
-    );
-
-    volScalarField limitedAlpha2
-    (
-        min(max(mixture_.alpha2(), scalar(0)), scalar(1))
-    );
-
     const volScalarField& T = mesh_.lookupObject<volScalarField>("T");
 
     const twoPhaseMixtureEThermo& thermo =
@@ -170,8 +153,14 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
 
     return Pair<tmp<volScalarField>>
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*pos(TSat - T),
-        coeffE_*mixture_.rho1()*limitedAlpha1*pos(T - TSat)
+        (
+            coeffC_*mixture_.rho2()*clamp(mixture_.alpha2(), zero_one{})
+          * pos(TSat - T)
+        ),
+        (
+            coeffE_*mixture_.rho1()*clamp(mixture_.alpha1(), zero_one{})
+          * pos(T - TSat)
+        )
     );
 }
 
@@ -201,25 +190,17 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::TSource() const
 
     const dimensionedScalar& TSat = thermo.TSat();
 
-    dimensionedScalar L = mixture_.Hf2() - mixture_.Hf1();
-
-    volScalarField limitedAlpha1
-    (
-        min(max(mixture_.alpha1(), scalar(0)), scalar(1))
-    );
-
-    volScalarField limitedAlpha2
-    (
-        min(max(mixture_.alpha2(), scalar(0)), scalar(1))
-    );
+    const dimensionedScalar L = mixture_.Hf2() - mixture_.Hf1();
 
     const volScalarField Vcoeff
     (
-        coeffE_*mixture_.rho1()*limitedAlpha1*L*pos(T - TSat)
+        coeffE_*mixture_.rho1()*clamp(mixture_.alpha1(), zero_one{})
+      * L*pos(T - TSat)
     );
     const volScalarField Ccoeff
     (
-        coeffC_*mixture_.rho2()*limitedAlpha2*L*pos(TSat - T)
+        coeffC_*mixture_.rho2()*clamp(mixture_.alpha2(), zero_one{})
+      * L*pos(TSat - T)
     );
 
     TSource =

@@ -23,47 +23,23 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::labelPairPair
-
-Description
-    A pair of labelPairs.
-
-Typedef
-    Foam::labelPairList
-
-Description
-    List of labelPairs.
-
-Typedef
-    Foam::labelPairUList
-
-Description
-    UList of labelPairs.
-
-Typedef
-    Foam::labelPairSubList
-
-Description
-    A SubList of labelPairs.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelPair_H
-#define labelPair_H
+#ifndef Foam_labelPair_H
+#define Foam_labelPair_H
 
+#include "Pair.H"
 #include "List.H"
 #include "SubList.H"
-#include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef Pair<labelPair> labelPairPair;
-    typedef List<labelPair> labelPairList;
-    typedef UList<labelPair> labelPairUList;
-    typedef SubList<labelPair> labelPairSubList;
+    typedef Pair<labelPair> labelPairPair;      //!< Pair of labelPair
+    typedef List<labelPair> labelPairList;      //!< List of labelPair
+    typedef UList<labelPair> labelPairUList;    //!< UList of labelPair
+
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

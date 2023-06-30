@@ -133,7 +133,7 @@ Foam::displacementMotionSolverMeshMover::displacementMotionSolverMeshMover
                     pointDisplacement.db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 dict
             ),
@@ -147,7 +147,7 @@ Foam::displacementMotionSolverMeshMover::displacementMotionSolverMeshMover
                     pointDisplacement.db(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 pointDisplacement.mesh()().points()
             )
@@ -275,13 +275,13 @@ bool Foam::displacementMotionSolverMeshMover::move
         );
 
 
-        scalar resid = 0;
+        // scalar resid = 0;
 
         forAll(displacement, patchPointI)
         {
             const label pointI(adaptPatchPtr_().meshPoints()[patchPointI]);
 
-            resid += mag(pointDisplacement()[pointI]-displacement[patchPointI]);
+            // resid += mag(pointDisplacement()[pointI]-displacement[patchPointI]);
 
             pointDisplacement()[pointI] = displacement[patchPointI];
         }

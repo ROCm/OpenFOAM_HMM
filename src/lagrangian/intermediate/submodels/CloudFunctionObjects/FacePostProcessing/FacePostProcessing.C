@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,10 +275,12 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
     const faceZoneMesh& fzm = owner.mesh().faceZones();
     const surfaceScalarField& magSf = owner.mesh().magSf();
     const polyBoundaryMesh& pbm = owner.mesh().boundaryMesh();
+
     forAll(faceZoneNames, i)
     {
         const word& zoneName = faceZoneNames[i];
         label zoneI = fzm.findZoneID(zoneName);
+
         if (zoneI != -1)
         {
             zoneIDs.append(zoneI);
@@ -291,17 +293,15 @@ Foam::FacePostProcessing<CloudType>::FacePostProcessing
             Info<< "        " << zoneName << " faces: " << nFaces << nl;
 
             scalar totArea = 0.0;
-            forAll(fz, j)
+            for (const label facei : fz)
             {
-                label facei = fz[j];
                 if (facei < owner.mesh().nInternalFaces())
                 {
-                    totArea += magSf[fz[j]];
+                    totArea += magSf[facei];
                 }
                 else
                 {
-                    label bFacei = facei - owner.mesh().nInternalFaces();
-                    label patchi = pbm.patchID()[bFacei];
+                    const label patchi = pbm.patchID(facei);
                     const polyPatch& pp = pbm[patchi];
 
                     if

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ License
 
 Foam::UIPstream::UIPstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     DynamicList<char>& receiveBuf,
     label& receiveBufPosition,
@@ -55,7 +55,7 @@ Foam::UIPstream::UIPstream
         fmt
     )
 {
-    if (commsType == commsTypes::nonBlocking)
+    if (commsType == UPstream::commsTypes::nonBlocking)
     {
         // Message is already received into buffer
     }
@@ -70,7 +70,7 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 :
     UIPstreamBase(fromProcNo, buffers)
 {
-    if (commsType() == commsTypes::nonBlocking)
+    if (commsType() == UPstream::commsTypes::nonBlocking)
     {
         // Message is already received into buffer
         messageSize_ = recvBuf_.size();
@@ -91,9 +91,19 @@ Foam::UIPstream::UIPstream(const int fromProcNo, PstreamBuffers& buffers)
 }
 
 
+Foam::UIPstream::UIPstream
+(
+    const DynamicList<char>& recvBuf,
+    IOstreamOption::streamFormat fmt
+)
+:
+    UIPstreamBase(recvBuf, fmt)
+{}
+
+
 Foam::IPstream::IPstream
 (
-    const commsTypes commsType,
+    const UPstream::commsTypes commsType,
     const int fromProcNo,
     const label bufSize,
     const int tag,
@@ -107,13 +117,12 @@ Foam::IPstream::IPstream
         commsType,
         fromProcNo,
         Pstream::transferBuf_,
-        transferBufPosition_,
+        UIPstreamBase::storedRecvBufPos_,   // Internal only
         tag,
         comm,
         false,  // Do not clear Pstream::transferBuf_ if at end
         fmt
-    ),
-    transferBufPosition_(0)
+    )
 {}
 
 

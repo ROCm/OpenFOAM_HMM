@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ void reduce
     const label comm
 )
 {
-    if (UPstream::warnComm != -1 && comm != UPstream::warnComm)
+    if (UPstream::warnComm >= 0 && comm != UPstream::warnComm)
     {
         Pout<< "** reducing:" << value << " with comm:" << comm << endl;
         error::printStack(Pout);
@@ -79,7 +79,7 @@ void reduce
     const label comm = UPstream::worldComm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::is_parallel(comm))
     {
         Foam::reduce(UPstream::whichCommunication(comm), value, bop, tag, comm);
     }
@@ -110,6 +110,21 @@ void reduce
     const BinaryOp&,
     const int tag,
     const label comm,
+    UPstream::Request& req
+)
+{
+    NotImplemented;
+}
+
+//- Non-blocking reduce inplace (cf. MPI Iallreduce)
+//- single value. Sets request.
+template<class T, class BinaryOp>
+void reduce
+(
+    T& Value,
+    const BinaryOp&,
+    const int tag,
+    const label comm,
     label& request
 )
 {
@@ -117,8 +132,23 @@ void reduce
 }
 
 //- Non-blocking reduce inplace (cf. MPI Iallreduce)
-//- of multiple values (same size on all processes!)
-//  Sets request.
+//- of multiple values (same size on all processes!). Sets request.
+template<class T, class BinaryOp>
+void reduce
+(
+    T values[],
+    const int size,
+    const BinaryOp&,
+    const int tag,
+    const label comm,
+    UPstream::Request& req
+)
+{
+    NotImplemented;
+}
+
+//- Non-blocking reduce inplace (cf. MPI Iallreduce)
+//- of multiple values (same size on all processes!). Sets request.
 template<class T, class BinaryOp>
 void reduce
 (
@@ -278,10 +308,33 @@ void reduce                                                                   \
     const sumOp<Native>&,                                                     \
     const int tag,  /*!< (ignored) */                                         \
     const label comm,                                                         \
+    UPstream::Request& req  /*!< [out] request information */                 \
+);                                                                            \
+                                                                              \
+/*! \brief Non-blocking reduce (sum) multiple Native values. Sets request */  \
+/*! \deprecated prefer version with UPstream::Request */                      \
+void reduce                                                                   \
+(                                                                             \
+    Native values[],                                                          \
+    const int size,                                                           \
+    const sumOp<Native>&,                                                     \
+    const int tag,  /*!< (ignored) */                                         \
+    const label comm,                                                         \
     label& requestID                                                          \
 );                                                                            \
                                                                               \
 /*! \brief Non-blocking reduce (sum) single Native value. Sets request */     \
+void reduce                                                                   \
+(                                                                             \
+    Native& value,                                                            \
+    const sumOp<Native>&,                                                     \
+    const int tag,  /*!< (ignored) */                                         \
+    const label comm,                                                         \
+    UPstream::Request& req  /*!< [out] request information */                 \
+);                                                                            \
+                                                                              \
+/*! \brief Non-blocking reduce (sum) single Native value. Sets request */     \
+/*! \deprecated prefer version with UPstream::Request */                      \
 void reduce                                                                   \
 (                                                                             \
     Native& value,                                                            \
@@ -322,7 +375,7 @@ void sumReduce
     const label comm = UPstream::worldComm
 )
 {
-    if (UPstream::parRun())
+    if (UPstream::is_parallel(comm))
     {
         Foam::reduce(value, sumOp<T>(), tag, comm);
         Foam::reduce(count, sumOp<label>(), tag, comm);

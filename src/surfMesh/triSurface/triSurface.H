@@ -38,12 +38,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef triSurface_H
-#define triSurface_H
+#ifndef Foam_triSurface_H
+#define Foam_triSurface_H
 
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 #include "PatchTools.H"
-#include "pointField.H"
 #include "labelledTri.H"
 #include "boolList.H"
 #include "bitSet.H"

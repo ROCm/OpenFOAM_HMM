@@ -70,10 +70,7 @@ adjointWallVelocityLowReFvPatchVectorField
     fixedValueFvPatchVectorField(p, iF),
     adjointVectorBoundaryCondition(p, iF, dict.get<word>("solverName"))
 {
-    fvPatchField<vector>::operator=
-    (
-        vectorField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -110,9 +107,9 @@ void Foam::adjointWallVelocityLowReFvPatchVectorField::updateCoeffs()
 
 void Foam::adjointWallVelocityLowReFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
-    writeEntry("value", os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("solverName", adjointSolverName_);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

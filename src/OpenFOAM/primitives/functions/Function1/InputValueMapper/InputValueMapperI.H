@@ -47,7 +47,7 @@ inline Type Foam::Function1Types::InputValueMapper<Type>::value
         }
         case mappingMode::MINMAX:
         {
-            scalar tlim = min(max(t, min_), max_);
+            scalar tlim = clamp(t, min_, max_);
 
             return value_->value(tlim);
         }
@@ -86,8 +86,8 @@ Type Foam::Function1Types::InputValueMapper<Type>::integrate
         }
         case mappingMode::MINMAX:
         {
-            scalar xlim0 = min(max(x1, min_), max_);
-            scalar xlim1 = min(max(x2, min_), max_);
+            scalar xlim0 = clamp(x1, min_, max_);
+            scalar xlim1 = clamp(x2, min_, max_);
 
             Type intValue = value_->integrate(xlim0, xlim1);
 

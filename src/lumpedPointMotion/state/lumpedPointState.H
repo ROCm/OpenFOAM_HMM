@@ -77,10 +77,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward Declarations
-class Istream;
-class Ostream;
-
 /*---------------------------------------------------------------------------*\
                       Class lumpedPointState Declaration
 \*---------------------------------------------------------------------------*/

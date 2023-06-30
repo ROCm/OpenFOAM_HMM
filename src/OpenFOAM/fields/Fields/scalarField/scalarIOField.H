@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::scalarIOField
-
-Description
-    scalarField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef scalarIOField_H
-#define scalarIOField_H
+#ifndef Foam_scalarIOField_H
+#define Foam_scalarIOField_H
 
 #include "scalarField.H"
 #include "IOField.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of scalar
     typedef IOField<scalar> scalarIOField;
 }
 

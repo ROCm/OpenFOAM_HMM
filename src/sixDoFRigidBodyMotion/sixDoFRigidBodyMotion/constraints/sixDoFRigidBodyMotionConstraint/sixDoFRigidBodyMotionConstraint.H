@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,6 +162,12 @@ public:
             {
                 return sDoFRBMCCoeffs_;
             }
+
+        //- Return const access to motion
+        const sixDoFRigidBodyMotion& motion() const noexcept { return motion_; }
+
+
+    // I-O
 
         //- Write
         virtual void write(Ostream&) const;

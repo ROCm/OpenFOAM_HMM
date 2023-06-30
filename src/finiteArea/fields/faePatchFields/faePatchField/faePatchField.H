@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,7 @@ SourceFiles
 
 #include "faPatch.H"
 #include "DimensionedField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,9 +59,8 @@ namespace Foam
 {
 
 // Forward Declarations
-
-class objectRegistry;
 class dictionary;
+class objectRegistry;
 class faPatchFieldMapper;
 class edgeMesh;
 
@@ -90,6 +90,14 @@ protected:
         //- Read dictionary entries.
         //  Useful when initially constructed without a dictionary
         virtual void readDict(const dictionary& dict);
+
+        //- Set updated state. This is a no-op for faePatchField
+        void setUpdated(bool state) noexcept
+        {}
+
+        //- Set matrix manipulated state. This is a no-op for faePatchField
+        void setManipulated(bool state) noexcept
+        {}
 
 
 public:
@@ -123,17 +131,66 @@ public:
     virtual ~faePatchFieldBase() = default;
 
 
+    // Static Member Functions
+
+        //- The type name for \c empty patch fields
+        static const word& emptyType() noexcept
+        {
+            return Foam::fieldTypes::emptyType;
+        }
+
+        //- The type name for \c calculated patch fields
+        static const word& calculatedType() noexcept
+        {
+            return Foam::fieldTypes::calculatedType;
+        }
+
+
     // Member Functions
+
+    // Attributes
+
+        //- True if the patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
+
+        //- True if the patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
+
 
     // Access
 
         //- The associated objectRegistry
-        /// const objectRegistry& db() const;
+        const objectRegistry& db() const;
 
         //- Return the patch
         const faPatch& patch() const noexcept
         {
             return patch_;
+        }
+
+
+    // Solution
+
+        //- True if the boundary condition has already been updated.
+        //- This is always true for faePatchField
+        bool updated() const noexcept
+        {
+            return true;
+        }
+
+        //- True if the matrix has already been manipulated.
+        //- Currently ignored (always false) for faePatchField
+        bool manipulatedMatrix() const noexcept
+        {
+            return false;
         }
 
 
@@ -158,6 +215,25 @@ class faePatchField
 
         //- Reference to internal field
         const DimensionedField<Type, edgeMesh>& internalField_;
+
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write \c *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
 
 
 public:
@@ -223,20 +299,39 @@ public:
             const DimensionedField<Type, edgeMesh>&
         );
 
-        //- Construct from patch and internal field and patch field
+        //- Construct from patch, internal field and value
         faePatchField
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const Field<Type>&
+            const Type& value
+        );
+
+        //- Construct from patch, internal field and patch field
+        faePatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&,
+            const Field<Type>& pfld
+        );
+
+        //- Construct from patch, internal field and patch field
+        faePatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, edgeMesh>&,
+            Field<Type>&& pfld
         );
 
         //- Construct from patch, internal field and dictionary
+        //  \note older versions have always treated "value" as optional
         faePatchField
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
-            const dictionary&
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::LAZY_READ
         );
 
         //- Construct by mapping the given faePatchField onto a new patch
@@ -335,69 +430,60 @@ public:
 
     // Member Functions
 
-        //- The type name for calculated patch fields
-        static const word& calculatedType();
+    // Access
+
+        //- Return const-reference to the dimensioned internal field
+        const DimensionedField<Type, edgeMesh>& internalField() const noexcept
+        {
+            return internalField_;
+        }
+
+        //- Return const-reference to the internal field values
+        const Field<Type>& primitiveField() const noexcept
+        {
+            return internalField_;
+        }
 
 
-        // Attributes
+    // Mapping
 
-            //- True if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return false;
-            }
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap
+        (
+            const faPatchFieldMapper&
+        );
 
-            //- True if this patch field is coupled
-            virtual bool coupled() const
-            {
-                return false;
-            }
-
-
-        // Access
-
-            //- Return local objectRegistry
-            const objectRegistry& db() const;
-
-            //- Return dimensioned internal field reference
-            const DimensionedField<Type, edgeMesh>& internalField()
-            const noexcept
-            {
-                return internalField_;
-            }
-
-            //- Return internal field reference
-            const Field<Type>& primitiveField() const noexcept
-            {
-                return internalField_;
-            }
+        //- Reverse map the given faePatchField onto this faePatchField
+        virtual void rmap
+        (
+            const faePatchField<Type>&,
+            const labelList&
+        );
 
 
-        // Mapping
+    // Evaluation Functions
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const faPatchFieldMapper&
-            );
+        //- Initialise the evaluation of the patch field, generally a no-op
+        virtual void initEvaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        )
+        {}
 
-            //- Reverse map the given faePatchField onto this faePatchField
-            virtual void rmap
-            (
-                const faePatchField<Type>&,
-                const labelList&
-            );
+        //- Evaluate the patch field, generally a no-op
+        virtual void evaluate
+        (
+            const Pstream::commsTypes commsType = Pstream::commsTypes::blocking
+        )
+        {}
 
+
+    // Other
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
-
-    // Check
-
-        //- Check faePatchField<Type> against given faePatchField<Type>
+        //- Check against given patch field
         void check(const faePatchField<Type>&) const;
 
 
@@ -445,70 +531,12 @@ public:
 
 #ifdef NoRepository
     #include "faePatchField.C"
+    #include "faePatchFieldNew.C"
     #include "calculatedFaePatchField.H"
 #endif
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Runtime selection macros
-
-#define makeFaePatchTypeFieldTypeName(typePatchTypeField)                      \
-                                                                               \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);
-
-#define makeFaePatchFieldsTypeName(typePatchField)                             \
-                                                                               \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchScalarField);            \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchVectorField);            \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSphericalTensorField);   \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSymmTensorField);        \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchTensorField);
-
-
-#define makeFaePatchTypeField(PatchTypeField, typePatchTypeField)              \
-                                                                               \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);                    \
-                                                                               \
-addToRunTimeSelectionTable                                                     \
-(                                                                              \
-    PatchTypeField, typePatchTypeField, patch                                  \
-);                                                                             \
-                                                                               \
-addToRunTimeSelectionTable                                                     \
-(                                                                              \
-    PatchTypeField,                                                            \
-    typePatchTypeField,                                                        \
-    patchMapper                                                                \
-);                                                                             \
-                                                                               \
-addToRunTimeSelectionTable                                                     \
-(                                                                              \
-    PatchTypeField, typePatchTypeField, dictionary                             \
-);
-
-
-#define makeFaePatchFields(type)                                               \
-                                                                               \
-makeFaePatchTypeField(faePatchScalarField, type##FaePatchScalarField);         \
-makeFaePatchTypeField(faePatchVectorField, type##FaePatchVectorField);         \
-makeFaePatchTypeField                                                          \
-(                                                                              \
-    faePatchSphericalTensorField,                                              \
-    type##FaePatchSphericalTensorField                                         \
-);                                                                             \
-makeFaePatchTypeField(faePatchSymmTensorField, type##FaePatchSymmTensorField); \
-makeFaePatchTypeField(faePatchTensorField, type##FaePatchTensorField);
-
-
-#define makeFaePatchTypeFieldTypedefs(type)                                    \
-                                                                               \
-typedef type##FaePatchField<scalar> type##FaePatchScalarField;                 \
-typedef type##FaePatchField<vector> type##FaePatchVectorField;                 \
-typedef type##FaePatchField<sphericalTensor>                                   \
-    type##FaePatchSphericalTensorField;                                        \
-typedef type##FaePatchField<symmTensor> type##FaePatchSymmTensorField;         \
-typedef type##FaePatchField<tensor> type##FaePatchTensorField;
-
+#include "faePatchFieldMacros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

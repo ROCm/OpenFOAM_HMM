@@ -49,16 +49,13 @@ SourceFiles
 
 namespace Foam
 {
-// Forward Declarations
-class Istream;
-class Ostream;
-
 namespace functionObjects
 {
+    // Forward Declarations
     class eulerianParticle;
 }
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 Istream& operator>>(Istream&, functionObjects::eulerianParticle&);
 Ostream& operator<<(Ostream&, const functionObjects::eulerianParticle&);
 

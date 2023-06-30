@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,8 +59,8 @@ namespace Foam
 {
 
 // Forward Declarations
-class objectRegistry;
 class dictionary;
+class objectRegistry;
 class fvPatchFieldMapper;
 class volMesh;
 
@@ -122,6 +122,7 @@ protected:
             manipulatedMatrix_ = state;
         }
 
+
 public:
 
     //- Debug switch to disallow the use of generic fvPatchField
@@ -153,7 +154,58 @@ public:
     virtual ~fvPatchFieldBase() = default;
 
 
+    // Static Member Functions
+
+        //- The type name for \c empty patch fields
+        static const word& emptyType() noexcept
+        {
+            return Foam::fieldTypes::emptyType;
+        }
+
+        //- The type name for \c calculated patch fields
+        static const word& calculatedType() noexcept
+        {
+            return Foam::fieldTypes::calculatedType;
+        }
+
+        //- The type name for \c extrapolatedCalculated patch fields
+        //- combines \c zero-gradient and \c calculated
+        static const word& extrapolatedCalculatedType() noexcept
+        {
+            return Foam::fieldTypes::extrapolatedCalculatedType;
+        }
+
+        //- The type name for \c zeroGradient patch fields
+        static const word& zeroGradientType() noexcept
+        {
+            return Foam::fieldTypes::zeroGradientType;
+        }
+
+
     // Member Functions
+
+    // Attributes
+
+        //- True if the value of the patch field is altered by assignment
+        virtual bool assignable() const
+        {
+            return true;
+        }
+
+        //- True if the patch field fixes a value.
+        //  Needed to check if a level has to be specified while solving
+        //  Poissons equations.
+        virtual bool fixesValue() const
+        {
+            return false;
+        }
+
+        //- True if the patch field is coupled
+        virtual bool coupled() const
+        {
+            return false;
+        }
+
 
     // Access
 
@@ -231,6 +283,28 @@ class fvPatchField
         //- Reference to internal field
         const DimensionedField<Type, volMesh>& internalField_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write \c *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
+
+        //- Assign the patch field from the internal field
+        void extrapolateInternal();
+
 
 public:
 
@@ -295,6 +369,14 @@ public:
             const DimensionedField<Type, volMesh>&
         );
 
+        //- Construct from patch, internal field and patch type
+        fvPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, volMesh>&,
+            const word& patchType
+        );
+
         //- Construct from patch, internal field and value
         fvPatchField
         (
@@ -303,20 +385,20 @@ public:
             const Type& value
         );
 
-        //- Construct from patch and internal field and patch type
+        //- Construct from patch, internal field and patch field
         fvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const word& patchType
+            const Field<Type>& pfld
         );
 
-        //- Construct from patch and internal field and patch field
+        //- Construct from patch, internal field and patch field
         fvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const Field<Type>&
+            Field<Type>&& pfld
         );
 
         //- Construct from patch, internal field and dictionary
@@ -324,9 +406,26 @@ public:
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
+
+        //- Construct, forwarding to readOption variant
+        fvPatchField
+        (
+            const fvPatch& p,
+            const DimensionedField<Type, volMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            fvPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
 
         //- Construct by mapping the given fvPatchField onto a new patch
         fvPatchField
@@ -428,51 +527,19 @@ public:
 
     // Member Functions
 
-        //- The type name for calculated patch fields
-        static const word& calculatedType();
+    // Access
 
-        //- The type name for zeroGradient patch fields
-        static const word& zeroGradientType();
+        //- Return const-reference to the dimensioned internal field
+        const DimensionedField<Type, volMesh>& internalField() const noexcept
+        {
+            return internalField_;
+        }
 
-
-        // Attributes
-
-            //- True if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return false;
-            }
-
-            //- True if the value of the patch field
-            //- is altered by assignment (the default)
-            virtual bool assignable() const
-            {
-                return true;
-            }
-
-            //- True if this patch field is coupled
-            virtual bool coupled() const
-            {
-                return false;
-            }
-
-
-        // Access
-
-            //- Return dimensioned internal field reference
-            const DimensionedField<Type, volMesh>& internalField()
-            const noexcept
-            {
-                return internalField_;
-            }
-
-            //- Return internal field reference
-            const Field<Type>& primitiveField() const noexcept
-            {
-                return internalField_;
-            }
+        //- Return const-reference to the internal field values
+        const Field<Type>& primitiveField() const noexcept
+        {
+            return internalField_;
+        }
 
 
         // Mapping Functions
@@ -517,11 +584,12 @@ public:
             //  patches. Sets Updated to true
             virtual void updateWeightedCoeffs(const scalarField& weights);
 
-            //- Return internal field next to patch as patch field
+            //- Return internal field next to patch
             virtual tmp<Field<Type>> patchInternalField() const;
 
-            //- Return internal field next to patch as patch field
-            virtual void patchInternalField(Field<Type>&) const;
+            //- Extract internal field next to patch
+            // \param [out] pfld The extracted patch field.
+            virtual void patchInternalField(Field<Type>& pfld) const;
 
             //- Return patchField on the opposite patch of a coupled patch
             virtual tmp<Field<Type>> patchNeighbourField() const
@@ -538,7 +606,7 @@ public:
             )
             {}
 
-            //- Evaluate the patch field, sets Updated to false
+            //- Evaluate the patch field, sets updated() to false
             virtual void evaluate
             (
                 const Pstream::commsTypes commsType =
@@ -628,16 +696,13 @@ public:
             );
 
 
-        // I-O
+    // Other
 
-            //- Write
-            virtual void write(Ostream&) const;
+        //- Write
+        virtual void write(Ostream&) const;
 
-
-        // Check
-
-            //- Check fvPatchField<Type> against given fvPatchField<Type>
-            void check(const fvPatchField<Type>&) const;
+        //- Check against given patch field
+        void check(const fvPatchField<Type>&) const;
 
 
     // Member Operators
@@ -684,110 +749,13 @@ public:
 
 #ifdef NoRepository
     #include "fvPatchField.C"
+    #include "fvPatchFieldNew.C"
     #include "calculatedFvPatchField.H"
     #include "zeroGradientFvPatchField.H"
 #endif
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Runtime selection macros
-
-#define makeFvPatchField(fvPatchTypeField)                                     \
-                                                                               \
-defineTemplateRunTimeSelectionTable(fvPatchTypeField, patch);                  \
-defineTemplateRunTimeSelectionTable(fvPatchTypeField, patchMapper);            \
-defineTemplateRunTimeSelectionTable(fvPatchTypeField, dictionary);
-
-
-#undef  addToPatchFieldRunTimeSelection
-#define addToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)    \
-    addToRunTimeSelectionTable                                                 \
-    (                                                                          \
-        PatchTypeField,                                                        \
-        typePatchTypeField,                                                    \
-        patch                                                                  \
-    );                                                                         \
-    addToRunTimeSelectionTable                                                 \
-    (                                                                          \
-        PatchTypeField,                                                        \
-        typePatchTypeField,                                                    \
-        patchMapper                                                            \
-    );                                                                         \
-    addToRunTimeSelectionTable                                                 \
-    (                                                                          \
-        PatchTypeField,                                                        \
-        typePatchTypeField,                                                    \
-        dictionary                                                             \
-    );
-
-
-// Use with caution
-#undef  addRemovableToPatchFieldRunTimeSelection
-#define addRemovableToPatchFieldRunTimeSelection\
-(PatchTypeField, typePatchTypeField)                                           \
-                                                                               \
-    addRemovableToRunTimeSelectionTable                                        \
-    (                                                                          \
-        PatchTypeField,                                                        \
-        typePatchTypeField,                                                    \
-        patch                                                                  \
-    );                                                                         \
-    addRemovableToRunTimeSelectionTable                                        \
-    (                                                                          \
-        PatchTypeField,                                                        \
-        typePatchTypeField,                                                    \
-        patchMapper                                                            \
-    );                                                                         \
-    addRemovableToRunTimeSelectionTable                                        \
-    (                                                                          \
-        PatchTypeField,                                                        \
-        typePatchTypeField,                                                    \
-        dictionary                                                             \
-    );
-
-
-// For non-templated patch fields
-#define makePatchTypeField(PatchTypeField, typePatchTypeField)                 \
-    defineTypeNameAndDebug(typePatchTypeField, 0);                             \
-    addToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)
-
-// For non-templated patch fields - use with caution
-#define makeRemovablePatchTypeField(PatchTypeField, typePatchTypeField)        \
-    defineTypeNameAndDebug(typePatchTypeField, 0);                             \
-    addRemovableToPatchFieldRunTimeSelection(PatchTypeField, typePatchTypeField)
-
-// For templated patch fields
-#define makeTemplatePatchTypeField(fieldType, type)                            \
-    defineNamedTemplateTypeNameAndDebug                                        \
-    (                                                                          \
-        CAT4(type, FvPatch, CAPITALIZE(fieldType), Field),                     \
-        0                                                                      \
-    );                                                                         \
-    addToPatchFieldRunTimeSelection                                            \
-    (                                                                          \
-        CAT3(fvPatch, CAPITALIZE(fieldType), Field),                           \
-        CAT4(type, FvPatch, CAPITALIZE(fieldType), Field)                      \
-    )
-
-#define makePatchFields(type)                                                  \
-    FOR_ALL_FIELD_TYPES(makeTemplatePatchTypeField, type)
-
-#define makePatchFieldTypeName(fieldType, type)                                \
-    defineNamedTemplateTypeNameAndDebug                                        \
-    (                                                                          \
-        CAT4(type, FvPatch, CAPITALIZE(fieldType), Field),                     \
-        0                                                                      \
-    );
-
-#define makePatchFieldTypeNames(type)                                          \
-    FOR_ALL_FIELD_TYPES(makePatchFieldTypeName, type)
-
-#define makePatchTypeFieldTypedef(fieldType, type)                             \
-    typedef type##FvPatchField<fieldType>                                      \
-        CAT4(type, FvPatch, CAPITALIZE(fieldType), Field);
-
-#define makePatchTypeFieldTypedefs(type)                                       \
-    FOR_ALL_FIELD_TYPES(makePatchTypeFieldTypedef, type)
+#include "fvPatchFieldMacros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

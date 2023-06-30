@@ -6,7 +6,7 @@
 #   \\  /    A nd           | www.openfoam.com
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-#     Copyright (C) 2019-2021 OpenCFD Ltd.
+#     Copyright (C) 2019-2023 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
@@ -20,10 +20,6 @@
 #     the OpenFOAM etc/bashrc file from the project directory.
 #
 # Note
-#     This script normally exists in the $WM_PROJECT_DIR/etc/ directory.
-#     Do not copy/move/link to other locations. Use instead an edited copy of
-#     `bin/tools/openfoam.in` with a hard-coded projectDir entry.
-#
 #     See OpenFOAM etc/bashrc for (command-line) preferences.
 #     Some equivalent settings:
 #       -sp     | -DWM_PRECISION_OPTION=SP
@@ -31,15 +27,33 @@
 #       -int32  | -DWM_LABEL_SIZE=32
 #       -int64  | -DWM_LABEL_SIZE=64
 #
-#     The '-D' options grant even more flexibility. For example,
-#         etc/openfoam -DWM_COMPILER=Clang
+#     Can use '-D' options for even more flexibility. For example,
+#
+#         openfoam -DWM_COMPILER=Clang
+#
+# Warning
+#     This script is to be located in one of the following locations:
+#       - $WM_PROJECT_DIR/
+#       - $WM_PROJECT_DIR/etc/
+#       - $WM_PROJECT_DIR/share/
+#
+#     Do not copy/move/link to other locations.
+#     Use instead an edited copy of `bin/tools/openfoam.in`
+#     with a hard-coded projectDir entry.
 #
 # SeeAlso
 #     META-INFO/README.md for other routines that also use META-INFO.
 #
 #------------------------------------------------------------------------------
-# Auto-detect from location. Do not call from within the etc/directory itself!
-projectDir="$(\cd "$(dirname "${0%/*}")" && \pwd -L)"
+# Auto-detect from location
+projectDir="$(\cd "$(dirname "$0")" && \pwd -L)"
+
+# Handle common sub-directory locations
+case "$projectDir" in
+(*/etc | */share)
+    projectDir="${projectDir%/*}"
+    ;;
+esac
 
 #------------------------------------------------------------------------------
 printHelp() {
@@ -115,7 +129,7 @@ unset optTestTut
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    ('') ;;
+    ('') ;;     # Ignore empty option
     (- | -- | /)
         shift
         break   # Stop option parsing
@@ -213,9 +227,9 @@ fi
 
 
 # Remove current OpenFOAM environment
-if [ -d "$WM_PROJECT_DIR" ] && [ -f "$WM_PROJECT_DIR/etc/config.sh/unset" ]
+if [ -d "$WM_PROJECT_DIR" ] && [ -f "$WM_PROJECT_DIR"/etc/config.sh/unset ]
 then
-    . "$WM_PROJECT_DIR/etc/config.sh/unset" || true
+    . "$WM_PROJECT_DIR"/etc/config.sh/unset || true
 fi
 
 

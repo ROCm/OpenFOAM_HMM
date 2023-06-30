@@ -75,8 +75,8 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
     IOobject d2dt2IOobject
     (
         "d2dt2("+dt.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -114,7 +114,7 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
                 d2dt2IOobject,
                 mesh(),
                 dimensioned<Type>(dt.dimensions()/dimTime/dimTime, Zero),
-                calculatedFaPatchField<Type>::typeName
+                faPatchFieldBase::calculatedType()
             )
         );
     }
@@ -134,8 +134,8 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
     IOobject d2dt2IOobject
     (
         "d2dt2("+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -212,8 +212,8 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
     IOobject d2dt2IOobject
     (
         "d2dt2("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -297,8 +297,8 @@ EulerFaD2dt2Scheme<Type>::facD2dt2
     IOobject d2dt2IOobject
     (
         "d2dt2("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );

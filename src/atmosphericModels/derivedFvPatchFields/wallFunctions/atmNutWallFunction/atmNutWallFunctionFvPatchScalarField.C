@@ -236,7 +236,7 @@ void atmNutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

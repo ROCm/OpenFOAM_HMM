@@ -462,8 +462,7 @@ void Foam::boundaryMesh::clearOut()
 void Foam::boundaryMesh::read(const polyMesh& mesh)
 {
     patches_.clear();
-
-    patches_.setSize(mesh.boundaryMesh().size());
+    patches_.resize(mesh.boundaryMesh().size());
 
     // Number of boundary faces
     const label nBFaces = mesh.nBoundaryFaces();
@@ -630,7 +629,7 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
         // There are as many surface patches as region numbers in triangles
         // so use the surface patches
 
-        patches_.setSize(surfPatches.size());
+        patches_.resize(surfPatches.size());
 
         // Take over patches, setting size to 0 for now.
         forAll(surfPatches, patchi)
@@ -655,7 +654,7 @@ void Foam::boundaryMesh::readTriSurface(const fileName& fName)
     {
         // There are not enough surface patches. Make up my own.
 
-        patches_.setSize(regionToBoundaryPatch.size());
+        patches_.resize(regionToBoundaryPatch.size());
 
         forAll(patches_, patchi)
         {
@@ -1627,9 +1626,7 @@ void Foam::boundaryMesh::deletePatch(const word& patchName)
         newPatches.set(patchi - 1, patches_[patchi].clone());
     }
 
-    patches_.clear();
-
-    patches_ = newPatches;
+    patches_ = std::move(newPatches);
 
     if (debug)
     {

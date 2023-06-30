@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,41 +66,26 @@ Foam::labelList Foam::csvTableReader<Type>::getComponentColumns
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    label csvTableReader<label>::readValue
-    (
-        const List<string>& strings
-    ) const
-    {
-        return readLabel(strings[componentColumns_[0]]);
-    }
-
-
-    template<>
-    scalar csvTableReader<scalar>::readValue
-    (
-        const List<string>& strings
-    ) const
-    {
-        return readScalar(strings[componentColumns_[0]]);
-    }
-
-} // End namespace Foam
-
-
 template<class Type>
 Type Foam::csvTableReader<Type>::readValue
 (
-    const List<string>& strings
+    const UList<string>& strings
 ) const
 {
     Type result;
 
-    for (label i = 0; i < pTraits<Type>::nComponents; ++i)
+    if (std::is_integral<Type>::value)
     {
-        result[i] = readScalar(strings[componentColumns_[i]]);
+        // nComponents == 1
+        setComponent(result, 0) = readLabel(strings[componentColumns_[0]]);
+    }
+    else
+    {
+        for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
+        {
+            setComponent(result, cmpt) =
+                readScalar(strings[componentColumns_[cmpt]]);
+        }
     }
 
     return result;
@@ -144,7 +129,7 @@ void Foam::csvTableReader<Type>::operator()
     // Skip header
     if (headerLine_)
     {
-        is.getLine(line);
+        is.getLine(nullptr);
         ++lineNo;
     }
 
@@ -171,12 +156,12 @@ void Foam::csvTableReader<Type>::operator()
 
             if (nPos == std::string::npos)
             {
-                strings.append(line.substr(pos));
+                strings.push_back(line.substr(pos));
                 pos = nPos;
             }
             else
             {
-                strings.append(line.substr(pos, nPos-pos));
+                strings.push_back(line.substr(pos, nPos-pos));
                 pos = nPos + 1;
             }
         }
@@ -198,7 +183,7 @@ void Foam::csvTableReader<Type>::operator()
         scalar x = readScalar(strings[refColumn_]);
         Type value = readValue(strings);
 
-        values.append(Tuple2<scalar,Type>(x, value));
+        values.emplace_back(x, value);
     }
 
     data.transfer(values);

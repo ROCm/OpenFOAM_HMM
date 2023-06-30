@@ -508,10 +508,10 @@ Foam::Ostream& Foam::operator<<
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<wallBoundedParticle>& ip
+    const InfoProxy<wallBoundedParticle>& iproxy
 )
 {
-    const wallBoundedParticle& p = ip.t_;
+    const auto& p = *iproxy;
 
     tetPointRef tpr(p.currentTetIndices().tet(p.mesh()));
 

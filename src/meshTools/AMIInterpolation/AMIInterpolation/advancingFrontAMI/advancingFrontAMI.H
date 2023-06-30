@@ -57,6 +57,17 @@ class advancingFrontAMI
 :
     public AMIInterpolation
 {
+public:
+
+    //- Area normalisation mode
+    enum class areaNormalisationMode
+    {
+        project,
+        mag
+    };
+
+    static const Enum<areaNormalisationMode> areaNormalisationModeNames_;
+
 
 private:
 
@@ -142,6 +153,9 @@ protected:
 
         //- Face triangulation mode
         const faceAreaIntersect::triangulationMode triMode_;
+
+        //- Area normalisation mode; default = project
+        areaNormalisationMode areaNormalisationMode_;
 
 
     // Protected Member Functions

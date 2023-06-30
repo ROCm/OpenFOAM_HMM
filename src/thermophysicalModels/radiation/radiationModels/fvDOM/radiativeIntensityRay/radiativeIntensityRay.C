@@ -140,17 +140,6 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 
     if (mesh_.nSolutionD() == 2)
     {
-        // Omega for 2D
-        omega_ = deltaPhi;
-
-        // dAve for 2D
-        dAve_ = vector
-        (
-            2*sinPhi*Foam::sin(0.5*deltaPhi),
-            2*cosPhi*Foam::sin(0.5*deltaPhi),
-            0
-        );
-
         vector meshDir(Zero);
         if (dom_.meshOrientation() != vector::zero)
         {
@@ -172,7 +161,6 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 
         dAve_ = coordRot & dAve_;
         d_ = coordRot & d_;
-
     }
     else if (mesh_.nSolutionD() == 1)
     {
@@ -195,9 +183,6 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 
         dAve_ = (dAve_ & normal)*meshDir;
         d_ = (d_ & normal)*meshDir;
-
-        // Omega normalization for 1D
-        omega_ /= 2;
     }
 
     autoPtr<volScalarField> IDefaultPtr;

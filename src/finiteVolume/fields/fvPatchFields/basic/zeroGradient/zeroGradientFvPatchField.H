@@ -47,8 +47,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zeroGradientFvPatchField_H
-#define zeroGradientFvPatchField_H
+#ifndef Foam_zeroGradientFvPatchField_H
+#define Foam_zeroGradientFvPatchField_H
 
 #include "fvPatchField.H"
 
@@ -66,11 +66,10 @@ class zeroGradientFvPatchField
 :
     public fvPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("zeroGradient");
+    TypeName("zeroGradient");  // fieldTypes::zeroGradientTypeName_()
 
 
     // Constructors
@@ -90,8 +89,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given zeroGradientFvPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given zeroGradient patch field
+        //- onto a new patch
         zeroGradientFvPatchField
         (
             const zeroGradientFvPatchField<Type>&,
@@ -142,10 +141,7 @@ public:
             //- Return gradient at boundary
             virtual tmp<Field<Type>> snGrad() const
             {
-                return tmp<Field<Type>>
-                (
-                    new Field<Type>(this->size(), Zero)
-                );
+                return tmp<Field<Type>>::New(this->size(), Zero);
             }
 
             //- Evaluate the patch field

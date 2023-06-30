@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValuePointPatchField_H
-#define fixedValuePointPatchField_H
+#ifndef Foam_fixedValuePointPatchField_H
+#define Foam_fixedValuePointPatchField_H
 
 #include "valuePointPatchField.H"
 
@@ -53,7 +54,6 @@ class fixedValuePointPatchField
 :
     public valuePointPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -69,16 +69,40 @@ public:
             const DimensionedField<Type, pointMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        fixedValuePointPatchField
+        (
+            const pointPatch&,
+            const DimensionedField<Type, pointMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and dictionary
         fixedValuePointPatchField
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
             const dictionary&,
-            const bool valueRequired=true
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Compatibility. Prefer with readOption
+        fixedValuePointPatchField
+        (
+            const pointPatch& p,
+            const DimensionedField<Type, pointMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            fixedValuePointPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
+
+        //- Construct by mapping given patch field onto a new patch
         fixedValuePointPatchField
         (
             const fixedValuePointPatchField<Type>&,
@@ -123,18 +147,13 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
-    // Member operators
+    // Member Operators
 
         // Disable assignment operators
 

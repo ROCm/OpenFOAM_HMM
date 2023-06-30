@@ -156,7 +156,7 @@ calc(const label propertyId) const
             ),
             mesh(),
             dimensionedScalar(dimless/dimLength, Zero),
-            extrapolatedCalculatedFvPatchVectorField::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 

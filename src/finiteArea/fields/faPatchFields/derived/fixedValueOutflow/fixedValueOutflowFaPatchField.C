@@ -48,7 +48,7 @@ Foam::fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
     const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF, Field<Type>("value", dict, p.size()))
+    faPatchField<Type>(p, iF, dict, IOobjectOption::MUST_READ)
 {}
 
 
@@ -133,7 +133,7 @@ template<class Type>
 void Foam::fixedValueOutflowFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

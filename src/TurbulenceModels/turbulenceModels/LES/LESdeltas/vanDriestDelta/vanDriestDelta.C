@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020,2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,9 +28,8 @@ License
 
 #include "vanDriestDelta.H"
 #include "wallFvPatch.H"
-#include "wallDistData.H"
-#include "wallPointYPlus.H"
 #include "addToRunTimeSelectionTable.H"
+#include "wallDistAddressing.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -60,7 +59,8 @@ void Foam::LESModels::vanDriestDelta::calcDelta()
         (
             "ystar",
             mesh.time().constant(),
-            mesh
+            mesh.thisDb(),
+            IOobjectOption::NO_REGISTER
         ),
         mesh,
         dimensionedScalar("ystar", dimLength, GREAT)
@@ -82,15 +82,62 @@ void Foam::LESModels::vanDriestDelta::calcDelta()
         }
     }
 
-    scalar cutOff = wallPointYPlus::yPlusCutOff;
-    wallPointYPlus::yPlusCutOff = 500;
-    wallDistData<wallPointYPlus> y(mesh, ystar);
-    wallPointYPlus::yPlusCutOff = cutOff;
+    // Construct wall transporter
+    const auto& wDist = wallDistAddressing::New(mesh);
 
+    // Get distance to nearest wall
+    const auto& y = wDist.y();
+
+    // Get ystar from nearest wall
+    wDist.map(ystar, mapDistribute::transform());
+
+    // Calculate y/ystar (stored in ystar!) and do the clipping
+    constexpr scalar yPlusCutOff = 500;
+    // Allow for some precision loss from transformation/interpolation of GREAT
+    // (= unvisited value)(though ystar is scalar so should not be transformed)
+    constexpr scalar fuzzyGREAT = 0.5*GREAT;
+
+    ystar.dimensions().reset(y.dimensions()/ystar.dimensions());
+    forAll(y, celli)
+    {
+        const scalar yPlus = y[celli]/ystar[celli];
+        if (y[celli] > fuzzyGREAT || (yPlus > yPlusCutOff))
+        {
+            // unvisited : y is GREAT, ystar is 1.0
+            ystar[celli] = GREAT;
+        }
+        else
+        {
+            ystar[celli] = yPlus;
+        }
+    }
+
+    forAll(y.boundaryField(), patchi)
+    {
+        const auto& yp = y.boundaryField()[patchi];
+        auto& ystarp = ystar.boundaryFieldRef()[patchi];
+
+        forAll(yp, i)
+        {
+            const scalar yPlus = yp[i]/ystarp[i];
+            if (yp[i] > fuzzyGREAT || (yPlus > yPlusCutOff))
+            {
+                ystarp[i] = GREAT;
+            }
+            else
+            {
+                ystarp[i] = yPlus;
+            }
+        }
+    }
+    ystar.correctBoundaryConditions();
+
+    // Note: y/ystar stored in ystar
     delta_ = min
     (
         static_cast<const volScalarField&>(geometricDelta_()),
-        (kappa_/Cdelta_)*((scalar(1) + SMALL) - exp(-y/ystar/Aplus_))*y
+        //(kappa_/Cdelta_)*((scalar(1) + SMALL) - exp(-y/ystar/Aplus_))*y
+        (kappa_/Cdelta_)*((scalar(1) + SMALL) - exp(-ystar/Aplus_))*y
     );
 }
 
@@ -136,7 +183,7 @@ Foam::LESModels::vanDriestDelta::vanDriestDelta
     )
 {
     calcInterval_ = 1;
-    const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
+    const dictionary& coeffsDict = dict.optionalSubDict(type() + "Coeffs");
     if (!coeffsDict.readIfPresent("calcInterval", calcInterval_))
     {
         coeffsDict.readIfPresent("updateInterval", calcInterval_);
@@ -150,7 +197,7 @@ Foam::LESModels::vanDriestDelta::vanDriestDelta
 
 void Foam::LESModels::vanDriestDelta::read(const dictionary& dict)
 {
-    const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
+    const dictionary& coeffsDict = dict.optionalSubDict(type() + "Coeffs");
 
     geometricDelta_().read(coeffsDict);
     dict.readIfPresent<scalar>("kappa", kappa_);
@@ -168,7 +215,11 @@ void Foam::LESModels::vanDriestDelta::read(const dictionary& dict)
 
 void Foam::LESModels::vanDriestDelta::correct()
 {
-    if ((turbulenceModel_.mesh().time().timeIndex() % calcInterval_) == 0)
+    if
+    (
+        (calcInterval_ > 0)
+     && (turbulenceModel_.mesh().time().timeIndex() % calcInterval_) == 0
+    )
     {
         geometricDelta_().correct();
         calcDelta();

@@ -53,10 +53,10 @@ Foam::fixedShearStressFvPatchVectorField::fixedShearStressFvPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchVectorField(p, iF, dict, false),
+    fixedValueFvPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     tau0_(dict.getOrDefault<vector>("tau", Zero))
 {
-    fvPatchField<vector>::operator=(patchInternalField());
+    this->extrapolateInternal();  // Zero-gradient patch values
 }
 
 
@@ -128,9 +128,9 @@ void Foam::fixedShearStressFvPatchVectorField::updateCoeffs()
 
 void Foam::fixedShearStressFvPatchVectorField::write(Ostream& os) const
 {
-    fvPatchVectorField::write(os);
+    fvPatchField<vector>::write(os);
     os.writeEntry("tau", tau0_);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

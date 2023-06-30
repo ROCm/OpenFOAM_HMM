@@ -58,7 +58,7 @@ Foam::regionProperties::regionProperties
         )
     );
 
-    if (IOobject::isReadRequired(rOpt) || iodict.size())
+    if (IOobjectOption::isReadRequired(rOpt) || iodict.size())
     {
         iodict.readEntry("regions", props);
     }

@@ -463,7 +463,7 @@ void Foam::surfaceDisplacementPointPatchVectorField::updateCoeffs()
 
 void Foam::surfaceDisplacementPointPatchVectorField::write(Ostream& os) const
 {
-    fixedValuePointPatchVectorField::write(os);
+    fixedValuePointPatchField<vector>::write(os);
     os.writeEntry("velocity", velocity_);
     os.writeEntry("geometry", surfacesDict_);
     os.writeEntry("projectMode", projectModeNames_[projectMode_]);

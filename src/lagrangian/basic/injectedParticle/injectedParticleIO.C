@@ -142,7 +142,7 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
 
     // Note: not writing local position_ - defer to base particle class
 
-    label np =  c.size();
+    const label np = c.size();
 
     IOField<label> tag(c.fieldIOobject("tag", IOobject::NO_READ), np);
     IOField<scalar> soi(c.fieldIOobject("soi", IOobject::NO_READ), np);

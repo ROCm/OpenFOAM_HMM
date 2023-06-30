@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(lduInterface, 0);
+    defineTypeName(lduInterface);
 }
 
 

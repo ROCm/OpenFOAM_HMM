@@ -23,12 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::cellShapeIOList
-
-Description
-    IOList of cellShapes
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_cellShapeIOList_H
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of cellShape
     typedef IOList<cellShape> cellShapeIOList;
 }
 

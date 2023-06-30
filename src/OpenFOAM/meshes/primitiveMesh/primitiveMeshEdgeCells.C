@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +28,6 @@ License
 
 #include "primitiveMesh.H"
 #include "ListOps.H"
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -58,13 +58,13 @@ const Foam::labelListList& Foam::primitiveMesh::edgeCells() const
 
 const Foam::labelList& Foam::primitiveMesh::edgeCells
 (
-    const label edgeI,
+    const label edgei,
     DynamicList<label>& storage
 ) const
 {
     if (hasEdgeCells())
     {
-        return edgeCells()[edgeI];
+        return edgeCells()[edgei];
     }
     else
     {
@@ -73,50 +73,27 @@ const Foam::labelList& Foam::primitiveMesh::edgeCells
 
         // Construct edgeFaces
         DynamicList<label> eFacesStorage;
-        const labelList& eFaces = edgeFaces(edgeI, eFacesStorage);
+        const labelList& eFaces = edgeFaces(edgei, eFacesStorage);
 
         storage.clear();
 
         // Do quadratic insertion.
-        forAll(eFaces, i)
+        for (const label facei : eFaces)
         {
-            label facei = eFaces[i];
-
             {
-                label ownCelli = own[facei];
-
-                // Check if not already in storage
-                forAll(storage, j)
+                // Owner cell
+                if (!storage.contains(own[facei]))
                 {
-                    if (storage[j] == ownCelli)
-                    {
-                        ownCelli = -1;
-                        break;
-                    }
-                }
-
-                if (ownCelli != -1)
-                {
-                    storage.append(ownCelli);
+                    storage.push_back(own[facei]);
                 }
             }
 
             if (isInternalFace(facei))
             {
-                label neiCelli = nei[facei];
-
-                forAll(storage, j)
+                // Neighbour cell
+                if (!storage.contains(nei[facei]))
                 {
-                    if (storage[j] == neiCelli)
-                    {
-                        neiCelli = -1;
-                        break;
-                    }
-                }
-
-                if (neiCelli != -1)
-                {
-                    storage.append(neiCelli);
+                    storage.push_back(nei[facei]);
                 }
             }
         }
@@ -126,9 +103,9 @@ const Foam::labelList& Foam::primitiveMesh::edgeCells
 }
 
 
-const Foam::labelList& Foam::primitiveMesh::edgeCells(const label edgeI) const
+const Foam::labelList& Foam::primitiveMesh::edgeCells(const label edgei) const
 {
-    return edgeCells(edgeI, labels_);
+    return edgeCells(edgei, labels_);
 }
 
 

@@ -185,7 +185,7 @@ void* Foam::dlLibraryTable::openLibrary
     if (!ptr)
     {
         // Even with details turned off, we want some feedback about failure
-        OSstream& os = (verbose ? WarningInFunction : Serr);
+        OSstream& os = (verbose > 0 ? WarningInFunction : InfoErr);
         os << "Could not load " << libName << nl << msg.c_str() << endl;
     }
 
@@ -222,8 +222,8 @@ Foam::dlLibraryTable::dlLibraryTable
     bool verbose
 )
 {
-    fileNameList libNames;
-    dict.readIfPresent(libsEntry, libNames);
+    List<fileName> libNames;
+    dict.readIfPresent(libsEntry, libNames, keyType::LITERAL);
     dlLibraryTable::open(libNames, verbose);
 }
 
@@ -253,7 +253,7 @@ Foam::dlLibraryTable::~dlLibraryTable()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::dlLibraryTable::empty() const
+bool Foam::dlLibraryTable::empty() const noexcept
 {
     for (const void* ptr : libPtrs_)
     {
@@ -267,7 +267,7 @@ bool Foam::dlLibraryTable::empty() const
 }
 
 
-Foam::label Foam::dlLibraryTable::size() const
+Foam::label Foam::dlLibraryTable::size() const noexcept
 {
     label nLoaded = 0;
 
@@ -383,8 +383,8 @@ bool Foam::dlLibraryTable::append(const fileName& libName)
         return false;
     }
 
-    libPtrs_.append(nullptr);
-    libNames_.append(libName);
+    libPtrs_.push_back(nullptr);
+    libNames_.push_back(libName);
 
     return true;
 }
@@ -449,8 +449,8 @@ void* Foam::dlLibraryTable::open
 
     if (ptr)
     {
-        libPtrs_.append(ptr);
-        libNames_.append(libName);
+        libPtrs_.push_back(ptr);
+        libNames_.push_back(libName);
     }
 
     return ptr;
@@ -587,10 +587,10 @@ bool Foam::dlLibraryTable::open
     bool verbose
 )
 {
-    fileNameList libNames;
+    List<fileName> libNames;
     return
     (
-        dict.readIfPresent(libsEntry, libNames)
+        dict.readIfPresent(libsEntry, libNames, keyType::LITERAL)
      && dlLibraryTable::open(libNames, verbose)
     );
 }
@@ -611,10 +611,10 @@ bool Foam::dlLibraryTable::open
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<dlLibraryTable>& ip
+    const InfoProxy<dlLibraryTable>& iproxy
 )
 {
-    const dlLibraryTable& tbl = ip.t_;
+    const auto& tbl = *iproxy;
 
     os << token::BEGIN_LIST << nl;
 

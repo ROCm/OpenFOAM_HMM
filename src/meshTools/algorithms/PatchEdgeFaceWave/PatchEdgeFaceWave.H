@@ -42,7 +42,7 @@ SourceFiles
 
 #include "bitSet.H"
 #include "scalarField.H"
-#include "PrimitivePatch.H"
+#include "primitivePatch.H"
 #include "vectorTensorTransform.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

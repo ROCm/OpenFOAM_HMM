@@ -55,22 +55,15 @@ freestreamPressureFvPatchScalarField
     mixedFvPatchScalarField(p, iF),
     UName_(dict.getOrDefault<word>("U", "U"))
 {
-    freestreamValue() = scalarField("freestreamValue", dict, p.size());
+    // freestreamValue() and refValue() are identical
+    freestreamValue().assign("freestreamValue", dict, p.size());
+    refGrad() = Zero;
+    valueFraction() = 0;
 
-    if (dict.found("value"))
-    {
-        fvPatchScalarField::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchScalarField::operator=(freestreamValue());
     }
-
-    refGrad() = Zero;
-    valueFraction() = 0;
 }
 
 
@@ -121,10 +114,7 @@ void Foam::freestreamPressureFvPatchScalarField::updateCoeffs()
     }
 
     const Field<vector>& Up =
-        patch().template lookupPatchField<volVectorField, vector>
-        (
-            UName_
-        );
+        patch().template lookupPatchField<volVectorField>(UName_);
 
     valueFraction() = 0.5 + 0.5*(Up & patch().nf())/mag(Up);
 
@@ -134,10 +124,10 @@ void Foam::freestreamPressureFvPatchScalarField::updateCoeffs()
 
 void Foam::freestreamPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     freestreamValue().writeEntry("freestreamValue", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

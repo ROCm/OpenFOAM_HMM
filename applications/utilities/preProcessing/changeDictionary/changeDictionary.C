@@ -116,7 +116,7 @@ HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
         for (const word& groupName : groupNames)
         {
             auto groupIter = groupToPatch.find(groupName);
-            if (groupIter.found())
+            if (groupIter.good())
             {
                 (*groupIter).append(patchName);
             }
@@ -548,7 +548,7 @@ int main(int argc, char *argv[])
                 mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
         const_cast<word&>(IOPtrList<entry>::typeName) = oldTypeName;
@@ -672,7 +672,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::MUST_READ_IF_MODIFIED,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 );
 
                 if (fieldHeader.typeHeaderOk<localIOdictionary>(false))

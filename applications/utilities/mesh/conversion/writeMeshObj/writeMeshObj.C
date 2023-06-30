@@ -124,7 +124,7 @@ void writePoints
 
             const auto e0Fnd = pointToObj.cfind(e[0]);
 
-            if (e0Fnd.found())
+            if (e0Fnd.good())
             {
                 v0 = *e0Fnd;
             }
@@ -139,7 +139,7 @@ void writePoints
 
             const auto e1Fnd = pointToObj.cfind(e[1]);
 
-            if (e1Fnd.found())
+            if (e1Fnd.good())
             {
                 v1 = *e1Fnd;
             }

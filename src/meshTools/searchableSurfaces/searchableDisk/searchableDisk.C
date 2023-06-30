@@ -73,7 +73,7 @@ Foam::pointIndexHit Foam::searchableDisk::findNearest
     v.normalise();
 
     // Clip to inner/outer radius
-    info.setPoint(origin() + radialLimits_.clip(magV)*v);
+    info.setPoint(origin() + radialLimits_.clamp(magV)*v);
 
     if (info.point().distSqr(sample) < nearestDistSqr)
     {

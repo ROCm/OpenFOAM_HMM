@@ -1286,7 +1286,7 @@ Foam::label Foam::faceCoupleInfo::matchEdgeFaces
                     // master faces.
                     auto fnd = candidates.find(cutFacei);
 
-                    if (!fnd.found())
+                    if (!fnd.good())
                     {
                         // No info yet for cutFacei. Add all master faces as
                         // candidates

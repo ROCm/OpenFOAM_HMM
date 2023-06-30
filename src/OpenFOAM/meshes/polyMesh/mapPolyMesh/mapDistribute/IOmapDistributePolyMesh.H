@@ -42,7 +42,6 @@ SourceFiles
 
 #include "mapDistributePolyMesh.H"
 #include "regIOobject.H"
-#include "refPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -67,7 +67,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchField<Type>(p, iF, dict, false),
+    fixedValueFvPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
     profile_(Function1<Type>::New("profile", dict, &this->db())),
     dir_(dict.lookup("direction")),
     origin_(dict.get<scalar>("origin"))
@@ -163,7 +163,7 @@ void Foam::fixedProfileFvPatchField<Type>::write(Ostream& os) const
     profile_->writeData(os);
     os.writeEntry("direction", dir_);
     os.writeEntry("origin", origin_);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

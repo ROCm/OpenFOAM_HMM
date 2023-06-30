@@ -160,7 +160,7 @@ void Foam::localPointRegion::countPointRegions
                     {
                         // Multiple regions for this point. Add.
                         const auto iter = meshPointMap_.cfind(pointi);
-                        if (iter.found())
+                        if (iter.good())
                         {
                             labelList& regions = pointRegions[iter.val()];
                             if (!regions.found(region))
@@ -372,7 +372,7 @@ void Foam::localPointRegion::calcPointRegions
                         const label pointi = f[fp];
                         auto iter = minPointValue.find(pointi);
 
-                        if (!iter.found())
+                        if (!iter.good())
                         {
                             minPointValue.insert(pointi, minRegion[facei][fp]);
                         }
@@ -554,7 +554,7 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
     );
 
     labelList duplicateFace(allPatch.size(), -1);
-    label nDuplicateFaces = 0;
+    // label nDuplicateFaces = 0;
 
     // Find all duplicate faces.
     forAll(allPatch, bFacei)
@@ -611,7 +611,7 @@ Foam::labelList Foam::localPointRegion::findDuplicateFaces
 
                     duplicateFace[bFacei] = otherFacei;
                     duplicateFace[otherFacei] = bFacei;
-                    nDuplicateFaces++;
+                    // ++nDuplicateFaces;
                 }
             }
         }

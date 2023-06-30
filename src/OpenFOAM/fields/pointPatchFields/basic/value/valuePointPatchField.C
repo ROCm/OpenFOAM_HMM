@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,56 @@ License
 #include "valuePointPatchField.H"
 #include "pointPatchFieldMapper.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::valuePointPatchField<Type>::readValueEntry
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = pointPatchFieldBase::patch();
+
+
+    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+    if (eptr)
+    {
+        Field<Type>::assign(*eptr, p.size());
+        return true;
+    }
+
+    if (IOobjectOption::isReadRequired(readOpt))
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entry 'value' : missing for patch " << p.name()
+            << " in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
+template<class Type>
+void Foam::valuePointPatchField<Type>::extrapolateInternal()
+{
+    const labelUList& meshPoints = pointPatchFieldBase::patch().meshPoints();
+
+    const Field<Type>& iF = this->primitiveField();
+    Field<Type>& pfld = *this;
+
+    pfld.resize_nocopy(meshPoints.size());  // In general this is a no-op
+
+    forAll(meshPoints, i)
+    {
+        pfld[i] = iF[meshPoints[i]];
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -48,29 +98,30 @@ Foam::valuePointPatchField<Type>::valuePointPatchField
 (
     const pointPatch& p,
     const DimensionedField<Type, pointMesh>& iF,
+    const Type& value
+)
+:
+    pointPatchField<Type>(p, iF),
+    Field<Type>(p.size(), value)
+{}
+
+
+template<class Type>
+Foam::valuePointPatchField<Type>::valuePointPatchField
+(
+    const pointPatch& p,
+    const DimensionedField<Type, pointMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue
 )
 :
     pointPatchField<Type>(p, iF, dict),
     Field<Type>(p.size())
 {
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-    if (hasValue)
+    if (!readValueEntry(dict, requireValue))
     {
-        Field<Type>::assign(*hasValue, p.size());
-    }
-    else if (!valueRequired)
-    {
+        // Not read (eg, optional and missing): define zero
         Field<Type>::operator=(Zero);
-    }
-    else
-    {
-        FatalIOErrorInFunction(dict)
-            << "Essential entry 'value' missing on patch "
-            << p.name() << endl
-            << exit(FatalIOError);
     }
 }
 
@@ -164,7 +215,7 @@ template<class Type>
 void Foam::valuePointPatchField<Type>::write(Ostream& os) const
 {
     pointPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

@@ -138,7 +138,8 @@ Foam::functionObjects::multiphaseInterHtcModel::multiphaseInterHtcModel
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobject::NO_WRITE,
+                IOobject::REGISTER
             ),
             mesh_,
             dimensionedScalar(dimPower/dimArea/dimTemperature, Zero)

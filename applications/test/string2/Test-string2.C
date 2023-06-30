@@ -28,12 +28,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "string.H"
-#include "stringOps.H"
-#include "dictionary.H"
-#include "IOstreams.H"
-#include "OSspecific.H"
-
+#include "fieldExprFwd.H"
 #include "int.H"
 #include "uint.H"
 #include "scalar.H"
@@ -41,7 +36,10 @@ Description
 #include "fileName.H"
 #include "stringList.H"
 #include "stringOps.H"
-#include "fieldExprFwd.H"
+#include "dictionary.H"
+#include "IOstreams.H"
+#include "OSspecific.H"
+
 
 using namespace Foam;
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ class DynamicField
 
         //- Copy assignment from another list
         template<class ListType>
-        inline void assignDynList(const ListType& list);
+        inline void doAssignDynList(const ListType& list);
 
         //- Alter the size of the underlying storage
         //  The 'nocopy' option will not attempt to recover old content
@@ -178,20 +178,17 @@ public:
 
     // Member Functions
 
-    // Access
+    // Sizing
 
         //- Normal lower capacity limit - the SizeMin template parameter
         static constexpr label min_size() noexcept { return SizeMin; }
 
         //- Size of the underlying storage.
-        inline label capacity() const noexcept;
+        label capacity() const noexcept { return capacity_; }
 
         //- Number of contiguous bytes of the underlying storage.
         //  \note Only meaningful for contiguous data
         inline std::streamsize capacity_bytes() const noexcept;
-
-
-    // Sizing
 
         //- Alter the size of the underlying storage.
         //  The addressed size will be truncated if needed to fit, but will
@@ -282,20 +279,22 @@ public:
         template<int AnySizeMin>
         inline void transfer(DynamicField<T, AnySizeMin>& list);
 
-        //- Append an element at the end of the list
+        //- Construct an element at the end of the list,
+        //- return reference to the new list element
+        template<class... Args>
+        inline T& emplace_back(Args&&... args);
+
+        //- Copy append an element at the end of the list
         inline void push_back(const T& val);
 
         //- Move append an element
         inline void push_back(T&& val);
 
-        //- Append a List at the end of this list
+        //- Copy append another list to the end of this list
         inline void push_back(const UList<T>& list);
 
         //- Reduce size by 1 or more elements. Can be called on an empty list.
         inline void pop_back(label n = 1);
-
-        //- Remove and return the last element. Fatal on an empty list.
-        inline T remove();
 
 
     // Reading/writing
@@ -305,10 +304,7 @@ public:
         inline Istream& readList(Istream& is);
 
 
-    // Member Operators
-
-        //- Return non-const access to an element, resizing list if needed
-        inline T& operator()(const label i);
+    // Assignment
 
         //- Assign addressed entries to the given value
         inline void operator=(const T& val);
@@ -321,6 +317,10 @@ public:
 
         //- Copy assignment
         inline void operator=(const DynamicField<T, SizeMin>& list);
+
+        //- Copy assign from IndirectList
+        template<class Addr>
+        inline void operator=(const IndirectListBase<T, Addr>& rhs);
 
         //- Move assignment
         inline void operator=(List<T>&& list);
@@ -335,6 +335,12 @@ public:
         //- Move assignment
         template<int AnySizeMin>
         inline void operator=(DynamicField<T, AnySizeMin>&& list);
+
+
+    // Member Operators
+
+        //- Return non-const access to an element, resizing list if needed
+        inline T& operator()(const label i);
 
 
     // IOstream Operators

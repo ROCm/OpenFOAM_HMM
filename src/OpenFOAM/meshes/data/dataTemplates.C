@@ -53,8 +53,7 @@ void Foam::data::setSolverPerformance
         dict.readIfPresent(name, perfs);
     }
 
-    // Append to list
-    perfs.setSize(perfs.size()+1, sp);
+    perfs.push_back(sp);
 
     dict.set(name, perfs);
 }

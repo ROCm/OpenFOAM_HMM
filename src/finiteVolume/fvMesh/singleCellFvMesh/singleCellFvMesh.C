@@ -116,7 +116,7 @@ void Foam::singleCellFvMesh::agglomerateMesh
 
                     const auto iter = localToNbr.cfind(myZone);
 
-                    if (iter.found())
+                    if (iter.good())
                     {
                         // Check that zone numbers are still the same.
                         if (iter.val() != nbrZone)

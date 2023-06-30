@@ -244,6 +244,7 @@ bool Foam::oversetAdjustPhi
 
 
     // Check correction
+    #ifdef FULLDEBUG
     if (fv::debug)
     {
         scalar massOutCheck = 0;
@@ -287,7 +288,10 @@ bool Foam::oversetAdjustPhi
                 }
             }
         }
+
+        Info<< "mass in:" << massInCheck << " out:" << massOutCheck << nl;
     }
+    #endif  /* FULLDEBUG */
 
     return true;
 }

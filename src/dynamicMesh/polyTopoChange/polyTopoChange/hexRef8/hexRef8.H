@@ -39,7 +39,6 @@ SourceFiles
 #define hexRef8_H
 
 #include "labelIOList.H"
-#include "face.H"
 #include "HashSet.H"
 #include "DynamicList.H"
 #include "primitivePatch.H"
@@ -589,7 +588,7 @@ public:
             void setInstance(const fileName& inst);
 
             //- Force writing refinement+history to polyMesh directory.
-            bool write(const bool valid = true) const;
+            bool write(const bool writeOnProc = true) const;
 
             //- Helper: remove all relevant files from mesh instance
             static void removeFiles(const polyMesh&);

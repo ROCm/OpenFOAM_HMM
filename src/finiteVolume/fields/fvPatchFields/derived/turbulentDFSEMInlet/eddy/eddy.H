@@ -52,10 +52,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declarations
+// Forward Declarations
 class eddy;
-class Istream;
-class Ostream;
 
 bool operator==(const eddy& a, const eddy& b);
 bool operator!=(const eddy& a, const eddy& b);

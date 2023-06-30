@@ -53,7 +53,7 @@
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar(dimArea*dimVelocity, Zero)
+        dimensionedScalar(dimVelocity*dimArea, Zero)
     );
 
     volScalarField rho("rho", fluid.rho());
@@ -76,7 +76,7 @@
                 mesh
             ),
             fluid.dragCoeff(phase, dragCoeffs())/phase.rho(),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         dragCoeffi.correctBoundaryConditions();
 

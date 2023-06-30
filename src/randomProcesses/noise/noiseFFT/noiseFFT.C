@@ -132,7 +132,7 @@ void Foam::noiseFFT::octaveBandInfo
     if (fc.size())
     {
         // Remove the last centre frequency (beyond upper frequency limit)
-        fc.remove();
+        fc.pop_back();
 
         fCentre.transfer(fc);
     }

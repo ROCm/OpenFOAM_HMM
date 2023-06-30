@@ -145,9 +145,9 @@ Foam::boxToPoint::boxToPoint
     if (!dict.readIfPresent("boxes", bbs_))
     {
         bbs_.resize(1);
-        if (!dict.readIfPresent("box", bbs_.first()))
+        if (!dict.readIfPresent("box", bbs_.front()))
         {
-            readBoxDim(dict, bbs_.first());
+            readBoxDim(dict, bbs_.front());
         }
     }
 }
@@ -176,8 +176,8 @@ void Foam::boxToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding points that are within boxes " << bbs_
-                << " ..." << endl;
+            Info<< "    Adding points that are within boxes "
+                << bbs_ << " ..." << endl;
         }
 
         combine(set, true);
@@ -186,8 +186,8 @@ void Foam::boxToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing points that are within boxes " << bbs_
-                << " ..." << endl;
+            Info<< "    Removing points that are within boxes "
+                << bbs_ << " ..." << endl;
         }
 
         combine(set, false);

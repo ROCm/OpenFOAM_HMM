@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -288,11 +288,11 @@ public:
         //  \return position in list or -1 if not found.
         label find(const T& val, label pos = 0) const;
 
-        //- True if the value if found in the list.
+        //- Is the value contained in the list?
+        //  Linear search from start pos until the end of the list.
         //  Any occurrences before the start pos are ignored.
-        //  Linear search.
         //  \return true if found.
-        inline bool found(const T& val, label pos = 0) const;
+        inline bool contains(const T& val, label pos = 0) const;
 
 
     // Stack-like Operations
@@ -479,6 +479,12 @@ public:
 
 
     // Housekeeping
+
+        //- Same as contains()
+        bool found(const T& val, label pos = 0) const
+        {
+            return contains(val, pos);
+        }
 
         //- Access the first element (front). Requires !empty().
         //FOAM_DEPRECATED_FOR(2022-10, "front()")

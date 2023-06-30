@@ -34,11 +34,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicAMIFvsPatchField_H
-#define cyclicAMIFvsPatchField_H
+#ifndef Foam_cyclicAMIFvsPatchField_H
+#define Foam_cyclicAMIFvsPatchField_H
 
-#include "coupledFvsPatchField.H"
 #include "cyclicAMIFvPatch.H"
+#include "coupledFvsPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

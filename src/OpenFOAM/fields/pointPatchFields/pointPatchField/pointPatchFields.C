@@ -27,27 +27,21 @@ License
 
 #include "pointPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#define makePointPatchField(PatchTypeField)                                   \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, patch);               \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, patchMapper);         \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, dictionary);
 
-#define makePointPatchField(pointPatchTypeField)                               \
-                                                                               \
-defineTemplateRunTimeSelectionTable(pointPatchTypeField, patch);               \
-defineTemplateRunTimeSelectionTable(pointPatchTypeField, patchMapper);         \
-defineTemplateRunTimeSelectionTable(pointPatchTypeField, dictionary);
-
-makePointPatchField(pointPatchScalarField)
-makePointPatchField(pointPatchVectorField)
-makePointPatchField(pointPatchSphericalTensorField)
-makePointPatchField(pointPatchSymmTensorField)
-makePointPatchField(pointPatchTensorField)
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+makePointPatchField(pointPatchScalarField);
+makePointPatchField(pointPatchVectorField);
+makePointPatchField(pointPatchSphericalTensorField);
+makePointPatchField(pointPatchSymmTensorField);
+makePointPatchField(pointPatchTensorField);
 
 } // End namespace Foam
 

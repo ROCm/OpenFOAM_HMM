@@ -173,16 +173,18 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
         // Stream the send data into PstreamBuffers,
         // which we also use to track the current topology.
 
-        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
+        pBufs_.clear();
 
-        for (const int proci : UPstream::allProcs())
+        for (const int proci : pBufs_.allProcs())
         {
-            if (proci != UPstream::myProcNo() && !send_[proci].empty())
+            const auto& indices = send_[proci];
+
+            if (proci != UPstream::myProcNo() && !indices.empty())
             {
                 // Serialize as Map
-                Map<Type> sendValues(2*send_[proci].size());
+                Map<Type> sendValues(2*indices.size());
 
-                for (const label sendIdx : send_[proci])
+                for (const label sendIdx : indices)
                 {
                     sendValues.insert
                     (
@@ -191,18 +193,18 @@ Foam::Map<Type> Foam::zoneDistribute::getDatafromOtherProc
                     );
                 }
 
-                UOPstream toProc(proci, pBufs);
+                UOPstream toProc(proci, pBufs_);
                 toProc << sendValues;
             }
         }
 
-        pBufs.finishedSends(sendConnections_, sendProcs_, recvProcs_);
+        pBufs_.finishedSends(sendConnections_, sendProcs_, recvProcs_);
 
-        for (const int proci : pBufs.allProcs())
+        for (const int proci : pBufs_.allProcs())
         {
-            if (proci != UPstream::myProcNo() && pBufs.recvDataCount(proci))
+            if (proci != UPstream::myProcNo() && pBufs_.recvDataCount(proci))
             {
-                UIPstream fromProc(proci, pBufs);
+                UIPstream fromProc(proci, pBufs_);
                 Map<Type> tmpValues(fromProc);
 
                 neiValues += tmpValues;

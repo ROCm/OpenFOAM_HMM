@@ -191,7 +191,8 @@ Foam::functionObjects::hydrostaticPressure::hydrostaticPressure
                     runTime.timeName(),
                     mesh_,
                     IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE // To enable restart
+                    IOobject::AUTO_WRITE,  // To enable restart
+                    IOobject::REGISTER
                 ),
                 mesh_
             );

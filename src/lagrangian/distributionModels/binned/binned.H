@@ -95,16 +95,13 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
 namespace distributionModels
 {
+    // Forward Declarations
     class binned;
 }
 
-// Forward declaration of friend functions and operators
+// Forward Declarations
 Istream& operator>>(Istream&, distributionModels::binned&);
 Ostream& operator<<(Ostream&, const distributionModels::binned&);
 

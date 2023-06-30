@@ -44,7 +44,7 @@ SourceFiles
 #define Foam_vtk_outputOptions_H
 
 #include "foamVtkOutput.H"
-#include "string.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

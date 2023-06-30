@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::triFaceList
-
-Description
-    list of triFaces
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef triFaceList_H
-#define triFaceList_H
+#ifndef Foam_triFaceList_H
+#define Foam_triFaceList_H
 
 #include "triFace.H"
 #include "List.H"
@@ -41,7 +35,7 @@ Description
 
 namespace Foam
 {
-    typedef List<triFace> triFaceList;
+    typedef List<triFace> triFaceList;      //!< List of triFace
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

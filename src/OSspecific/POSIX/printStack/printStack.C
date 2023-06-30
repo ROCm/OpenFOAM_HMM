@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -201,15 +201,20 @@ inline Foam::fileName whichPath(const char* fn)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::error::safePrintStack(std::ostream& os)
+void Foam::error::safePrintStack(std::ostream& os, int size)
 {
     // Get raw stack symbols
     void *callstack[100];
-    const int size = backtrace(callstack, 100);
+    size = backtrace(callstack, (size > 0 && size < 100) ? size + 1 : 100);
+
     char **strings = backtrace_symbols(callstack, size);
     size_t rdelim;
 
-    for (int i = 0; i < size; ++i)
+    // Frame 0 is 'printStack()' - report something more meaningful
+    os  << "[stack trace]" << std::endl
+        << "=============" << std::endl;
+
+    for (int i = 1; i < size; ++i)
     {
         std::string str(strings[i]);
 
@@ -269,20 +274,26 @@ void Foam::error::safePrintStack(std::ostream& os)
         os  << std::endl;
     }
 
+    os  << "=============" << std::endl;
+
     free(strings);
 }
 
 
-void Foam::error::printStack(Ostream& os)
+void Foam::error::printStack(Ostream& os, int size)
 {
     // Get raw stack symbols
     void *callstack[100];
-    const int size = backtrace(callstack, 100);
+    size = backtrace(callstack, (size > 0 && size < 100) ? size + 1 : 100);
 
     Dl_info info;
     fileName fname;
 
-    for (int i = 0; i < size; ++i)
+    // Frame 0 is 'printStack()' - report something more meaningful
+    os  << "[stack trace]" << nl
+        << "=============" << nl;
+
+    for (int i = 1; i < size; ++i)
     {
         int st = dladdr(callstack[i], &info);
 
@@ -309,6 +320,8 @@ void Foam::error::printStack(Ostream& os)
         printSourceFileAndLine(os, fname, info, callstack[i]);
         os  << nl;
     }
+
+    os  << "=============" << nl;
 }
 
 

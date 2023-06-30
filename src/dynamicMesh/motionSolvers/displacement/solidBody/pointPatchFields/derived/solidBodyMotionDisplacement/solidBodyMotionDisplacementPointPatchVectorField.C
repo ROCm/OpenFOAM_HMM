@@ -59,7 +59,7 @@ solidBodyMotionDisplacementPointPatchVectorField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchVectorField(p, iF, dict, false),
+    fixedValuePointPatchVectorField(p, iF, dict, IOobjectOption::NO_READ),
     SBMFPtr_(solidBodyMotionFunction::New(dict, this->db().time())),
     localPoints0Ptr_(nullptr)
 {
@@ -148,7 +148,7 @@ solidBodyMotionDisplacementPointPatchVectorField::localPoints0() const
                 this->db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 
@@ -181,7 +181,7 @@ void solidBodyMotionDisplacementPointPatchVectorField::
 write(Ostream& os) const
 {
     // Note: write value
-    fixedValuePointPatchVectorField::write(os);
+    fixedValuePointPatchField<vector>::write(os);
 
     os.writeEntry(solidBodyMotionFunction::typeName, SBMFPtr_->type());
 

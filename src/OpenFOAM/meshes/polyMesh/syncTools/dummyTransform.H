@@ -32,8 +32,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dummyTransform_H
-#define dummyTransform_H
+#ifndef Foam_dummyTransform_H
+#define Foam_dummyTransform_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

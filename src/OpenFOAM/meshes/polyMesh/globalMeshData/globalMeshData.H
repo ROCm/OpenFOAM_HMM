@@ -348,22 +348,22 @@ public:
                 return mesh_;
             }
 
-            //- Does the mesh contain processor patches? (also valid when
-            //  not running parallel)
-            bool parallel() const
+            //- Does the mesh contain processor patches?
+            //- (also valid when not running parallel)
+            bool parallel() const noexcept
             {
                 return !processorPatches_.empty();
             }
 
-            //- Return total number of points in decomposed mesh. Not
-            //  compensated for duplicate points!
+            //- Return total number of points in decomposed mesh.
+            //- Not compensated for duplicate points!
             label nTotalPoints() const noexcept
             {
                 return nTotalPoints_;
             }
 
-            //- Return total number of faces in decomposed mesh. Not
-            //  compensated for duplicate faces!
+            //- Return total number of faces in decomposed mesh.
+            //- Not compensated for duplicate faces!
             label nTotalFaces() const noexcept
             {
                 return nTotalFaces_;

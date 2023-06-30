@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019-2020 Mattijs Janssens
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PPCG_H
-#define PPCG_H
+#ifndef Foam_PPCG_H
+#define Foam_PPCG_H
 
 #include "lduMatrix.H"
 
@@ -66,19 +66,25 @@ class PPCG
 :
     public lduMatrix::solver
 {
+    // Private Member Data
+
+        //- Cached preconditioner
+        mutable autoPtr<lduMatrix::preconditioner> preconPtr_;
+
+
     // Private Member Functions
 
         //- Non-blocking version of sum(a*b), sum(a*c), sum(mag(sumMag))
-        void gSumMagProd
+        static void gSumMagProd
         (
             FixedList<solveScalar, 3>& globalSum,
             const solveScalarField& a,
             const solveScalarField& b,
             const solveScalarField& c,
             const solveScalarField& sumMag,
-            label& outstandingRequest,
+            UPstream::Request& request,
             const label comm
-        ) const;
+        );
 
         //- No copy construct
         PPCG(const PPCG&) = delete;

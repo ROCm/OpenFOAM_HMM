@@ -41,7 +41,7 @@ graph calcEk
     (
         fft::forwardTransform
         (
-            ReComplexField(U.primitiveField()),
+            ComplexField(U.primitiveField(), vector::zero),
             K.nn()
         )*recRootN,
         K

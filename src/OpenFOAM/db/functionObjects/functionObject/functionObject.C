@@ -93,7 +93,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         const auto finder =
             dict.csearchCompat("libs", {{"functionObjectLibs", 1612}});
 
-        if (finder.found())
+        if (finder.good())
         {
             runTime.libs().open
             (

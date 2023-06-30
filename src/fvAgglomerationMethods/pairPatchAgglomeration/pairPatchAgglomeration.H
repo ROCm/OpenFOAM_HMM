@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2020 OpenCFD Ltd.
+    Copyright (C) 2016-2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef pairPatchAgglomeration_H
-#define pairPatchAgglomeration_H
+#ifndef Foam_pairPatchAgglomeration_H
+#define Foam_pairPatchAgglomeration_H
 
 #include "mathematicalConstants.H"
 #include "indirectPrimitivePatch.H"
@@ -101,8 +101,29 @@ private:
         (
             const bPatch& patch,
             const labelList& fineToCoarse,
-            const label fineLevelIndex
+            const label fineLevelIndex,
+            label& nMarkedEdges
         );
+
+        //- Does combining facei with faceIDs produce a single face?
+        bool isSingleEdgeLoop
+        (
+            const bPatch& patch,
+            const labelList& faceIDs,
+            const label facei
+        ) const;
+
+        //- Select neighbour with highest inbetween edge weight. Either looks
+        //- at already clustered faces (addToCluster=true) or only
+        //  unclustered
+        label maxValidNeighbour
+        (
+            const bool addToCluster,
+            const bPatch& patch,
+            const label facei,
+            const labelList& coarseCellMap
+            //const labelListList& coarseToFine
+        ) const;
 
         //- Agglomerate one level
         tmp<labelField> agglomerateOneLevel
@@ -121,7 +142,8 @@ private:
         bool continueAgglomerating
         (
             const label nLocal,
-            const label nLocalOld
+            const label nLocalOld,
+            const label nMarkedEdges
         );
 
         //- Set edge weights
@@ -141,6 +163,10 @@ private:
 
 
 public:
+
+    //- Runtime type information
+    TypeName("pairPatch");
+
 
     // Constructors
 
@@ -166,7 +192,7 @@ public:
 
 
     // Destructor
-    ~pairPatchAgglomeration();
+    virtual ~pairPatchAgglomeration();
 
 
     // Member Functions

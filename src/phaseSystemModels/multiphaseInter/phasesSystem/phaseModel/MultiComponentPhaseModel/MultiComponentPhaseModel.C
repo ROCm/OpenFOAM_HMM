@@ -428,7 +428,7 @@ void Foam::MultiComponentPhaseModel<BasePhaseModel, phaseThermo>::solveYi
     }
 
     X_[inertIndex_] = scalar(1) - Yt;
-    X_[inertIndex_].max(0.0);
+    X_[inertIndex_].clamp_min(0);
 
     calculateMassFractions();
 }

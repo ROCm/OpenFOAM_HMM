@@ -127,7 +127,7 @@ Foam::solidChemistryModel<CompType, SolidThermo>::Qdot() const
                 this->mesh_,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             this->mesh_,
             dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)

@@ -105,10 +105,7 @@ JohnsonJacksonParticleThetaFvPatchScalarField
             << abort(FatalError);
     }
 
-    fvPatchScalarField::operator=
-    (
-        scalarField("value", dict, p.size())
-    );
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 }
 
 
@@ -179,37 +176,29 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::updateCoeffs()
     );
 
     // lookup all the fields on this patch
-    const fvPatchScalarField& alpha
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& alpha =
+        patch().lookupPatchField<volScalarField>
         (
             phased.volScalarField::name()
-        )
-    );
+        );
 
-    const fvPatchVectorField& U
-    (
-        patch().lookupPatchField<volVectorField, vector>
+    const auto& U =
+        patch().lookupPatchField<volVectorField>
         (
             IOobject::groupName("U", phased.name())
-        )
-    );
+        );
 
-    const fvPatchScalarField& gs0
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& gs0 =
+        patch().lookupPatchField<volScalarField>
         (
             IOobject::groupName("gs0", phased.name())
-        )
-    );
+        );
 
-    const fvPatchScalarField& kappa
-    (
-        patch().lookupPatchField<volScalarField, scalar>
+    const auto& kappa =
+        patch().lookupPatchField<volScalarField>
         (
             IOobject::groupName("kappa", phased.name())
-        )
-    );
+        );
 
     const scalarField Theta(patchInternalField());
 
@@ -279,10 +268,10 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("restitutionCoefficient", restitutionCoefficient_);
     os.writeEntry("specularityCoefficient", specularityCoefficient_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

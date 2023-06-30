@@ -798,7 +798,7 @@ void Foam::snappySnapDriver::freezeExposedPoints
     for (const label pointi : isFrozenPoint)
     {
         const auto iter = outside.meshPointMap().find(pointi);
-        if (iter.found())
+        if (iter.good())
         {
             outsideDisp[iter.val()] = Zero;
         }
@@ -1017,7 +1017,7 @@ void Foam::snappySnapDriver::getZoneSurfacePoints
 
             const auto iter = pp.meshPointMap().cfind(meshPointi);
 
-            if (iter.found())
+            if (iter.good())
             {
                 const label pointi = iter.val();
                 pointOnZone[pointi] = true;

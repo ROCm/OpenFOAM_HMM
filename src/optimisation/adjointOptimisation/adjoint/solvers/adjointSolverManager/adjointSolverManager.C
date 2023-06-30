@@ -56,7 +56,7 @@ Foam::adjointSolverManager::adjointSolverManager
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            true //register object
+            IOobject::REGISTER
         )
     ),
     mesh_(mesh),

@@ -43,9 +43,14 @@ void Foam::SuppressionCollision<CloudType>::collide
         lookupObject<kinematicCloud>(suppressionCloud_);
 
     volScalarField vDotSweep(sc.vDotSweep());
-
     dimensionedScalar Dt("dt", dimTime, dt);
-    volScalarField P(type() + ":p", 1.0 - exp(-vDotSweep*Dt));
+
+    auto tP = volScalarField::New
+    (
+        IOobject::scopedName(type(), "p"),
+        1.0 - exp(-vDotSweep*Dt)
+    );
+    const auto& P = tP();
 
     for (typename CloudType::parcelType& p : this->owner())
     {

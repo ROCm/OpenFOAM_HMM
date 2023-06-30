@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedValueFaPatchField_H
-#define fixedValueFaPatchField_H
+#ifndef Foam_fixedValueFaPatchField_H
+#define Foam_fixedValueFaPatchField_H
 
 #include "faPatchField.H"
 
@@ -56,7 +57,6 @@ class fixedValueFaPatchField
 :
     public faPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -72,16 +72,26 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        fixedValueFaPatchField
+        (
+            const faPatch&,
+            const DimensionedField<Type, areaMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and dictionary
         fixedValueFaPatchField
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
-            const dictionary&
+            const dictionary&,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
-        //- Construct by mapping the given fixedValueFaPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValue patch field
+        //- onto a new patch
         fixedValueFaPatchField
         (
             const fixedValueFaPatchField<Type>&,
@@ -125,17 +135,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
         // Evaluation functions

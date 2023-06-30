@@ -56,11 +56,11 @@ void Foam::regionModels::singleLayerRegion::constructMeshObjects()
                 time_.timeName(),
                 regionMesh(),
                 IOobject::READ_IF_PRESENT,
-                NO_WRITE
+                IOobject::NO_WRITE
             ),
             regionMesh(),
             dimensionedVector(dimless, Zero),
-            zeroGradientFvPatchField<vector>::typeName
+            fvPatchFieldBase::zeroGradientType()
         )
     );
 
@@ -75,11 +75,11 @@ void Foam::regionModels::singleLayerRegion::constructMeshObjects()
                 time_.timeName(),
                 regionMesh(),
                 IOobject::READ_IF_PRESENT,
-                NO_WRITE
+                IOobject::NO_WRITE
             ),
             regionMesh(),
             dimensionedScalar(dimArea, Zero),
-            zeroGradientFvPatchField<scalar>::typeName
+            fvPatchFieldBase::zeroGradientType()
         )
     );
 }

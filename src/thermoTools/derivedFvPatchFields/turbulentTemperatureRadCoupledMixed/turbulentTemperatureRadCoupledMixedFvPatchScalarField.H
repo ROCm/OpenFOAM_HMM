@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2017-2021 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,41 +25,59 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::compressible::
-        turbulentTemperatureRadCoupledMixedFvPatchScalarField
+    Foam::compressible::turbulentTemperatureRadCoupledMixedFvPatchScalarField
 
 Description
-    Mixed boundary condition for temperature and radiation heat transfer
-    to be used for in multiregion cases. Optional thin thermal layer
-    resistances can be specified through thicknessLayers and kappaLayers
-    entries.
+    Mixed boundary condition for temperature and radiation heat transfer,
+    suitable for multiregion cases. The optional specification of
+    thin thermal layer resistances can be made using the entries
+    \c thicknessLayers and \c kappaLayers.
 
-    The thermal conductivity \c kappa can either be retrieved from various
-    possible sources, as detailed in the class temperatureCoupledBase.
+    The thermal conductivity \c kappa can be obtained from a variety
+    of sources, as explained in the \c temperatureCoupledBase class.
 
 Usage
-    \table
-        Property     | Description             | Required    | Default value
-        Tnbr         | name of the field    | no | T
-        qrNbr      | name of the radiative flux in the nbr region | no | none
-        qr         | name of the radiative flux in this region | no | none
-        thicknessLayers | list of thicknesses per layer [m] | no |
-        kappaLayers  | list of thermal conductivites per layer [W/m/K] | no |
-        thicknessLayer | single thickness of layer [m] | no |
-        kappaLayer  | corresponding thermal conductivity [W/m/K] | no |
-        kappaMethod  | inherited from temperatureCoupledBase | inherited |
-        kappa        | inherited from temperatureCoupledBase | inherited |
-        thermalInertia | Add thermal inertia to wall node | no | false
-    \endtable
-
     Example of the boundary condition specification:
+    \verbatim
+    <patchName>
+    {
+        // Mandatory entries
+        type                compressible::turbulentTemperatureRadCoupledMixed;
+
+        // Optional entries
+        Tnbr                <word>;
+        qrNbr               <word>;
+        qr                  <word>;
+        logInterval         <scalar>;
+        thermalInertia      <bool>;
+        verbose             <bool>;
+        prefix              <word>;
+
+        // Conditional entries
+
+            // Option-1
+            thicknessLayers <scalarList>;
+            kappaLayers     <scalarList>;
+
+            // Option-2
+            thicknessLayer  <PatchFunction1<scalar>>;
+            kappaLayer      <PatchFunction1<scalar>>;
+
+        // Inherited entries
+        kappaMethod         <word>;
+        kappa               <word>;
+        ...
+    }
+    \endverbatim
+
+    For example:
     \verbatim
     <patchName>
     {
         type            compressible::turbulentTemperatureRadCoupledMixed;
         Tnbr            T;
         qrNbr           qr; // or none. Name of qr field on neighbour region
-        qr              qr; // or none. Name of qr field on local region
+        qr              qr; // or none. Name of qr field on this region
         thicknessLayers (0.1 0.2 0.3 0.4);
         kappaLayers     (1 2 3 4);
         thermalInertia  false/true;
@@ -69,23 +87,53 @@ Usage
     }
     \endverbatim
 
-    Needs to be on underlying mapped(Wall)FvPatch.
+    where the entries mean:
+    \table
+      Property | Description                            | Type  | Reqd | Deflt
+      type   | Type name: compressible::turbulentTemperatureRadCoupledMixed <!--
+               -->                                      | word  | yes  | -
+      Tnbr     | Name of the nbr temperature field      | word  | no   | T
+      qrNbr    | Name of the radiative flux in the nbr region | word | no | none
+      qr       | Name of the radiative flux in this region | word | no | none
+      logInterval | Log-file output frequency [s]          | scalar | no  | -1
+      thermalInertia | Flag to add thermal inertia to wall node | bool | no <!--
+               -->                                                     | false
+      verbose | Flag to enable verbose output with extra fields | bool | no <!--
+              -->                                                      | false
+      prefix  | Name of output-field prefix (in verbose mode)         <!--
+              -->                                       | word | no | multiWorld
+      thicknessLayers | List of thicknesses per layer [m] | scalarList <!--
+              -->                                             | choice | -
+      kappaLayers  | List of thermal conductivites per layer [W/m/K]   <!--
+              -->                                | scalarList | choice | -
+      thicknessLayer | Single thickness of layer [m]                   <!--
+              -->                   | PatchFunction1\<scalar\>| choice | -
+      kappaLayer     | Corresponding thermal conductivity [W/m/K]      <!--
+              -->                   | PatchFunction1\<scalar\>| choice | -
+    \endtable
 
-See also
-    Foam::temperatureCoupledBase
+    The inherited entries are elaborated in:
+      - \link mixedFvPatchFields.H \endlink
+      - \link temperatureCoupledBase.H \endlink
+      - \link mappedPatchFieldBase.H \endlink
+      - \link writeFile.H \endlink
+
+Note
+  - Needs to be on underlying \c mapped(Wall)FvPatch.
 
 SourceFiles
     turbulentTemperatureRadCoupledMixedFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentTemperatureRadCoupledMixedFvPatchScalarField_H
-#define turbulentTemperatureRadCoupledMixedFvPatchScalarField_H
+#ifndef Foam_turbulentTemperatureRadCoupledMixedFvPatchScalarField_H
+#define Foam_turbulentTemperatureRadCoupledMixedFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 #include "temperatureCoupledBase.H"
 #include "scalarList.H"
 #include "mappedPatchFieldBase.H"
+#include "writeFile.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -102,18 +150,18 @@ class turbulentTemperatureRadCoupledMixedFvPatchScalarField
 :
     public mixedFvPatchScalarField,
     public temperatureCoupledBase,
-    public mappedPatchFieldBase<scalar>
+    public mappedPatchFieldBase<scalar>,
+    public functionObjects::writeFile
 {
-
     // Private Data
 
-        //- Name of field on the neighbour region
+        //- Name of temperature field on the neighbour region
         const word TnbrName_;
 
         //- Name of the radiative heat flux in the neighbour region
         const word qrNbrName_;
 
-        //- Name of the radiative heat flux in local region
+        //- Name of the radiative heat flux in this region
         const word qrName_;
 
         //- Thickness of layers (either scalarList or a single PatchFunction1)
@@ -124,29 +172,61 @@ class turbulentTemperatureRadCoupledMixedFvPatchScalarField
         scalarList kappaLayers_;
         autoPtr<PatchFunction1<scalar>> kappaLayer_;
 
-        //- Thermal inertia term
-        Switch thermalInertia_;
+        //- Log-file output frequency
+        scalar logInterval_;
+
+        //- Index of previous execution
+        label executionIndex_;
+
+        //- Flag to enable thermal inertia term
+        const Switch thermalInertia_;
+
+        //- Flag to enable verbose output with extra fields
+        const bool verbose_;
+
+        //- Name of output-field prefix (in verbose mode)
+        const word prefix_;
 
 
      // Private Functions
 
-            //- Return local alphaSfDelta
-            tmp<scalarField> alphaSfDelta() const;
+        //- Return local alphaSfDelta
+        tmp<scalarField> alphaSfDelta() const;
 
-            //- Return delta enthalpy between regions
-            tmp<scalarField> deltaH() const;
+        //- Return delta enthalpy between regions
+        tmp<scalarField> deltaH() const;
 
-            //- Return the sum of deltaCoeff*alpha from nbr and local
-            tmp<scalarField> beta() const;
+        //- Return the sum of deltaCoeff*alpha from nbr and local
+        tmp<scalarField> beta() const;
+
+        //- Calculate coefficients for assembly matrix
+        tmp<Field<scalar>> coeffs
+        (
+            fvMatrix<scalar>& matrix,
+            const Field<scalar>&,
+            const label
+        ) const;
+
+        //- Return requested field from the object registry
+        //- or create+register the field to the object registry
+        volScalarField& getOrCreateField(const word& fieldName) const;
+
+        //- Store heat-transfer coeff fields to facilitate postprocessing
+        void storeHTCFields
+        (
+            const word& prefix,
+            const scalarField& htc,
+            const scalarField& htcPatch
+        ) const;
+
+        //- Flag to allow writing to file
+        bool writeFile();
 
 
-            //- Calculate coefficients for assembly matrix
-            tmp<Field<scalar>> coeffs
-            (
-                fvMatrix<scalar>& matrix,
-                const Field<scalar>&,
-                const label
-            ) const;
+        // functionObjects::writeFile
+
+            //- Write file header information
+            void writeFileHeader(Ostream& os);
 
 
 public:
@@ -173,8 +253,8 @@ public:
         );
 
         //- Construct by mapping given
-        //  turbulentTemperatureCoupledBaffleMixedFvPatchScalarField onto a
-        //  new patch
+        //- turbulentTemperatureCoupledBaffleMixedFvPatchScalarField onto a
+        //- new patch
         turbulentTemperatureRadCoupledMixedFvPatchScalarField
         (
             const
@@ -228,21 +308,23 @@ public:
 
     // Member Functions
 
-        // Mapping functions
+    // Mapping
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
+        //- Map (and resize as needed) from self given a mapping object
+        virtual void autoMap
+        (
+            const fvPatchFieldMapper&
+        );
 
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchField<scalar>&,
-                const labelList&
-            );
+        //- Reverse map the given fvPatchField onto this fvPatchField
+        virtual void rmap
+        (
+            const fvPatchField<scalar>&,
+            const labelList&
+        );
 
+
+    // Evaluation
 
         //- Given patch temperature calculate corresponding K field. Override
         //- temperatureCoupledBase::kappa to includes effect of any
@@ -260,6 +342,8 @@ public:
             const direction cmpt
         );
 
+
+    // I-O
 
         //- Write
         virtual void write(Ostream& os) const;

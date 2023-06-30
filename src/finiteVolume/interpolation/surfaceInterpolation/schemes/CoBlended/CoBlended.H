@@ -36,7 +36,7 @@ Description
     face-based Courant number and the lower and upper Courant number limits
     supplied:
     \f[
-        weight = 1 - max(min((Co - Co1)/(Co2 - Co1), 1), 0)
+        weight = 1 - clamp((Co - Co1)/(Co2 - Co1), zero_one{})
     \f]
     where
     \vartable
@@ -199,7 +199,7 @@ public:
             const fvMesh& mesh = this->mesh();
             tmp<surfaceScalarField> tUflux = faceFlux_;
 
-            if (faceFlux_.dimensions() == dimDensity*dimVelocity*dimArea)
+            if (faceFlux_.dimensions() == dimMass/dimTime)
             {
                 // Currently assume that the density field
                 // corresponding to the mass-flux is named "rho"
@@ -209,7 +209,7 @@ public:
 
                 tUflux = faceFlux_/fvc::interpolate(rho);
             }
-            else if (faceFlux_.dimensions() != dimVelocity*dimArea)
+            else if (faceFlux_.dimensions() != dimVolume/dimTime)
             {
                 FatalErrorInFunction
                     << "dimensions of faceFlux are not correct"
@@ -222,18 +222,14 @@ public:
                 (
                     vf.name() + "BlendingFactor",
                     scalar(1)
-                  - max
+                  - clamp
                     (
-                        min
                         (
-                            (
-                                mesh.time().deltaT()*mesh.deltaCoeffs()
-                               *mag(tUflux)/mesh.magSf()
-                              - Co1_
-                            )/(Co2_ - Co1_),
-                            scalar(1)
-                        ),
-                        scalar(0)
+                            mesh.time().deltaT()*mesh.deltaCoeffs()
+                            *mag(tUflux)/mesh.magSf()
+                          - Co1_
+                        )/(Co2_ - Co1_),
+                        zero_one{}
                     )
                 )
             );
@@ -319,10 +315,7 @@ public:
             }
             else
             {
-                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-                (
-                    nullptr
-                );
+                return nullptr;
             }
         }
 };

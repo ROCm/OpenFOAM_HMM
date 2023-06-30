@@ -56,9 +56,9 @@ clampedPlateFaPatchField<Type>::clampedPlateFaPatchField
     const dictionary& dict
 )
 :
-    faPatchField<Type>(p, iF)
+    faPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ)
 {
-    faPatchField<Type>::operator=(this->patchInternalField());
+    this->extrapolateInternal();  // Zero-gradient patch values
 }
 
 
@@ -113,14 +113,13 @@ void clampedPlateFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    Field<scalar>::operator=(pTraits<scalar>::zero);
+    Field<scalar>::operator=(Zero);
 
-    const labelUList& edgeFaces = this->patch().edgeFaces();
-    forAll(edgeFaces, edgeID)
+    auto& iF = const_cast<Field<scalar>&>(this->primitiveField());
+
+    for (const label facei : this->patch().edgeFaces())
     {
-        label faceID = edgeFaces[edgeID];
-        const_cast<Field<scalar>&>(this->primitiveField())[faceID] =
-            pTraits<scalar>::zero;
+        iF[facei] = Zero;
     }
 
     faPatchField<scalar>::evaluate();
@@ -128,18 +127,17 @@ void clampedPlateFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > clampedPlateFaPatchField<Type>::valueInternalCoeffs
+tmp<Field<Type>> clampedPlateFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type>>
-        (new Field<Type>(this->size(), pTraits<Type>::zero));
+    return tmp<Field<Type>>::New(this->size(), Zero);
 }
 
 
 template<class Type>
-tmp<Field<Type> > clampedPlateFaPatchField<Type>::valueBoundaryCoeffs
+tmp<Field<Type>> clampedPlateFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -149,7 +147,7 @@ tmp<Field<Type> > clampedPlateFaPatchField<Type>::valueBoundaryCoeffs
 
 
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 clampedPlateFaPatchField<Type>::gradientInternalCoeffs() const
 {
     return -Type(pTraits<Type>::one)*this->patch().deltaCoeffs();
@@ -157,7 +155,7 @@ clampedPlateFaPatchField<Type>::gradientInternalCoeffs() const
 
 
 template<class Type>
-tmp<Field<Type> >
+tmp<Field<Type>>
 clampedPlateFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
     return this->patch().deltaCoeffs()*(*this);
@@ -168,7 +166,7 @@ template<class Type>
 void clampedPlateFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
-    this->writeEntry("value", os);
+    faPatchField<Type>::writeValueEntry(os);
 }
 
 

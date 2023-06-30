@@ -259,11 +259,11 @@ void Foam::Reaction<ReactionThermo>::setLRhs
 
     while (is.good())
     {
-        dlrhs.append(specieCoeffs(species, is, failUnknownSpecie));
+        dlrhs.push_back(specieCoeffs(species, is, failUnknownSpecie));
 
-        if (dlrhs.last().index < 0)
+        if (dlrhs.back().index < 0)
         {
-            dlrhs.remove();
+            dlrhs.pop_back();
         }
 
         if (is.good())

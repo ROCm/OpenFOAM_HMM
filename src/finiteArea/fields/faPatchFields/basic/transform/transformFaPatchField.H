@@ -73,7 +73,8 @@ public:
             const DimensionedField<Type, areaMesh>&
         );
 
-        //- Construct from patch, internal field and dictionary
+        //- Construct from patch, internal field and dictionary.
+        //  The "value" entry: NO_READ
         transformFaPatchField
         (
             const faPatch&,
@@ -81,8 +82,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given transformFaPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given transform patch field
+        //- onto a new patch
         transformFaPatchField
         (
             const transformFaPatchField<Type>&,

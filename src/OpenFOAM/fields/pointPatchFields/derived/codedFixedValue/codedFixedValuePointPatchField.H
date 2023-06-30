@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,9 @@ Class
 Description
     Constructs on-the-fly a new boundary condition (derived from
     fixedValuePointPatchField) which is then used to evaluate.
+
+    The \c value entry (optional) is used for the initial values.
+    Otherwise the code is executed.
 
     The code entries:
     \plaintable
@@ -100,8 +103,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef codedFixedValuePointPatchField_H
-#define codedFixedValuePointPatchField_H
+#ifndef Foam_codedFixedValuePointPatchField_H
+#define Foam_codedFixedValuePointPatchField_H
 
 #include "fixedValuePointPatchFields.H"
 #include "codedBase.H"
@@ -187,8 +190,7 @@ public:
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary&
         );
 
         //- Construct by mapping given codedFixedValuePointPatchField
@@ -248,7 +250,7 @@ public:
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
 
-        //- Evaluate the patch field, sets Updated to false
+        //- Evaluate the patch field, sets updated() to false
         virtual void evaluate
         (
             const Pstream::commsTypes commsType=Pstream::commsTypes::blocking

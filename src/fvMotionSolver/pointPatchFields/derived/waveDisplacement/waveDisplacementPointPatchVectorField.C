@@ -127,7 +127,7 @@ void Foam::waveDisplacementPointPatchVectorField::write(Ostream& os) const
     os.writeEntry("amplitude", amplitude_);
     os.writeEntry("omega", omega_);
     os.writeEntry("waveNumber", waveNumber_);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

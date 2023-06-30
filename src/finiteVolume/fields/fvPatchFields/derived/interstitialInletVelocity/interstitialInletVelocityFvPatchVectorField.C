@@ -135,8 +135,7 @@ void Foam::interstitialInletVelocityFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    const fvPatchField<scalar>& alphap =
-        patch().lookupPatchField<volScalarField, scalar>(alphaName_);
+    const auto& alphap = patch().lookupPatchField<volScalarField>(alphaName_);
 
     operator==(inletVelocity_/alphap);
     fixedValueFvPatchVectorField::updateCoeffs();
@@ -148,7 +147,7 @@ void Foam::interstitialInletVelocityFvPatchVectorField::write(Ostream& os) const
     fvPatchField<vector>::write(os);
     os.writeEntryIfDifferent<word>("alpha", "alpha", alphaName_);
     inletVelocity_.writeEntry("inletVelocity", os);
-    writeEntry("value", os);
+    fvPatchField<vector>::writeValueEntry(os);
 }
 
 

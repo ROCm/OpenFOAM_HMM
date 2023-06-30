@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Test minMax
+    Test-minMax2
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "argList.H"
 #include "Time.H"
 #include "BitOps.H"
 #include "HashOps.H"
@@ -37,6 +37,7 @@ Description
 #include "MinMax.H"
 #include "dimensionedScalar.H"
 #include "dimensionedMinMax.H"
+#include "Random.H"
 
 using namespace Foam;
 
@@ -77,7 +78,6 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     Info<< "Test min/max " << nl;
-
 
     {
         scalarMinMax range1(10, 20);
@@ -140,7 +140,42 @@ int main(int argc, char *argv[])
         }
     }
 
+    {
+        scalarField someField(25);
 
+        Random rnd(4567);
+        for (scalar& val : someField)
+        {
+            val = rnd.position(scalar(-0.2), scalar(1.2));
+        }
+
+        Info<< nl
+            << "field: " << flatOutput(someField) << nl;
+        Info<< "clamp01: "
+            << flatOutput(clamp(someField, zero_one{})()) << nl;
+
+        Info<< "clamp01: "
+            << clamp(tmp<scalarField>(someField), zero_one{})<< nl;
+
+        scalarField result(10);
+        clamp(result, someField, zero_one{});
+
+        Info<< "result: " << result << nl;
+
+        someField.clamp_range(zero_one{});
+        Info<< "inplace: " << someField << nl;
+
+        scalar val(1.414);
+
+        Info<< "clamp " << val
+            // nope << " : " << clamp(val, zero_one{})
+            // nope << " : " << clamp(val, scalarMinMax(zero_one{}))
+            << " : " << clamp(val, 0, 1)
+            << " : " << clamp(val, zero_one{})
+            << nl;
+    }
+
+    Info<< nl << "\nDone\n" << endl;
     return 0;
 }
 

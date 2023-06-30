@@ -76,11 +76,11 @@ void Foam::AveragingMethods::Basic<Type>::updateGrad()
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensioned<Type>(dimless, Zero),
-        zeroGradientFvPatchField<Type>::typeName
+        fvPatchFieldBase::zeroGradientType()
     );
     tempData.primitiveFieldRef() = data_;
     tempData.correctBoundaryConditions();

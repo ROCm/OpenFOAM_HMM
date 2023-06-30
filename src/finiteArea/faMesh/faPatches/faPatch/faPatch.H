@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -305,6 +305,10 @@ public:
             return false;
         }
 
+        //- The offset where this patch starts in the boundary edge list.
+        //  The value is the same as patch.start() - mesh.nInternalEdges()
+        label offset() const;
+
         //- Patch start in edge list
         label start() const;
 
@@ -320,18 +324,26 @@ public:
             return edgei - start();
         }
 
-        //- Slice List to patch, using the virtual patch size
+        //- This patch slice from the complete list of values, which has
+        //- size mesh::nEdges(), using the virtual patch size.
         template<class T>
-        typename List<T>::subList patchSlice(const List<T>& l) const
+        const typename List<T>::subList patchSlice(const List<T>& values) const
         {
-            return typename List<T>::subList(l, size(), start());
+            return typename List<T>::subList(values, size(), start());
         }
 
-        //- Slice List to patch, using the number of patch edges
+        //- This patch slice from the list of boundary values, which has
+        //- size mesh::nBoundaryEdges(), using the virtual patch size.
         template<class T>
-        typename List<T>::subList patchRawSlice(const List<T>& l) const
+        const typename List<T>::subList
+        boundarySlice(const List<T>& values) const
         {
-            return typename List<T>::subList(l, nEdges(), start());
+            return typename List<T>::subList
+            (
+                values,
+                size(),
+                offset()
+            );
         }
 
 
@@ -375,13 +387,13 @@ public:
             //- Return edge centres
             const vectorField& edgeCentres() const;
 
-            //- Return edge length vectors
+            //- Return edge length vectors, like the faMesh::Le() method
             const vectorField& edgeLengths() const;
 
-            //- Return edge length magnitudes
+            //- Return edge length magnitudes, like the faMesh::magLe() method
             const scalarField& magEdgeLengths() const;
 
-            //- Return edge normals
+            //- Return edge unit normals, like the faMesh::unitLe() method
             tmp<vectorField> edgeNormals() const;
 
             //- Return neighbour face centres
@@ -421,31 +433,41 @@ public:
 
         // Evaluation
 
-            //- Extract internal field next to patch using edgeFaces mapping
+            //- Extract internal field next to patch using specified addressing
+            // \param internalData The internal field to extract from
+            // \param addressing Addressing from patch into internal field
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the addressing size
             template<class Type>
             inline void patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& edgeFaces,
+                const UList<Type>& internalData,
+                const labelUList& addressing,
+                Field<Type>& pfld
+            ) const;
+
+            //- Extract internal field next to patch as patch field
+            //- using edgeFaces() mapping.
+            // \param internalData The internal field to extract from
+            // \param [out] pfld The extracted patch field.
+            //     It is always resized according to the patch size(),
+            //     which can be smaller than the edgeFaces() size
+            template<class Type>
+            void patchInternalField
+            (
+                const UList<Type>& internalData,
                 Field<Type>& pfld
             ) const;
 
             //- Return given internal field next to patch as patch field
+            //- using edgeFaces() mapping.
+            // \param internalData The internal field to extract from
             template<class Type>
-            tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
-
-            //- Return given internal field next to patch as patch field
-            //- using provided addressing
-            template<class Type>
-            tmp<Foam::Field<Type>> patchInternalField
+            tmp<Field<Type>> patchInternalField
             (
-                const UList<Type>& f,
-                const labelUList& edgeFaces
+                const UList<Type>& internalData
             ) const;
-
-            //- Extract internal field next to patch as patch field
-            template<class Type>
-            void patchInternalField(const UList<Type>&, Field<Type>&) const;
 
             //- Return the patch field of the GeometricField
             //- corresponding to this patch.

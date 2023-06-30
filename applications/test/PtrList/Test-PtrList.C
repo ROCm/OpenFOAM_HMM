@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -268,10 +268,7 @@ Ostream& report
 
 int main(int argc, char *argv[])
 {
-    PtrList<Scalar> list1(10);
-    PtrList<Scalar> list2(15);
-    PtrList<Scalar> listApp;
-
+    #if 0
     {
         DLPtrList<Scalar> llist1;
         llist1.push_front(new Scalar(100));
@@ -301,8 +298,10 @@ int main(int argc, char *argv[])
                 << "for-: " << it << endl;
         }
     }
+    #endif
 
     // Same but as SLPtrList
+    #if 0
     {
         SLPtrList<Scalar> llist1;
         llist1.push_front(new Scalar(100));
@@ -318,24 +317,43 @@ int main(int argc, char *argv[])
         PtrList<Scalar> list1b(llist1);
         Info<< list1b << endl;
     }
+    #endif
+
+    PtrList<Scalar> list1(10);
 
     forAll(list1, i)
     {
         list1.set(i, new Scalar(1.3*i));
     }
+    {
+        auto ptr = autoPtr<Scalar>::New(10);
 
+        Info<< "add: " << Foam::name(ptr.get());
+        list1.set(0, ptr);
+
+        Info<< "ptrlist: " << Foam::name(list1.get(0)) << nl;
+        Info<< "now: " << Foam::name(ptr.get()) << nl;
+
+        ptr = autoPtr<Scalar>::New(20);
+
+        list1.append(ptr);
+        // Delete method:  list1.push_back(ptr);
+        // list1.push_back(std::move(ptr));
+    }
+
+
+    PtrList<Scalar> list2(15);
     Info<< "Emplace set " << list2.size() << " values" << nl;
     forAll(list2, i)
     {
         list2.emplace(i, (10 + 1.3*i));
     }
 
+    PtrList<Scalar> listApp;
     for (label i = 0; i < 5; ++i)
     {
-        listApp.append(new Scalar(1.3*i));
+        listApp.emplace_back(1.3*i);
     }
-    listApp.emplace_back(100);
-
 
     Info<< nl
         << "list1: " << list1 << nl
@@ -353,7 +371,7 @@ int main(int argc, char *argv[])
 
             if (old)
             {
-                ptrs.append(old.release());
+                ptrs.push_back(old.release());
             }
         }
 
@@ -375,6 +393,24 @@ int main(int argc, char *argv[])
     for (label i = 2; i < 5; i++)
     {
         list1.set(i, nullptr);
+    }
+
+    {
+        Info<< "range-for of list (" << list1.count() << '/'
+            << list1.size() << ") non-null entries" << nl
+            << "(" << nl;
+        for (const auto& item : list1)
+        {
+            Info<< "    " << item << nl;
+        }
+        Info<< ")" << nl;
+    }
+    {
+        Info<< "iterate on non-null:" << endl;
+        forAllConstIters(list1, iter)
+        {
+            Info<< "    " << iter.key() << " : " << iter.val() << nl;
+        }
     }
 
     Info<< "release some items:" << endl;
@@ -459,8 +495,8 @@ int main(int argc, char *argv[])
         printAddr(Info, dynlist1b);
         printAddr(Info, dynlist1c);
 
-        dynlist1d.append(std::move(dynlist1b));
-        dynlist1d.append(std::move(dynlist1c));
+        dynlist1d.push_back(std::move(dynlist1b));
+        dynlist1d.push_back(std::move(dynlist1c));
 
         Info<< "result:" << nl;
         print(Info, dynlist1d);
@@ -477,8 +513,8 @@ int main(int argc, char *argv[])
         printAddr(Info, list1b);
         printAddr(Info, list1c);
 
-        list1d.append(std::move(list1b));
-        list1d.append(std::move(list1c));
+        list1d.push_back(std::move(list1b));
+        list1d.push_back(std::move(list1c));
 
         Info<< "result:" << nl;
         print(Info, list1d);
@@ -523,7 +559,7 @@ int main(int argc, char *argv[])
     printAddr(Info, ulist1);
     Info<< nl;
 
-    ulist1c.append(std::move(ulist1b));
+    ulist1c.push_back(std::move(ulist1b));
 
     Info<< "UPtrList append/append:";
     printAddr(Info, ulist1c);
@@ -564,6 +600,7 @@ int main(int argc, char *argv[])
         << "ulist2: " << ulist2 << nl;
 
     // Test iterator random access
+    #if (OPENFOAM <= 2212)
     {
         auto iter1 = ulist1.begin();
         auto iter2 = iter1 + 3;
@@ -578,6 +615,7 @@ int main(int argc, char *argv[])
         Info<< "*"  << (*iter1).value() << nl;
         Info<< "()" << iter1().value() << nl;
     }
+    #endif
 
     PtrList<plane> planes;
     planes.emplace_back(vector::one, vector::one);
@@ -596,12 +634,14 @@ int main(int argc, char *argv[])
     {
         dynPlanes.emplace_back(vector::one, vector::one);
         dynPlanes.emplace_back(vector(1,2,3), vector::one);
-        dynPlanes.append(nullptr);
+        dynPlanes.push_back(nullptr);
 
         dynPlanes.set(6, new plane(vector(2,2,1), vector::one));
         dynPlanes.set(10, new plane(vector(4,5,6), vector::one));
 
-        dynPlanes.emplace(12, vector(3,2,1), vector::one);
+        Info<< "emplaced :"
+            << dynPlanes.emplace(12, vector(3,2,1), vector::one) << endl;
+
         dynPlanes.emplace_back(Zero, vector::one);
     }
 
@@ -619,10 +659,10 @@ int main(int argc, char *argv[])
 
     Info<< "now append again" << endl;
     {
-        dynPlanes.append(new plane(vector::one, vector::one));
-        dynPlanes.append(new plane(vector(1,2,3), vector::one));
+        dynPlanes.emplace_back(vector::one, vector::one);
+        dynPlanes.emplace_back(vector(1,2,3), vector::one);
 
-        dynPlanes.set(5, new plane(vector(2,2,1), vector::one));
+        dynPlanes.emplace(5, vector(2,2,1), vector::one);
     }
 
     report(Info, dynPlanes, true);
@@ -658,12 +698,12 @@ int main(int argc, char *argv[])
     {
         PtrDynList<plane> dynPlanes2;
 
-        dynPlanes2.append(new plane(vector::one, vector::one));
-        dynPlanes2.append(new plane(vector(1,2,3), vector::one));
-        dynPlanes2.append(nullptr);
+        dynPlanes2.emplace_back(vector::one, vector::one);
+        dynPlanes2.emplace_back(vector(1,2,3), vector::one);
+        dynPlanes2.push_back(nullptr);
 
-        dynPlanes2.set(6, new plane(vector(2,2,1), vector::one));
-        dynPlanes2.set(10, new plane(Zero, vector::one));
+        dynPlanes2.emplace(6, vector(2,2,1), vector::one);
+        dynPlanes2.emplace(10, Zero, vector::one);
 
         labelList order;
         sortedOrder(dynPlanes2, order);
@@ -701,7 +741,7 @@ int main(int argc, char *argv[])
         Info<< "Append" << endl;
         report(Info, dynPlanes2, false);
 
-        dynPlanes.append(std::move(dynPlanes2));
+        dynPlanes.push_back(std::move(dynPlanes2));
 
         Info<< "Result" << endl;
         report(Info, dynPlanes, false);

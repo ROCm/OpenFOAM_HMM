@@ -58,7 +58,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict, false),
+    fixedValueFvPatchScalarField(p, iF, dict, IOobjectOption::NO_READ),
     UName_(dict.getOrDefault<word>("U", "U")),
     phiName_(dict.getOrDefault<word>("phi", "phi")),
     rhoName_(dict.getOrDefault<word>("rho", "rho")),
@@ -66,14 +66,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     gamma_(psiName_ != "none" ? dict.get<scalar>("gamma") : 1),
     p0_("p0", dict, p.size())
 {
-    if (dict.found("value"))
-    {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<scalar>::operator=(p0_);
     }
@@ -167,8 +160,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs
         return;
     }
 
-    const fvsPatchField<scalar>& phip =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+    const auto& phip = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     if (internalField().dimensions() == dimPressure)
     {
@@ -176,17 +168,17 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs
         {
             // Variable density and low-speed compressible flow
 
-            const fvPatchField<scalar>& rho =
-                patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+            const auto& rho =
+                patch().lookupPatchField<volScalarField>(rhoName_);
 
-            operator==(p0p - 0.5*rho*(1.0 - pos0(phip))*magSqr(Up));
+            operator==(p0p - 0.5*rho*(neg(phip))*magSqr(Up));
         }
         else
         {
             // High-speed compressible flow
 
-            const fvPatchField<scalar>& psip =
-                patch().lookupPatchField<volScalarField, scalar>(psiName_);
+            const auto& psip =
+                patch().lookupPatchField<volScalarField>(psiName_);
 
             if (gamma_ > 1)
             {
@@ -197,14 +189,14 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs
                     p0p
                    /pow
                     (
-                        (1.0 + 0.5*psip*gM1ByG*(1.0 - pos0(phip))*magSqr(Up)),
+                        (1.0 + 0.5*psip*gM1ByG*(neg(phip))*magSqr(Up)),
                         1.0/gM1ByG
                     )
                 );
             }
             else
             {
-                operator==(p0p/(1.0 + 0.5*psip*(1.0 - pos0(phip))*magSqr(Up)));
+                operator==(p0p/(1.0 + 0.5*psip*(neg(phip))*magSqr(Up)));
             }
         }
 
@@ -212,7 +204,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs
     else if (internalField().dimensions() == dimPressure/dimDensity)
     {
         // Incompressible flow
-        operator==(p0p - 0.5*(1.0 - pos0(phip))*magSqr(Up));
+        operator==(p0p - 0.5*(neg(phip))*magSqr(Up));
     }
     else
     {
@@ -238,21 +230,21 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs()
     updateCoeffs
     (
         p0(),
-        patch().lookupPatchField<volVectorField, vector>(UName())
+        patch().lookupPatchField<volVectorField>(UName())
     );
 }
 
 
 void Foam::totalPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntry("rho", rhoName_);
     os.writeEntry("psi", psiName_);
     os.writeEntry("gamma", gamma_);
     p0_.writeEntry("p0", os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

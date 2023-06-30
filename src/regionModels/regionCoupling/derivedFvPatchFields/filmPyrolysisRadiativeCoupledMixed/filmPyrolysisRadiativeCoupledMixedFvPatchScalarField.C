@@ -178,14 +178,11 @@ filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
             << exit(FatalError);
     }
 
-    fvPatchScalarField::operator=(scalarField("value", dict, p.size()));
+    this->readValueEntry(dict, IOobjectOption::MUST_READ);
 
-    if (dict.found("refValue"))
+    if (this->readMixedEntries(dict))
     {
         // Full restart
-        refValue() = scalarField("refValue", dict, p.size());
-        refGrad() = scalarField("refGradient", dict, p.size());
-        valueFraction() = scalarField("valueFraction", dict, p.size());
     }
     else
     {
@@ -266,14 +263,13 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::updateCoeffs()
 
     scalarField intFld(patchInternalField());
 
-    const filmPyrolysisRadiativeCoupledMixedFvPatchScalarField&
-        nbrField =
+    const auto& nbrField =
         refCast
         <
             const filmPyrolysisRadiativeCoupledMixedFvPatchScalarField
         >
         (
-            nbrPatch.lookupPatchField<volScalarField, scalar>(TnbrName_)
+            nbrPatch.lookupPatchField<volScalarField>(TnbrName_)
         );
 
     // Swap to obtain full local values of neighbour internal field
@@ -307,7 +303,7 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::updateCoeffs()
         coupledPatchi = patchi;
         if (qrName_ != "none")
         {
-            qr = nbrPatch.lookupPatchField<volScalarField, scalar>(qrName_);
+            qr = nbrPatch.lookupPatchField<volScalarField>(qrName_);
             mpp.distribute(qr);
         }
     }
@@ -316,7 +312,7 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::updateCoeffs()
         coupledPatchi = nbrPatch.index();
         if (qrName_ != "none")
         {
-            qr = patch().lookupPatchField<volScalarField, scalar>(qrName_);
+            qr = patch().lookupPatchField<volScalarField>(qrName_);
         }
     }
     else
@@ -413,7 +409,7 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    mixedFvPatchScalarField::write(os);
+    mixedFvPatchField<scalar>::write(os);
     os.writeEntryIfDifferent<word>
     (
         "filmRegion",

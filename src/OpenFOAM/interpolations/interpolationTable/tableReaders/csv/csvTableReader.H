@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef csvTableReader_H
-#define csvTableReader_H
+#ifndef Foam_csvTableReader_H
+#define Foam_csvTableReader_H
 
 #include "tableReader.H"
 #include "labelList.H"
@@ -81,7 +81,7 @@ class csvTableReader
         );
 
         //- Read component values from the split string
-        Type readValue(const List<string>& strings) const;
+        Type readValue(const UList<string>& strings) const;
 
 
 public:
@@ -131,14 +131,6 @@ public:
         //- Write the remaining parameters
         virtual void write(Ostream& os) const;
 };
-
-
-// Template specialisations
-template<>
-label csvTableReader<label>::readValue(const List<string>& strings) const;
-
-template<>
-scalar csvTableReader<scalar>::readValue(const List<string>& strings) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

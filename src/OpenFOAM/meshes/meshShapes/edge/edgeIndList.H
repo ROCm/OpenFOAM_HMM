@@ -23,18 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::edgeIndList
-
-Description
-    An IndirectList of edges.
-
-Typedef
-    Foam::edgeUIndList
-
-Description
-    A UIndirectList of edges.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_edgeIndList_H
@@ -48,7 +36,10 @@ Description
 
 namespace Foam
 {
+    //! IndirectList of edge
     typedef IndirectList<edge>  edgeIndList;
+
+    //! UIndirectList of edge
     typedef UIndirectList<edge> edgeUIndList;
 }
 

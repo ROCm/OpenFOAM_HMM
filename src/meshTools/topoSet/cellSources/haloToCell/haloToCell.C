@@ -144,8 +144,9 @@ void Foam::haloToCell::combine(topoSet& set, const bool add) const
 
             if (verbose_)
             {
-                Info<< "    Grow " << current.count()
-                    << " by " << updates.count() << endl;
+                Info<< "    Grow "
+                    << returnReduce(current.count(), sumOp<label>()) << " by "
+                    << returnReduce(updates.count(), sumOp<label>()) << endl;
             }
 
             // Add to current set for the next loop
@@ -158,8 +159,9 @@ void Foam::haloToCell::combine(topoSet& set, const bool add) const
 
             if (verbose_)
             {
-                Info<< "    Shrink " << current.count()
-                    << " by " << updates.count() << endl;
+                Info<< "    Shrink "
+                    << returnReduce(current.count(), sumOp<label>()) << " by "
+                    << returnReduce(updates.count(), sumOp<label>()) << endl;
             }
 
             // Remove from current set for the next loop

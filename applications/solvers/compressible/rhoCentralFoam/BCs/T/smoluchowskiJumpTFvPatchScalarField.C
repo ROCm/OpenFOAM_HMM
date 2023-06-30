@@ -103,16 +103,10 @@ Foam::smoluchowskiJumpTFvPatchScalarField::smoluchowskiJumpTFvPatchScalarField
             << exit(FatalIOError);
     }
 
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fvPatchField<scalar>::operator=
-        (
-            scalarField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchField<scalar>::operator=(patchInternalField());
+        // Fallback: set to the internal field
+        fvPatchField<scalar>::patchInternalField(*this);
     }
 
     refValue() = *this;
@@ -165,14 +159,10 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const fvPatchScalarField& pmu =
-        patch().lookupPatchField<volScalarField, scalar>(muName_);
-    const fvPatchScalarField& prho =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
-    const fvPatchField<scalar>& ppsi =
-        patch().lookupPatchField<volScalarField, scalar>(psiName_);
-    const fvPatchVectorField& pU =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const auto& pmu = patch().lookupPatchField<volScalarField>(muName_);
+    const auto& prho = patch().lookupPatchField<volScalarField>(rhoName_);
+    const auto& ppsi = patch().lookupPatchField<volScalarField>(psiName_);
+    const auto& pU = patch().lookupPatchField<volVectorField>(UName_);
 
     // Prandtl number reading consistent with rhoCentralFoam
     const dictionary& thermophysicalProperties =
@@ -207,7 +197,7 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
 // Write
 void Foam::smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
 
     os.writeEntryIfDifferent<word>("U", "U", UName_);
     os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
@@ -217,7 +207,7 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
     os.writeEntry("accommodationCoeff", accommodationCoeff_);
     Twall_.writeEntry("Twall", os);
     os.writeEntry("gamma", gamma_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

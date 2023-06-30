@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,7 +109,11 @@ int main(int argc, char *argv[])
     {
         #include "setConstantRunTimeDictionaryIO.H"
 
-        IOdictionary propsDict(dictIO);
+        #if (OPENFOAM > 2212)
+        dictionary propsDict(IOdictionary::readContents(dictIO));
+        #else
+        dictionary propsDict(static_cast<dictionary&&>(IOdictionary(dictIO)));
+        #endif
 
         const scalarField xvals(propsDict.lookup("x"));
 
@@ -132,7 +136,7 @@ int main(int argc, char *argv[])
             {
                 if (nameFilter(f))
                 {
-                    functionNames.append(f);
+                    functionNames.push_back(f);
                 }
             }
         }
@@ -140,7 +144,7 @@ int main(int argc, char *argv[])
         {
             for (label argi=1; argi < args.size(); ++argi)
             {
-                functionNames.append(args[argi]);
+                functionNames.push_back(args[argi]);
             }
         }
 

@@ -135,7 +135,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
                 pMesh(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             );
             if (io.typeHeaderOk<pointVectorField>(false))
             {
@@ -261,7 +261,7 @@ const
     pointPatchField<vector>::write(os);
     os.writeEntry("field", fieldName_);
     os.writeEntry("interpolationScheme", interpolationScheme_);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

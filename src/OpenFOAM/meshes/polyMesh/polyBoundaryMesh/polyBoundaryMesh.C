@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -206,6 +206,13 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
+void Foam::polyBoundaryMesh::clear()
+{
+    polyPatchList::clear();
+    clearAddressing();
+}
+
+
 void Foam::polyBoundaryMesh::clearGeom()
 {
     polyPatchList& patches = *this;
@@ -219,9 +226,9 @@ void Foam::polyBoundaryMesh::clearGeom()
 
 void Foam::polyBoundaryMesh::clearAddressing()
 {
-    neighbourEdgesPtr_.clear();
-    patchIDPtr_.clear();
-    groupIDsPtr_.clear();
+    neighbourEdgesPtr_.reset(nullptr);
+    patchIDPtr_.reset(nullptr);
+    groupIDsPtr_.reset(nullptr);
 
     polyPatchList& patches = *this;
 
@@ -353,7 +360,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
 
                 auto fnd = pointsToEdge.find(meshEdge);
 
-                if (!fnd.found())
+                if (!fnd.good())
                 {
                     // First occurrence of mesh edge. Store patch and my
                     // local index.
@@ -450,6 +457,31 @@ const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
 }
 
 
+Foam::label Foam::polyBoundaryMesh::patchID(const label meshFacei) const
+{
+    const label bndFacei = (meshFacei - mesh_.nInternalFaces());
+
+    return
+    (
+        (bndFacei >= 0 && bndFacei < mesh_.nBoundaryFaces())
+      ? this->patchID()[bndFacei]
+      : -1
+    );
+}
+
+
+Foam::labelList
+Foam::polyBoundaryMesh::patchID(const labelUList& meshFaceIndices) const
+{
+    labelList output(meshFaceIndices.size());
+    forAll(meshFaceIndices, i)
+    {
+        output[i] = patchID(meshFaceIndices[i]);
+    }
+    return output;
+}
+
+
 const Foam::HashTable<Foam::labelList>&
 Foam::polyBoundaryMesh::groupPatchIDs() const
 {
@@ -468,7 +500,7 @@ void Foam::polyBoundaryMesh::setGroup
     const labelUList& patchIDs
 )
 {
-    groupIDsPtr_.clear();
+    groupIDsPtr_.reset(nullptr);
 
     polyPatchList& patches = *this;
 
@@ -509,7 +541,7 @@ Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
 {
     const polyPatchList& patches = *this;
 
-    label nonProc = 0;
+    label count = 0;
 
     for (const polyPatch& p : patches)
     {
@@ -518,10 +550,28 @@ Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
             break;
         }
 
-        ++nonProc;
+        ++count;
     }
 
-    return nonProc;
+    return count;
+}
+
+
+Foam::label Foam::polyBoundaryMesh::nProcessorPatches() const
+{
+    const polyPatchList& patches = *this;
+
+    label count = 0;
+
+    for (const polyPatch& p : patches)
+    {
+        if (isA<processorPolyPatch>(p))
+        {
+            ++count;
+        }
+    }
+
+    return count;
 }
 
 
@@ -672,7 +722,7 @@ Foam::labelList Foam::polyBoundaryMesh::indices
         {
             const auto iter = groupPatchIDs().cfind(matcher);
 
-            if (iter.found())
+            if (iter.good())
             {
                 // Hash ids associated with the group
                 ids.insert(iter.val());
@@ -789,22 +839,22 @@ Foam::label Foam::polyBoundaryMesh::findPatchID
 
 
 Foam::labelPair
-Foam::polyBoundaryMesh::whichPatchFace(const label faceIndex) const
+Foam::polyBoundaryMesh::whichPatchFace(const label meshFacei) const
 {
-    if (faceIndex < mesh().nInternalFaces())
+    if (meshFacei < mesh().nInternalFaces())
     {
         // Internal face: return (-1, meshFace)
-        return labelPair(-1, faceIndex);
+        return labelPair(-1, meshFacei);
     }
-    else if (faceIndex >= mesh().nFaces())
+    else if (meshFacei >= mesh().nFaces())
     {
         // Bounds error: abort
         FatalErrorInFunction
-            << "Face " << faceIndex
+            << "Face " << meshFacei
             << " out of bounds. Number of geometric faces " << mesh().nFaces()
             << abort(FatalError);
 
-        return labelPair(-1, faceIndex);
+        return labelPair(-1, meshFacei);
     }
 
 
@@ -812,44 +862,47 @@ Foam::polyBoundaryMesh::whichPatchFace(const label faceIndex) const
     // Find out which patch index and local patch face the specified
     // mesh face belongs to by comparing label with patch start labels.
 
+
+    // TBD: use patchIDPtr_ if it exists?
+
     const polyPatchList& patches = *this;
 
     const label patchi =
         findLower
         (
             patches,
-            faceIndex,
+            meshFacei,
             0,
             // Must include the start in the comparison
             [](const polyPatch& p, label val) { return (p.start() <= val); }
         );
 
-    if (patchi < 0 || !patches[patchi].range().found(faceIndex))
+    if (patchi < 0 || !patches[patchi].range().contains(meshFacei))
     {
         // If not in any of above, it is trouble!
         FatalErrorInFunction
-            << "Face " << faceIndex << " not found in any of the patches "
+            << "Face " << meshFacei << " not found in any of the patches "
             << flatOutput(names()) << nl
             << "The patches appear to be inconsistent with the mesh :"
             << " internalFaces:" << mesh().nInternalFaces()
             << " total number of faces:" << mesh().nFaces()
             << abort(FatalError);
 
-        return labelPair(-1, faceIndex);
+        return labelPair(-1, meshFacei);
     }
 
     // (patch, local face index)
-    return labelPair(patchi, faceIndex - patches[patchi].start());
+    return labelPair(patchi, meshFacei - patches[patchi].start());
 }
 
 
 Foam::labelPairList
-Foam::polyBoundaryMesh::whichPatchFace(const labelUList& faceIndices) const
+Foam::polyBoundaryMesh::whichPatchFace(const labelUList& meshFaceIndices) const
 {
-    labelPairList output(faceIndices.size());
-    forAll(faceIndices, i)
+    labelPairList output(meshFaceIndices.size());
+    forAll(meshFaceIndices, i)
     {
-        output[i] = whichPatchFace(faceIndices[i]);
+        output[i] = whichPatchFace(meshFaceIndices[i]);
     }
     return output;
 }
@@ -894,7 +947,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
             {
                 const auto iter = groupPatchIDs().cfind(matcher);
 
-                if (iter.found())
+                if (iter.good())
                 {
                     // Hash ids associated with the group
                     ids.insert(iter.val());
@@ -1151,9 +1204,9 @@ void Foam::polyBoundaryMesh::movePoints(const pointField& p)
 
 void Foam::polyBoundaryMesh::updateMesh()
 {
-    neighbourEdgesPtr_.clear();
-    patchIDPtr_.clear();
-    groupIDsPtr_.clear();
+    neighbourEdgesPtr_.reset(nullptr);
+    patchIDPtr_.reset(nullptr);
+    groupIDsPtr_.reset(nullptr);
 
     PstreamBuffers pBufs(Pstream::defaultCommsType);
 
@@ -1246,11 +1299,11 @@ bool Foam::polyBoundaryMesh::writeData(Ostream& os) const
 bool Foam::polyBoundaryMesh::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     streamOpt.compression(IOstreamOption::UNCOMPRESSED);
-    return regIOobject::writeObject(streamOpt, valid);
+    return regIOobject::writeObject(streamOpt, writeOnProc);
 }
 
 

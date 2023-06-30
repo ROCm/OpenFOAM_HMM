@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -130,9 +130,9 @@ inline Foam::label Foam::hashedWordList::find(const word& val) const
 }
 
 
-inline bool Foam::hashedWordList::found(const word& val) const
+inline bool Foam::hashedWordList::contains(const word& val) const
 {
-    return lookup().found(val);
+    return lookup().contains(val);
 }
 
 
@@ -201,7 +201,7 @@ inline Foam::label Foam::hashedWordList::operator[](const word& val) const
 
 inline bool Foam::hashedWordList::operator()(const word& val) const
 {
-    return lookup_.found(val);
+    return lookup_.contains(val);
 }
 
 

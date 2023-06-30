@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,6 @@ Usage
 #include "globalIndex.H"
 #include "loadOrCreateMesh.H"
 #include "processorFvPatchField.H"
-#include "zeroGradientFvPatchFields.H"
 #include "topoSet.H"
 #include "regionProperties.H"
 
@@ -397,7 +396,7 @@ void writeDecomposition
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         decomp
     );
@@ -415,11 +414,11 @@ void writeDecomposition
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false                   // do not register
+            IOobject::NO_REGISTER
         ),
         mesh,
-        dimensionedScalar(name, dimless, -1),
-        zeroGradientFvPatchScalarField::typeName
+        dimensionedScalar(word::null, dimless, -1),
+        fvPatchFieldBase::zeroGradientType()
     );
 
     forAll(procCells, celli)
@@ -552,7 +551,7 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 // Inplace redistribute mesh and any fields
 autoPtr<mapDistributePolyMesh> redistributeAndWrite
 (
-    autoPtr<fileOperation>&& writeHandler,
+    refPtr<fileOperation>& writeHandler,
     const Time& baseRunTime,
     const fileName& proc0CaseName,
 
@@ -657,7 +656,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // We don't want to map the decomposition (mapping already tested when
         // mapping the cell centre field)
         auto iter = objects.find("cellDist");
-        if (iter.found())
+        if (iter.good())
         {
             objects.erase(iter);
         }
@@ -835,18 +834,12 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     }
     else
     {
-        autoPtr<fileOperation> defaultHandler;
-        if (writeHandler)
-        {
-            defaultHandler = fileHandler(std::move(writeHandler));
-        }
+        auto oldHandler = fileOperation::fileHandler(writeHandler);
 
         mesh.write();
 
-        if (defaultHandler)
-        {
-            writeHandler = fileHandler(std::move(defaultHandler));
-        }
+        writeHandler = fileOperation::fileHandler(oldHandler);
+
         topoSet::removeFiles(mesh);
     }
     Info<< "Written redistributed mesh to "
@@ -862,7 +855,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             mesh,
             distMap(),
             decompose,
-            std::move(writeHandler)
+            writeHandler
         );
     }
     else
@@ -891,7 +884,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
             mesh,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         );
 
         hexRef8Data refData(io);
@@ -1021,7 +1014,7 @@ int main(int argc, char *argv[])
     #include "addOverwriteOption.H"
     argList::addBoolOption("decompose", "Decompose case");
     argList::addBoolOption("reconstruct", "Reconstruct case");
-    argList::addVerboseOption("Additional verbosity");
+    argList::addVerboseOption();
     argList::addDryRunOption
     (
         "Test without writing the decomposition. "
@@ -1065,7 +1058,7 @@ int main(int argc, char *argv[])
     //                than it writes to
     // - reconstruct - reads parallel, write on master only and to parent
     //                 directory
-    autoPtr<fileOperation> writeHandler;
+    refPtr<fileOperation> writeHandler;
     if
     (
         fileHandler().type()
@@ -1073,7 +1066,8 @@ int main(int argc, char *argv[])
     )
     {
         // Install 'uncollated' as fileHandler. Save old one in writeHandler.
-        writeHandler = fileHandler(fileOperation::NewUncollated());
+        writeHandler =
+            fileOperation::fileHandler(fileOperation::NewUncollated());
     }
 
     // Switch off parallel synchronisation of cached time directories
@@ -1251,7 +1245,8 @@ int main(int argc, char *argv[])
         runTime.globalCaseName(),
         runTime.system(),
         runTime.constant(),
-        false                   // enableFunctionObjects
+        false,  // No function objects
+        false   // No extra controlDict libs
     );
 
 
@@ -1583,7 +1578,7 @@ int main(int argc, char *argv[])
 
                     redistributeAndWrite
                     (
-                        std::move(writeHandler),
+                        writeHandler,
                         baseRunTime,
                         proc0CaseName,
 
@@ -1714,7 +1709,7 @@ int main(int argc, char *argv[])
                         areaBaseMeshPtr(),  // Reconstruct location
                         faDistMap,
                         false,              // decompose=false
-                        std::move(writeHandler),
+                        writeHandler,
                         areaMeshPtr.get()   // procMesh
                     );
                 }
@@ -2503,7 +2498,7 @@ int main(int argc, char *argv[])
             // - but not lagrangian fields; these are done later
             autoPtr<mapDistributePolyMesh> distMap = redistributeAndWrite
             (
-                std::move(writeHandler),
+                writeHandler,
                 baseRunTime,
                 proc0CaseName,
 
@@ -2576,11 +2571,7 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    autoPtr<fileOperation> defaultHandler;
-                    if (writeHandler)
-                    {
-                        defaultHandler = fileHandler(std::move(writeHandler));
-                    }
+                    auto oldHandler = fileOperation::fileHandler(writeHandler);
 
                     IOmapDistributePolyMeshRef
                     (
@@ -2592,17 +2583,14 @@ int main(int argc, char *argv[])
                             areaProcMeshPtr->thisDb(),
                             IOobject::NO_READ,
                             IOobject::NO_WRITE,
-                            false
+                            IOobject::NO_REGISTER
                         ),
                         faDistMap
                     ).write();
 
                     areaProcMeshPtr->write();
 
-                    if (defaultHandler)
-                    {
-                        writeHandler = fileHandler(std::move(defaultHandler));
-                    }
+                    writeHandler = fileOperation::fileHandler(oldHandler);
 
                     if (decompose)
                     {
@@ -2611,7 +2599,7 @@ int main(int argc, char *argv[])
                             areaProcMeshPtr(),
                             faDistMap,
                             decompose,
-                            std::move(writeHandler)
+                            writeHandler
                         );
                     }
                 }
@@ -2623,7 +2611,8 @@ int main(int argc, char *argv[])
                 (
                     areaMeshPtr(),      // source
                     areaProcMeshPtr(),  // target
-                    faDistMap
+                    faDistMap,
+                    true                // isWriteProc (unused)
                 );
 
                 areaFields.redistributeAndWrite(distributor, true);

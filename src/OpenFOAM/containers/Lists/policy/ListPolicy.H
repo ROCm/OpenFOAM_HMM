@@ -31,10 +31,9 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ListPolicy_H
-#define ListPolicy_H
+#ifndef Foam_ListPolicy_H
+#define Foam_ListPolicy_H
 
-#include "label.H"
 #include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,9 +42,9 @@ namespace Foam
 {
 
 // Forward Declarations
+class keyType;
 class word;
 class wordRe;
-class keyType;
 
 namespace Detail
 {
@@ -58,11 +57,11 @@ namespace ListPolicy
 //
 //  Default definition: 10
 template<class T>
-struct short_length : std::integral_constant<label,10> {};
+struct short_length : std::integral_constant<int,10> {};
 
-// Could override on a per-type basis
+// Can override on a per-type basis
 // Eg,
-// template<> struct short_length<label> : std::integral_constant<label,20> {};
+// template<> struct short_length<label> : std::integral_constant<int,20> {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -75,18 +74,18 @@ struct short_length : std::integral_constant<label,10> {};
 template<class T>
 struct no_linebreak : std::is_arithmetic<T> {};
 
-// Specialization for word, wordRe, keyType
+// Specialization for word-like classes
 // These elements are normally fairly short, so ok to output a few (eg, 10)
 // of them on a single line.
+
+//- Suppress line-breaks for keyType
+template<> struct no_linebreak<keyType> : std::true_type {};
 
 //- Suppress line-breaks for word
 template<> struct no_linebreak<word> : std::true_type {};
 
 //- Suppress line-breaks for wordRe
 template<> struct no_linebreak<wordRe> : std::true_type {};
-
-//- Suppress line-breaks for keyType
-template<> struct no_linebreak<keyType> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

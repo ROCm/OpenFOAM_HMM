@@ -59,9 +59,9 @@ Foam::dynamicInkJetFvMesh::dynamicInkJetFvMesh
                 "dynamicMeshDict",
                 io.time().constant(),
                 *this,
-                IOobject::MUST_READ_IF_MODIFIED,
+                IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         ).optionalSubDict(typeName + "Coeffs")
     ),

@@ -176,54 +176,42 @@ void Foam::fileControl::initialVertices
 {
     Info<< "    Reading points from file     : " << pointsFile_ << endl;
 
-    pointIOField pointsTmp
+    pts = pointIOField::readContents
     (
         IOobject
         (
             pointsFile_,
             runTime_.constant(),
             runTime_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobject::MUST_READ
         )
     );
 
-    pts.transfer(pointsTmp);
-
     Info<< "    Reading sizes from file      : " << sizesFile_ << endl;
 
-    scalarIOField sizesTmp
+    sizes = scalarIOField::readContents
     (
         IOobject
         (
             sizesFile_,
             runTime_.constant(),
             runTime_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobject::MUST_READ
         )
     );
 
-    sizes.transfer(sizesTmp);
-
     Info<< "    Reading alignments from file : " << alignmentsFile_ << endl;
 
-    triadIOField alignmentsTmp
+    alignments = triadIOField::readContents
     (
         IOobject
         (
             alignmentsFile_,
             runTime_.constant(),
             runTime_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
+            IOobject::MUST_READ
         )
     );
-
-    alignments.transfer(alignmentsTmp);
 
     if ((pts.size() != sizes.size()) || (pts.size() != alignments.size()))
     {

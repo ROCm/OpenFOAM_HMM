@@ -166,17 +166,22 @@ void Foam::Time::readDict()
         }
         controlDict_.watchIndices().clear();
 
-        // The new handler, with verbosity
-        autoPtr<fileOperation> newHandler =
-            fileOperation::New(fileHandlerName, true);
+        // Reporting verbosity corresponding to detail level
+        const bool verbose = (::Foam::infoDetailLevel > 0);
 
-        if (TimePaths::distributed() && newHandler)
+        // The new handler
+        refPtr<fileOperation> newHandler
+        (
+            fileOperation::New(fileHandlerName, verbose)
+        );
+
+        // Install the new handler
+        (void) fileOperation::fileHandler(newHandler);
+
+        if (TimePaths::distributed())
         {
             newHandler->distributed(true);
         }
-
-        // Installing the new handler
-        Foam::fileHandler(std::move(newHandler));
 
         // Reinstall old watches
         fileHandler().addWatches(controlDict_, oldWatched);
@@ -204,6 +209,9 @@ void Foam::Time::readDict()
 
         IStringStream dummyIs("");
 
+        // Reporting verbosity corresponding to detail level
+        const bool verbose = (::Foam::infoDetailLevel > 0);
+
         forAllConstIters(objs, iter)
         {
             const List<simpleRegIOobject*>& objects = *iter;
@@ -212,7 +220,7 @@ void Foam::Time::readDict()
             {
                 obj->readData(dummyIs);
 
-                if (Foam::infoDetailLevel > 0)
+                if (verbose)
                 {
                     Info<< "    ";
                     obj->writeData(Info);
@@ -526,7 +534,7 @@ bool Foam::Time::writeTimeDict() const
             *this,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -547,7 +555,7 @@ bool Foam::Time::writeTimeDict() const
 bool Foam::Time::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     if (writeTime())
@@ -556,7 +564,7 @@ bool Foam::Time::writeObject
 
         if (writeOK)
         {
-            writeOK = objectRegistry::writeObject(streamOpt, valid);
+            writeOK = objectRegistry::writeObject(streamOpt, writeOnProc);
         }
 
         if (writeOK)

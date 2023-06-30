@@ -47,8 +47,6 @@ namespace Foam
 {
 
 // Forward Declarations
-class Istream;
-class Ostream;
 class labelRanges;
 Istream& operator>>(Istream& is, labelRanges& ranges);
 Ostream& operator<<(Ostream& is, const labelRanges& ranges);

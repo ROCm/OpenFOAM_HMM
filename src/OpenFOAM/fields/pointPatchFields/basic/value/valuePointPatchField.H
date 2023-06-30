@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2020 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef valuePointPatchField_H
-#define valuePointPatchField_H
+#ifndef Foam_valuePointPatchField_H
+#define Foam_valuePointPatchField_H
 
 #include "pointPatchField.H"
 
@@ -55,6 +55,29 @@ class valuePointPatchField
     public pointPatchField<Type>,
     public Field<Type>
 {
+protected:
+
+    // Protected Member Functions
+
+        //- Read the "value" entry into \c *this.
+        //  The reading can be optional (default), mandatory etc.
+        //  \returns True on success
+        bool readValueEntry
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
+
+        //- Write \c *this field as a "value" entry
+        void writeValueEntry(Ostream& os) const
+        {
+            Field<Type>::writeEntry("value", os);
+        }
+
+        //- Assign the patch field from the internal field
+        void extrapolateInternal();
+
+
 public:
 
     //- Declare type-name, virtual type (with debug switch)
@@ -76,16 +99,41 @@ public:
             const DimensionedField<Type, pointMesh>&
         );
 
+        //- Construct from patch, internal field and value
+        valuePointPatchField
+        (
+            const pointPatch&,
+            const DimensionedField<Type, pointMesh>&,
+            const Type& value
+        );
+
         //- Construct from patch, internal field and dictionary
         valuePointPatchField
         (
             const pointPatch&,
             const DimensionedField<Type, pointMesh>&,
-            const dictionary&,
-            const bool valueRequired=true
+            const dictionary& dict,
+            //! The "value" entry (default: mandatory)
+            IOobjectOption::readOption requireValue = IOobjectOption::MUST_READ
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct, forwarding to readOption variant
+        valuePointPatchField
+        (
+            const pointPatch& p,
+            const DimensionedField<Type, pointMesh>& iF,
+            const dictionary& dict,
+            const bool valueReqd
+        )
+        :
+            valuePointPatchField
+            (
+                p, iF, dict,
+                (valueReqd? IOobjectOption::MUST_READ : IOobjectOption::NO_READ)
+            )
+        {}
+
+        //- Construct by mapping given patch field onto a new patch
         valuePointPatchField
         (
             const valuePointPatchField<Type>&,

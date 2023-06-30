@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,7 +80,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-//- Check if dynamic_cast to \c Type is possible
+//- Check if dynamic_cast to \c Type is possible.
+//  The template types should \em not include any \c const qualifier.
 //  \returns const pointer to cast object, nullptr if cast is not possible
 template<class Type, class U>
 inline const Type* isA(const U& obj)
@@ -99,6 +100,7 @@ inline bool isType(const U& obj)
 
 
 //- A dynamic_cast (for references) that generates FatalError on failed casts
+//  Respects the constness of the template types.
 template<class Type, class U>
 inline Type& dynamicCast(U& obj)
 {
@@ -118,6 +120,7 @@ inline Type& dynamicCast(U& obj)
 
 
 //- A dynamic_cast (for references) that generates FatalIOError on failed casts
+//  Respects the constness of the template types.
 template<class Type, class U>
 inline Type& dynamicCast(U& obj, const dictionary& dict)
 {
@@ -136,8 +139,10 @@ inline Type& dynamicCast(U& obj, const dictionary& dict)
 }
 
 
-//- A dynamic_cast (for references) that generates FatalError on failed casts,
-//- uses the virtual type() method for error messages.
+//- A dynamic_cast (for references).
+//- Generates a FatalError on failed casts and uses the virtual type()
+//- method for error messages.
+//  Respects the constness of the template types.
 template<class Type, class U>
 inline Type& refCast(U& obj)
 {
@@ -158,6 +163,7 @@ inline Type& refCast(U& obj)
 
 //- A dynamic_cast (for references) that generates FatalIOError on failed casts,
 //- uses the virtual type() method for error messages.
+//  Respects the constness of the template types.
 template<class Type, class U>
 inline Type& refCast(U& obj, const dictionary& dict)
 {
@@ -179,6 +185,7 @@ inline Type& refCast(U& obj, const dictionary& dict)
 //- A dynamic_cast (for references) that generates FatalError on failed casts,
 //- uses the virtual type() method for error messages.
 //- The index can be used to convey additional context.
+//  Respects the constness of the template types.
 template<class Type, class U>
 inline Type& refCast(U& obj, const label index)
 {

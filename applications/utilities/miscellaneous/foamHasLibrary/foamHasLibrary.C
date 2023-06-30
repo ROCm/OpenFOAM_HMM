@@ -78,10 +78,7 @@ int main(int argc, char *argv[])
         "detail",
         "Additional detail"
     );
-    argList::addVerboseOption
-    (
-        "Additional verbosity"
-    );
+    argList::addVerboseOption();
 
     argList::addArgument("lib...");
     argList::noMandatoryArgs();  // Arguments are optional

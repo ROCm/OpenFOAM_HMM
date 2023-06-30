@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,12 +39,10 @@ void Foam::UIPBstream::bufferIPCrecv()
 
 Foam::label Foam::UIPBstream::read
 (
-    const commsTypes commsType,
     const int rootProcNo,
     char* buf,
     const std::streamsize bufSize,
-    const int tag,
-    const label communicator
+    const label comm
 )
 {
     NotImplemented;

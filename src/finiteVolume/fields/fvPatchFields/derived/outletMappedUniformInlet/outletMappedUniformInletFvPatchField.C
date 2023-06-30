@@ -168,16 +168,10 @@ outletMappedUniformInletFvPatchField
     }
 
 
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
-        fvPatchField<Type>::operator=(this->patchInternalField());
+        // Fallback: set to the internal field
+        this->extrapolateInternal();
     }
 }
 
@@ -210,7 +204,8 @@ outletMappedUniformInletFvPatchField
     }
     else
     {
-        fvPatchField<Type>::operator=(this->patchInternalField());
+        // Fallback: set to the internal field
+        this->extrapolateInternal();
     }
 }
 
@@ -462,7 +457,7 @@ void Foam::outletMappedUniformInletFvPatchField<Type>::write(Ostream& os) const
     os.endBlock();
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
 
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

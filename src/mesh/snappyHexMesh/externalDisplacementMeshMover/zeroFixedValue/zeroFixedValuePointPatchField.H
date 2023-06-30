@@ -42,8 +42,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef zeroFixedValuePointPatchField_H
-#define zeroFixedValuePointPatchField_H
+#ifndef Foam_zeroFixedValuePointPatchField_H
+#define Foam_zeroFixedValuePointPatchField_H
 
 #include "fixedValuePointPatchField.H"
 
@@ -53,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class zeroFixedValuePointPatchField Declaration
+                Class zeroFixedValuePointPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -61,7 +61,6 @@ class zeroFixedValuePointPatchField
 :
     public fixedValuePointPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -85,7 +84,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         zeroFixedValuePointPatchField
         (
             const zeroFixedValuePointPatchField<Type>&,
@@ -135,7 +134,6 @@ public:
                 )
             );
         }
-
 };
 
 

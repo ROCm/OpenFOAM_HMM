@@ -20,7 +20,7 @@ if (LTS)
             ),
             mesh,
             dimensionedScalar("one", dimless/dimTime, 1),
-            extrapolatedCalculatedFvPatchScalarField::typeName
+            fvPatchFieldBase::extrapolatedCalculatedType()
         )
     );
 }

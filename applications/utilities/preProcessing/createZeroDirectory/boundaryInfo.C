@@ -59,7 +59,7 @@ Foam::IOPtrList<Foam::entry> Foam::boundaryInfo::readBoundaryDict
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -75,8 +75,7 @@ Foam::IOPtrList<Foam::entry> Foam::boundaryInfo::readBoundaryDict
         if (!procPatch)
         {
             label nFaces = dict.get<label>("nFaces");
-            reduce(nFaces, sumOp<label>());
-            if (nFaces == 0)
+            if (returnReduceAnd(nFaces == 0))
             {
                 addPatch = false;
             }

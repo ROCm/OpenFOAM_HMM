@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,42 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+Foam::List<T> Foam::UPstream::allGatherValues
+(
+    const T& localValue,
+    const label comm
+)
+{
+    if (!is_contiguous<T>::value)
+    {
+        FatalErrorInFunction
+            << "Cannot all-gather values for non-contiguous types" << endl
+            << Foam::abort(FatalError);
+    }
+
+
+    List<T> allValues;
+
+    if (UPstream::is_parallel(comm))
+    {
+        allValues.resize(UPstream::nProcs(comm));
+        allValues[UPstream::myProcNo(comm)] = localValue;
+
+        UPstream::mpiAllGather(allValues.data_bytes(), sizeof(T), comm);
+    }
+    else
+    {
+        // non-parallel: return own value
+        // TBD: only when UPstream::is_rank(comm) as well?
+        allValues.resize(1);
+        allValues[0] = localValue;
+    }
+
+    return allValues;
+}
+
+
+template<class T>
 Foam::List<T> Foam::UPstream::listGatherValues
 (
     const T& localValue,
@@ -44,27 +80,25 @@ Foam::List<T> Foam::UPstream::listGatherValues
 
     List<T> allValues;
 
-    const label nproc = (UPstream::parRun() ? UPstream::nProcs(comm) : 1);
-
-    if (nproc > 1)
+    if (UPstream::is_parallel(comm))
     {
         if (UPstream::master(comm))
         {
-            allValues.resize(nproc);
+            allValues.resize(UPstream::nProcs(comm));
         }
 
         UPstream::mpiGather
         (
             reinterpret_cast<const char*>(&localValue),
-            sizeof(T),
             allValues.data_bytes(),
-            sizeof(T),
+            sizeof(T),  // The send/recv size per rank
             comm
         );
     }
     else
     {
         // non-parallel: return own value
+        // TBD: only when UPstream::is_rank(comm) as well?
         allValues.resize(1);
         allValues[0] = localValue;
     }
@@ -88,12 +122,12 @@ T Foam::UPstream::listScatterValues
     }
 
 
-    const label nproc = (UPstream::parRun() ? UPstream::nProcs(comm) : 1);
-
     T localValue;
 
-    if (nproc > 1)
+    if (UPstream::is_parallel(comm))
     {
+        const label nproc = UPstream::nProcs(comm);
+
         if (UPstream::master(comm) && allValues.size() < nproc)
         {
             FatalErrorInFunction
@@ -105,9 +139,8 @@ T Foam::UPstream::listScatterValues
         UPstream::mpiScatter
         (
             allValues.cdata_bytes(),
-            sizeof(T),
             reinterpret_cast<char*>(&localValue),
-            sizeof(T),
+            sizeof(T),  // The send/recv size per rank
             comm
         );
     }
@@ -115,13 +148,13 @@ T Foam::UPstream::listScatterValues
     {
         // non-parallel: return local value
 
-        if (allValues.empty())   // Extra safety
+        if (UPstream::is_rank(comm) && !allValues.empty())
         {
-            localValue = Zero;
+            localValue = allValues[0];
         }
         else
         {
-            localValue = allValues[0];
+            localValue = Zero;
         }
      }
 

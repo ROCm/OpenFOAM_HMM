@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,8 +70,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mixedFvPatchField_H
-#define mixedFvPatchField_H
+#ifndef Foam_mixedFvPatchField_H
+#define Foam_mixedFvPatchField_H
 
 #include "fvPatchField.H"
 
@@ -89,7 +89,7 @@ class mixedFvPatchField
 :
     public fvPatchField<Type>
 {
-    // Private data
+    // Private Data
 
         //- Value field
         Field<Type> refValue_;
@@ -102,6 +102,20 @@ class mixedFvPatchField
 
         //- Source field
         Field<Type> source_;
+
+protected:
+
+        //- Read the 'refValue', 'refGradient' and 'valueFraction' entries
+        //- into their respective places.
+        //  The reading can be optional (default), mandatory etc.
+        //  If 'refValue' is to be read, refGradient and valueFraction must
+        //  also exist.
+        //  \returns True on success
+        bool readMixedEntries
+        (
+            const dictionary& dict,
+            IOobjectOption::readOption readOpt = IOobjectOption::LAZY_READ
+        );
 
 
 public:
@@ -119,12 +133,24 @@ public:
             const DimensionedField<Type, volMesh>&
         );
 
+        //- Construct from patch and internal field,
+        //- initialise as zero-gradient
+        mixedFvPatchField
+        (
+            const fvPatch&,
+            const DimensionedField<Type, volMesh>&,
+            const Foam::zero
+        );
+
         //- Construct from patch, internal field and dictionary
         mixedFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
-            const dictionary&
+            const dictionary&,
+            //! The "refValue", "refGradient", "valueFraction" entries
+            //! (default: mandatory)
+            IOobjectOption::readOption requireMixed = IOobjectOption::MUST_READ
         );
 
         //- Construct by mapping the given mixedFvPatchField onto a new patch
@@ -171,23 +197,13 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+        //- True: this patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
-
-            //- Return false: this patch field is not altered by assignment
-            virtual bool assignable() const
-            {
-                return false;
-            }
+        //- False: this patch field is not altered by assignment.
+        virtual bool assignable() const { return false; }
 
 
         // Return defining fields

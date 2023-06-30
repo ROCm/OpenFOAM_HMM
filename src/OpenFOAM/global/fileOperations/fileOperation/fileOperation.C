@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,17 +27,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "fileOperation.H"
-#include "uncollatedFileOperation.H"
-#include "regIOobject.H"
-#include "argList.H"
-#include "HashSet.H"
 #include "objectRegistry.H"
-#include "decomposedBlockData.H"
-#include "polyMesh.H"
+#include "labelIOList.H"
 #include "registerSwitch.H"
+#include "stringOps.H"
 #include "Time.H"
-#include "ITstream.H"
-#include <cerrno>
+#include "OSspecific.H"  // for Foam::isDir etc
 #include <cinttypes>
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
@@ -46,6 +41,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(fileOperation, 0);
     defineRunTimeSelectionTable(fileOperation, word);
+    defineRunTimeSelectionTable(fileOperation, comm);
 
     word fileOperation::defaultFileHandler
     (
@@ -81,7 +77,8 @@ Foam::fileOperation::pathTypeNames_
 
 Foam::word Foam::fileOperation::processorsBaseDir = "processors";
 
-Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::fileHandlerPtr_;
+//- Caching (e.g. of time directories) - enabled by default
+int Foam::fileOperation::cacheLevel_(1);
 
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
@@ -219,21 +216,8 @@ void sortProcessorDirs(Foam::UList<Foam::fileOperation::dirIndex>& dirs)
 } // End anonymous namespace
 #endif
 
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-Foam::labelList Foam::fileOperation::ioRanks()
-{
-    labelList ranks;
-
-    ITstream is(Foam::getEnv("FOAM_IORANKS"));
-    if (!is.empty())
-    {
-        is >> ranks;
-    }
-
-    return ranks;
-}
-
 
 Foam::instantList
 Foam::fileOperation::sortTimes
@@ -318,7 +302,7 @@ bool Foam::fileOperation::uniformFile(const fileNameList& names)
 
 bool Foam::fileOperation::uniformFile(const label comm, const fileName& name)
 {
-    if (!Pstream::parRun())
+    if (!UPstream::parRun())
     {
         return true;
     }
@@ -441,6 +425,13 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
     // find the corresponding actual processor directory (e.g. 'processors4')
     // and index (2)
 
+    // Behaviour affected by
+    // - UPstream::parRun()
+    // - syncPar : usually true, only uncollated does false. Determines
+    //             if directory status gets synchronised
+    // - distributed() : different processors have different roots
+    // - fileModificationChecking : (uncollated only) do IO on master only
+
     fileName path, pDir, local;
     procRangeType group;
     label numProcs;
@@ -451,11 +442,14 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
     {
         const fileName procPath(path/pDir);
 
-        const auto iter = procsDirs_.cfind(procPath);
-
-        if (iter.found())
+        if (cacheLevel() > 0)
         {
-            return iter.val();
+            const auto iter = procsDirs_.cfind(procPath);
+
+            if (iter.good())
+            {
+                return iter.val();
+            }
         }
 
         DynamicList<dirIndex> procDirs;
@@ -469,7 +463,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
 
         const bool readDirMasterOnly
         (
-            Pstream::parRun() && !distributed()
+            UPstream::parRun() && !distributed()
          &&
             (
                 IOobject::fileModificationChecking == IOobject::timeStampMaster
@@ -485,7 +479,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
             // Parallel and non-distributed
             // Read on master only and send to subProcs
 
-            if (Pstream::master(comm_))
+            if (UPstream::master(UPstream::worldComm))
             {
                 dirEntries = Foam::readDir(path, fileName::Type::DIRECTORY);
 
@@ -494,7 +488,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                     << " names to sub-processes" << endl;
             }
 
-            Pstream::broadcast(dirEntries, comm_);
+            Pstream::broadcast(dirEntries, UPstream::worldComm);
         }
         else
         {
@@ -550,7 +544,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                         pathTypeIdx.second() = proci;
                     }
                 }
-                else if (group.found(proci))
+                else if (group.contains(proci))
                 {
                     // "processorsNN_start-end"
                     // - save the local proc offset
@@ -580,7 +574,7 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                 << " detected:" << procDirs << endl;
         }
 
-        if (Pstream::parRun() && (!distributed() || syncPar))
+        if (UPstream::parRun() && (!distributed() || syncPar))
         {
             reduce(procDirsStatus, bitOrOp<unsigned>());  // worldComm
 
@@ -611,7 +605,8 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                     if
                     (
                         pathTypeIdx.first() == pathType::PROCBASEOBJECT
-                     && proci < nProcs
+                        // Do not restrict to currently used processors
+                        // && proci < nProcs
                     )
                     {
                         pathTypeIdx.second() = proci;
@@ -650,12 +645,12 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
                 }
             }
         }
-        else if (!Pstream::parRun())
+        else if (!UPstream::parRun())
         {
             // Serial: use the number of decompositions (if found)
             if (nProcs)
             {
-                const_cast<fileOperation&>(*this).setNProcs(nProcs);
+                const_cast<fileOperation&>(*this).nProcs(nProcs);
             }
         }
 
@@ -664,10 +659,17 @@ Foam::fileOperation::lookupAndCacheProcessorsPath
 
         if (procDirsStatus & 2u)
         {
-            procsDirs_.insert(procPath, procDirs);
+            if (cacheLevel() > 0)
+            {
+                procsDirs_.insert(procPath, procDirs);
 
-            // Make sure to return a reference
-            return procsDirs_[procPath];
+                // Make sure to return a reference
+                return procsDirs_[procPath];
+            }
+            else
+            {
+                return refPtr<dirIndexList>::New(procDirs);
+            }
         }
     }
 
@@ -697,8 +699,11 @@ bool Foam::fileOperation::exists(IOobject& io) const
     else
     {
         ok =
+        (
             isFile(objPath)
-         && io.typeHeaderOk<IOList<label>>(false);// object with local scope
+            // object with local scope
+         && io.typeHeaderOk<labelIOList>(false)
+        );
     }
 
     if (!ok)
@@ -716,8 +721,11 @@ bool Foam::fileOperation::exists(IOobject& io) const
             else
             {
                 ok =
+                (
                     isFile(originalPath)
-                 && io.typeHeaderOk<IOList<label>>(false);
+                    // object with local scope
+                 && io.typeHeaderOk<labelIOList>(false)
+                );
             }
         }
     }
@@ -730,62 +738,32 @@ bool Foam::fileOperation::exists(IOobject& io) const
 
 Foam::fileOperation::fileOperation
 (
+    const Tuple2<label, labelList>& commAndIORanks,
+    const bool distributedRoots
+)
+:
+    comm_(commAndIORanks.first()),
+    nProcs_(UPstream::nProcs(UPstream::worldComm)),
+    distributed_(distributedRoots),
+    ioRanks_(commAndIORanks.second())
+{}
+
+
+Foam::fileOperation::fileOperation
+(
     const label comm,
+    const labelUList& ioRanks,
     const bool distributedRoots
 )
 :
     comm_(comm),
-    distributed_(distributedRoots)
+    nProcs_(UPstream::nProcs(UPstream::worldComm)),
+    distributed_(distributedRoots),
+    ioRanks_(ioRanks)
 {}
 
 
-Foam::autoPtr<Foam::fileOperation>
-Foam::fileOperation::New
-(
-    const word& handlerType,
-    bool verbose
-)
-{
-    if (handlerType.empty())
-    {
-        if (fileOperation::defaultFileHandler.empty())
-        {
-            FatalErrorInFunction
-                << "defaultFileHandler name is undefined" << nl
-                << abort(FatalError);
-        }
-
-        return fileOperation::New(fileOperation::defaultFileHandler, verbose);
-    }
-
-    DebugInFunction
-        << "Constructing fileHandler" << endl;
-
-    auto* ctorPtr = wordConstructorTable(handlerType);
-
-    if (!ctorPtr)
-    {
-        FatalErrorInLookup
-        (
-            "fileHandler",
-            handlerType,
-            *wordConstructorTablePtr_
-        ) << abort(FatalError);
-    }
-
-    return autoPtr<fileOperation>(ctorPtr(verbose));
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::fileOperation::distributed(bool on) const noexcept
-{
-    bool old(distributed_);
-    distributed_ = on;
-    return old;
-}
-
 
 Foam::fileName Foam::fileOperation::objectPath
 (
@@ -801,10 +779,10 @@ bool Foam::fileOperation::writeObject
 (
     const regIOobject& io,
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
-    if (valid)
+    if (writeOnProc)
     {
         const fileName pathName(io.objectPath());
 
@@ -982,7 +960,7 @@ void Foam::fileOperation::updateStates
     const bool syncPar
 ) const
 {
-    monitor().updateStates(masterOnly, Pstream::parRun());
+    monitor().updateStates(masterOnly, UPstream::parRun());
 }
 
 
@@ -1257,10 +1235,6 @@ Foam::fileNameList Foam::fileOperation::readObjects
 }
 
 
-void Foam::fileOperation::setNProcs(const label nProcs)
-{}
-
-
 Foam::label Foam::fileOperation::nProcs
 (
     const fileName& dir,
@@ -1268,7 +1242,7 @@ Foam::label Foam::fileOperation::nProcs
 ) const
 {
     label nProcs = 0;
-    if (Pstream::master(comm_))
+    if (UPstream::master(comm_))
     {
         fileNameList dirNames(Foam::readDir(dir, fileName::Type::DIRECTORY));
 
@@ -1318,6 +1292,23 @@ void Foam::fileOperation::flush() const
             << endl;
     }
     procsDirs_.clear();
+}
+
+
+void Foam::fileOperation::sync()
+{
+    if (debug)
+    {
+        Pout<< "fileOperation::sync : parallel synchronisation"
+            << endl;
+    }
+
+    Pstream::broadcasts
+    (
+        UPstream::worldComm,
+        nProcs_,
+        procsDirs_
+    );
 }
 
 
@@ -1542,75 +1533,30 @@ Foam::label Foam::fileOperation::detectProcessorPath(const fileName& fName)
 }
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * *  Friend Operators * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::NewUncollated()
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<fileOperation>& iproxy
+)
 {
-    return autoPtr<fileOperation>
-    (
-        new fileOperations::uncollatedFileOperation(false)
-    );
-}
+    const auto& fp = *iproxy;
 
+    os  << "fileHandler:" << fp.type()
+        << " nProcs:" << fp.nProcs()
+        << " comm:" << fp.comm()
+        << " distributed:" << fp.distributed()
+        << " ioranks: " << flatOutput(fp.ioRanks())
+        << " ranks: ";
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-const Foam::fileOperation& Foam::fileHandler()
-{
-    if (!fileOperation::fileHandlerPtr_)
+    if (fp.comm() >= 0)
     {
-        word handlerType(Foam::getEnv("FOAM_FILEHANDLER"));
-
-        if (handlerType.empty())
-        {
-            handlerType = fileOperation::defaultFileHandler;
-        }
-
-        fileOperation::fileHandlerPtr_ = fileOperation::New(handlerType, true);
+        os << flatOutput(UPstream::procID(fp.comm()));
     }
+    os  << nl;
 
-    return *fileOperation::fileHandlerPtr_;
+    return os;
 }
-
-
-Foam::autoPtr<Foam::fileOperation>
-Foam::fileHandler(std::nullptr_t)
-{
-    return autoPtr<fileOperation>(fileOperation::fileHandlerPtr_.release());
-}
-
-
-Foam::autoPtr<Foam::fileOperation>
-Foam::fileHandler(autoPtr<fileOperation>&& newHandler)
-{
-    // - do nothing if newHandler is empty. Does not delete current
-    // - do nothing if newHandler is identical to current handler
-
-    // Change ownership as atomic operations
-
-    // If newHandler and current handler are actually identical, we
-    // have a bit problem somewhere else since this means that the pointer
-    // is managed is done in two places!
-    // Should flag as a FatalError (in the future), but there may still be
-    // some place where we would like to fake shared pointers?
-
-    // TBD: add a flush() operation on the old handler first,
-    // instead of waiting for it to be run on destruction?
-
-    autoPtr<fileOperation> old;
-
-    if
-    (
-        newHandler.get() != nullptr
-     && newHandler.get() != fileOperation::fileHandlerPtr_.get()
-    )
-    {
-        old.reset(newHandler.release());
-        old.swap(fileOperation::fileHandlerPtr_);
-    }
-
-    return old;
-}
-
 
 // ************************************************************************* //

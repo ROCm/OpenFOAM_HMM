@@ -254,8 +254,9 @@ public:
 
     // Output
 
-        //- Return info proxy
-        InfoProxy<ensightCells> info() const { return *this; }
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<ensightCells> info() const noexcept { return *this; }
 
 
         //- Globally unique mesh points. Required when writing point fields.
@@ -281,6 +282,7 @@ public:
 };
 
 
+//- Print information via proxy
 template<>
 Ostream& operator<<(Ostream&, const InfoProxy<ensightCells>&);
 

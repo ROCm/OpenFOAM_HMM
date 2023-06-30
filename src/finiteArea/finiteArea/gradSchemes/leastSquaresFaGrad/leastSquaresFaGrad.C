@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,18 +46,20 @@ namespace fa
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 template<class Type>
 tmp
 <
     GeometricField
     <
-        typename outerProduct<vector, Type>::type, faPatchField, areaMesh
+        typename outerProduct<vector, Type>::type,
+        faPatchField,
+        areaMesh
     >
 >
-leastSquaresFaGrad<Type>::grad
+leastSquaresFaGrad<Type>::calcGrad
 (
-    const GeometricField<Type, faPatchField, areaMesh>& vsf
+    const GeometricField<Type, faPatchField, areaMesh>& vsf,
+    const word& name
 ) const
 {
     typedef typename outerProduct<vector, Type>::type GradType;
@@ -69,7 +72,7 @@ leastSquaresFaGrad<Type>::grad
         (
             IOobject
             (
-                "grad(" + vsf.name() + ')',
+                name,
                 vsf.instance(),
                 vsf.db(),
                 IOobject::NO_READ,
@@ -77,7 +80,7 @@ leastSquaresFaGrad<Type>::grad
             ),
             mesh,
             dimensioned<GradType>(vsf.dimensions()/dimLength, Zero),
-            zeroGradientFaPatchField<GradType>::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
     GeometricField<GradType, faPatchField, areaMesh>& lsGrad = tlsGrad.ref();

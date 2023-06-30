@@ -260,16 +260,24 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token::compound& ct)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ostream& Foam::operator<<(ostream& os, const InfoProxy<token>& ip)
+ostream& Foam::operator<<
+(
+    ostream& os,
+    const InfoProxy<token>& iproxy
+)
 {
-    return printTokenInfo(os, ip.t_);
+    return printTokenInfo(os, *iproxy);
 }
 
 
 template<>
-Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<token>& ip)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const InfoProxy<token>& iproxy
+)
 {
-    return printTokenInfo(os, ip.t_);
+    return printTokenInfo(os, *iproxy);
 }
 
 

@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ijkMesh_H
-#define ijkMesh_H
+#ifndef Foam_ijkMesh_H
+#define Foam_ijkMesh_H
 
 #include "ijkAddressing.H"
 

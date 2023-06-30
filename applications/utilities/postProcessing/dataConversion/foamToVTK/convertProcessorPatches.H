@@ -5,23 +5,10 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
     Code chunk for converting volume fields on processor boundaries,
@@ -84,9 +71,8 @@ Description
 
     label nPatchWriters = 0;
 
-    List<wordList> procPatchNames(Pstream::nProcs());
-
-    procPatchNames[Pstream::myProcNo()].resize(patchIds.size());
+    List<wordList> procPatchNames(UPstream::nProcs());
+    procPatchNames[UPstream::myProcNo()].resize(patchIds.size());
 
     for (const label patchId : patchIds)
     {
@@ -100,13 +86,13 @@ Description
             nearCellValue,
             (
                 vtmOutputBase
-              / subDirNaming(Pstream::myProcNo())
+              / subDirNaming(UPstream::myProcNo())
               / pp.name()
             ),
             false  // This MUST be non-parallel (serial only)
         );
 
-        procPatchNames[Pstream::myProcNo()][nPatchWriters] = pp.name();
+        procPatchNames[UPstream::myProcNo()][nPatchWriters] = pp.name();
 
         writer->writeTimeValue(timeValue);
         writer->writeGeometry();
@@ -124,10 +110,10 @@ Description
         for (vtk::patchWriter& writer : patchWriters)
         {
             // Optionally with patchID, procID, neighID fields
-            // - use Pstream::parRun() not writer.parallel() !!
+            // - use UPstream::parRun() not writer.parallel() !!
             writer.beginCellData
             (
-                (withMeshIds ? 1 + (Pstream::parRun() ? 2 : 0) : 0)
+                (withMeshIds ? 1 + (UPstream::parRun() ? 2 : 0) : 0)
               + nVolFields
             );
 
@@ -145,7 +131,8 @@ Description
             patchWriters,
             meshProxy,
             objects,
-            true  // syncPar
+            true,   // syncPar
+            nullptr // no field cache (object registry)
         );
 
         // End CellData is implicit
@@ -170,10 +157,10 @@ Description
 
     const label nProcPatches = returnReduce(nPatchWriters, sumOp<label>());
 
-    if (Pstream::master() && nProcPatches)
+    if (UPstream::master() && nProcPatches)
     {
         Info<< "Wrote " << nProcPatches << " processor boundaries from "
-            << Pstream::nProcs() << " processes" << nl;
+            << UPstream::nProcs() << " processes" << nl;
 
 
         // Collect individual boundaries into a vtm file

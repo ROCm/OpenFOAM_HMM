@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -94,21 +94,22 @@ class polyBoundaryMesh
         //- Read if IOobject flags set. Return true if read.
         bool readContents(const bool allowReadIfPresent);
 
-        //- No copy construct
-        polyBoundaryMesh(const polyBoundaryMesh&) = delete;
-
-        //- No copy assignment
-        void operator=(const polyBoundaryMesh&) = delete;
-
-
 public:
 
     //- Declare friendship with polyMesh
     friend class polyMesh;
 
-
     //- Runtime type information
     TypeName("polyBoundaryMesh");
+
+
+    // Generated Methods
+
+        //- No copy construct
+        polyBoundaryMesh(const polyBoundaryMesh&) = delete;
+
+        //- No copy assignment
+        void operator=(const polyBoundaryMesh&) = delete;
 
 
     // Constructors
@@ -142,14 +143,16 @@ public:
     ~polyBoundaryMesh() = default;
 
 
+    // Member Functions
+
+        //- Clear the patch list and all demand-driven data
+        void clear();
+
         //- Clear geometry at this level and at patches
         void clearGeom();
 
         //- Clear addressing at this level and at patches
         void clearAddressing();
-
-
-    // Member Functions
 
         //- Return the mesh reference
         const polyMesh& mesh() const noexcept
@@ -171,6 +174,9 @@ public:
 
         //- The number of patches before the first processor patch.
         label nNonProcessor() const;
+
+        //- The number of processorPolyPatch patches
+        label nProcessorPatches() const;
 
         //- Return a list of patch names
         wordList names() const;
@@ -247,19 +253,30 @@ public:
 
         //- Lookup mesh face index and return (patchi, patchFacei) tuple
         //- or (-1, meshFacei) for internal faces
-        labelPair whichPatchFace(const label faceIndex) const;
+        labelPair whichPatchFace(const label meshFacei) const;
 
         //- Lookup mesh face indices and return (patchi, patchFacei) tuples
-        labelPairList whichPatchFace(const labelUList& faceIndices) const;
+        labelPairList whichPatchFace(const labelUList& meshFaceIndices) const;
 
-        //- Return patch index for a given mesh face index
-        label whichPatch(const label faceIndex) const
+        //- Return patch index for a given mesh face index.
+        //- Uses binary search.
+        label whichPatch(const label meshFacei) const
         {
-            return whichPatchFace(faceIndex).first();
+            return whichPatchFace(meshFacei).first();
         }
 
         //- Per boundary face label the patch index
         const labelList& patchID() const;
+
+        //- Return patch index for a given mesh face index.
+        //- Uses direct lookup into patchID() list.
+        //- Returns -1 for internal or out-of-range faces
+        label patchID(const label meshFacei) const;
+
+        //- Lookup mesh face indices and return patch indices.
+        //- Uses direct lookup into patchID() list.
+        //- Returns values of -1 for internal or out-of-range faces
+        labelList patchID(const labelUList& meshFaceIndices) const;
 
         //- The patch indices per patch group
         const HashTable<labelList>& groupPatchIDs() const;
@@ -315,7 +332,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
 

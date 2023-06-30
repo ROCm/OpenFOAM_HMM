@@ -37,10 +37,10 @@ Note
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef argListRunControl_H
-#define argListRunControl_H
+#ifndef Foam_argListRunControl_H
+#define Foam_argListRunControl_H
 
-#include "Pstream.H"
+#include "UPstream.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,21 +54,38 @@ namespace Foam
 
 class ParRunControl
 {
-    int dryRun_;
-    int verbose_;
-    bool parallel_;
-    bool distributed_;
+    // Private Data
+
+        //- The dry-run level
+        int dryRun_;
+
+        //- The verbosity level
+        int verbose_;
+
+        //- True if this is (or will be) a parallel run
+        bool parallel_;
+
+        //- Uses distributed roots
+        bool distributed_;
+
+        //- MPI threads are desired
+        bool needsThread_;
+
 
 public:
 
-    //- Default construct
-    ParRunControl()
-    :
-        dryRun_(0),
-        verbose_(0),
-        parallel_(false),
-        distributed_(false)
-    {}
+    // Constructors
+
+        //- Default construct
+        ParRunControl() noexcept
+        :
+            dryRun_(0),
+            verbose_(0),
+            parallel_(false),
+            distributed_(false),
+            needsThread_(false)
+        {}
+
 
     //- Destructor. Shutdown (finalize) MPI as required
     ~ParRunControl()
@@ -81,27 +98,56 @@ public:
     }
 
 
-    // Parallel Control
+    // Member Functions - General Control
 
-        //- Initialize Pstream for a parallel run
-        void runPar(int& argc, char**& argv, bool needsThread)
+        //- Return the dry-run level (default: 0)
+        int dryRun() const noexcept { return dryRun_; }
+
+        //- Increase the dry-run level
+        void incrDryRun(int level = 1) noexcept { dryRun_ += level; }
+
+        //- Change dry-run level, returns old value
+        int dryRun(const int level) noexcept
         {
-            if (!UPstream::init(argc, argv, needsThread))
-            {
-                Info<< "Failed to start parallel run" << endl;
-                UPstream::exit(1);
-            }
-            parallel_ = true;
+            int old(dryRun_);
+            dryRun_ = level;
+            return old;
+        }
+
+        //- Return the verbosity level (default: 0)
+        int verbose() const noexcept { return verbose_; }
+
+        //- Increase the verbosity level
+        void incrVerbose(int level = 1) noexcept { verbose_ += level; }
+
+        //- Change verbosity level, returns old value
+        int verbose(const int level) noexcept
+        {
+            int old(verbose_);
+            verbose_ = level;
+            return old;
         }
 
 
-        //- True if this is a parallel run
+    // Member Functions - Parallel Control
+
+        //- True if this is (or will be) a parallel run
         bool parRun() const noexcept
         {
             return parallel_;
         }
 
-        //- True if this is a parallel run and uses distributed roots.
+        //- Set as parallel run on/off, return the previous value.
+        //  Use with \b extreme caution if runPar() has already been
+        //  called.
+        bool parRun(const bool on) noexcept
+        {
+            bool old(parallel_);
+            parallel_ = on;
+            return old;
+        }
+
+        //- True if a parallel run and uses distributed roots.
         bool distributed() const noexcept
         {
             return (parallel_ && distributed_);
@@ -113,35 +159,27 @@ public:
             distributed_ = (parallel_ && on);
         }
 
-
-    // General Control
-
-        //- Non-zero if set as 'dry-run'
-        int dryRun() const noexcept
+        //- True if MPI threads are desired (default: false)
+        bool threads() const noexcept
         {
-            return dryRun_;
+            return needsThread_;
         }
 
-        //- Change 'dry-run', return old value
-        int dryRun(const int level) noexcept
+        //- Set preference for use of MPI threads
+        void threads(bool on) noexcept
         {
-            int old(dryRun_);
-            dryRun_ = level;
-            return old;
+            needsThread_ = on;
         }
 
-        //- Non-zero if set as 'verbose'
-        int verbose() const noexcept
+        //- Initialize UPstream for a parallel run
+        void runPar(int& argc, char**& argv)
         {
-            return verbose_;
-        }
-
-        //- Change 'verbose', return old value
-        int verbose(const int level) noexcept
-        {
-            int old(verbose_);
-            verbose_ = level;
-            return old;
+            if (!UPstream::init(argc, argv, needsThread_))
+            {
+                Info<< "Failed to start parallel run" << endl;
+                UPstream::exit(1);
+            }
+            parallel_ = true;
         }
 };
 

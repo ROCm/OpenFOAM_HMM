@@ -41,7 +41,7 @@ Foam::autoPtr<Foam::binModel> Foam::binModel::New
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
-    if (!cstrIter.found())
+    if (!cstrIter.good())
     {
         FatalIOErrorInLookup
         (

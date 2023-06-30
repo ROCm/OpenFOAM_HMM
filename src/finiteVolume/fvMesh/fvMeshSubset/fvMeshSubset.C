@@ -172,29 +172,24 @@ void Foam::fvMeshSubset::doCoupledPatches
 
     label nUncoupled = 0;
 
-    if (syncPar && Pstream::parRun())
+    if (syncPar && UPstream::parRun())
     {
-        PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
+        PstreamBuffers pBufs(UPstream::commsTypes::nonBlocking);
 
         // Send face usage across processor patches
-        for (const polyPatch& pp : oldPatches)
+        if (!nCellsUsingFace.empty())
         {
-            const auto* procPatch = isA<processorPolyPatch>(pp);
-
-            if (procPatch)
+            for (const polyPatch& pp : oldPatches)
             {
-                const label nbrProci = procPatch->neighbProcNo();
+                const auto* procPatch = isA<processorPolyPatch>(pp);
 
-                UOPstream toNeighbour(nbrProci, pBufs);
-
-                if (!nCellsUsingFace.empty())
+                if (procPatch)
                 {
-                    toNeighbour <<
+                    const label nbrProci = procPatch->neighbProcNo();
+
+                    UOPstream toNbr(nbrProci, pBufs);
+                    toNbr <<
                         SubList<label>(nCellsUsingFace, pp.size(), pp.start());
-                }
-                else
-                {
-                    toNeighbour << labelList();
                 }
             }
         }
@@ -210,16 +205,20 @@ void Foam::fvMeshSubset::doCoupledPatches
             {
                 const label nbrProci = procPatch->neighbProcNo();
 
-                UIPstream fromNeighbour(nbrProci, pBufs);
-
-                const labelList nbrList(fromNeighbour);
-
-                // Combine with this side.
-
-                if (!nCellsUsingFace.empty())
+                if (!pBufs.recvDataCount(nbrProci))
                 {
-                    const labelList& nbrCellsUsingFace(nbrList);
+                    // Nothing to receive
+                    continue;
+                }
 
+                labelList nbrCellsUsingFace;
+                {
+                    UIPstream fromNbr(nbrProci, pBufs);
+                    fromNbr >> nbrCellsUsingFace;
+                }
+
+                if (!nCellsUsingFace.empty() && !nbrCellsUsingFace.empty())
+                {
                     // Combine with this side.
 
                     forAll(pp, i)

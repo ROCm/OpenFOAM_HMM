@@ -53,7 +53,7 @@ Foam::sampledSets::getOrLoadField(const word& fieldName) const
                     mesh_,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 mesh_
             )

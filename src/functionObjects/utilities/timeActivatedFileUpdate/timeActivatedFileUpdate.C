@@ -75,7 +75,14 @@ void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
             << "to  : " << time_.relativePath(fileToUpdate_, true) << nl
             << endl;
 
-        if (Pstream::master() || time_.distributed())
+        if
+        (
+            UPstream::master()
+         || (
+                fileHandler().distributed()
+             && UPstream::master(fileHandler().comm())
+            )
+        )
         {
             // Copy on master only for non-distributed
             fileName tmpFile(fileToUpdate_ + Foam::name(pid()));
@@ -141,7 +148,9 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
         Info<< "    " << tuple.first() << tab
             << time_.relativePath(srcFile, true) << nl;
 
-        if (Pstream::master() || time_.distributed())
+        // No need for distributed test since dictionaries are read on the
+        // master only or otherwise they need to be copied everywhere
+        if (UPstream::master())  // || time_.distributed())
         {
             if (!Foam::isFile(srcFile))
             {

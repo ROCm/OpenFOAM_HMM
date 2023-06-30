@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,6 +104,18 @@ inline Foam::label Foam::vtk::fileWriter::nCellData() const noexcept
 inline Foam::label Foam::vtk::fileWriter::nPointData() const noexcept
 {
     return nPointData_;
+}
+
+
+inline bool Foam::vtk::fileWriter::isCellData() const noexcept
+{
+    return (outputState::CELL_DATA == state_);
+}
+
+
+inline bool Foam::vtk::fileWriter::isPointData() const noexcept
+{
+    return (outputState::POINT_DATA == state_);
 }
 
 

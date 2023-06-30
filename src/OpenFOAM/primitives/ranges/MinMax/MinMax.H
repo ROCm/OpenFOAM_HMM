@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,30 +67,16 @@ Description
     Info<< "values values in range " << mask << nl;
     \endverbatim
 
-    One particular advantage offered by MinMax is to clip or limit values
+    One advantage offered by MinMax is to clamp or limit values
     to a particular range. For example,
     \verbatim
     scalarMinMax range(lower, upper);
 
     scalar val;
-    val = range.clip(val)    .. return clip values
+    val = range.clamp(val)    .. return clamped values
 
     // vs.
-    val = min(max(value, lower, upper))
-    \endverbatim
-
-    Or when working on lists, the values can be limited in a single pass
-    of the data without intermediate memory allocation.
-    \verbatim
-    scalarField values = ...;
-
-    for (scalar& val : values)
-    {
-        range.inplaceClip(val);
-    }
-
-    // vs.
-    values = min(max(values, lower, upper))
+    val = min(max(value, lower), upper)
     \endverbatim
 
 \*---------------------------------------------------------------------------*/
@@ -99,6 +85,7 @@ Description
 #define Foam_MinMax_H
 
 #include "scalar.H"
+#include "zero.H"
 #include "Pair.H"
 #include "Tuple2.H"
 #include "VectorSpace.H"
@@ -111,7 +98,6 @@ namespace Foam
 
 // Forward Declarations
 template<class T> class MinMax;
-class zero;
 
 // Common min/max types
 typedef MinMax<label> labelMinMax;      //!< A label min/max range
@@ -154,6 +140,9 @@ public:
 
         //- Construct with a single zero value
         inline explicit MinMax(const Foam::zero);
+
+        //- Implicit construct from zero_one as 0-1 range (pTraits zero, one)
+        inline MinMax(const Foam::zero_one);
 
         //- Construct with a single initial value
         inline explicit MinMax(const T& val);
@@ -239,14 +228,9 @@ public:
         //- True if the value is within the range (inclusive check)
         inline bool contains(const T& val) const;
 
-        //- If out of range, return the respective min/max limits, otherwise
-        //- return the value itself.
-        //  If the range is invalid, always return the value.
-        inline const T& clip(const T& val) const;
-
-        //- Inplace clip value by the min/max limits
-        //  \return True if clipping was applied.
-        inline bool inplaceClip(T& val) const;
+        //- Return value clamped component-wise.
+        //  If the range is invalid, just returns the value.
+        inline T clamp(const T& val) const;
 
 
     // Manipulate
@@ -284,6 +268,15 @@ public:
 
         //- Divide range by scalar factor
         inline MinMax<T>& operator/=(const scalar& s);
+
+
+    // Housekeeping
+
+        //- Old method name. Same as clamp (2023-01)
+        T clip(const T& val) const { return this->clamp(val); }
+
+        //- Old method (2023-01)
+        void inplaceClip(T& val) const { val = this->clamp(val); }
 };
 
 

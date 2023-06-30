@@ -123,8 +123,7 @@ void Foam::labelToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding points mentioned in dictionary"
-                << " ..." << endl;
+            Info<< "    Adding points mentioned in dictionary ..." << endl;
         }
 
         addOrDelete(set, labels_, true);
@@ -133,8 +132,7 @@ void Foam::labelToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing points mentioned in dictionary"
-                << " ..." << endl;
+            Info<< "    Removing points mentioned in dictionary ..." << endl;
         }
 
         addOrDelete(set, labels_, false);

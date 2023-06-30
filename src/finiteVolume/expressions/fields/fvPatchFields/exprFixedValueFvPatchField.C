@@ -82,7 +82,7 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const dictionary& dict,
-    const bool valueRequired
+    IOobjectOption::readOption requireValue  // (ignored)
 )
 :
     parent_bctype(p, iF), // bypass dictionary constructor
@@ -107,6 +107,10 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
     ),
     driver_(this->patch(), dict_)
 {
+    DeprecatedInFunction(2212)
+        << "Use uniformFixedValue with an expression Function1 instead." << nl
+        << "    This boundary condition will be removed in the future" << endl;
+
     setDebug();
     DebugInFunction << nl;
 
@@ -121,19 +125,13 @@ Foam::exprFixedValueFvPatchField<Type>::exprFixedValueFvPatchField
 
     driver_.readDict(dict_);
 
-    // Similar to fvPatchField constructor, which we have bypassed
-    dict.readIfPresent("patchType", this->patchType(), keyType::LITERAL);
+    // Since we bypassed dictionary constructor
+    fvPatchFieldBase::readDict(dict);
 
-
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-    if (hasValue)
+    if (!this->readValueEntry(dict))
     {
-        Field<Type>::assign(*hasValue, p.size());
-    }
-    else
-    {
-        (*this) == this->patchInternalField();
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
 
         #ifdef FULLDEBUG
         WarningInFunction

@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -201,7 +201,8 @@ protected:
             const UList<Type>& field
         );
 
-        //- Write nValues of processor ids as CellData (no-op in serial)
+        //- Write nValues of processor ids as CellData or PointData
+        //- (no-op in serial)
         bool writeProcIDs(const label nValues);
 
 
@@ -305,10 +306,16 @@ public:
         //  \return True if the state changed
         virtual bool beginPointData(label nFields = 0) = 0;
 
-        //- Return the number of CellData written for the Piece thus far.
+        //- True if output state corresponds to CELL_DATA
+        inline bool isCellData() const noexcept;
+
+        //- True if output state corresponds to POINT_DATA
+        inline bool isPointData() const noexcept;
+
+        //- The number of CellData written for the Piece thus far.
         inline label nCellData() const noexcept;
 
-        //- Return the number of PointData written for the Piece thus far.
+        //- The number of PointData written for the Piece thus far.
         inline label nPointData() const noexcept;
 
 

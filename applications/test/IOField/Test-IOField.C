@@ -46,35 +46,39 @@ using namespace Foam;
 template<class Type>
 void doWrite(const IOobject& io, const label sz)
 {
+    const bool writeOnProc = (sz > 0);
+
     IOField<Type> fld(io, sz);
     forAll(fld, i)
     {
         fld[i] = i + 1000.25 + (0.25 * i);
     }
     Pout<< "writing:" << fld << endl;
-    fld.write(sz > 0);
+    fld.write(writeOnProc);
 }
 
 
 template<>
 void doWrite<bool>(const IOobject& io, const label sz)
 {
+    const bool writeOnProc = (sz > 0);
+
     IOField<bool> fld(io, sz);
     forAll(fld, i)
     {
         fld[i] = i % 2;
     }
     Pout<< "writing:" << fld << endl;
-    fld.write(sz > 0);
+    fld.write(writeOnProc);
 }
 
 
 template<class Type>
 void doRead(const IOobject& io, const label sz)
 {
-    bool valid = (sz > 0);
-    Pout<< "    valid:" << valid << endl;
-    IOField<Type> fld(io, valid);
+    const bool readOnProc = (sz > 0);
+    Pout<< "    readOnProc:" << readOnProc << endl;
+    IOField<Type> fld(io, readOnProc);
     Pout<< "    wanted:" << sz << " actually read:" << fld.size() << endl;
 
     if (fld.size() != sz)

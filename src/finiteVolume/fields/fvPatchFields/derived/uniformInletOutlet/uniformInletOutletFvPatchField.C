@@ -61,18 +61,12 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
         Function1<Type>::New("uniformInletValue", dict, &this->db())
     )
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
+
     this->refValue() =
         uniformInletValue_->value(this->db().time().timeOutputValue());
 
-    if (dict.found("value"))
-    {
-        fvPatchField<Type>::operator=
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
+    if (!this->readValueEntry(dict))
     {
         fvPatchField<Type>::operator=(this->refValue());
     }
@@ -151,12 +145,12 @@ void Foam::uniformInletOutletFvPatchField<Type>::updateCoeffs()
     this->refValue() = uniformInletValue_->value(t);
 
     const Field<scalar>& phip =
-        this->patch().template lookupPatchField<surfaceScalarField, scalar>
+        this->patch().template lookupPatchField<surfaceScalarField>
         (
             phiName_
         );
 
-    this->valueFraction() = 1.0 - pos0(phip);
+    this->valueFraction() = neg(phip);
 
     mixedFvPatchField<Type>::updateCoeffs();
 }
@@ -168,7 +162,7 @@ void Foam::uniformInletOutletFvPatchField<Type>::write(Ostream& os) const
     fvPatchField<Type>::write(os);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->uniformInletValue_->writeData(os);
-    this->writeEntry("value", os);
+    fvPatchField<Type>::writeValueEntry(os);
 }
 
 

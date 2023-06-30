@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::quaternionIOField
-
-Description
-    quaternionField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef quaternionIOField_H
-#define quaternionIOField_H
+#ifndef Foam_quaternionIOField_H
+#define Foam_quaternionIOField_H
 
 #include "quaternionField.H"
 #include "IOField.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of quaternion
     typedef IOField<quaternion> quaternionIOField;
 }
 

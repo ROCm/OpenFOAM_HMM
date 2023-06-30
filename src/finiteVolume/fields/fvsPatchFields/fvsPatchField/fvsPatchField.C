@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,39 @@ License
 #include "surfaceMesh.H"
 #include "fvPatchFieldMapper.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::fvsPatchField<Type>::readValueEntry
+(
+    const dictionary& dict,
+    IOobjectOption::readOption readOpt
+)
+{
+    if (!IOobjectOption::isAnyRead(readOpt)) return false;
+    const auto& p = fvsPatchFieldBase::patch();
+
+
+    const auto* eptr = dict.findEntry("value", keyType::LITERAL);
+
+    if (eptr)
+    {
+        Field<Type>::assign(*eptr, p.size());
+        return true;
+    }
+
+    if (IOobjectOption::isReadRequired(readOpt))
+    {
+        FatalIOErrorInFunction(dict)
+            << "Required entry 'value' : missing for patch " << p.name()
+            << " in dictionary " << dict.relativeName() << nl
+            << exit(FatalIOError);
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -52,13 +85,58 @@ Foam::fvsPatchField<Type>::fvsPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, surfaceMesh>& iF,
-    const Field<Type>& f
+    const Type& value
 )
 :
     fvsPatchFieldBase(p),
-    Field<Type>(f),
+    Field<Type>(p.size(), value),
     internalField_(iF)
 {}
+
+
+template<class Type>
+Foam::fvsPatchField<Type>::fvsPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, surfaceMesh>& iF,
+    const Field<Type>& pfld
+)
+:
+    fvsPatchFieldBase(p),
+    Field<Type>(pfld),
+    internalField_(iF)
+{}
+
+
+template<class Type>
+Foam::fvsPatchField<Type>::fvsPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, surfaceMesh>& iF,
+    Field<Type>&& pfld
+)
+:
+    fvsPatchFieldBase(p),
+    Field<Type>(std::move(pfld)),
+    internalField_(iF)
+{}
+
+
+template<class Type>
+Foam::fvsPatchField<Type>::fvsPatchField
+(
+    const fvPatch& p,
+    const DimensionedField<Type, surfaceMesh>& iF,
+    const dictionary& dict,
+    IOobjectOption::readOption requireValue
+)
+:
+    fvsPatchFieldBase(p, dict),
+    Field<Type>(p.size()),
+    internalField_(iF)
+{
+    readValueEntry(dict, requireValue);
+}
 
 
 template<class Type>
@@ -74,38 +152,6 @@ Foam::fvsPatchField<Type>::fvsPatchField
     Field<Type>(ptf, mapper),
     internalField_(iF)
 {}
-
-
-template<class Type>
-Foam::fvsPatchField<Type>::fvsPatchField
-(
-    const fvPatch& p,
-    const DimensionedField<Type, surfaceMesh>& iF,
-    const dictionary& dict,
-    const bool valueRequired
-)
-:
-    fvsPatchFieldBase(p, dict),
-    Field<Type>(p.size()),
-    internalField_(iF)
-{
-    if (valueRequired)
-    {
-        const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
-
-        if (hasValue)
-        {
-            Field<Type>::assign(*hasValue, p.size());
-        }
-        else
-        {
-            FatalIOErrorInFunction(dict)
-                << "Essential entry 'value' missing on patch "
-                << p.name() << endl
-                << exit(FatalIOError);
-        }
-    }
-}
 
 
 template<class Type>
@@ -133,9 +179,9 @@ Foam::fvsPatchField<Type>::fvsPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::fvsPatchField<Type>::check(const fvsPatchField<Type>& ptf) const
+void Foam::fvsPatchField<Type>::check(const fvsPatchField<Type>& rhs) const
 {
-    fvsPatchFieldBase::checkPatch(ptf);
+    fvsPatchFieldBase::checkPatch(rhs);
 }
 
 
@@ -161,7 +207,7 @@ template<class Type>
 void Foam::fvsPatchField<Type>::write(Ostream& os) const
 {
     os.writeEntry("type", type());
-    this->writeEntry("value", os);
+    Field<Type>::writeEntry("value", os);
 }
 
 
@@ -364,9 +410,5 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvsPatchField<Type>& ptf)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "fvsPatchFieldNew.C"
 
 // ************************************************************************* //

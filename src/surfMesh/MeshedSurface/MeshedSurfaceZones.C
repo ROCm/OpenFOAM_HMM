@@ -58,7 +58,7 @@ void Foam::MeshedSurface<Face>::checkZones(const bool verbose)
 
     if (!zones.empty())
     {
-        surfZone& zn = zones.last();
+        surfZone& zn = zones.back();
 
         if ((zn.start() + zn.size()) < maxCount)
         {

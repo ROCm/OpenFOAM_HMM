@@ -386,6 +386,9 @@ void Foam::cyclicAMIPolyPatch::resetAMI(const UList<point>& points) const
     pointField srcPoints(localPoints());
     pointField nbrPoints(nbr.localPoints());
 
+    Info<< "AMI: Creating AMI for source:" << name()
+        << " and target:" << nbr.name() << endl;
+
     if (debug)
     {
         const Time& t = boundaryMesh().mesh().time();
@@ -434,7 +437,7 @@ void Foam::cyclicAMIPolyPatch::resetAMI(const UList<point>& points) const
     }
 
     // Construct/apply AMI interpolation to determine addressing and weights
-    AMIPtr_->upToDate() = false;
+    AMIPtr_->upToDate(false);
     AMIPtr_->calculate(patch0, nbrPatch0, surfPtr());
 
     if (debug)
@@ -485,7 +488,7 @@ void Foam::cyclicAMIPolyPatch::initGeometry(PstreamBuffers& pBufs)
     DebugInFunction << endl;
 
     // Flag AMI as needing update
-    AMIPtr_->upToDate() = false;
+    AMIPtr_->upToDate(false);
 
     polyPatch::initGeometry(pBufs);
 
@@ -531,7 +534,7 @@ void Foam::cyclicAMIPolyPatch::initMovePoints
     }
     else
     {
-        AMIPtr_->upToDate() = false;
+        AMIPtr_->upToDate(false);
     }
 
     // Early calculation of transforms. See above.
@@ -591,7 +594,7 @@ void Foam::cyclicAMIPolyPatch::clearGeom()
 
     if (!updatingAMI_)
     {
-        AMIPtr_->upToDate() = false;
+        AMIPtr_->upToDate(false);
     }
 
     polyPatch::clearGeom();

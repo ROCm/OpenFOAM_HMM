@@ -203,19 +203,21 @@ Foam::mappedPatchBase::updateSampleMeshTime() const
     {
         const auto& mesh = sampleMesh();
 
-        updateSampleMeshTimePtr_ =
-            autoPtr<uniformDimensionedScalarField>::New
+        updateSampleMeshTimePtr_.reset
+        (
+            new uniformDimensionedScalarField
             (
                 IOobject
                 (
                     "updateSampleMeshTime",
                     mesh.pointsInstance(),
-                    mesh,
+                    mesh.thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 )
-            );
+            )
+        );
     }
 
     return updateSampleMeshTimePtr_();
@@ -229,19 +231,21 @@ Foam::mappedPatchBase::updateMeshTime() const
     {
         const auto& mesh = patch_.boundaryMesh().mesh();
 
-        updateMeshTimePtr_ =
-            autoPtr<uniformDimensionedScalarField>::New
+        updateMeshTimePtr_.reset
+        (
+            new uniformDimensionedScalarField
             (
                 IOobject
                 (
                     "updateMeshTime",
                     mesh.pointsInstance(),
-                    mesh,
+                    mesh.thisDb(),
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 )
-            );
+            )
+        );
     }
 
     return updateMeshTimePtr_();
@@ -275,7 +279,7 @@ inline const Foam::mapDistribute& Foam::mappedPatchBase::map() const
 
         if (AMIPtr_)
         {
-            AMIPtr_->upToDate() = false;
+            AMIPtr_->upToDate(false);
         }
     }
 
@@ -296,12 +300,12 @@ inline const Foam::AMIPatchToPatchInterpolation& Foam::mappedPatchBase::AMI
     if (!upToDate())
     {
         mapPtr_.reset(nullptr);
-        AMIPtr_->upToDate() = false;
+        AMIPtr_->upToDate(false);
     }
 
     if (forceUpdate)
     {
-        AMIPtr_->upToDate() = false;
+        AMIPtr_->upToDate(false);
     }
 
     calcAMI();

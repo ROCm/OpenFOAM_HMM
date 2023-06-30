@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -926,9 +926,10 @@ void Foam::fvMatrix<Type>::createOrUpdateLduPrimitiveAssembly()
     (
         lduAssemblyName_,
         psi_.mesh().time().timeName(),
-        psi_.mesh(),
+        psi_.mesh().thisDb(),
         IOobject::NO_READ,
-        IOobject::NO_WRITE
+        IOobject::NO_WRITE,
+        IOobject::REGISTER
     );
 
     UPtrList<lduMesh> uMeshPtr(nMatrices());
@@ -1284,7 +1285,7 @@ void Foam::fvMatrix<Type>::boundaryManipulate
 template<class Type>
 Foam::tmp<Foam::scalarField> Foam::fvMatrix<Type>::D() const
 {
-    tmp<scalarField> tdiag(new scalarField(diag()));
+    auto tdiag = tmp<scalarField>::New(diag());
     addCmptAvBoundaryDiag(tdiag.ref());
     return tdiag;
 }
@@ -1317,22 +1318,12 @@ Foam::tmp<Foam::Field<Type>> Foam::fvMatrix<Type>::DD() const
 template<class Type>
 Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::A() const
 {
-    tmp<volScalarField> tAphi
+    auto tAphi = volScalarField::New
     (
-        new volScalarField
-        (
-            IOobject
-            (
-                "A("+psi_.name()+')',
-                psi_.instance(),
-                psi_.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi_.mesh(),
-            dimensions_/psi_.dimensions()/dimVol,
-            extrapolatedCalculatedFvPatchScalarField::typeName
-        )
+        "A(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions_/psi_.dimensions()/dimVol,
+        fvPatchFieldBase::extrapolatedCalculatedType()
     );
 
     tAphi.ref().primitiveFieldRef() = D()/psi_.mesh().V();
@@ -1346,24 +1337,14 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::fvMatrix<Type>::H() const
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tHphi
+    auto tHphi = GeometricField<Type, fvPatchField, volMesh>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
-        (
-            IOobject
-            (
-                "H("+psi_.name()+')',
-                psi_.instance(),
-                psi_.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi_.mesh(),
-            dimensions_/dimVol,
-            extrapolatedCalculatedFvPatchScalarField::typeName
-        )
+        "H(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions_/dimVol,
+        fvPatchFieldBase::extrapolatedCalculatedType()
     );
-    GeometricField<Type, fvPatchField, volMesh>& Hphi = tHphi.ref();
+    auto& Hphi = tHphi.ref();
 
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
@@ -1408,24 +1389,14 @@ Foam::fvMatrix<Type>::H() const
 template<class Type>
 Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::H1() const
 {
-    tmp<volScalarField> tH1
+    auto tH1 = volScalarField::New
     (
-        new volScalarField
-        (
-            IOobject
-            (
-                "H(1)",
-                psi_.instance(),
-                psi_.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi_.mesh(),
-            dimensions_/(dimVol*psi_.dimensions()),
-            extrapolatedCalculatedFvPatchScalarField::typeName
-        )
+        "H(1)",
+        psi_.mesh(),
+        dimensions_/(dimVol*psi_.dimensions()),
+        fvPatchFieldBase::extrapolatedCalculatedType()
     );
-    volScalarField& H1_ = tH1.ref();
+    auto& H1_ = tH1.ref();
 
     H1_.primitiveFieldRef() = lduMatrix::H1();
 
@@ -1451,7 +1422,6 @@ Foam::tmp<Foam::volScalarField> Foam::fvMatrix<Type>::H1() const
 }
 
 
-
 template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvsPatchField, Foam::surfaceMesh>>
 Foam::fvMatrix<Type>::
@@ -1474,25 +1444,13 @@ flux() const
             << abort(FatalError);
     }
 
-    // construct GeometricField<Type, fvsPatchField, surfaceMesh>
-    tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tfieldFlux
+    auto tfieldFlux = GeometricField<Type, fvsPatchField, surfaceMesh>::New
     (
-        new GeometricField<Type, fvsPatchField, surfaceMesh>
-        (
-            IOobject
-            (
-                "flux("+psi_.name()+')',
-                psi_.instance(),
-                psi_.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi_.mesh(),
-            dimensions()
-        )
+        "flux(" + psi_.name() + ')',
+        psi_.mesh(),
+        dimensions()
     );
-    GeometricField<Type, fvsPatchField, surfaceMesh>& fieldFlux =
-        tfieldFlux.ref();
+    auto& fieldFlux = tfieldFlux.ref();
 
     fieldFlux.setOriented();
 
@@ -2897,24 +2855,14 @@ Foam::operator&
     const DimensionedField<Type, volMesh>& psi
 )
 {
-    tmp<GeometricField<Type, fvPatchField, volMesh>> tMphi
+    auto tMphi = GeometricField<Type, fvPatchField, volMesh>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
-        (
-            IOobject
-            (
-                "M&" + psi.name(),
-                psi.instance(),
-                psi.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            psi.mesh(),
-            M.dimensions()/dimVol,
-            extrapolatedCalculatedFvPatchScalarField::typeName
-        )
+        "M&" + psi.name(),
+        psi.mesh(),
+        M.dimensions()/dimVol,
+        fvPatchFieldBase::extrapolatedCalculatedType()
     );
-    GeometricField<Type, fvPatchField, volMesh>& Mphi = tMphi.ref();
+    auto& Mphi = tMphi.ref();
 
     // Loop over field components
     if (M.hasDiag())

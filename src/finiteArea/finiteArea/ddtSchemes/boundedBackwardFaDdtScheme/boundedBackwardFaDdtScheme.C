@@ -67,8 +67,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
     IOobject ddtIOobject
     (
         "ddt("+dt.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -105,7 +105,7 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
         ddtIOobject,
         mesh(),
         dimensionedScalar(dt.dimensions()/dimTime, Zero),
-        calculatedFaPatchScalarField::typeName
+        faPatchFieldBase::calculatedType()
     );
 }
 
@@ -122,8 +122,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
     IOobject ddtIOobject
     (
         "ddt("+dt.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -167,8 +167,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
     IOobject ddtIOobject
     (
         "ddt("+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -264,8 +264,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
     IOobject ddtIOobject
     (
         "ddt0("+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -359,8 +359,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
     IOobject ddtIOobject
     (
         "ddt("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -456,8 +456,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
     IOobject ddtIOobject
     (
         "ddt0("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -551,8 +551,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
     IOobject ddtIOobject
     (
         "ddt("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );
@@ -652,8 +652,8 @@ tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
     IOobject ddtIOobject
     (
         "ddt0("+rho.name()+','+vf.name()+')',
-        mesh()().time().timeName(),
-        mesh()(),
+        mesh().time().timeName(),
+        mesh().thisDb(),
         IOobject::NO_READ,
         IOobject::NO_WRITE
     );

@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017,2022 OpenFOAM Foundation
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,26 +84,32 @@ private:
 
     // Private Member Functions
 
-        //- Slice the given field and a create a PtrList of SlicedPatchField
-        //  from which the boundary field is built
-        tmp<FieldField<PatchField, Type>>
-        slicedBoundaryField
-        (
-            const Mesh& mesh,
-            const Field<Type>& completeField,
-            const bool preserveCouples,
-            const bool preserveProcessorOnly = false
-        );
+        //- Return true if field size is too small to be the complete field
+        //- (ie, it must be boundary field addressing)
+        static bool
+        isBoundaryAddressing(const Mesh& mesh, const label fieldSize);
 
         //- Slice the given field and a create a PtrList of SlicedPatchField
         //  from which the boundary field is built
         tmp<FieldField<PatchField, Type>>
-        slicedBoundaryField
+        makeBoundary
+        (
+            const Mesh& mesh,
+            const Field<Type>& completeOrBoundaryField,
+            const bool preserveCouples,
+            const bool preserveProcessorOnly = false,
+            const bool isBoundaryOnly = false
+        ) const;
+
+        //- Slice the given field and a create a PtrList of SlicedPatchField
+        //  from which the boundary field is built
+        tmp<FieldField<PatchField, Type>>
+        makeBoundary
         (
             const Mesh& mesh,
             const FieldField<PatchField, Type>& bField,
             const bool preserveCouples
-        );
+        ) const;
 
         // Note - copy construct allowed
 
@@ -133,9 +140,9 @@ public:
         (
             const IOobject&,
             const Mesh&,
-            const dimensionSet&,
+            const dimensionSet& dims,
             const Field<Type>& completeField,
-            const bool preserveCouples=true
+            const bool preserveCouples = true
         );
 
         //- Construct from components and separate fields to slice for the
@@ -144,10 +151,10 @@ public:
         (
             const IOobject&,
             const Mesh&,
-            const dimensionSet&,
+            const dimensionSet& dims,
             const Field<Type>& completeIField,
             const Field<Type>& completeBField,
-            const bool preserveCouples=true,
+            const bool preserveCouples = true,
             const bool preserveProcessorOnly = false
         );
 
@@ -157,7 +164,7 @@ public:
         (
             const IOobject&,
             const GeometricField<Type, PatchField, GeoMesh>&,
-            const bool preserveCouples=true
+            const bool preserveCouples = true
         );
 
         //- Copy construct

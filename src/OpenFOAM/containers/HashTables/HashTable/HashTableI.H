@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2020 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,27 +40,6 @@ Foam::HashTable<T, Key, Hash>::hashKeyIndex(const Key& key) const
 
 
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
-
-template<class T, class Key, class Hash>
-inline Foam::label Foam::HashTable<T, Key, Hash>::capacity() const noexcept
-{
-    return capacity_;
-}
-
-
-template<class T, class Key, class Hash>
-inline Foam::label Foam::HashTable<T, Key, Hash>::size() const noexcept
-{
-    return size_;
-}
-
-
-template<class T, class Key, class Hash>
-inline bool Foam::HashTable<T, Key, Hash>::empty() const noexcept
-{
-    return !size_;
-}
-
 
 template<class T, class Key, class Hash>
 inline T& Foam::HashTable<T, Key, Hash>::at(const Key& key)
@@ -97,7 +76,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::at(const Key& key) const
 
 
 template<class T, class Key, class Hash>
-inline bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
+inline bool Foam::HashTable<T, Key, Hash>::contains(const Key& key) const
 {
     if (size_)
     {
@@ -217,6 +196,32 @@ inline bool Foam::HashTable<T, Key, Hash>::set
 {
     return this->setEntry(true, key, std::forward<T>(obj));  // Overwrite
 }
+
+
+// FUTURE?
+// If 'key' already exists, assign \c std::forward<T>(obj) to the
+// entry. If it does not exist, uses insert()
+//
+// template<class T, class Key, class Hash>
+// inline void Foam::HashTable<T, Key, Hash>::insert_or_assign
+// (
+//     const Key& key,
+//     T&& obj
+// )
+// {
+//     iterator iter(this->find(key));
+//
+//     if (iter.good())
+//     {
+//         iter.val() = std::forward<T>(obj);
+//     }
+//     else
+//     {
+//         this->setEntry(true, key, std::forward<T>(obj));
+//         // iter = this->find(key);
+//     }
+//     // return iter.val();
+// }
 
 
 template<class T, class Key, class Hash>

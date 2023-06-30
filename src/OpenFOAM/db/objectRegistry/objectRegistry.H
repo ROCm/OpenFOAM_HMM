@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,6 +44,7 @@ SourceFiles
 #include "UPtrList.H"
 #include "regIOobject.H"
 #include "wordRes.H"
+#include "Pair.H"
 
 // Historically included by objectRegistryTemplates (until NOV-2018),
 // but not used by objectRegistry directly.
@@ -78,12 +79,30 @@ class objectRegistry
         //- Current event
         mutable label event_;
 
+        //- State of cacheTemporaryObjects_, set true after reading
+        mutable bool cacheTemporaryObjectsActive_;
+
+        //- Names of temporary object with current state
+        mutable HashTable<Pair<bool>> cacheTemporaryObjects_;
+
+        //- Accumulated list of temporary objects available to cache
+        //  Used to provide diagnostics in case the requested object is not
+        //  available
+        mutable wordHashSet temporaryObjects_;
+
 
     // Private Member Functions
 
         //- Is the objectRegistry parent_ different from time_
         //  Used to terminate searching within the ancestors
         bool parentNotTime() const noexcept;
+
+        //- Read the cacheTemporaryObjects list from Time controlDict
+        void readCacheTemporaryObjects() const;
+
+        //- Delete the cached object. Eg, before caching a new object
+        //- A nullptr is ignored.
+        void deleteCachedObject(regIOobject* io) const;
 
         //- Templated implementation for count()
         //  The number of items with a matching class
@@ -413,11 +432,11 @@ public:
             const bool recursive = false
         ) const;
 
-        //- Can the regIOobject object be found (by name).
+        //- Does the registry contain the regIOobject object (by name).
         //
+        //  \param name the object name
         //  \param recursive search parent registries
-        bool found(const word& name, const bool recursive = false) const;
-
+        bool contains(const word& name, const bool recursive = false) const;
 
         //- Is the named Type found?
         //
@@ -559,6 +578,30 @@ public:
         virtual void rename(const word& newName);
 
 
+    // Temporaries
+
+        //FUTURE //- Add given name to the set of temporary objects to cache
+        //FUTURE void addTemporaryObject(const word& name) const;
+
+        //- True if given name is in the cacheTemporaryObjects set
+        bool cacheTemporaryObject(const word& name) const;
+
+        //- Cache the given object. Moves content and stores
+        template<class Type>
+        bool cacheTemporaryObject(Type& obj) const;
+
+        //- Reset the cache state of the given object (nullptr is ignored)
+        void resetCacheTemporaryObject(const regIOobject* io) const;
+
+        //- Reset the cache state of the given object
+        //  in the cacheTemporaryObjects set
+        void resetCacheTemporaryObject(const regIOobject& io) const;
+
+        //- Check that all objects specified in the cacheTemporaryObjects
+        //- were also cached
+        bool checkCacheTemporaryObjects() const;
+
+
     // Reading
 
         //- Return true if any of the object's files have been modified
@@ -573,7 +616,7 @@ public:
 
     // Writing
 
-        //- writeData function required by regIOobject but not used.
+        //- The writeData function is required by regIOobject but not used.
         //  For this class, write is used instead
         virtual bool writeData(Ostream&) const
         {
@@ -585,11 +628,17 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
 
     // Housekeeping
+
+        //- Same as contains()
+        bool found(const word& name, bool recursive = false) const
+        {
+            return this->contains(name, recursive);
+        }
 
         //- Deprecated(2018-10) find object
         //  \deprecated(2018-10) - use findObject() method

@@ -56,12 +56,14 @@ $(derivedFvPatches)/mapped/mappedWallFvPatch.C
 
 
 wallDist = fvMesh/wallDist
-$(wallDist)/wallPointYPlus/wallPointYPlus.C
+$(wallDist)/wallDistAddressing/wallDistAddressing.C
+$(wallDist)/wallDistAddressing/wallPointAddressing.C
 $(wallDist)/nearWallDist/nearWallDistNoSearch.C
 $(wallDist)/nearWallDist/nearWallDist.C
 $(wallDist)/wallDist/wallDist.C
 $(wallDist)/patchDistMethods/patchDistMethod/patchDistMethod.C
 $(wallDist)/patchDistMethods/meshWave/meshWavePatchDistMethod.C
+$(wallDist)/patchDistMethods/meshWaveAddressing/meshWaveAddressingPatchDistMethod.C
 $(wallDist)/patchDistMethods/Poisson/PoissonPatchDistMethod.C
 $(wallDist)/patchDistMethods/advectionDiffusion/advectionDiffusionPatchDistMethod.C
 $(wallDist)/patchDistMethods/directionalMeshWave/directionalMeshWavePatchDistMethod.C
@@ -126,7 +128,7 @@ $(fvPatchFields)/fvPatchField/fvPatchFieldBase.C
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
 
 basicFvPatchFields = $(fvPatchFields)/basic
-$(basicFvPatchFields)/basicSymmetry/basicSymmetryFvPatchScalarField.C
+$(basicFvPatchFields)/basicSymmetry/basicSymmetryFvPatchFields.C
 $(basicFvPatchFields)/calculated/calculatedFvPatchFields.C
 $(basicFvPatchFields)/extrapolatedCalculated/extrapolatedCalculatedFvPatchFields.C
 $(basicFvPatchFields)/coupled/coupledFvPatchFields.C
@@ -136,7 +138,6 @@ $(basicFvPatchFields)/fixedValue/fixedValueFvPatchFields.C
 $(basicFvPatchFields)/mixed/mixedFvPatchFields.C
 $(basicFvPatchFields)/sliced/slicedFvPatchFields.C
 $(basicFvPatchFields)/transform/transformFvPatchFields.C
-$(basicFvPatchFields)/transform/transformFvPatchScalarField.C
 $(basicFvPatchFields)/zeroGradient/zeroGradientFvPatchFields.C
 
 constraintFvPatchFields = $(fvPatchFields)/constraint
@@ -152,10 +153,8 @@ $(constraintFvPatchFields)/processor/processorFvPatchFields.C
 $(constraintFvPatchFields)/processorCyclic/processorCyclicFvPatchFields.C
 $(constraintFvPatchFields)/calculatedProcessor/calculatedProcessorFvPatchFields.C
 $(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchFields.C
-$(constraintFvPatchFields)/symmetryPlane/symmetryPlaneFvPatchScalarField.C
 $(constraintFvPatchFields)/symmetry/symmetryFvPatchFields.C
 $(constraintFvPatchFields)/wedge/wedgeFvPatchFields.C
-$(constraintFvPatchFields)/wedge/wedgeFvPatchScalarField.C
 
 derivedFvPatchFields = $(fvPatchFields)/derived
 $(derivedFvPatchFields)/activeBaffleVelocity/activeBaffleVelocityFvPatchVectorField.C
@@ -228,6 +227,7 @@ $(derivedFvPatchFields)/turbulentIntensityKineticEnergyInlet/turbulentIntensityK
 $(derivedFvPatchFields)/uniformDensityHydrostaticPressure/uniformDensityHydrostaticPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/uniformFixedGradient/uniformFixedGradientFvPatchFields.C
 $(derivedFvPatchFields)/uniformFixedValue/uniformFixedValueFvPatchFields.C
+$(derivedFvPatchFields)/uniformMixed/uniformMixedFvPatchFields.C
 $(derivedFvPatchFields)/uniformInletOutlet/uniformInletOutletFvPatchFields.C
 $(derivedFvPatchFields)/uniformJump/uniformJumpFvPatchFields.C
 $(derivedFvPatchFields)/uniformJumpAMI/uniformJumpAMIFvPatchFields.C

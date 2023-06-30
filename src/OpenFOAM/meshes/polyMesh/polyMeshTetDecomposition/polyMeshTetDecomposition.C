@@ -268,14 +268,14 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
         fI++, bFI++
     )
     {
-        label patchi = mesh.boundaryMesh().patchID()[bFI];
+        const label patchi = mesh.boundaryMesh().patchID()[bFI];
 
         if (patches[patchi].coupled())
         {
-            const coupledPolyPatch& pp =
+            const coupledPolyPatch& cpp =
                 refCast<const coupledPolyPatch>(patches[patchi]);
 
-            if (pp.owner())
+            if (cpp.owner())
             {
                 boundaryFaceTetBasePtIs[bFI] = findSharedBasePoint
                 (
@@ -340,11 +340,11 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
             continue;
         }
 
-        label patchi = mesh.boundaryMesh().patchID()[bFI];
+        const label patchi = mesh.boundaryMesh().patchID()[bFI];
 
         if (patches[patchi].coupled())
         {
-            const coupledPolyPatch& pp =
+            const coupledPolyPatch& cpp =
                 refCast<const coupledPolyPatch>(patches[patchi]);
 
             // Calculated base points on coupled faces are those of
@@ -369,7 +369,7 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
             // +: 6 - 1 = 5
             // #: 6 - 2 = 4
 
-            if (!pp.owner())
+            if (!cpp.owner())
             {
                 bFTetBasePtI = mesh.faces()[fI].size() - bFTetBasePtI;
             }
@@ -476,7 +476,7 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
         }
         else
         {
-            label patchi = patches.patchID()[facei - mesh.nInternalFaces()];
+            const label patchi = patches.patchID(facei);
 
             if (patches[patchi].coupled())
             {

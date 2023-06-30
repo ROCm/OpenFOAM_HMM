@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOPtrList_H
-#define IOPtrList_H
+#ifndef Foam_IOPtrList_H
+#define Foam_IOPtrList_H
 
 #include "PtrList.H"
 #include "regIOobject.H"
@@ -82,6 +82,12 @@ public:
 
         //- Construct by transferring the PtrList content
         IOPtrList(const IOobject& io, PtrList<T>&& content);
+
+
+    // Factory Methods
+
+        //- Read and return contents. The IOobject will not be registered
+        static PtrList<T> readContents(const IOobject& io);
 
 
     //- Destructor

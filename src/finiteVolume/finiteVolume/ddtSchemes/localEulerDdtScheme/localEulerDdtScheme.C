@@ -66,7 +66,7 @@ localEulerDdtScheme<Type>::fvcDdt
     (
         "ddt(" + dt.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
@@ -74,7 +74,7 @@ localEulerDdtScheme<Type>::fvcDdt
         ddtIOobject,
         mesh(),
         dimensioned<Type>(dt.dimensions()/dimTime, Zero),
-        calculatedFvPatchField<Type>::typeName
+        fvPatchFieldBase::calculatedType()
     );
 }
 
@@ -92,7 +92,7 @@ localEulerDdtScheme<Type>::fvcDdt
     (
         "ddt(" + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     return tmp<GeometricField<Type, fvPatchField, volMesh>>
@@ -120,7 +120,7 @@ localEulerDdtScheme<Type>::fvcDdt
     (
         "ddt(" + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     return tmp<GeometricField<Type, fvPatchField, volMesh>>
@@ -148,7 +148,7 @@ localEulerDdtScheme<Type>::fvcDdt
     (
         "ddt(" + rho.name() + ',' + vf.name() + ')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     return tmp<GeometricField<Type, fvPatchField, volMesh>>
@@ -177,7 +177,7 @@ localEulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     return tmp<GeometricField<Type, fvPatchField, volMesh>>
@@ -208,7 +208,7 @@ localEulerDdtScheme<Type>::fvcDdt
     (
         "ddt("+sf.name()+')',
         mesh().time().timeName(),
-        mesh()
+        mesh().thisDb()
     );
 
     return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
@@ -365,7 +365,7 @@ localEulerDdtScheme<Type>::fvcDdtUfCorr
             (
                 "ddtCorr(" + U.name() + ',' + Uf.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phiUf0, phiCorr)
            *rDeltaT*phiCorr
@@ -397,7 +397,7 @@ localEulerDdtScheme<Type>::fvcDdtPhiCorr
             (
                 "ddtCorr(" + U.name() + ',' + phi.name() + ')',
                 mesh().time().timeName(),
-                mesh()
+                mesh().thisDb()
             ),
             this->fvcDdtPhiCoeff(U.oldTime(), phi.oldTime(), phiCorr)
            *rDeltaT*phiCorr
@@ -440,7 +440,7 @@ localEulerDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff(rhoU0, phiUf0, phiCorr, rho.oldTime())
                *rDeltaT*phiCorr
@@ -468,7 +468,7 @@ localEulerDdtScheme<Type>::fvcDdtUfCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + Uf.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -527,7 +527,7 @@ localEulerDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -559,7 +559,7 @@ localEulerDdtScheme<Type>::fvcDdtPhiCorr
                     "ddtCorr("
                   + rho.name() + ',' + U.name() + ',' + phi.name() + ')',
                     mesh().time().timeName(),
-                    mesh()
+                    mesh().thisDb()
                 ),
                 this->fvcDdtPhiCoeff
                 (
@@ -596,10 +596,10 @@ tmp<surfaceScalarField> localEulerDdtScheme<Type>::meshPhi
             (
                 "meshPhi",
                 mesh().time().timeName(),
-                mesh(),
+                mesh().thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             mesh(),
             dimensionedScalar(dimVolume/dimTime, Zero)

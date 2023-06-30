@@ -422,7 +422,7 @@ void Foam::surfaceSlipDisplacementPointPatchVectorField::write
     Ostream& os
 ) const
 {
-    pointPatchVectorField::write(os);
+    pointPatchField<vector>::write(os);
     os.writeEntry("geometry", surfacesDict_);
     os.writeEntry("projectMode", projectModeNames_[projectMode_]);
     os.writeEntry("projectDirection", projectDir_);

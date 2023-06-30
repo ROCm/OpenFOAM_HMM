@@ -6,6 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2016-2017 Wikki Ltd
+    Copyright (C) 2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +32,7 @@ License
 #include "facEdgeIntegrate.H"
 #include "faMesh.H"
 #include "faGradScheme.H"
+#include "gaussFaGrad.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,19 +59,9 @@ grad
     const GeometricField<Type, faePatchField, edgeMesh>& ssf
 )
 {
-    const areaVectorField &n = ssf.mesh().faceAreaNormals();
-    typedef typename outerProduct<vector,Type>::type GradType;
-
-    tmp<GeometricField<GradType, faPatchField, areaMesh>> tgGrad =
-        fac::edgeIntegrate(ssf.mesh().Sf()*ssf);
-
-    GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad.ref();
-
-    gGrad -= n*(n & gGrad);
-    gGrad.correctBoundaryConditions();
-
-    return tgGrad;
+    return fa::gaussGrad<Type>::gradf(ssf, "grad(" + ssf.name() + ')');
 }
+
 
 template<class Type>
 tmp
@@ -108,22 +100,11 @@ grad
     const word& name
 )
 {
-    const areaVectorField &n = vf.mesh().faceAreaNormals();
-    typedef typename outerProduct<vector,Type>::type GradType;
-
-    tmp<GeometricField<GradType, faPatchField, areaMesh>> tgGrad =
-        fa::gradScheme<Type>::New
-        (
-            vf.mesh(),
-            vf.mesh().gradScheme(name)
-        ).ref().grad(vf);
-
-    GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad.ref();
-
-    gGrad -= n*(n & gGrad);
-    gGrad.correctBoundaryConditions();
-
-    return tgGrad;
+    return fa::gradScheme<Type>::New
+    (
+        vf.mesh(),
+        vf.mesh().gradScheme(name)
+    )().grad(vf, name);
 }
 
 

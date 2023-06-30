@@ -204,18 +204,20 @@ tmp<scalarField> curvatureSeparation::calcCosAngle
                 "cosAngle",
                 mesh.time().timeName(),
                 mesh,
-                IOobject::NO_READ
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         volCosAngle.primitiveFieldRef() = cosAngle;
         volCosAngle.correctBoundaryConditions();
         volCosAngle.write();
     }
 
-    return max(min(cosAngle, scalar(1)), scalar(-1));
+    return clamp(cosAngle, scalarMinMax(-1, 1));
 }
 
 
@@ -346,11 +348,13 @@ void curvatureSeparation::correct
                 "Fnet",
                 mesh.time().timeName(),
                 mesh,
-                IOobject::NO_READ
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimForce, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         volFnet.primitiveFieldRef() = Fnet;
         volFnet.correctBoundaryConditions();

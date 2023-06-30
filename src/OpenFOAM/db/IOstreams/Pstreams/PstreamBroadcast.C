@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,31 +34,28 @@ License
 template<class Type>
 void Foam::Pstream::broadcast(Type& value, const label comm)
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (is_contiguous<Type>::value)
     {
-        if (is_contiguous<Type>::value)
+        // Note: contains parallel guard internally
+        UPstream::broadcast
+        (
+            reinterpret_cast<char*>(&value),
+            sizeof(Type),
+            comm,
+            UPstream::masterNo()
+        );
+    }
+    else if (UPstream::is_parallel(comm))
+    {
+        if (UPstream::master(comm))
         {
-            // Note: contains parallel guard internally as well
-            UPstream::broadcast
-            (
-                reinterpret_cast<char*>(&value),
-                sizeof(Type),
-                comm,
-                UPstream::masterNo()
-            );
+            OPBstream os(UPstream::masterNo(), comm);
+            os << value;
         }
-        else
+        else  // UPstream::is_subrank(comm)
         {
-            if (UPstream::master(comm))
-            {
-                OPBstream os(UPstream::masterNo(), comm);
-                os << value;
-            }
-            else
-            {
-                IPBstream is(UPstream::masterNo(), comm);
-                is >> value;
-            }
+            IPBstream is(UPstream::masterNo(), comm);
+            is >> value;
         }
     }
 }
@@ -67,14 +64,14 @@ void Foam::Pstream::broadcast(Type& value, const label comm)
 template<class Type, class... Args>
 void Foam::Pstream::broadcasts(const label comm, Type& arg1, Args&&... args)
 {
-    if (UPstream::parRun() && UPstream::nProcs(comm) > 1)
+    if (UPstream::is_parallel(comm))
     {
         if (UPstream::master(comm))
         {
             OPBstream os(UPstream::masterNo(), comm);
             Detail::outputLoop(os, arg1, std::forward<Args>(args)...);
         }
-        else
+        else  // UPstream::is_subrank(comm)
         {
             IPBstream is(UPstream::masterNo(), comm);
             Detail::inputLoop(is, arg1, std::forward<Args>(args)...);

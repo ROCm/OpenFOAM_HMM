@@ -88,8 +88,7 @@ int main(int argc, char *argv[])
     // Info<<"tree-bb faces: " << treeBoundBox::faces << nl
     //     <<"tree-bb edges: " << treeBoundBox::edges << endl;
 
-    treeBoundBox bb;
-    bb = cube(0, 1);
+    treeBoundBox bb(zero_one{});
 
     triPoints tri;
     tri.a() = point(-0.1, 0.5, 0.5);

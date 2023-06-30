@@ -104,7 +104,7 @@ void Foam::displacementInterpolationMotionSolver::calcInterpolation()
                 mesh(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
 

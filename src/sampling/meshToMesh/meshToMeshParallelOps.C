@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2012-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,62 +212,46 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
                     }
                 }
 
-                // convert dynamicList to labelList
-                forAll(sendMap, proci)
-                {
-                    sendMap[proci].transfer(dynSendMap[proci]);
-                }
-
-                // debug printing
                 if (debug)
                 {
                     Pout<< "Of my " << tgt.nCells()
                         << " target cells I need to send to:" << nl
                         << "\tproc\tcells" << endl;
-                    forAll(sendMap, proci)
+                    forAll(dynSendMap, proci)
                     {
                         Pout<< '\t' << proci << '\t'
-                            << sendMap[proci].size() << endl;
+                            << dynSendMap[proci].size() << endl;
                     }
                 }
+
+                // Convert DynamicList -> List
+                forAll(sendMap, proci)
+                {
+                    sendMap[proci].transfer(dynSendMap[proci]);
+                }
             }
 
 
-            // send over how many tgt cells I need to receive from each
-            // processor
-            labelListList sendSizes(Pstream::nProcs());
-            sendSizes[Pstream::myProcNo()].resize(Pstream::nProcs());
-            forAll(sendMap, proci)
-            {
-                sendSizes[Pstream::myProcNo()][proci] = sendMap[proci].size();
-            }
-            Pstream::allGatherList(sendSizes);
+            labelList recvSizes;
+            Pstream::exchangeSizes(sendMap, recvSizes, UPstream::worldComm);
 
+            // Uses linear receive order
+            labelListList constructMap(UPstream::nProcs());
 
-            // determine order of receiving
-            labelListList constructMap(Pstream::nProcs());
-
-            label segmentI = 0;
+            label constructSize = 0;
             forAll(constructMap, proci)
             {
-                // what I need to receive is what other processor is sending
-                // to me
-                label nRecv = sendSizes[proci][Pstream::myProcNo()];
-                constructMap[proci].setSize(nRecv);
-
-                for (label i = 0; i < nRecv; i++)
-                {
-                    constructMap[proci][i] = segmentI++;
-                }
+                const label len = recvSizes[proci];
+                constructMap[proci] = identity(len, constructSize);
+                constructSize += len;
             }
 
             return autoPtr<mapDistribute>::New
             (
-                segmentI,       // size after construction
+                constructSize,
                 std::move(sendMap),
                 std::move(constructMap)
             );
-
             break;
         }
     }
@@ -610,7 +594,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
                 const auto fnd = procFaceToGlobalCell.cfind(key);
 
-                if (!fnd.found())
+                if (!fnd.good())
                 {
                     procFaceToGlobalCell.insert(key, -1);
                 }
@@ -725,7 +709,7 @@ void Foam::meshToMesh::distributeAndMergeCells
 
                 auto fnd = procFaceToGlobalCell.find(key);
 
-                if (fnd.found())
+                if (fnd.good())
                 {
                     label tgtFacei = fnd();
                     if (tgtFacei == -1)

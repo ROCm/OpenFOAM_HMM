@@ -88,14 +88,14 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::MPPICParcel<ParcelType>::readFields(CloudType& c)
 {
-    bool valid = c.size();
+    const bool readOnProc = c.size();
 
     ParcelType::readFields(c);
 
     IOField<vector> UCorrect
     (
         c.fieldIOobject("UCorrect", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     c.checkFieldIOobject(c, UCorrect);
 
@@ -116,6 +116,7 @@ void Foam::MPPICParcel<ParcelType>::writeFields(const CloudType& c)
     ParcelType::writeFields(c);
 
     const label np = c.size();
+    const bool writeOnProc = c.size();
 
     IOField<vector>
         UCorrect(c.fieldIOobject("UCorrect", IOobject::NO_READ), np);
@@ -129,7 +130,7 @@ void Foam::MPPICParcel<ParcelType>::writeFields(const CloudType& c)
         ++i;
     }
 
-    UCorrect.write(np > 0);
+    UCorrect.write(writeOnProc);
 }
 
 
@@ -164,6 +165,7 @@ void Foam::MPPICParcel<ParcelType>::readObjects
 {
     ParcelType::readObjects(c, obr);
 
+    // const bool readOnProc = c.size();
     if (!c.size()) return;
 
     const auto& UCorrect = cloud::lookupIOField<vector>("UCorrect", obr);
@@ -189,6 +191,7 @@ void Foam::MPPICParcel<ParcelType>::writeObjects
     ParcelType::writeObjects(c, obr);
 
     const label np = c.size();
+    // const bool writeOnProc = c.size();
 
     auto& UCorrect = cloud::createIOField<vector>("UCorrect", np, obr);
 

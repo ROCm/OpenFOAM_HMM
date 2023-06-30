@@ -5,38 +5,19 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
-    This file is part of OpenFOAM.
-
-    OpenFOAM is free software: you can redistribute it and/or modify it
-    under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-    for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-InNamespace
-    Foam
+    This file is part of OpenFOAM, distributed under GPL-3.0-or-later.
 
 Description
-    Read finite-area fields from disk
+    Code chunk for reading finite-area fields from disk
     and write with vtk::uindirectPatchGeoFieldsWriter
-
-SourceFiles
-    writeAreaFields.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef writeAreaFields_H
-#define writeAreaFields_H
+#ifndef FoamToVTK_writeAreaFields_H
+#define FoamToVTK_writeAreaFields_H
 
 #include "readFields.H"
 #include "foamVtkIndPatchGeoFieldsWriter.H"
@@ -48,25 +29,6 @@ namespace Foam
 
 // Writer type for finite-area mesh + fields
 typedef vtk::uindirectPatchGeoFieldsWriter vtkWriterType_areaMesh;
-
-template<class GeoField>
-bool writeAreaField
-(
-    vtkWriterType_areaMesh& writer,
-    const tmp<GeoField>& tfield
-)
-{
-    if (tfield)
-    {
-        writer.write(tfield());
-        tfield.clear();
-
-        return true;
-    }
-
-    return false;
-}
-
 
 template<class GeoField>
 label writeAreaFields
@@ -81,15 +43,14 @@ label writeAreaFields
 
     for (const word& fieldName : objects.sortedNames<GeoField>())
     {
-        if
-        (
-            writeAreaField<GeoField>
-            (
-                writer,
-                getField<GeoField>(mesh, objects, fieldName, syncPar)
-            )
-        )
+        tmp<GeoField> tfield =
+            getField<GeoField>(mesh, objects, fieldName, syncPar);
+
+        if (tfield)
         {
+            writer.write(tfield());
+
+            tfield.clear();
             ++count;
         }
     }

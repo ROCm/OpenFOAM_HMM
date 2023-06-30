@@ -35,12 +35,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cyclicFvPatch_H
-#define cyclicFvPatch_H
+#ifndef Foam_cyclicFvPatch_H
+#define Foam_cyclicFvPatch_H
 
+#include "cyclicPolyPatch.H"
 #include "coupledFvPatch.H"
 #include "cyclicLduInterface.H"
-#include "cyclicPolyPatch.H"
 #include "fvBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,7 +57,7 @@ class cyclicFvPatch
     public coupledFvPatch,
     public cyclicLduInterface
 {
-    // Private data
+    // Private Data
 
         const cyclicPolyPatch& cyclicPolyPatch_;
 
@@ -87,7 +87,6 @@ public:
 
 
     // Member functions
-
 
         // Access
 
@@ -173,7 +172,6 @@ public:
                 const Pstream::commsTypes commsType,
                 const labelUList& internalData
             ) const;
-
 };
 
 

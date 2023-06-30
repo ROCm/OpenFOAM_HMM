@@ -110,40 +110,44 @@ Foam::molecule::molecule
 
 void Foam::molecule::readFields(Cloud<molecule>& mC)
 {
-    const bool valid = mC.size();
+    const bool readOnProc = mC.size();
 
     particle::readFields(mC);
 
-    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::MUST_READ), valid);
+    IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::MUST_READ), readOnProc);
     mC.checkFieldIOobject(mC, Q);
 
-    IOField<vector> v(mC.fieldIOobject("v", IOobject::MUST_READ), valid);
+    IOField<vector> v(mC.fieldIOobject("v", IOobject::MUST_READ), readOnProc);
     mC.checkFieldIOobject(mC, v);
 
-    IOField<vector> a(mC.fieldIOobject("a", IOobject::MUST_READ), valid);
+    IOField<vector> a(mC.fieldIOobject("a", IOobject::MUST_READ), readOnProc);
     mC.checkFieldIOobject(mC, a);
 
-    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::MUST_READ), valid);
+    IOField<vector> pi(mC.fieldIOobject("pi", IOobject::MUST_READ), readOnProc);
     mC.checkFieldIOobject(mC, pi);
 
-    IOField<vector> tau(mC.fieldIOobject("tau", IOobject::MUST_READ), valid);
+    IOField<vector> tau
+    (
+        mC.fieldIOobject("tau", IOobject::MUST_READ),
+        readOnProc
+    );
     mC.checkFieldIOobject(mC, tau);
 
     IOField<vector> specialPosition
     (
         mC.fieldIOobject("specialPosition", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     mC.checkFieldIOobject(mC, specialPosition);
 
     IOField<label> special
     (
         mC.fieldIOobject("special", IOobject::MUST_READ),
-        valid
+        readOnProc
     );
     mC.checkFieldIOobject(mC, special);
 
-    IOField<label> id(mC.fieldIOobject("id", IOobject::MUST_READ), valid);
+    IOField<label> id(mC.fieldIOobject("id", IOobject::MUST_READ), readOnProc);
     mC.checkFieldIOobject(mC, id);
 
     label i = 0;
@@ -168,7 +172,7 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
     particle::writeFields(mC);
 
     const label np = mC.size();
-    const bool valid = np;
+    const bool writeOnProc = mC.size();
 
     IOField<tensor> Q(mC.fieldIOobject("Q", IOobject::NO_READ), np);
     IOField<vector> v(mC.fieldIOobject("v", IOobject::NO_READ), np);
@@ -237,21 +241,21 @@ void Foam::molecule::writeFields(const Cloud<molecule>& mC)
         ++i;
     }
 
-    Q.write(valid);
-    v.write(valid);
-    a.write(valid);
-    pi.write(valid);
-    tau.write(valid);
-    specialPosition.write(valid);
-    special.write(valid);
-    id.write(valid);
+    Q.write(writeOnProc);
+    v.write(writeOnProc);
+    a.write(writeOnProc);
+    pi.write(writeOnProc);
+    tau.write(writeOnProc);
+    specialPosition.write(writeOnProc);
+    special.write(writeOnProc);
+    id.write(writeOnProc);
 
-    piGlobal.write(valid);
-    tauGlobal.write(valid);
+    piGlobal.write(writeOnProc);
+    tauGlobal.write(writeOnProc);
 
-    orientation1.write(valid);
-    orientation2.write(valid);
-    orientation3.write(valid);
+    orientation1.write(writeOnProc);
+    orientation2.write(writeOnProc);
+    orientation3.write(writeOnProc);
 
     Info<< "writeFields " << mC.name() << endl;
 

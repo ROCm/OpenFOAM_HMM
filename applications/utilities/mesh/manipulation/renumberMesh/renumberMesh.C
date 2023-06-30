@@ -73,28 +73,17 @@ tmp<volScalarField> createScalarField
 (
     const fvMesh& mesh,
     const word& name,
-    const labelList& elems
+    const labelUList& elems
 )
 {
-    tmp<volScalarField> tfld
+    auto tfld = volScalarField::New
     (
-        new volScalarField
-        (
-            IOobject
-            (
-                name,
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
-            ),
-            mesh,
-            dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
-        )
+        name,
+        mesh,
+        dimensionedScalar(dimless, Zero),
+        fvPatchFieldBase::zeroGradientType()
     );
-    volScalarField& fld = tfld.ref();
+    auto& fld = tfld.ref();
 
     forAll(fld, celli)
     {
@@ -1343,7 +1332,7 @@ int main(int argc, char *argv[])
                 mesh,
                 IOobject::READ_IF_PRESENT,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             )
         );
         refData.updateMesh(map());
@@ -1387,7 +1376,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 map().cellMap()
             ).write();
@@ -1402,7 +1391,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 map().faceMap()
             ).write();
@@ -1417,7 +1406,7 @@ int main(int argc, char *argv[])
                     mesh,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE,
-                    false
+                    IOobject::NO_REGISTER
                 ),
                 map().pointMap()
             ).write();

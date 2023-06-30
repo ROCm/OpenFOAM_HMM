@@ -5,8 +5,8 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2011-2019 OpenFOAM Foundation
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,9 +88,9 @@ Foam::objectRegistry::objectRegistry(const Time& t, const label nObjects)
             word::validate(t.caseName()),
             t.path(),
             t,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobjectOption::NO_READ,
+            IOobjectOption::AUTO_WRITE,
+            IOobjectOption::NO_REGISTER
         ),
         true    // to flag that this is the top-level regIOobject
     ),
@@ -98,7 +98,10 @@ Foam::objectRegistry::objectRegistry(const Time& t, const label nObjects)
     time_(t),
     parent_(t),
     dbDir_(name()),
-    event_(1)
+    event_(1),
+    cacheTemporaryObjectsActive_(false),
+    cacheTemporaryObjects_(0),
+    temporaryObjects_(0)
 {}
 
 
@@ -109,7 +112,10 @@ Foam::objectRegistry::objectRegistry(const IOobject& io, const label nObjects)
     time_(io.time()),
     parent_(io.db()),
     dbDir_(parent_.dbDir()/local()/name()),
-    event_(1)
+    event_(1),
+    cacheTemporaryObjectsActive_(false),
+    cacheTemporaryObjects_(0),
+    temporaryObjects_(0)
 {
     writeOpt(IOobject::AUTO_WRITE);
 }
@@ -207,8 +213,9 @@ const Foam::objectRegistry& Foam::objectRegistry::subRegistry
                 name,
                 time().constant(),
                 *this,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
+                IOobjectOption::NO_READ,
+                IOobjectOption::NO_WRITE,
+                IOobjectOption::REGISTER
             )
         );
         subObr->store();
@@ -248,6 +255,8 @@ bool Foam::objectRegistry::checkIn(regIOobject* io) const
 {
     if (!io) return false;
 
+    objectRegistry& obr = const_cast<objectRegistry&>(*this);
+
     if (objectRegistry::debug)
     {
         Pout<< "objectRegistry::checkIn : "
@@ -256,7 +265,36 @@ bool Foam::objectRegistry::checkIn(regIOobject* io) const
             << endl;
     }
 
-    objectRegistry& obr = const_cast<objectRegistry&>(*this);
+    // Delete cached object if it has the same name as io, and in the
+    // cacheTemporaryObjects list
+    if (!cacheTemporaryObjects_.empty())
+    {
+        auto cacheIter = cacheTemporaryObjects_.find(io->name());
+
+        if (cacheIter.good())
+        {
+            iterator iter = obr.find(io->name());
+
+            if
+            (
+                iter.good()
+             && iter.val() != io
+             && iter.val()->ownedByRegistry()
+            )
+            {
+                if (objectRegistry::debug)
+                {
+                    Pout<< "objectRegistry::checkIn : "
+                        << name() << " : deleting cached object "
+                        << io->name() << endl;
+                }
+
+                cacheIter.val().first() = false;
+                deleteCachedObject(iter.val());
+            }
+        }
+    }
+
 
     bool ok = obr.insert(io->name(), io);
 
@@ -280,7 +318,7 @@ bool Foam::objectRegistry::checkOut(regIOobject* io) const
 
     iterator iter = obr.find(io->name());
 
-    if (iter.found())
+    if (iter.good())
     {
         if (objectRegistry::debug)
         {
@@ -373,7 +411,7 @@ bool Foam::objectRegistry::erase(const iterator& iter)
 {
     // Remove from registry - see notes in objectRegistry::clear()
 
-    if (iter.found())
+    if (iter.good())
     {
         regIOobject* ptr = const_cast<iterator&>(iter).val();
 
@@ -436,7 +474,7 @@ const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
 {
     const_iterator iter = cfind(name);
 
-    if (iter.found())
+    if (iter.good())
     {
         return iter.val();
     }
@@ -449,7 +487,7 @@ const Foam::regIOobject* Foam::objectRegistry::cfindIOobject
 }
 
 
-bool Foam::objectRegistry::found
+bool Foam::objectRegistry::contains
 (
     const word& name,
     const bool recursive
@@ -499,7 +537,7 @@ bool Foam::objectRegistry::readIfModified()
 bool Foam::objectRegistry::writeObject
 (
     IOstreamOption streamOpt,
-    const bool valid
+    const bool writeOnProc
 ) const
 {
     bool ok = true;
@@ -520,7 +558,7 @@ bool Foam::objectRegistry::writeObject
 
         if (iter.val()->writeOpt() != IOobjectOption::NO_WRITE)
         {
-            ok = iter.val()->writeObject(streamOpt, valid) && ok;
+            ok = iter.val()->writeObject(streamOpt, writeOnProc) && ok;
         }
     }
 

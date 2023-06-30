@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,9 @@ License
 #include "polyPatch.H"
 
 // * * * * * * * * * * * * * Private Member Functions * * * * * * * * * * * * //
+
+// Alternative
+// refCast<const facePointPatch>(p).patch()
 
 template<class Type>
 const Foam::polyPatch&
@@ -60,7 +63,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(p, iF),
-    uniformValue_()
+    refValueFunc_(nullptr)
 {}
 
 
@@ -73,8 +76,8 @@ uniformFixedValuePointPatchField
     const dictionary& dict
 )
 :
-    fixedValuePointPatchField<Type>(p, iF, dict, false),
-    uniformValue_
+    fixedValuePointPatchField<Type>(p, iF, dict, IOobjectOption::NO_READ),
+    refValueFunc_
     (
         PatchFunction1<Type>::New
         (
@@ -85,15 +88,12 @@ uniformFixedValuePointPatchField
         )
     )
 {
-    if (dict.found("value"))
+    if (!this->readValueEntry(dict))
     {
-        fixedValuePointPatchField<Type>::operator==
-        (
-            Field<Type>("value", dict, p.size())
-        );
-    }
-    else
-    {
+        // Ensure field has reasonable initial values
+        this->extrapolateInternal();
+
+        // Evaluate to assign a value
         this->evaluate();
     }
 }
@@ -110,7 +110,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
-    uniformValue_(ptf.uniformValue_.clone(this->getPatch(p)))
+    refValueFunc_(ptf.refValueFunc_.clone(this->getPatch(p)))
 {
     if (mapper.direct() && !mapper.hasUnmapped())
     {
@@ -133,7 +133,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_.clone(this->getPatch(this->patch())))
+    refValueFunc_(ptf.refValueFunc_.clone(this->getPatch(this->patch())))
 {}
 
 
@@ -146,7 +146,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_.clone(this->getPatch(this->patch())))
+    refValueFunc_(ptf.refValueFunc_.clone(this->getPatch(this->patch())))
 {}
 
 
@@ -159,12 +159,16 @@ void Foam::uniformFixedValuePointPatchField<Type>::autoMap
 )
 {
     fixedValuePointPatchField<Type>::autoMap(mapper);
-    uniformValue_().autoMap(mapper);
 
-    if (uniformValue_().constant())
+    if (refValueFunc_)
     {
-        // If mapper is not dependent on time we're ok to evaluate
-        this->evaluate();
+        refValueFunc_().autoMap(mapper);
+
+        if (refValueFunc_().constant())
+        {
+            // If mapper is not dependent on time we're ok to evaluate
+            this->evaluate();
+        }
     }
 }
 
@@ -181,7 +185,10 @@ void Foam::uniformFixedValuePointPatchField<Type>::rmap
     const uniformFixedValuePointPatchField& tiptf =
         refCast<const uniformFixedValuePointPatchField>(ptf);
 
-    uniformValue_().rmap(tiptf.uniformValue_(), addr);
+    if (refValueFunc_ && tiptf.refValueFunc_)
+    {
+        refValueFunc_().rmap(tiptf.refValueFunc_(), addr);
+    }
 }
 
 
@@ -193,7 +200,8 @@ void Foam::uniformFixedValuePointPatchField<Type>::updateCoeffs()
         return;
     }
     const scalar t = this->db().time().timeOutputValue();
-    fixedValuePointPatchField<Type>::operator==(uniformValue_->value(t));
+
+    valuePointPatchField<Type>::operator=(refValueFunc_->value(t));
     fixedValuePointPatchField<Type>::updateCoeffs();
 }
 
@@ -204,7 +212,10 @@ write(Ostream& os) const
 {
     // Note: write value
     fixedValuePointPatchField<Type>::write(os);
-    uniformValue_->writeData(os);
+    if (refValueFunc_)
+    {
+        refValueFunc_->writeData(os);
+    }
 }
 
 

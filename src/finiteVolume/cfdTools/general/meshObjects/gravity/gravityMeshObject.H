@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,14 +70,38 @@ public:
     TypeNameNoDebug("g");
 
 
-    //- Construct on Time with MUST_READ_IF_MODIFIED from "constant"
-    explicit gravity(const Time& runTime);
+    // Constructors
 
-    //- Return cached object or construct on Time
-    static const gravity& New(const Time& runTime)
-    {
-        return MeshObject<Time, TopologicalMeshObject, gravity>::New(runTime);
-    }
+        //- Construct with given name on Time from \c constant
+        //- (MUST_READ_IF_MODIFIED)
+        gravity(const word& name, const Time& runTime);
+
+        //- Construct "g" field on Time from \c constant
+        //- (MUST_READ_IF_MODIFIED)
+        explicit gravity(const Time& runTime)
+        :
+            gravity("g", runTime)
+        {}
+
+        //- Return named gravity field cached or construct on Time
+        static const gravity& New(const word& name, const Time& runTime)
+        {
+            return MeshObject<Time, TopologicalMeshObject, gravity>::New
+            (
+                name,
+                runTime
+            );
+        }
+
+        //- Return gravity "g" field cached or construct on Time
+        static const gravity& New(const Time& runTime)
+        {
+            return MeshObject<Time, TopologicalMeshObject, gravity>::New
+            (
+                runTime
+            );
+        }
+
 
     //- Destructor
     virtual ~gravity() = default;

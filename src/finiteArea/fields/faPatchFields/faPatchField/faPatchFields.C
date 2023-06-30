@@ -28,26 +28,21 @@ License
 #include "faPatchFields.H"
 #include "areaFaMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#define makeFaPatchField(PatchTypeField)                                      \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, patch);               \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, patchMapper);         \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, dictionary);
 
-#define makeFaPatchField(faPatchTypeField)                                    \
-                                                                              \
-defineTemplateRunTimeSelectionTable(faPatchTypeField, patch);                 \
-defineTemplateRunTimeSelectionTable(faPatchTypeField, patchMapper);           \
-defineTemplateRunTimeSelectionTable(faPatchTypeField, dictionary);
-
-makeFaPatchField(faPatchScalarField)
-makeFaPatchField(faPatchVectorField)
-makeFaPatchField(faPatchSphericalTensorField)
-makeFaPatchField(faPatchSymmTensorField)
-makeFaPatchField(faPatchTensorField)
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+makeFaPatchField(faPatchScalarField);
+makeFaPatchField(faPatchVectorField);
+makeFaPatchField(faPatchSphericalTensorField);
+makeFaPatchField(faPatchSymmTensorField);
+makeFaPatchField(faPatchTensorField);
 
 } // End namespace Foam
 

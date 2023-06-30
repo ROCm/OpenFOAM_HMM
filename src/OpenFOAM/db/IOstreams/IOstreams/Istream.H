@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2017-2022 OpenCFD Ltd.
+    Copyright (C) 2017-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -161,8 +161,10 @@ public:
             //- Read a double
             virtual Istream& read(double&) = 0;
 
-            //- Read binary block
-            virtual Istream& read(char*, std::streamsize) = 0;
+            //- Read binary block (with any possible block delimiters).
+            //- Reading into a null pointer shall ideally behave like a seek
+            //- operation.
+            virtual Istream& read(char* data, std::streamsize count) = 0;
 
             //- Start of low-level raw binary read
             virtual bool beginRawRead() = 0;
@@ -170,8 +172,10 @@ public:
             //- End of low-level raw binary read
             virtual bool endRawRead() = 0;
 
-            //- Low-level raw binary read
-            virtual Istream& readRaw(char*, std::streamsize) = 0;
+            //- Low-level raw binary read (without possible block delimiters).
+            //- Reading into a null pointer shall ideally behave like a seek
+            //- operation.
+            virtual Istream& readRaw(char* data, std::streamsize count) = 0;
 
             //- Rewind the stream so that it may be read again
             virtual void rewind() = 0;

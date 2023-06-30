@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2022 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -165,8 +165,8 @@ public:
             const tmp<Field<Type>>& tfield
         );
 
-        //- Construct from components, setting the initial size and assigning
-        //- the dimensions, but not initialising any field values.
+        //- Construct from components, setting initial size and dimensions,
+        //- but not initialising any field values.
         //  Used for temporary fields which are initialised after construction
         DimensionedField
         (
@@ -176,9 +176,20 @@ public:
             const bool checkIOFlags = true
         );
 
-        //- Construct from components, setting the initial size and assigning
-        //- both dimensions and values.
-        //  The internal name for the dimensioned\<Type\> has no influence.
+        //- Construct from components, setting dimensions and initial
+        //- uniform field value.
+        DimensionedField
+        (
+            const IOobject& io,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims,
+            const bool checkIOFlags = true
+        );
+
+        //- Construct from components, setting dimensions and initial
+        //- uniform field value.
+        //  The name of the dimensioned\<Type\> has no influence.
         DimensionedField
         (
             const IOobject& io,
@@ -292,7 +303,7 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             const Field<Type>& iField
         );
 
@@ -304,7 +315,7 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds,
+            const dimensionSet& dims,
             Field<Type>&& iField
         );
 
@@ -315,7 +326,18 @@ public:
         (
             const word& name,
             const Mesh& mesh,
-            const dimensionSet& ds
+            const dimensionSet& dims
+        );
+
+        //- Return uniform value tmp field from name, mesh, dimensions, value.
+        //  The field is NO_READ, NO_WRITE, unregistered and uses the
+        //  current timeName from the mesh registry
+        static tmp<DimensionedField<Type, GeoMesh>> New
+        (
+            const word& name,
+            const Mesh& mesh,
+            const Type& value,
+            const dimensionSet& dims
         );
 
         //- Return tmp field from name, mesh, dimensioned\<Type\>.
@@ -420,6 +442,8 @@ public:
             const direction d,
             const tmp<DimensionedField<cmptType, GeoMesh>>& tdf
         );
+
+        // Inherits clamp, clamp_min, clamp_max (without dimensions) from Field
 
         //- Return the field transpose (only defined for second rank tensors)
         tmp<DimensionedField<Type, GeoMesh>> T() const;

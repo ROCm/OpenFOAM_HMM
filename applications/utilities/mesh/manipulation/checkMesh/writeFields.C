@@ -2,7 +2,6 @@
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "polyMeshTools.H"
-#include "zeroGradientFvPatchFields.H"
 #include "syncTools.H"
 #include "tetrahedron.H"
 #include "regionSplit.H"
@@ -134,12 +133,11 @@ void writeSurfaceField
             mesh.time().timeName(),
             mesh,
             IOobject::NO_READ,
-            IOobject::AUTO_WRITE,
-            false
+            IOobject::NO_WRITE,
+            IOobject::NO_REGISTER
         ),
         mesh,
-        dimensionedScalar(dimless, Zero),
-        calculatedFvsPatchScalarField::typeName
+        dimensionedScalar(dimless, Zero)
     );
     fld.primitiveFieldRef() = faceData;
     //fld.correctBoundaryConditions();
@@ -193,12 +191,11 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
-            dimensionedScalar(dimless, Zero),
-            calculatedFvPatchScalarField::typeName
+            dimensionedScalar(dimless, Zero)
         );
         //- Take max
         maxFaceToCell(nonOrthoAngle, cellNonOrthoAngle);
@@ -227,15 +224,15 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
             wordList                                // wanted bc types
             (
                 mesh.boundary().size(),
-                calculatedFvPatchScalarField::typeName
+                fvPatchFieldBase::calculatedType()
             ),
             mesh.weights().boundaryField().types()  // current bc types
         );
@@ -279,12 +276,11 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
-            dimensionedScalar(dimless, Zero),
-            calculatedFvPatchScalarField::typeName
+            dimensionedScalar(dimless, Zero)
         );
         //- Take max
         maxFaceToCell(faceSkewness, cellSkewness);
@@ -316,12 +312,12 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         cellDeterminant.primitiveFieldRef() =
             primitiveMeshTools::cellDeterminant
@@ -351,12 +347,12 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
 
@@ -386,12 +382,12 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         aspectRatio.ref().field() = cellAspectRatio(mesh);
@@ -416,12 +412,12 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar(dimless, Zero),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
         const cellShapeList& cellShapes = mesh.cellShapes();
         forAll(cellShapes, cellI)
@@ -445,12 +441,11 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
-            dimensionedScalar(dimVolume, Zero),
-            calculatedFvPatchScalarField::typeName
+            dimensionedScalar(dimVolume, Zero)
         );
         V.ref() = mesh.V();
         Info<< "    Writing cell volume to " << V.name() << endl;
@@ -476,12 +471,11 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
-            dimensionedScalar(dimless, Zero),
-            calculatedFvPatchScalarField::typeName
+            dimensionedScalar(dimless, Zero)
         );
         //- Take min
         minFaceToCell(faceVolumeRatio, cellVolumeRatio);
@@ -511,12 +505,12 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar("minTetVolume", dimless, GREAT),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
 
@@ -577,12 +571,12 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
             dimensionedScalar("minPyrVolume", dimless, GREAT),
-            zeroGradientFvPatchScalarField::typeName
+            fvPatchFieldBase::zeroGradientType()
         );
 
         // Get owner and neighbour pyr volumes
@@ -650,12 +644,11 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
-            dimensionedScalar(dimless, Zero),
-            calculatedFvPatchScalarField::typeName
+            dimensionedScalar(dimless, Zero)
         );
 
         regionSplit rs(mesh);
@@ -701,12 +694,11 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
-            dimensionedScalar(scalar(-1)),
-            calculatedFvPatchScalarField::typeName
+            dimensionedScalar(word::null, dimless, -1)
         );
 
         const cellZoneMesh& czs = mesh.cellZones();
@@ -740,12 +732,11 @@ void Foam::writeFields
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
-                IOobject::AUTO_WRITE,
-                false
+                IOobject::NO_WRITE,
+                IOobject::NO_REGISTER
             ),
             mesh,
-            dimensionedScalar(scalar(-1)),
-            calculatedFvsPatchScalarField::typeName
+            dimensionedScalar(word::null, dimless, -1)
         );
 
         faceZone.primitiveFieldRef() =

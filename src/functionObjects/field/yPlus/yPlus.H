@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2013-2016 OpenFOAM Foundation
-    Copyright (C) 2015-2021 OpenCFD Ltd.
+    Copyright (C) 2015-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,8 @@ Usage
         libs        (fieldFunctionObjects);
 
         // Optional entries
-        useWallFunction    true;
+        useWallFunction true;
+        writeFields     true;
 
         // Optional (inherited) entries
         ...
@@ -67,6 +68,7 @@ Usage
                       --> the selected nut wall function to compute yPlus, <!--
                       --> otherwise directly compute yPlus from flow field <!--
                       -->                             | bool | no    | true
+      writeFields | Flag to write yPlus field         | bool |  no   | true
     \endtable
 
     The inherited entries are elaborated in:
@@ -77,6 +79,12 @@ Usage
     \verbatim
         <solver> -postProcess -func yPlus
     \endverbatim
+
+Note
+    The \c writeFields flag currently defaults to \c true
+    (for consistency with previous versions that did not have that flag)
+    but this is subject to change in the near future for consistency
+    with other function objects.
 
 See also
     - Foam::functionObject
@@ -89,8 +97,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef functionObjects_yPlus_H
-#define functionObjects_yPlus_H
+#ifndef Foam_functionObjects_yPlus_H
+#define Foam_functionObjects_yPlus_H
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
@@ -100,7 +108,6 @@ SourceFiles
 
 namespace Foam
 {
-
 namespace functionObjects
 {
 
@@ -115,8 +122,11 @@ class yPlus
 {
     // Private Data
 
-        //- Flag to use the wall function expressions to compute yPlus
+        //- Use the wall function expressions to compute yPlus ?
         bool useWallFunction_;
+
+        //- Write the yPlus field ?
+        bool writeFields_;
 
 
     // Private Member Functions
@@ -160,7 +170,8 @@ public:
         //- Calculate the yPlus field
         virtual bool execute();
 
-        //- Write the yPlus field
+        //- Report min/max/avg (per patch) and log to file,
+        //- write the yPlus volume field.
         virtual bool write();
 };
 

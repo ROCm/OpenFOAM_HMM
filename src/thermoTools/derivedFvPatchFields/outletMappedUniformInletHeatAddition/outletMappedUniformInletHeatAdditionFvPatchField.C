@@ -170,7 +170,7 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::updateCoeffs()
 
         scalar totalPhiCp = gSum(outletPatchPhi)*gAverage(Cpf);
 
-        operator==(min(max(averageOutletField + Q_/totalPhiCp, TMin_), TMax_));
+        operator==(clamp(averageOutletField + Q_/totalPhiCp, TMin_, TMax_));
     }
     else
     {
@@ -190,14 +190,14 @@ void Foam::outletMappedUniformInletHeatAdditionFvPatchField::write
     Ostream& os
 ) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("outletPatch", outletPatchName_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntry("Q", Q_);
     os.writeEntry("TMin", TMin_);
     os.writeEntry("TMax", TMax_);
 
-    this->writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

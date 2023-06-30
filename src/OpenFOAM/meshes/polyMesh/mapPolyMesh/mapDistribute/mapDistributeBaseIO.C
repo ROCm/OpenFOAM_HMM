@@ -171,10 +171,10 @@ template<>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<mapDistributeBase>& ip
+    const InfoProxy<mapDistributeBase>& iproxy
 )
 {
-    const auto& map = ip.t_;
+    const auto& map = *iproxy;
 
     // Output as compact pseudo dictionary entries
 

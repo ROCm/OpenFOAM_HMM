@@ -136,7 +136,7 @@ SourceFiles
 #ifndef Foam_faceCoupleInfo_H
 #define Foam_faceCoupleInfo_H
 
-#include "pointField.H"
+#include "edgeHashes.H"
 #include "indirectPrimitivePatch.H"
 #include "primitivePatch.H"
 
@@ -145,10 +145,7 @@ SourceFiles
 namespace Foam
 {
 
-typedef HashTable<labelList, edge, Hash<edge>> edgeLookup;
-
 // Forward Declarations
-class face;
 class primitiveMesh;
 class polyPatch;
 class polyMesh;
@@ -204,7 +201,7 @@ class faceCoupleInfo
             //- For edges originating from splitting of edges:
             //  given the two endpoints of the unsplit edge give the list
             //  of inbetween vertices
-            edgeLookup cutEdgeToPoints_;
+            EdgeMap<labelList> cutEdgeToPoints_;
 
 
     // Private Member Functions
@@ -499,13 +496,11 @@ public:
                 return slaveToCutPoints_;
             }
 
-            //- From two cut points (original edge) to list of inserted
-            //  points
-            const edgeLookup& cutEdgeToPoints() const
+            //- From two cut points (original edge) to list of inserted points
+            const EdgeMap<labelList>& cutEdgeToPoints() const noexcept
             {
                 return cutEdgeToPoints_;
             }
-
  };
 
 

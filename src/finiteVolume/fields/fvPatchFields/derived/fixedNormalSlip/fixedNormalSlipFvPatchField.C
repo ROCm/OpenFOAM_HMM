@@ -71,7 +71,7 @@ Foam::fixedNormalSlipFvPatchField<Type>::fixedNormalSlipFvPatchField
     fixedValue_("fixedValue", dict, p.size()),
     writeValue_(dict.getOrDefault("writeValue", false))
 {
-    this->patchType() = dict.getOrDefault<word>("patchType", word::null);
+    fvPatchFieldBase::readDict(dict);
     evaluate();
 }
 
@@ -171,12 +171,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::fixedNormalSlipFvPatchField<Type>::snGradTransformDiag() const
 {
-    const vectorField nHat(this->patch().nf());
-    vectorField diag(nHat.size());
-
-    diag.replace(vector::X, mag(nHat.component(vector::X)));
-    diag.replace(vector::Y, mag(nHat.component(vector::Y)));
-    diag.replace(vector::Z, mag(nHat.component(vector::Z)));
+    tmp<vectorField> diag(cmptMag(this->patch().nf()));
 
     return transformFieldMask<Type>(pow<vector, pTraits<Type>::rank>(diag));
 }
@@ -191,7 +186,7 @@ void Foam::fixedNormalSlipFvPatchField<Type>::write(Ostream& os) const
     if (writeValue_)
     {
         os.writeEntry("writeValue", "true");
-        this->writeEntry("value", os);
+        fvPatchField<Type>::writeValueEntry(os);
     }
 }
 

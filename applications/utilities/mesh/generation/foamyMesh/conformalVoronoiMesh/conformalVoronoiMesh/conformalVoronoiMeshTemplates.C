@@ -79,8 +79,8 @@ bool Foam::conformalVoronoiMesh::distributeBackground(const Triangulation& mesh)
                 IOobject::NO_WRITE
             ),
             bMesh,
-            dimensionedScalar("weight", dimless, 1e-2),
-            zeroGradientFvPatchScalarField::typeName
+            dimensionedScalar(word::null, dimless, 1e-2),
+            fvPatchFieldBase::zeroGradientType()
         );
 
         meshSearch cellSearch(bMesh, polyMesh::FACE_PLANES);

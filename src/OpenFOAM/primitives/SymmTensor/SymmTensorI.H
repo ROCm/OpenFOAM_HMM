@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -213,9 +213,210 @@ inline void Foam::SymmTensor<Cmpt>::diag(const Vector<Cmpt>& v)
 
 
 template<class Cmpt>
-inline const Foam::SymmTensor<Cmpt>& Foam::SymmTensor<Cmpt>::T() const
+inline void Foam::SymmTensor<Cmpt>::addDiag(const Vector<Cmpt>& v)
 {
-    return *this;
+    this->v_[XX] += v.x(); this->v_[YY] += v.y(); this->v_[ZZ] += v.z();
+}
+
+
+template<class Cmpt>
+inline void Foam::SymmTensor<Cmpt>::subtractDiag(const Vector<Cmpt>& v)
+{
+    this->v_[XX] -= v.x(); this->v_[YY] -= v.y(); this->v_[ZZ] -= v.z();
+}
+
+
+template<class Cmpt>
+inline Foam::scalar Foam::SymmTensor<Cmpt>::diagSqr() const
+{
+    return
+    (
+        Foam::magSqr(this->xx())
+      + Foam::magSqr(this->yy())
+      + Foam::magSqr(this->zz())
+    );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::SymmTensor<Cmpt>::det() const
+{
+    return
+    (
+        xx()*yy()*zz() + xy()*yz()*xz()
+      + xz()*xy()*yz() - xx()*yz()*yz()
+      - xy()*xy()*zz() - xz()*yy()*xz()
+    );
+}
+
+
+template<class Cmpt>
+inline Cmpt Foam::SymmTensor<Cmpt>::det2D(const direction excludeCmpt) const
+{
+    switch (excludeCmpt)
+    {
+        case 0:  // Eliminate x
+        {
+            return (yy()*zz() - yz()*yz());
+        }
+
+        case 1:  // Eliminate y
+        {
+            return (xx()*zz() - xz()*xz());
+        }
+    }
+
+    // Fall-through: Eliminate z
+    return (xx()*yy() - xy()*xy());
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::adjunct() const
+{
+    // symmetric: cof() == adjunct()
+    return SymmTensor<Cmpt>
+    (
+        yy()*zz() - yz()*yz(), xz()*yz() - xy()*zz(), xy()*yz() - xz()*yy(),
+                               xx()*zz() - xz()*xz(), xy()*xz() - xx()*yz(),
+                                                      xx()*yy() - xy()*xy()
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::cof() const
+{
+    // symmetric: cof() == adjunct()
+    return this->adjunct();
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::adjunct2D
+(
+    const direction excludeCmpt
+) const
+{
+    switch (excludeCmpt)
+    {
+        case 0:  // Eliminate x
+        {
+            return SymmTensor<Cmpt>
+            (
+                Zero, Zero,  Zero,
+                      zz(), -yz(),
+                             yy()
+            );
+        }
+
+        case 1:  // Eliminate y
+        {
+            return SymmTensor<Cmpt>
+            (
+                zz(), Zero, -xz(),
+                      Zero,  Zero,
+                             xx()
+            );
+        }
+    }
+
+    // Fall-through: Eliminate z
+    return SymmTensor<Cmpt>
+    (
+        yy(), -xy(), Zero,
+               xx(), Zero,
+                     Zero
+    );
+}
+
+
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::inv2D
+(
+    const direction excludeCmpt
+) const
+{
+    const Cmpt detval = this->det2D(excludeCmpt);
+
+    return this->adjunct2D(excludeCmpt)/detval;
+}
+
+
+// Invert without much error handling
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::inv() const
+{
+    const Cmpt detval = this->det();
+
+    #ifdef FULLDEBUG
+    if (mag(detval) < VSMALL)
+    {
+        FatalErrorInFunction
+            << "Tensor not properly invertible, determinant:"
+            << detval << " tensor:" << *this << nl
+            << abort(FatalError);
+    }
+    #endif
+
+    return this->adjunct()/detval;
+}
+
+
+// Invert with some error handling
+template<class Cmpt>
+inline Foam::SymmTensor<Cmpt> Foam::SymmTensor<Cmpt>::safeInv() const
+{
+    {
+        // Attempt to identify and handle 2-D cases.
+        // - use diagSqr instead of magSqr for fewer operations
+        const scalar magSqr_xx = Foam::magSqr(xx());
+        const scalar magSqr_yy = Foam::magSqr(yy());
+        const scalar magSqr_zz = Foam::magSqr(zz());
+
+        // SMALL: 1e-15 (double), 1e-6 (float), but 1e-6 may be adequate
+
+        const scalar threshold = SMALL * (magSqr_xx + magSqr_yy + magSqr_zz);
+
+        const bool small_xx = (magSqr_xx < threshold);
+        const bool small_yy = (magSqr_yy < threshold);
+        const bool small_zz = (magSqr_zz < threshold);
+
+        if (small_xx || small_yy || small_zz)
+        {
+            SymmTensor<Cmpt> work(*this);
+
+            if (small_xx) { work.xx() += pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() += pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() += pTraits<Cmpt>::one; }
+
+            const Cmpt detval = work.det();
+
+            if (mag(detval) < ROOTVSMALL)
+            {
+                // Appears to be nearly zero - leave untouched?
+                return SymmTensor<Cmpt>(Zero);
+            }
+
+            work = work.adjunct()/detval;
+
+            if (small_xx) { work.xx() -= pTraits<Cmpt>::one; }
+            if (small_yy) { work.yy() -= pTraits<Cmpt>::one; }
+            if (small_zz) { work.zz() -= pTraits<Cmpt>::one; }
+
+            return work;
+        }
+    }
+
+    const Cmpt detval = this->det();
+
+    if (mag(detval) < ROOTVSMALL)
+    {
+        // Appears to be nearly zero - leave untouched?
+        return SymmTensor<Cmpt>(Zero);
+    }
+
+    return this->adjunct()/detval;
 }
 
 
@@ -272,6 +473,22 @@ inline SymmTensor<Cmpt> twoSymm(const SymmTensor<Cmpt>& st)
 }
 
 
+//- Return the deviatoric part of the symmetric part of a SymmTensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devSymm(const SymmTensor<Cmpt>& st)
+{
+    return dev(st);
+}
+
+
+//- Return the deviatoric part of twice the symmetric part of a SymmTensor
+template<class Cmpt>
+inline SymmTensor<Cmpt> devTwoSymm(const SymmTensor<Cmpt>& st)
+{
+    return dev2(st);
+}
+
+
 //- Return the deviatoric part of a SymmTensor
 template<class Cmpt>
 inline SymmTensor<Cmpt> dev(const SymmTensor<Cmpt>& st)
@@ -292,12 +509,7 @@ inline SymmTensor<Cmpt> dev2(const SymmTensor<Cmpt>& st)
 template<class Cmpt>
 inline Cmpt det(const SymmTensor<Cmpt>& st)
 {
-    return
-    (
-        st.xx()*st.yy()*st.zz() + st.xy()*st.yz()*st.xz()
-      + st.xz()*st.xy()*st.yz() - st.xx()*st.yz()*st.yz()
-      - st.xy()*st.xy()*st.zz() - st.xz()*st.yy()*st.xz()
-    );
+    return st.det();
 }
 
 
@@ -305,35 +517,25 @@ inline Cmpt det(const SymmTensor<Cmpt>& st)
 template<class Cmpt>
 inline SymmTensor<Cmpt> cof(const SymmTensor<Cmpt>& st)
 {
-    return SymmTensor<Cmpt>
-    (
-        st.yy()*st.zz() - st.yz()*st.yz(),
-        st.xz()*st.yz() - st.xy()*st.zz(),
-        st.xy()*st.yz() - st.xz()*st.yy(),
-
-        st.xx()*st.zz() - st.xz()*st.xz(),
-        st.xy()*st.xz() - st.xx()*st.yz(),
-
-        st.xx()*st.yy() - st.xy()*st.xy()
-    );
+    return st.cof();
 }
 
 
-//- Return the inverse of a SymmTensor by using the given determinant
+//- Return the inverse of a SymmTensor, using given determinant value
 template<class Cmpt>
-inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st, const Cmpt detst)
+inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st, const Cmpt detval)
 {
     #ifdef FULLDEBUG
-    if (mag(detst) < VSMALL)
+    if (mag(detval) < VSMALL)
     {
         FatalErrorInFunction
-            << "SymmTensor is not invertible due to the zero determinant:"
-            << "det(symmTensor) = " << mag(detst)
+            << "SymmTensor not properly invertible, determinant:"
+            << detval << " tensor:" << st << nl
             << abort(FatalError);
     }
     #endif
 
-    return cof(st).T()/detst;
+    return st.adjunct()/detval;
 }
 
 
@@ -341,7 +543,7 @@ inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st, const Cmpt detst)
 template<class Cmpt>
 inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st)
 {
-    return inv(st, det(st));
+    return st.inv();
 }
 
 
@@ -392,15 +594,15 @@ innerSqr(const SymmTensor<Cmpt>& st)
 }
 
 
-//- Return the square of Frobenius norm of a SymmTensor as a Cmpt
+//- Return the square of Frobenius norm of a SymmTensor
 template<class Cmpt>
-inline Cmpt magSqr(const SymmTensor<Cmpt>& st)
+inline Foam::scalar magSqr(const SymmTensor<Cmpt>& st)
 {
-    return Cmpt
+    return
     (
-        mag(st.xx()*st.xx()) + 2*mag(st.xy()*st.xy()) + 2*mag(st.xz()*st.xz())
-                             +   mag(st.yy()*st.yy()) + 2*mag(st.yz()*st.yz())
-                                                      +   mag(st.zz()*st.zz())
+        magSqr(st.xx()) + 2*magSqr(st.xy()) + 2*magSqr(st.xz())
+                        +   magSqr(st.yy()) + 2*magSqr(st.yz())
+                                            +   magSqr(st.zz())
     );
 }
 
@@ -414,6 +616,29 @@ inline SymmTensor<Cmpt> sqr(const Vector<Cmpt>& v)
         v.x()*v.x(), v.x()*v.y(), v.x()*v.z(),
                      v.y()*v.y(), v.y()*v.z(),
                                   v.z()*v.z()
+    );
+}
+
+
+//- Linear interpolation of symmetric tensors a and b by factor t
+template<class Cmpt>
+inline SymmTensor<Cmpt> lerp
+(
+    const SymmTensor<Cmpt>& a,
+    const SymmTensor<Cmpt>& b,
+    const scalar t
+)
+{
+    const scalar onet = (1-t);
+
+    return SymmTensor<Cmpt>
+    (
+        onet*a.xx() + t*b.xx(),
+        onet*a.xy() + t*b.xy(),
+        onet*a.xz() + t*b.xz(),
+        onet*a.yy() + t*b.yy(),
+        onet*a.yz() + t*b.yz(),
+        onet*a.zz() + t*b.zz()
     );
 }
 

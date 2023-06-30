@@ -78,7 +78,11 @@ TolubinskiKostanchuk::dDeparture
     const scalarField& L
 ) const
 {
-    return max(min(dRef_*exp(-(Tsatw - Tl)/scalar(45)), dMax_), dMin_);
+    return clamp
+    (
+        dRef_*exp(-(Tsatw - Tl)/scalar(45)),
+        scalarMinMax(dMin_, dMax_)
+    );
 }
 
 

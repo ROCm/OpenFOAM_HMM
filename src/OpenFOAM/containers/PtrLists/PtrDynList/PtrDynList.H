@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2018-2022 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,9 +109,6 @@ public:
         //- Alter the addressed list size.
         inline void resize(const label newLen);
 
-        //- Same as resize()
-        void setSize(const label n) { this->resize(n); }
-
         //- Clear the addressed list, i.e. set the size to zero.
         //  Allocated size does not change
         inline void clear();
@@ -129,9 +126,6 @@ public:
 
     // Edit
 
-        //- Delete the allocated entries, but retain the list size.
-        using PtrList<T>::free;
-
         //- Squeeze out intermediate nullptr entries in the list of pointers
         //- and adjust the addressable size accordingly.
         //  \return the number of non-null entries
@@ -141,9 +135,17 @@ public:
         template<int AnySizeMin>
         inline void swap(PtrDynList<T, AnySizeMin>& other);
 
-        //- Construct an element at the end of the list
+        //- Transfer contents of the argument PtrList into this.
+        inline void transfer(PtrList<T>& list);
+
+        //- Transfer contents of any sized PtrDynList into this.
+        template<int AnySizeMin>
+        inline void transfer(PtrDynList<T, AnySizeMin>& list);
+
+        //- Construct an element at the end of the list,
+        //- return reference to the new list element
         template<class... Args>
-        inline void emplace_back(Args&&... args);
+        inline T& emplace_back(Args&&... args);
 
         //- Append an element to the end of the list
         inline void push_back(T* ptr);
@@ -170,12 +172,11 @@ public:
         //- Reduce size by 1 or more elements. Can be called on an empty list.
         inline void pop_back(label n = 1);
 
-        //- Remove and return the top element. Can be called on an empty list.
-        inline autoPtr<T> remove();
-
-        //- Construct and set an element
+        //- Construct and set a new element at given position,
+        //- (discard old element at that location).
+        //- Return reference to the new list element.
         template<class... Args>
-        inline autoPtr<T> emplace(const label i, Args&&... args);
+        inline T& emplace(const label i, Args&&... args);
 
         //- Set element to given pointer and return old element (can be null).
         //- Auto-sizes list as required.
@@ -226,11 +227,18 @@ public:
 
     // Housekeeping
 
+        //- Disallow push_back with autoPtr without std::move
+        void push_back(autoPtr<T>& ptr) = delete;
+
         //- Set element to given autoPtr and return old element
+        //FOAM_DEPRECATED_FOR(2022-10, "set(autoPtr&&))")
         autoPtr<T> set(const label i, autoPtr<T>& ptr)
         {
-            return this->set(i, std::move(ptr));
+            return this->set(i, ptr.release());
         }
+
+        //- Same as resize()
+        void setSize(const label n) { this->resize(n); }
 
         //- Move append an element to the end of the list
         void append(autoPtr<T>& ptr) { this->push_back(std::move(ptr)); }

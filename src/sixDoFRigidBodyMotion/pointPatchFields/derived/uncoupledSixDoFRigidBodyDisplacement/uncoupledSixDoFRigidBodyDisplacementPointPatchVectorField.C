@@ -200,7 +200,7 @@ void uncoupledSixDoFRigidBodyDisplacementPointPatchVectorField::write
     pointPatchField<vector>::write(os);
     motion_.write(os);
     initialPoints_.writeEntry("initialPoints", os);
-    writeEntry("value", os);
+    this->writeValueEntry(os);
 }
 
 

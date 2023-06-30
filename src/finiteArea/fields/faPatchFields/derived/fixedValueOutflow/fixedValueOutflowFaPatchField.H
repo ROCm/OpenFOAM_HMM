@@ -56,7 +56,6 @@ class fixedValueOutflowFaPatchField
 :
     public faPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -73,6 +72,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
+        //  The "value" entry: MUST_READ
         fixedValueOutflowFaPatchField
         (
             const faPatch&,
@@ -80,8 +80,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping the given fixedValueOutflowFaPatchField<Type>
-        //  onto a new patch
+        //- Construct by mapping the given fixedValueOutflow patch field
+        //- onto a new patch
         fixedValueOutflowFaPatchField
         (
             const fixedValueOutflowFaPatchField<Type>&,
@@ -125,17 +125,10 @@ public:
         }
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
-
-            //- Return true if this patch field fixes a value.
-            //  Needed to check if a level has to be specified while solving
-            //  Poissons equations.
-            virtual bool fixesValue() const
-            {
-                return true;
-            }
+        //- True: the patch field fixes a value.
+        virtual bool fixesValue() const { return true; }
 
 
         // Evaluation functions

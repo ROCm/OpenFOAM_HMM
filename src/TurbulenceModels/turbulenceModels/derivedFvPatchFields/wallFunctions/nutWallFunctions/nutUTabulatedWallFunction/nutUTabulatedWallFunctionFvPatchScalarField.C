@@ -115,7 +115,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
             patch().boundaryMesh().mesh(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         false
     )
@@ -156,7 +156,7 @@ nutUTabulatedWallFunctionFvPatchScalarField
             patch().boundaryMesh().mesh(),
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         true
     )
@@ -225,7 +225,7 @@ void Foam::nutUTabulatedWallFunctionFvPatchScalarField::write
 {
     nutWallFunctionFvPatchScalarField::write(os);
     writeLocalEntries(os);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

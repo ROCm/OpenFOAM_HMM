@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2015 OpenFOAM Foundation
-    Copyright (C) 2018 OpenCFD Ltd.
+    Copyright (C) 2018-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,9 +37,12 @@ Foam::List<T> Foam::transform
     const UList<T>& field
 )
 {
-    List<T> result(field.size());
+    const label loopLen = field.size();
 
-    forAll(field, i)
+    List<T> result(loopLen);
+
+    /* pragmas... */
+    for (label i = 0; i < loopLen; ++i)
     {
         result[i] = transform(rotTensor, field[i]);
     }
@@ -51,7 +54,10 @@ Foam::List<T> Foam::transform
 template<class T>
 void Foam::transformList(const tensor& rotTensor, UList<T>& field)
 {
-    forAll(field, i)
+    const label loopLen = field.size();
+
+    /* pragmas... */
+    for (label i = 0; i < loopLen; ++i)
     {
         field[i] = transform(rotTensor, field[i]);
     }
@@ -63,11 +69,14 @@ void Foam::transformList(const tensorField& rotTensor, UList<T>& field)
 {
     if (rotTensor.size() == 1)
     {
-        transformList(rotTensor[0], field);
+        transformList(rotTensor.front(), field);
     }
     else if (rotTensor.size() == field.size())
     {
-        forAll(field, i)
+        const label loopLen = field.size();
+
+        /* pragmas... */
+        for (label i = 0; i < loopLen; ++i)
         {
             field[i] = transform(rotTensor[i], field[i]);
         }
@@ -98,7 +107,7 @@ void Foam::transformList(const tensorField& rotTensor, Map<T>& field)
 {
     if (rotTensor.size() == 1)
     {
-        transformList(rotTensor[0], field);
+        transformList(rotTensor.front(), field);
     }
     else
     {
@@ -126,7 +135,7 @@ void Foam::transformList(const tensorField& rotTensor, EdgeMap<T>& field)
 {
     if (rotTensor.size() == 1)
     {
-        transformList(rotTensor[0], field);
+        transformList(rotTensor.front(), field);
     }
     else
     {

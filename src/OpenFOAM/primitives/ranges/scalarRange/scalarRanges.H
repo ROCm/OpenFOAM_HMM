@@ -88,17 +88,17 @@ public:
 
     // Member Functions
 
-        //- True if the value is matched by any of the sub-ranges
+        //- True if the value is contained by any of the sub-ranges
         inline bool contains(const scalar value) const;
 
         //- True if the value is matched by any of the sub-ranges
-        inline bool match(const scalar value) const;
+        bool match(const scalar value) const { return contains(value); }
 
 
     // Member Operators
 
-        //- For use as a predicate, same as contains(), match()
-        bool operator()(const scalar value) const { return match(value); }
+        //- For use as a predicate, same as contains()
+        bool operator()(const scalar value) const { return contains(value); }
 };
 
 

@@ -92,15 +92,15 @@ inline Foam::edge::edge(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::edge::minVertex() const
+inline Foam::label Foam::edge::minVertex() const noexcept
 {
     return (first() < second() ? first() : second());
 }
 
 
-inline Foam::label Foam::edge::maxVertex() const
+inline Foam::label Foam::edge::maxVertex() const noexcept
 {
-    return (first() > second() ? first() : second());
+    return (second() < first() ? first() : second());
 }
 
 
@@ -110,27 +110,27 @@ inline bool Foam::edge::good() const noexcept
 }
 
 
-inline bool Foam::edge::found(const label pointLabel) const
+inline bool Foam::edge::contains(const label vertex) const noexcept
 {
     // -1: always false
     return
     (
-        pointLabel >= 0
-     && (pointLabel == first() || pointLabel == second())
+        vertex >= 0
+     && (vertex == first() || vertex == second())
     );
 }
 
 
-inline Foam::label Foam::edge::which(const label pointLabel) const
+inline Foam::label Foam::edge::which(const label vertex) const
 {
     // -1: always false
-    if (pointLabel >= 0)
+    if (vertex >= 0)
     {
-        if (pointLabel == first())
+        if (vertex == first())
         {
             return 0;
         }
-        if (pointLabel == second())
+        if (vertex == second())
         {
             return 1;
         }
@@ -142,17 +142,17 @@ inline Foam::label Foam::edge::which(const label pointLabel) const
 
 inline bool Foam::edge::connected(const edge& other) const
 {
-    return (other.found(first()) || other.found(second()));
+    return (other.contains(first()) || other.contains(second()));
 }
 
 
 inline Foam::label Foam::edge::commonVertex(const edge& other) const
 {
-    if (other.found(first()))
+    if (other.contains(first()))
     {
         return first();
     }
-    if (other.found(second()))
+    if (other.contains(second()))
     {
         return second();
     }
@@ -162,13 +162,13 @@ inline Foam::label Foam::edge::commonVertex(const edge& other) const
 }
 
 
-inline Foam::label Foam::edge::otherVertex(const label pointLabel) const
+inline Foam::label Foam::edge::otherVertex(const label vertex) const
 {
-    if (pointLabel == first())
+    if (vertex == first())
     {
         return second();
     }
-    if (pointLabel == second())
+    if (vertex == second())
     {
         return first();
     }
@@ -228,35 +228,35 @@ inline Foam::label Foam::edge::count() const
 }
 
 
-inline bool Foam::edge::empty() const
+inline bool Foam::edge::empty() const noexcept
 {
     return (first() < 0 && second() < 0);
 }
 
 
-inline bool Foam::edge::insert(const label index)
+inline bool Foam::edge::insert(const label vertex)
 {
-    if (index < 0)
+    if (vertex < 0)
     {
-        // Cannot insert invalid point labels (use direct assignment for that)
+        // Cannot insert invalid vertex labels (use direct assignment for that)
         return false;
     }
 
     if (first() < 0)
     {
         // Store at first, if not duplicate of second
-        if (index != second())
+        if (vertex != second())
         {
-            first() = index;
+            first() = vertex;
             return true;
         }
     }
     else if (second() < 0)
     {
         // Store at second, if not duplicate of first
-        if (index != first())
+        if (vertex != first())
         {
-            second() = index;
+            second() = vertex;
             return true;
         }
     }
@@ -308,23 +308,23 @@ inline Foam::label Foam::edge::insert(const labelUList& list)
 }
 
 
-inline Foam::label Foam::edge::erase(const label index)
+inline Foam::label Foam::edge::erase(const label vertex)
 {
-    if (index < 0)
+    if (vertex < 0)
     {
         // Can never remove invalid point labels!
         return 0;
     }
 
     label n = 0;
-    if (index == first())
+    if (vertex == first())
     {
         first() = -1;
         ++n;
     }
 
     // Automatically handle duplicates, which should not have been there anyhow
-    if (index == second())
+    if (vertex == second())
     {
         second() = -1;
         ++n;
@@ -426,7 +426,13 @@ inline Foam::vector Foam::edge::unitVec(const UList<point>& pts) const
 
 inline Foam::scalar Foam::edge::mag(const UList<point>& pts) const
 {
-    return ::Foam::mag(vec(pts));
+    return pts[first()].dist(pts[second()]);
+}
+
+
+inline Foam::scalar Foam::edge::magSqr(const UList<point>& pts) const
+{
+    return pts[first()].distSqr(pts[second()]);
 }
 
 

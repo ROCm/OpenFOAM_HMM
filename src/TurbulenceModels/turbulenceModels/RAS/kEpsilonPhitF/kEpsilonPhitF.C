@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2020,2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -304,7 +304,7 @@ kEpsilonPhitF<BasicTurbulenceModel>::kEpsilonPhitF
             this->mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         this->mesh_,
         dimensionedScalar(dimTime, Zero)
@@ -412,6 +412,8 @@ void kEpsilonPhitF<BasicTurbulenceModel>::correct()
 
     // Update epsilon and G at the wall
     epsilon_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    epsilon_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
     // Turbulent kinetic energy dissipation rate equation (LUU:Eq. 4)
     // k/T ~ epsilon

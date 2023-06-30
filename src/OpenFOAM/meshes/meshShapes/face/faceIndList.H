@@ -23,18 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::faceIndList
-
-Description
-    An IndirectList of faces.
-
-Typedef
-    Foam::faceUIndList
-
-Description
-    A UIndirectList of faces.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef Foam_faceIndList_H
@@ -48,7 +36,10 @@ Description
 
 namespace Foam
 {
+    //! IndirectList of face.
     typedef IndirectList<face>  faceIndList;
+
+    //! UIndirectList of face.
     typedef UIndirectList<face> faceUIndList;
 }
 

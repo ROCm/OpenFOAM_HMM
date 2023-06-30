@@ -151,30 +151,28 @@ Foam::LimitedScheme<Type, Limiter, LimitFunc>::limiter
 
     if (this->mesh().cache("limiter"))
     {
-        if (!mesh.foundObject<surfaceScalarField>(limiterFieldName))
+        auto* fldptr = mesh.getObjectPtr<surfaceScalarField>(limiterFieldName);
+
+        if (!fldptr)
         {
-            surfaceScalarField* limiterField
+            fldptr = new surfaceScalarField
             (
-                new surfaceScalarField
+                IOobject
                 (
-                    IOobject
-                    (
-                        limiterFieldName,
-                        mesh.time().timeName(),
-                        mesh,
-                        IOobject::NO_READ,
-                        IOobject::NO_WRITE
-                    ),
+                    limiterFieldName,
+                    mesh.time().timeName(),
                     mesh,
-                    dimless
-                )
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    IOobject::REGISTER
+                ),
+                mesh,
+                dimless
             );
 
-            mesh.objectRegistry::store(limiterField);
+            mesh.objectRegistry::store(fldptr);
         }
-
-        surfaceScalarField& limiterField =
-            mesh.lookupObjectRef<surfaceScalarField>(limiterFieldName);
+        auto& limiterField = *fldptr;
 
         calcLimiter(phi, limiterField);
 

@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2014 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,6 @@ SourceFiles
 #include "zero.H"
 #include "contiguous.H"
 #include <complex>
-#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,13 +53,6 @@ namespace Foam
 // Forward Declarations
 class complex;
 
-inline scalar magSqr(const complex&);
-inline scalar mag(const complex&);
-inline complex sqr(const complex&);
-inline const complex& min(const complex&, const complex&);
-inline const complex& max(const complex&, const complex&);
-inline complex limit(const complex&, const complex&);
-inline const complex& sum(const complex&);
 inline complex operator-(const complex&);
 inline complex operator+(const complex&, const complex&);
 inline complex operator+(const complex&, const scalar);
@@ -93,16 +85,16 @@ public:
     // Generated Methods
 
         //- Copy construct
-        complex(const complex&) = default;
+        complex(const complex&) noexcept = default;
 
         //- Copy assignment
-        complex& operator=(const complex&) = default;
+        complex& operator=(const complex&) noexcept = default;
 
         //- Move construct
-        complex(complex&&) = default;
+        complex(complex&&) noexcept = default;
 
         //- Move assignment
-        complex& operator=(complex&&) = default;
+        complex& operator=(complex&&) noexcept = default;
 
 
     // Constructors
@@ -134,46 +126,32 @@ public:
     // STL getter/setter
 
         //- Real part of complex number - STL naming
-        constexpr scalar real() const
-        {
-            return re;
-        }
+        constexpr scalar real() const noexcept { return re; }
 
         //- Imaginary part of complex number - STL naming
-        constexpr scalar imag() const
-        {
-            return im;
-        }
+        constexpr scalar imag() const noexcept { return im; }
 
         //- Set real part of complex number - STL naming
-        inline void real(scalar val);
+        void real(scalar val) noexcept { re = val; }
 
         //- Set imaginary part of complex number - STL naming
-        inline void imag(scalar val);
+        void imag(scalar val) noexcept { im = val; }
 
 
-    // Access
-
-        //- Real part of complex number
-        inline scalar Re() const;
-
-        //- Imaginary part of complex number
-        inline scalar Im() const;
-
-
-    // Edit
-
-        //- Real part of complex number
-        inline scalar& Re();
-
-        //- Imaginary part of complex number
-        inline scalar& Im();
-
-
-    // Operations
+    // Methods
 
         //- Complex conjugate
         inline complex conjugate() const;
+
+        //- The magnitude (L2-norm) of complex.
+        //- Called magnitude() instead mag(), which looks too much like imag()
+        inline scalar magnitude() const;
+
+        //- The L2-norm squared of complex
+        inline scalar magSqr() const;
+
+        //- The sum of real/imag components
+        inline scalar cmptSum() const noexcept;
 
 
     // Member Operators
@@ -207,24 +185,6 @@ public:
         inline bool operator!=(const complex& c) const;
 
 
-    // Friend Functions
-
-        friend scalar magSqr(const complex& c);
-        friend scalar mag(const complex& c);
-        friend complex sqr(const complex& c);
-
-        //- sgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
-        friend complex sign(const complex& c);
-
-        //- csgn() https://en.wikipedia.org/wiki/Sign_function#Complex_signum
-        friend scalar csign(const complex& c);
-
-        friend const complex& min(const complex& c1, const complex& c2);
-        friend const complex& max(const complex& c1, const complex& c2);
-        friend complex limit(const complex& c1, const complex& c2);
-        friend const complex& sum(const complex& c);
-
-
     // Friend Operators
 
         friend complex operator-(const complex& c);
@@ -244,14 +204,29 @@ public:
         friend complex operator/(const complex& c1, const complex& c2);
         friend complex operator/(const complex& c, const scalar s);
         friend complex operator/(const scalar s, const complex& c);
+
+
+    // Housekeeping
+
+        //- Get real part of complex number. Same as real()
+        scalar Re() const noexcept { return re; }
+
+        //- Get imaginary part of complex number. Same as imag()
+        scalar Im() const noexcept { return im; }
+
+        //- Non-const access to real part. Prefer real() setter method
+        scalar& Re() noexcept { return re; }
+
+        //- Non-const access to imaginary part. Prefer imag() setter method
+        scalar& Im() noexcept { return im; }
 };
 
 
 /*---------------------------------------------------------------------------*\
-                      Class pTraits<complex> Declaration
+                        Specialization pTraits<complex>
 \*---------------------------------------------------------------------------*/
 
-// Template specialisation for pTraits<complex>
+//- Template specialisation for pTraits<complex>
 template<>
 class pTraits<complex>
 {
@@ -312,16 +287,10 @@ public:
     // Member Functions
 
         //- Return the value
-        operator complex() const noexcept
-        {
-            return p_;
-        }
+        operator complex() const noexcept { return p_; }
 
         //- Access the value
-        operator complex&() noexcept
-        {
-            return p_;
-        }
+        operator complex&() noexcept { return p_; }
 };
 
 

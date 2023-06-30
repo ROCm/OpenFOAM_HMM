@@ -55,7 +55,7 @@ wordList adjointEikonalSolver::patchTypes() const
 
     for (const label patchi : wallPatchIDs_)
     {
-        daTypes[patchi] = zeroGradientFvPatchScalarField::typeName;
+        daTypes[patchi] = fvPatchFieldBase::zeroGradientType();
     }
 
     return daTypes;
@@ -89,7 +89,7 @@ tmp<surfaceScalarField> adjointEikonalSolver::computeYPhi()
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         ),
         mesh_,
         dimensionedVector(dimless, Zero),

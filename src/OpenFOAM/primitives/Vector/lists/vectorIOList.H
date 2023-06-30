@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::vectorIOList
-
-Description
-    Vector container classes
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef vectorIOList_H
-#define vectorIOList_H
+#ifndef Foam_vectorIOList_H
+#define Foam_vectorIOList_H
 
 #include "vector.H"
 #include "IOList.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of vector
     typedef IOList<vector> vectorIOList;
 }
 

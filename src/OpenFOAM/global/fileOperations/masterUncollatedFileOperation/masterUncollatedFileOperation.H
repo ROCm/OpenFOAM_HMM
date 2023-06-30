@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2019-2022 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,8 +66,6 @@ Description
 #include "OSspecific.H"
 #include "HashPtrTable.H"
 #include "DynamicList.H"
-#include "List.H"
-#include "unthreadedInitialise.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,13 +89,14 @@ class masterUncollatedFileOperation
     // Private Data
 
         //- Communicator allocated/managed by us
-        label managedComm_;
+        mutable label managedComm_;
 
 
     // Private Member Functions
 
         //- Any initialisation steps after constructing
         void init(bool verbose);
+
 
 protected:
 
@@ -391,9 +390,6 @@ protected:
 
     // Private Member Functions
 
-        //- Get the list of processors that are part of this communicator
-        static labelList subRanks(const label n);
-
         template<class Type>
         Type scatterList(const UList<Type>&, const int, const label comm) const;
 
@@ -435,6 +431,7 @@ protected:
             const bool checkGlobal,
             const bool isFile,
             const IOobject& io,
+            const dirIndexList& pDirs,
             const bool search,
             pathType& searchType,
             word& processorsDir,
@@ -455,7 +452,7 @@ protected:
         static void readAndSend
         (
             const fileName& filePath,
-            const labelUList& procs,
+            const labelUList& recvProcs,
             PstreamBuffers& pBufs
         );
 
@@ -465,8 +462,8 @@ protected:
             IOobject& io,
             const label comm,
             const bool uniform,             // on comms master only
-            const fileNameList& filePaths,  // on comms master only
-            const boolList& procValid       // on comms master only
+            const fileNameList& filePaths,  // on comms master and sub-ranks
+            const boolUList& readOnProcs    // on comms master and sub-ranks
         );
 
         //- Helper: check IO for local existence. Like filePathInfo but
@@ -491,10 +488,15 @@ public:
     // Constructors
 
         //- Default construct
-        explicit masterUncollatedFileOperation(bool verbose);
+        explicit masterUncollatedFileOperation(bool verbose = false);
 
-        //- Construct from communicator
-        masterUncollatedFileOperation(const label comm, bool verbose);
+        //- Construct from communicator with specified io-ranks
+        explicit masterUncollatedFileOperation
+        (
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
+            bool verbose = false
+        );
 
 
     //- Destructor
@@ -502,6 +504,11 @@ public:
 
 
     // Member Functions
+
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const;
+
 
         // OSSpecific equivalents
 
@@ -662,13 +669,13 @@ public:
             ) const;
 
             //- Reads header for regIOobject and returns an ISstream
-            //  to read the contents.
+            //- to read the contents.
             virtual autoPtr<ISstream> readStream
             (
                 regIOobject&,
                 const fileName&,
                 const word& typeName,
-                const bool valid = true
+                const bool readOnProc = true
             ) const;
 
             //- Top-level read
@@ -686,7 +693,7 @@ public:
             (
                 const regIOobject& io,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
             //- Generate an ISstream that reads a file
@@ -697,7 +704,7 @@ public:
             (
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
             //- Generate an OSstream that writes a file
@@ -706,7 +713,7 @@ public:
                 IOstreamOption::atomicType atomic,
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
 
@@ -767,35 +774,14 @@ public:
             //- Forcibly wait until all output done. Flush any cached data
             virtual void flush() const;
 
+            //- Forcibly parallel sync
+            virtual void sync();
+
             //- Return cached times
             const HashPtrTable<DynamicList<instant>>& times() const noexcept
             {
                 return times_;
             }
-};
-
-
-/*---------------------------------------------------------------------------*\
-           Class masterUncollatedFileOperationInitialise Declaration
-\*---------------------------------------------------------------------------*/
-
-class masterUncollatedFileOperationInitialise
-:
-    public unthreadedInitialise
-{
-public:
-
-    // Constructors
-
-        //- Construct from components
-        masterUncollatedFileOperationInitialise(int& argc, char**& argv)
-        :
-            unthreadedInitialise(argc, argv)
-        {}
-
-
-    //- Destructor
-    virtual ~masterUncollatedFileOperationInitialise() = default;
 };
 
 

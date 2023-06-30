@@ -219,9 +219,22 @@ bool Foam::functionObjects::writeObjects::write()
         }
         else
         {
-            Log << "    writing object " << obj.name() << endl;
+            // TBD:
+            // If the object is a temporary field expression wrap with tmp<...>
 
-            obj.write();
+            // if (obj.db().cacheTemporaryObject(objName))
+            // {
+            //     obj.IOobject::rename("tmp<" + objName + ">");
+            //
+            //     Log << "    writing object " << obj.name() << endl;
+            //     obj.write();
+            //     obj.IOobject::rename(objName);
+            // }
+            // else
+            {
+                Log << "    writing object " << obj.name() << endl;
+                obj.write();
+            }
         }
     }
 

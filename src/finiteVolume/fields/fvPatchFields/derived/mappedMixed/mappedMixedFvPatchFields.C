@@ -36,7 +36,6 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-//makeTemplatePatchTypeField(scalar, mappedMixed);
 makePatchFields(mappedMixed);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

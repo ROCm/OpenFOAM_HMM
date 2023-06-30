@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2017 OpenFOAM Foundation
-    Copyright (C) 2019-2020 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -204,13 +204,15 @@ void kOmega<BasicTurbulenceModel>::correct()
     tmp<volTensorField> tgradU = fvc::grad(U);
     const volScalarField::Internal GbyNu
     (
-        tgradU().v() && dev(twoSymm(tgradU().v()))
+        tgradU().v() && devTwoSymm(tgradU().v())
     );
     const volScalarField::Internal G(this->GName(), nut()*GbyNu);
     tgradU.clear();
 
     // Update omega and G at the wall
     omega_.boundaryFieldRef().updateCoeffs();
+    // Push any changed cell values to coupled neighbours
+    omega_.boundaryFieldRef().template evaluateCoupled<coupledFvPatch>();
 
     // Turbulence specific dissipation rate equation
     tmp<fvScalarMatrix> omegaEqn

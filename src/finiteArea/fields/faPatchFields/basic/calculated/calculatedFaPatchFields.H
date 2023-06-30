@@ -23,22 +23,12 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::calculatedFaPatchFields
-
-Description
-
-SourceFiles
-    calculatedFaPatchFields.C
-
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef calculatedFaPatchFields_H
-#define calculatedFaPatchFields_H
+#ifndef Foam_calculatedFaPatchFields_H
+#define Foam_calculatedFaPatchFields_H
 
 #include "calculatedFaPatchField.H"
-#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +37,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeFaPatchTypeFieldTypedefs(calculated)
+makeFaPatchTypeFieldTypedefs(calculated);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

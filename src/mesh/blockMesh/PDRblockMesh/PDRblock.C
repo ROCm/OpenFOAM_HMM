@@ -5,7 +5,7 @@
     \\  /    A nd           | www.openfoam.com
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
-    Copyright (C) 2019-2021 OpenCFD Ltd.
+    Copyright (C) 2019-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,22 @@ const Foam::PDRblock& Foam::PDRblock::null()
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::PDRblock::addDefaultPatches()
+{
+    // Default boundaries with patchi == shapeFacei
+    patches_.resize(6);
+    for (label patchi=0; patchi < 6; ++patchi)
+    {
+        boundaryEntry& bentry = patches_.emplace_set(patchi);
+
+        bentry.name_ = "patch" + Foam::name(patchi);
+        bentry.type_ = "patch";
+        bentry.size_ = 0;
+        bentry.faces_ = labelList(one{}, patchi);
+    }
+}
+
 
 void Foam::PDRblock::adjustSizes()
 {
@@ -438,9 +454,7 @@ void Foam::PDRblock::readBoundary(const dictionary& dict)
 
         // Save information for later access during mesh creation.
 
-        patches_.set(patchi, new boundaryEntry());
-
-        boundaryEntry& bentry = patches_[patchi];
+        boundaryEntry& bentry = patches_.emplace_set(patchi);
 
         bentry.name_ = patchName;
         bentry.type_ = patchType;
@@ -462,9 +476,7 @@ void Foam::PDRblock::readBoundary(const dictionary& dict)
 
     if (missed.size())
     {
-        patches_.append(new boundaryEntry());
-
-        boundaryEntry& bentry = patches_.last();
+        boundaryEntry& bentry = patches_.emplace_back();
 
         bentry.name_ = "defaultFaces";
         bentry.type_ = emptyPolyPatch::typeName;
@@ -523,21 +535,17 @@ Foam::PDRblock::PDRblock
 :
     PDRblock(dictionary::null, false)
 {
-    // Default boundaries with patchi == shapeFacei
-    patches_.resize(6);
-    for (label patchi=0; patchi < 6; ++patchi)
-    {
-        patches_.set(patchi, new boundaryEntry());
-
-        boundaryEntry& bentry = patches_[patchi];
-
-        bentry.name_ = "patch" + Foam::name(patchi);
-        bentry.type_ = "patch";
-        bentry.size_ = 0;
-        bentry.faces_ = labelList(one{}, patchi);
-    }
-
+    addDefaultPatches();
     reset(xgrid, ygrid, zgrid);
+}
+
+
+Foam::PDRblock::PDRblock(const boundBox& box, const labelVector& nCells)
+:
+    PDRblock(dictionary::null, false)
+{
+    addDefaultPatches();
+    reset(box, nCells);
 }
 
 
@@ -614,6 +622,28 @@ void Foam::PDRblock::reset
         checkMonotonic(cmpt, grid_[cmpt]);
     }
     #endif
+
+    adjustSizes();
+
+    // Adjust boundaries
+    for (boundaryEntry& bentry : patches_)
+    {
+        bentry.size_ = 0;
+
+        // Count patch faces
+        for (const label shapeFacei : bentry.faces_)
+        {
+            bentry.size_ += nBoundaryFaces(shapeFacei);
+        }
+    }
+}
+
+
+void Foam::PDRblock::reset(const boundBox& box, const labelVector& nCells)
+{
+    grid_.x().reset(box.min().x(), box.max().x(), nCells.x());
+    grid_.y().reset(box.min().y(), box.max().y(), nCells.y());
+    grid_.z().reset(box.min().z(), box.max().z(), nCells.z());
 
     adjustSizes();
 

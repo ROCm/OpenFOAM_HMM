@@ -123,12 +123,10 @@ inline Foam::scalar Foam::janafThermo<EquationOfState>::limit
             << Tlow_ << " -> " << Thigh_ << ";  T = " << T
             << endl;
 
-        return min(max(T, Tlow_), Thigh_);
+        return clamp(T, Tlow_, Thigh_);
     }
-    else
-    {
-        return T;
-    }
+
+    return T;
 }
 
 
@@ -294,7 +292,7 @@ inline void Foam::janafThermo<EquationOfState>::operator+=
         if
         (
             janafThermo<EquationOfState>::debug
-         && notEqual(Tcommon_, jt.Tcommon_)
+         && !equal(Tcommon_, jt.Tcommon_)
         )
         {
             FatalErrorInFunction
@@ -375,7 +373,7 @@ inline Foam::janafThermo<EquationOfState> Foam::operator+
         if
         (
             janafThermo<EquationOfState>::debug
-         && notEqual(jt1.Tcommon_, jt2.Tcommon_)
+         && !equal(jt1.Tcommon_, jt2.Tcommon_)
         )
         {
             FatalErrorInFunction
@@ -456,7 +454,7 @@ inline Foam::janafThermo<EquationOfState> Foam::operator==
     if
     (
         janafThermo<EquationOfState>::debug
-     && notEqual(jt2.Tcommon_, jt1.Tcommon_)
+     && !equal(jt2.Tcommon_, jt1.Tcommon_)
     )
     {
         FatalErrorInFunction

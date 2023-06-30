@@ -42,9 +42,9 @@ mixedUnburntEnthalpyFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF)
 {
+    refValue() = Zero;
+    refGrad() = Zero;
     valueFraction() = 0.0;
-    refValue() = 0.0;
-    refGrad() = 0.0;
 }
 
 

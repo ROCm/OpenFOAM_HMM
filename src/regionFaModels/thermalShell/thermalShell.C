@@ -195,11 +195,11 @@ const tmp<areaScalarField> thermalShell::Cp() const
                 primaryMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             regionMesh(),
             dimensionedScalar(dimEnergy/dimTemperature/dimMass, thermo_.Cp()),
-            zeroGradientFaPatchScalarField::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
 }
@@ -218,11 +218,11 @@ const tmp<areaScalarField> thermalShell::rho() const
                 primaryMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             regionMesh(),
             dimensionedScalar(dimDensity, thermo_.rho()),
-            zeroGradientFaPatchScalarField::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
 }
@@ -241,7 +241,7 @@ const tmp<areaScalarField> thermalShell::kappa() const
                 primaryMesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                IOobject::NO_REGISTER
             ),
             regionMesh(),
             dimensionedScalar
@@ -249,7 +249,7 @@ const tmp<areaScalarField> thermalShell::kappa() const
                 dimPower/dimLength/dimTemperature,
                 thermo_.kappa()
             ),
-            zeroGradientFaPatchScalarField::typeName
+            faPatchFieldBase::zeroGradientType()
         )
     );
 }

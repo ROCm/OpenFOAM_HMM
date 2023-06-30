@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2012 OpenFOAM Foundation
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,13 +52,17 @@ Foam::FaceCellWaveBase::FaceCellWaveBase
 )
 :
     mesh_(mesh),
+    pBufs_(UPstream::commsTypes::nonBlocking),
     changedFace_(mesh_.nFaces()),
     changedCell_(mesh_.nCells()),
     changedFaces_(mesh_.nFaces()),
     changedCells_(mesh_.nCells()),
     nUnvisitedFaces_(mesh_.nFaces()),
     nUnvisitedCells_(mesh_.nCells())
-{}
+{
+    // Don't clear storage on persistent buffer
+    pBufs_.allowClearRecv(false);
+}
 
 
 // ************************************************************************* //

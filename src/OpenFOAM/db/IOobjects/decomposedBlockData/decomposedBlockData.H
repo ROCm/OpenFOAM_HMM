@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017-2018 OpenFOAM Foundation
-    Copyright (C) 2020-2021 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,11 +81,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef decomposedBlockData_H
-#define decomposedBlockData_H
+#ifndef Foam_decomposedBlockData_H
+#define Foam_decomposedBlockData_H
 
-#include "IOList.H"
 #include "regIOobject.H"
+#include "ISstream.H"
+#include "OSstream.H"
 #include "UPstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -153,6 +154,12 @@ protected:
             const UPstream::commsTypes commsType
         );
 
+        //- Helper: skip a block of (binary) character data
+        static bool skipBlockEntry(Istream& is);
+
+        //- Extract number of blocks from decomposedBlockData file stream
+        static label getNumBlocks(Istream& is, const bool readHeader);
+
 
 public:
 
@@ -188,7 +195,7 @@ public:
         virtual bool writeObject
         (
             IOstreamOption streamOpt,
-            const bool valid
+            const bool writeOnProc
         ) const;
 
 
@@ -247,6 +254,14 @@ public:
             const UList<char>& charData
         );
 
+        //- Helper: write block of (binary) character content
+        static std::streamoff writeBlockEntry
+        (
+            OSstream& os,
+            const label blocki,
+            const std::string& content
+        );
+
         //- Helper: write block of (binary) character data
         //  \return -1 on error
         static std::streamoff writeBlockEntry
@@ -298,11 +313,10 @@ public:
             const UList<char>& data,
             const labelUList& recvSizes,
 
-            const label startProc,
-            const label nProcs,
+            const labelRange& fromProcs,
 
             List<int>& recvOffsets,
-            List<char>& recvData
+            DynamicList<char>& recvData
         );
 
         //- Write *this. Ostream only valid on master.
@@ -317,10 +331,10 @@ public:
 
             const labelUList& recvSizes,
 
-            // optional slave data (on master)
-            const PtrList<SubList<char>>& slaveData,
+            // Optional slave data (on master)
+            const UPtrList<SubList<char>>& slaveData,
 
-            const UPstream::commsTypes,
+            const UPstream::commsTypes commsType,
             const bool syncReturnState = true
         );
 };

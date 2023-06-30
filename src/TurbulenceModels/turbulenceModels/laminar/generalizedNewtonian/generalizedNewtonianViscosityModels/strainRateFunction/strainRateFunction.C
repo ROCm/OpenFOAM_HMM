@@ -103,12 +103,11 @@ nu
     const volScalarField& strainRate
 ) const
 {
-    auto tnu =
-        volScalarField::New
-        (
-            IOobject::groupName(type() + ":nu", nu0.group()),
-            nu0.mesh(),
-            dimensionedScalar(dimViscosity, Zero)
+    auto tnu = volScalarField::New
+    (
+        IOobject::scopedName(type(), IOobject::groupName("nu", nu0.group())),
+        nu0.mesh(),
+        dimensionedScalar(dimViscosity, Zero)
     );
 
     tnu.ref().primitiveFieldRef() = strainRateFunction_->value(strainRate);

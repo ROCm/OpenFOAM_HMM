@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -37,7 +37,7 @@ boundaryConditions
         }
         values
         {
-            $:initialConditions;
+            $/initialConditions;
         }
     }
 
@@ -52,7 +52,7 @@ boundaryConditions
         }
         values
         {
-            $:initialConditions;
+            $/initialConditions;
         }
     }
 
@@ -68,7 +68,7 @@ boundaryConditions
         }
         values
         {
-            $:initialConditions;
+            $/initialConditions;
         }
     }
 
@@ -83,7 +83,7 @@ boundaryConditions
         }
         values
         {
-            $:initialConditions;
+            $/initialConditions;
         }
     }
 
@@ -94,7 +94,7 @@ boundaryConditions
         patches         (upperWall);
         values
         {
-            $:initialConditions;
+            $/initialConditions;
         }
     }
 
@@ -105,7 +105,7 @@ boundaryConditions
         patches         (frontAndBack);
         values
         {
-            $:initialConditions;
+            $/initialConditions;
         }
     }
 }

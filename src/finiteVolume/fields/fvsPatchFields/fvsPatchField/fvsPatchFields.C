@@ -27,26 +27,21 @@ License
 
 #include "fvsPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#define makeFvsPatchField(PatchTypeField)                                     \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, patch);               \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, patchMapper);         \
+    defineTemplateRunTimeSelectionTable(PatchTypeField, dictionary);
 
-#define makeFvsPatchField(fvsPatchTypeField)                                   \
-                                                                               \
-defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patch);                 \
-defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patchMapper);           \
-defineTemplateRunTimeSelectionTable(fvsPatchTypeField, dictionary);
-
-makeFvsPatchField(fvsPatchScalarField)
-makeFvsPatchField(fvsPatchVectorField)
-makeFvsPatchField(fvsPatchSphericalTensorField)
-makeFvsPatchField(fvsPatchSymmTensorField)
-makeFvsPatchField(fvsPatchTensorField)
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+makeFvsPatchField(fvsPatchScalarField);
+makeFvsPatchField(fvsPatchVectorField);
+makeFvsPatchField(fvsPatchSphericalTensorField);
+makeFvsPatchField(fvsPatchSymmTensorField);
+makeFvsPatchField(fvsPatchTensorField);
 
 } // End namespace Foam
 

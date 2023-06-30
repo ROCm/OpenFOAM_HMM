@@ -109,6 +109,10 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     ),
     driver_(this->patch(), dict_)
 {
+    DeprecatedInFunction(2212)
+        << "Use uniformMixed with Function1 expressions instead." << nl
+        << "    This boundary condition will be removed in the future" << endl;
+
     setDebug();
     DebugInFunction << nl;
 
@@ -162,11 +166,9 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
 
     driver_.readDict(dict_);
 
-    // Similar to fvPatchField constructor, which we have bypassed
-    dict.readIfPresent("patchType", this->patchType(), keyType::LITERAL);
+    // Since we bypassed dictionary constructor
+    fvPatchFieldBase::readDict(dict);
 
-
-    const auto* hasValue = dict.findEntry("value", keyType::LITERAL);
     const auto* hasRefValue = dict.findEntry("refValue", keyType::LITERAL);
 
     const auto* hasRefGradient
@@ -181,10 +183,8 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
         this->refValue().assign(*hasRefValue, p.size());
     }
 
-    if (hasValue)
+    if (this->readValueEntry(dict))
     {
-        Field<Type>::assign(*hasValue, p.size());
-
         if (!hasRefValue)
         {
             // Ensure refValue has a sensible value for the "update" below
@@ -235,25 +235,14 @@ Foam::exprMixedFvPatchField<Type>::exprMixedFvPatchField
     }
     else
     {
-        // Emulate mixedFvPatchField<Type>::evaluate,
+        // Like mixedFvPatchField<Type>::evaluate()
         // but avoid our own updateCoeffs
         if (!this->updated())
         {
-            this->parent_bctype::updateCoeffs();
+            mixedFvPatchField<Type>::updateCoeffs();
         }
 
-        Field<Type>::operator=
-        (
-            this->valueFraction()*this->refValue()
-          +
-            (1.0 - this->valueFraction())*
-            (
-                this->patchInternalField()
-              + this->refGrad()/this->patch().deltaCoeffs()
-            )
-        );
-
-        fvPatchField<Type>::evaluate();
+        mixedFvPatchField<Type>::evaluate();
     }
 }
 

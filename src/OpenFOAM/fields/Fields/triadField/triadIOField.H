@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::triadIOField
-
-Description
-    triadField with IO.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef triadIOField_H
-#define triadIOField_H
+#ifndef Foam_triadIOField_H
+#define Foam_triadIOField_H
 
 #include "triadField.H"
 #include "IOField.H"
@@ -41,6 +35,7 @@ Description
 
 namespace Foam
 {
+    //! IO for a Field of triad
     typedef IOField<triad> triadIOField;
 }
 

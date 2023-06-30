@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef emptyPointPatchField_H
-#define emptyPointPatchField_H
+#ifndef Foam_emptyPointPatchField_H
+#define Foam_emptyPointPatchField_H
 
 #include "pointPatchField.H"
 #include "emptyPointPatch.H"
@@ -54,11 +54,10 @@ class emptyPointPatchField
 :
     public pointPatchField<Type>
 {
-
 public:
 
     //- Runtime type information
-    TypeName(emptyPointPatch::typeName_());
+    TypeName(emptyPointPatch::typeName_());  // fieldTypes::emptyTypeName_()
 
 
     // Constructors
@@ -78,7 +77,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         emptyPointPatchField
         (
             const emptyPointPatchField<Type>&,

@@ -58,12 +58,11 @@ namespace Foam
 {
 
 // Read porosity, change to blockage. Clamp values [0-1] silently
-static const scalarMinMax limits01(scalarMinMax::zero_one());
 
 // Volume porosity -> blockage
 inline scalar getPorosity(const dictionary& dict)
 {
-    return 1 - limits01.clip(dict.getOrDefault<scalar>("porosity", 0));
+    return 1 - clamp(dict.getOrDefault<scalar>("porosity", 0), zero_one{});
 }
 
 // Direction porosities -> blockage
@@ -75,7 +74,7 @@ inline vector getPorosities(const dictionary& dict)
     {
         for (scalar& val : blockage)
         {
-            val = 1 - limits01.clip(val);
+            val = 1 - clamp(val, zero_one{});
         }
     }
 

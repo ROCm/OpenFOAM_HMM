@@ -174,7 +174,7 @@ static void writeFuncsImpl
 
         const auto iter = tbl.cfind(entryName);
 
-        if (!iter.found())
+        if (!iter.good())
         {
             continue;
         }

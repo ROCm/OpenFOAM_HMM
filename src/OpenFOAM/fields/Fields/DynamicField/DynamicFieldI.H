@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2016 OpenFOAM Foundation
-    Copyright (C) 2016-2022 OpenCFD Ltd.
+    Copyright (C) 2016-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ License
 
 template<class T, int SizeMin>
 template<class ListType>
-inline void Foam::DynamicField<T, SizeMin>::assignDynList
+inline void Foam::DynamicField<T, SizeMin>::doAssignDynList
 (
     const ListType& list
 )
@@ -324,13 +324,6 @@ Foam::DynamicField<T, SizeMin>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::label Foam::DynamicField<T, SizeMin>::capacity() const noexcept
-{
-    return capacity_;
-}
-
-
-template<class T, int SizeMin>
 inline std::streamsize
 Foam::DynamicField<T, SizeMin>::capacity_bytes() const noexcept
 {
@@ -591,6 +584,23 @@ inline void Foam::DynamicField<T, SizeMin>::transfer
 
 
 template<class T, int SizeMin>
+template<class... Args>
+inline T& Foam::DynamicField<T, SizeMin>::emplace_back(Args&&... args)
+{
+    // This could/should be better with inplace construction
+    // (as per std::vector), but currently lacking the methods for that
+    // so resize and move assign
+
+    const label idx = List<T>::size();
+    resize(idx + 1);
+
+    // move assign element
+    this->operator[](idx) = T(std::forward<Args>(args)...);
+    return this->back();
+}
+
+
+template<class T, int SizeMin>
 inline void Foam::DynamicField<T, SizeMin>::push_back
 (
     const T& val
@@ -653,26 +663,6 @@ inline void Foam::DynamicField<T, SizeMin>::pop_back(label n)
 }
 
 
-template<class T, int SizeMin>
-inline T Foam::DynamicField<T, SizeMin>::remove()
-{
-    // Location of last element and simultaneously the new size
-    const label idx = List<T>::size() - 1;
-
-    if (idx < 0)
-    {
-        FatalErrorInFunction
-            << "List is empty" << abort(FatalError);
-    }
-
-    const T& val = List<T>::operator[](idx);
-
-    List<T>::setAddressableSize(idx);
-
-    return val;
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
@@ -716,7 +706,7 @@ inline void Foam::DynamicField<T, SizeMin>::operator=
     const UList<T>& list
 )
 {
-    assignDynList(list);
+    doAssignDynList(list);
 }
 
 
@@ -731,7 +721,25 @@ inline void Foam::DynamicField<T, SizeMin>::operator=
         return;  // Self-assignment is a no-op
     }
 
-    assignDynList(list);
+    doAssignDynList(list);
+}
+
+
+template<class T, int SizeMin>
+template<class Addr>
+inline void Foam::DynamicField<T, SizeMin>::operator=
+(
+    const IndirectListBase<T, Addr>& list
+)
+{
+    // NOTE: Self-assignment needs special handling
+    /// if
+    /// (
+    ///     static_cast<const UList<T>*>(this)
+    ///  == static_cast<const UList<T>*>(&list.values())
+    /// )
+
+    doAssignDynList(list);
 }
 
 

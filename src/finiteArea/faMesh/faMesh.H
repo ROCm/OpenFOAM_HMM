@@ -101,11 +101,11 @@ class faMesh
 {
     // Private (internal) classes/structures
 
-        //- A (proc, patchi, patchEdgei) tuple used internally for managing
-        //- patch/patch bookkeeping during construction.
-        //  Finite-area patches are stored with negated indices, which makes
-        //  them readily identifiable and always sort before normal patches.
-        //  Note
+        //- A (proc, patchi, patchEdgei, meshFacei) tuple used internally
+        //- for managing patch/patch bookkeeping during construction.
+        //  Finite-area patches are stored with negated indices (offset -2),
+        //  which makes them readily identifiable and always sort before normal
+        //  patches.
         struct patchTuple
         :
             public FixedList<label, 4>
@@ -150,17 +150,17 @@ class faMesh
                 meshFacei(-1);
             }
 
-            //- Valid if proc and edge are non-negative
-            bool valid() const noexcept
+            //- Valid if proc and patch (or patch edge) are non-negative
+            bool valid() const
             {
-                return (procNo() >= 0 && patchEdgei() >= 0);
+                return (procNo() >= 0 && patchi() != -1);
             }
 
             // Processor is the first sort index
             label procNo() const { return (*this)[0]; }
             void procNo(label val) { (*this)[0] = val; }
 
-            // PatchId (-ve for finiteArea patches) is the second sort index
+            // PatchId is the second sort index (finiteArea patches are < -1)
             label patchi() const { return (*this)[1]; }
             void patchi(label val) { (*this)[1] = val; }
 
@@ -177,25 +177,25 @@ class faMesh
             label realPatchi() const
             {
                 const label id = patchi();
-                return (id < 0 ? -(id + 1) : id);
+                return (id < -1 ? -(id + 2) : id);
             }
 
             //- Set patchId as finiteArea
             void faPatchi(label val)
             {
-                patchi(-(val + 1));
+                patchi(-(val + 2));
             }
 
-            //- Considered to be finiteArea if patchi < 0
+            //- Considered to be finiteArea if (patchi < -1)
             bool is_finiteArea() const noexcept
             {
-                return (patchi() < 0);
+                return (patchi() < -1);
             }
 
             //- Considered to be processor local
-            bool is_localProc() const noexcept
+            bool is_localProc() const
             {
-                return (procNo() == Pstream::myProcNo());
+                return (procNo() == UPstream::myProcNo());
             }
         };
 
@@ -424,6 +424,9 @@ class faMesh
 
             //- Clear geometry but not the face areas
             void clearGeomNotAreas() const;
+
+            //- Has halo face centers/normals
+            bool hasHaloFaceGeometry() const noexcept;
 
             //- Clear boundary halo information
             void clearHalo() const;
@@ -814,7 +817,7 @@ public:
         bool hasAreaCentres() const noexcept { return bool(faceCentresPtr_); }
 
         //- Has edge centres: edgeCentres()
-        bool hasAdgeCentres() const noexcept { return bool(edgeCentresPtr_); }
+        bool hasEdgeCentres() const noexcept { return bool(edgeCentresPtr_); }
 
         //- Has edge length vectors: Le()
         bool hasLe() const noexcept { return bool(LePtr_); }
@@ -844,6 +847,12 @@ public:
         bool hasFaceCurvatures() const noexcept
         {
             return bool(faceCurvaturesPtr_);
+        }
+
+        //- Has patch point normals corrections
+        bool hasPatchPointNormalsCorrection() const noexcept
+        {
+            return bool(correctPatchPointNormalsPtr_);
         }
 
 
@@ -887,6 +896,9 @@ public:
 
             //- Return edge length magnitudes
             const edgeScalarField& magLe() const;
+
+            //- Return normalised edge length vectors
+            tmp<edgeVectorField> unitLe() const;
 
             //- Return face centres as areaVectorField
             const areaVectorField& areaCentres() const;
@@ -938,7 +950,7 @@ public:
 
 
         //- Write mesh
-        virtual bool write(const bool valid = true) const;
+        virtual bool write(const bool writeOnProc = true) const;
 
 
     // Member Operators

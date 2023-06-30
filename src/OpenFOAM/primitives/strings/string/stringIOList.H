@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::stringIOList
-
-Description
-    IO of a list of strings
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef stringIOList_H
-#define stringIOList_H
+#ifndef Foam_stringIOList_H
+#define Foam_stringIOList_H
 
 #include "stringList.H"
 #include "IOList.H"
@@ -41,7 +35,10 @@ Description
 
 namespace Foam
 {
+    //! IO for a List of string
     typedef IOList<string> stringIOList;
+
+    //! IO for a List of stringList
     typedef IOList<stringList> stringListIOList;
 }
 

@@ -177,10 +177,9 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
         (
             internalField().name()
         ).oldTime().boundaryField()[patch().index()];
-    const fvPatchField<vector>& U =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
-    const fvsPatchField<scalar>& phi =
-        patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
+
+    const auto& U = patch().lookupPatchField<volVectorField>(UName_);
+    const auto& phi = patch().lookupPatchField<surfaceScalarField>(phiName_);
 
     // Get the timestep
     const scalar dt = db().time().deltaTValue();
@@ -196,7 +195,7 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
 
     // Calculate the current mass flow rate
     scalar massFlowRate(1.0);
-    if (phi.internalField().dimensions() == dimVelocity*dimArea)
+    if (phi.internalField().dimensions() == dimVolume/dimTime)
     {
         if (hasRho_)
         {
@@ -209,11 +208,7 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
                 << exit(FatalError);
         }
     }
-    else if
-    (
-        phi.internalField().dimensions()
-     == dimDensity*dimVelocity*dimArea
-    )
+    else if (phi.internalField().dimensions() == dimMass/dimTime)
     {
         if (hasRho_)
         {
@@ -277,7 +272,12 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
     // Limit to prevent outflow
     const scalarField p_new
     (
-        (1.0 - pos0(phi))*t*plenumPressure + pos0(phi)*max(p, plenumPressure)
+        lerp
+        (
+            t*plenumPressure,           // Negative phi
+            max(p, plenumPressure),     // Positive phi
+            pos0(phi)                   // 0-1 selector
+        )
     );
 
     // Relaxation fraction
@@ -285,14 +285,14 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
     const scalar fraction = oneByFraction < 1.0 ? 1.0 : 1.0/oneByFraction;
 
     // Set the new value
-    operator==((1.0 - fraction)*p_old + fraction*p_new);
+    operator==(lerp(p_old, p_new, fraction));
     fixedValueFvPatchScalarField::updateCoeffs();
 }
 
 
 void Foam::plenumPressureFvPatchScalarField::write(Ostream& os) const
 {
-    fvPatchScalarField::write(os);
+    fvPatchField<scalar>::write(os);
     os.writeEntry("gamma", gamma_);
     os.writeEntry("R", R_);
     os.writeEntry("supplyMassFlowRate", supplyMassFlowRate_);
@@ -309,7 +309,7 @@ void Foam::plenumPressureFvPatchScalarField::write(Ostream& os) const
     os.writeEntryIfDifferent<scalar>("timeScale", 0.0, timeScale_);
     os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     os.writeEntryIfDifferent<word>("U", "U", UName_);
-    writeEntry("value", os);
+    fvPatchField<scalar>::writeValueEntry(os);
 }
 
 

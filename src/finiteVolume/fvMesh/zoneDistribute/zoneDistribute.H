@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2020 DLR
-    Copyright (C) 2022 OpenCFD Ltd.
+    Copyright (C) 2022-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -101,6 +101,9 @@ class zoneDistribute
 
         //- Parallel [cache]: recv data from these ranks
         DynamicList<label> recvProcs_;
+
+        //- Persistent set of exchange buffers
+        PstreamBuffers pBufs_;
 
 
     // Private Member Functions

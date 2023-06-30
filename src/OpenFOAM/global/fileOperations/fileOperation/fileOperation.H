@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2017 OpenFOAM Foundation
-    Copyright (C) 2020-2022 OpenCFD Ltd.
+    Copyright (C) 2020-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,6 +30,38 @@ Class
 Description
     An encapsulation of filesystem-related operations.
 
+    Several of the file handlers can be configured to use specific ranks for
+    IO operations. These can either be defined from the command-line
+    \c -ioRanks option, or via the \c FOAM_ENV environment variable.
+    In either case, the list of IO ranks shall always include the value
+    \b 0 (master rank). The ranks may be specified as a plain list, or as an
+    OpenFOAM list. The special value \em host can be used to specify selection
+    based on hostname.
+
+    For example,
+    \verbatim
+        FOAM_IORANKS='0 4 8'   decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='0,4,8'   decomposePar -fileHandler hostCollated
+        FOAM_IORANKS='(0 4 8)' decomposePar -fileHandler hostCollated
+    \endverbatim
+    will generate
+    \verbatim
+        processors12_0-3/   : containing data for processors 0 to 3
+        processors12_4-7/   : containing data for processors 4 to 7
+        processors12_8-11/  : containing data for processors 8 to 11
+    \endverbatim
+
+    The value \em host can be used to specify a single IO rank for each
+    host. For example,
+    \verbatim
+        decomposePar -fileHandler collated -ioRanks host
+        decomposePar -fileHandler hostCollated
+    \endverbatim
+
+Environment
+    - \c FOAM_ENV : list of io-ranks as plain space or comma separated
+      list or as an OpenFOAM formatted list. Eg, '(0 4 8)'
+
 Namespace
     Foam::fileOperations
 
@@ -43,13 +75,15 @@ Description
 
 #include "ISstream.H"
 #include "Ostream.H"
-#include "autoPtr.H"
+#include "UPstream.H"
+#include "fileMonitor.H"
 #include "fileNameList.H"
 #include "instantList.H"
-#include "fileMonitor.H"
 #include "refPtr.H"
+#include "bitSet.H"
 #include "Enum.H"
 #include "Tuple2.H"
+#include "InfoProxy.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,10 +91,13 @@ namespace Foam
 {
 
 // Forward Declarations
-class IOobject;
-class regIOobject;
+class fileOperation;
 class objectRegistry;
+class regIOobject;
+class IOobject;
 class Time;
+
+Ostream& operator<<(Ostream& os, const InfoProxy<fileOperation>& info);
 
 /*---------------------------------------------------------------------------*\
                          Class fileOperation Declaration
@@ -106,30 +143,51 @@ public:
         typedef IntRange<int> procRangeType;
 
 
+private:
+
+    // Private Static Data
+
+        //- Storage of the dummy file handler (demand-driven)
+        static refPtr<fileOperation> dummyHandlerPtr_;
+
+
 protected:
+
+    // Protected Static Data
+
+        //- Cache level (eg, for caching time directories). Default: 1
+        static int cacheLevel_;
+
 
     // Protected Data
 
         //- Communicator to use
-        const label comm_;
+        mutable label comm_;
+
+        //- Overall number of processors.
+        //  Used to synthesise processor directory naming:
+        //  - parallel: UPstream::nProcs(UPstream::commWorld())
+        //  - non-parallel: detected from processor dir naming ('processorsNN')
+        label nProcs_;
 
         //- Distributed roots (parallel run)
         mutable bool distributed_;
+
+        //- The list of IO ranks (global ranks)
+        //  Primarily for additional bookkeeping in non-parallel
+        const labelList ioRanks_;
 
         //- Detected processors directories
         mutable HashTable<dirIndexList> procsDirs_;
 
         //- File-change monitor for all registered files
-        mutable autoPtr<fileMonitor> monitorPtr_;
+        mutable std::unique_ptr<fileMonitor> monitorPtr_;
 
 
    // Protected Member Functions
 
         //- Get or create fileMonitor singleton
         fileMonitor& monitor() const;
-
-        //- Retrieve list of IO ranks from FOAM_IORANKS env variable
-        static labelList ioRanks();
 
         //- Merge two times
         static void mergeTimes
@@ -158,9 +216,48 @@ protected:
             const fileName& objectPath
         ) const;
 
-        //- Does IOObject exist.
+        //- Does IOobject exist?
         //- Is either a directory (empty name()) or a file
         bool exists(IOobject& io) const;
+
+
+        //- Is proci a master rank in the communicator (in parallel)
+        //- or a master rank in the IO ranks (non-parallel)
+        bool isIOrank(const label proci) const;
+
+        //- Helper: output which ranks are IO
+        void printRanks() const;
+
+
+        //- Construction helper: check for locally allocated communicator
+        static inline label getManagedComm(const label communicator)
+        {
+            return
+            (
+                (
+                    communicator < 0
+                 || communicator == UPstream::commGlobal()
+                 || communicator == UPstream::commSelf()
+                 || communicator == UPstream::commWorld()
+                )
+              ? -1
+              : communicator
+            );
+        }
+
+
+private:
+
+    // Private Member Functions
+
+        //- Low-level implementation for subsetting 'clone' operation
+        static autoPtr<fileOperation> New_impl
+        (
+            const fileOperation& origHandler,
+            //! The selected sub-ranks (in comm-world)
+            const labelUList& subProcs,
+            bool verbose
+        );
 
 
 public:
@@ -180,24 +277,30 @@ public:
         TypeName("fileOperation");
 
 
-    //- Static fileOperation
-    static autoPtr<fileOperation> fileHandlerPtr_;
+    //- The currently active file handler. Avoid accessing directly
+    static refPtr<fileOperation> fileHandlerPtr_;
 
-    //- Static construct the commonly used uncollatedFileOperation
-    static autoPtr<fileOperation> NewUncollated();
+    //- Reference to a dummy file handler.
+    static refPtr<fileOperation> null();
 
 
     // Constructors
 
-        //- Construct from communicator, optionally with distributed roots
+        //- Construct from communicator,
+        //- optionally with specified io-ranks and/or distributed roots
         explicit fileOperation
         (
             const label comm,
+            const labelUList& ioRanks = labelUList::null(),
             const bool distributedRoots = false
         );
 
-        //- Clone fileHandler
-        /// virtual autoPtr<fileOperation> clone() const = 0;
+        //- Construct from communicator with specified io-ranks
+        explicit fileOperation
+        (
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots = false
+        );
 
 
     // Declare run-time constructor selection table
@@ -213,6 +316,19 @@ public:
             (verbose)
         );
 
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            fileOperation,
+            comm,
+            (
+                const Tuple2<label, labelList>& commAndIORanks,
+                const bool distributedRoots,
+                bool verbose
+            ),
+            (commAndIORanks, distributedRoots, verbose)
+        );
+
 
     // Selectors
 
@@ -224,12 +340,117 @@ public:
             bool verbose = false
         );
 
+        //- Select fileHandler-type.
+        //- Uses defaultFileHandler if the handlerType is empty.
+        static autoPtr<fileOperation> New
+        (
+            const word& handlerType,
+            const Tuple2<label, labelList>& commAndIORanks,
+            const bool distributedRoots,
+            bool verbose = false
+        );
+
+
+        //- Replicate the given fileHandler properties with
+        //- a subset of (global) ranks.
+        //  Always includes rank 0 and constrained by the global numProcs
+        //  Returns nullptr if myProcNo is not involved.
+        static autoPtr<fileOperation> New
+        (
+            //! The original file handler
+            const fileOperation& origHandler,
+            //! The selected sub-ranks (in comm-world)
+            const boolUList& useProc,
+            bool verbose = false
+        );
+
+        //- Replicate the given fileHandler properties with
+        //- a subset of (global) ranks.
+        //  Always includes rank 0 and constrained by the global numProcs
+        //  Returns nullptr if myProcNo is not involved.
+        static autoPtr<fileOperation> New
+        (
+            //! The original file handler
+            const fileOperation& origHandler,
+            //! The selected sub-ranks (in comm-world). Monotonic order!
+            const bitSet& useProc,
+            bool verbose = false
+        );
+
 
     //- Destructor
     virtual ~fileOperation() = default;
 
 
+   // Factory Methods, Singleton-type Functions
+
+        //- The commonly used uncollatedFileOperation
+        static autoPtr<fileOperation> NewUncollated();
+
+        //- Return the current file handler.
+        //- Will create the default file handler if necessary.
+        static const fileOperation& fileHandler();
+
+        //- Delete current file handler.
+        //  \returns the old handler.
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler(std::nullptr_t);
+
+        //- Replace the current file handler.
+        //  The following are considered no-ops:
+        //  - an empty/invalid newHandler does \b not delete, use a literal
+        //    \c nullptr (std::nullptr_t) for that
+        //  - if new handler and current handler are identical (same pointer).
+        //  .
+        //  \returns the old handler (on change), nullptr otherwise
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler
+        (
+            refPtr<fileOperation>& newHandler
+        );
+
+        //- Replace the current file handler.
+        //  The following are considered no-ops:
+        //  - an empty/invalid newHandler does \b not delete, use a literal
+        //    \c nullptr (std::nullptr_t) for that
+        //  - if new handler and current handler are identical (same pointer).
+        //  .
+        //  \returns the old handler (on change), nullptr otherwise
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler
+        (
+            refPtr<fileOperation>&& newHandler
+        );
+
+        //- Replace the current file handler.
+        //  The following are considered no-ops:
+        //  - an empty/invalid newHandler does \b not delete, use a literal
+        //    \c nullptr (std::nullptr_t) for that
+        //  - if new handler and current handler are identical (same pointer).
+        //  .
+        //  \returns the old handler (on change), nullptr otherwise
+        //  Should have [[nodiscard]], but gcc ignores void casting.
+        static refPtr<fileOperation> fileHandler
+        (
+            autoPtr<fileOperation>&& newHandler
+        );
+
+
    // Static Functions
+
+        //- Return cache level
+        static int cacheLevel() noexcept
+        {
+            return cacheLevel_;
+        }
+
+        //- Set cache level (0 = off). \return the previous value
+        static int cacheLevel(int level) noexcept
+        {
+            int old(cacheLevel_);
+            cacheLevel_ = level;
+            return old;
+        }
 
         //- Sort directory entries according to time value,
         //  with "constant" appearing first (if it exists)
@@ -248,15 +469,56 @@ public:
 
     // Member Functions
 
+    // Characteristics
+
+        //- Communicator to use
+        label comm() const noexcept
+        {
+            return comm_;
+        }
+
+        //- Set communicator to use [mutable]. Negative values are a no-op.
+        //  \return old value
+        label comm(label communicator) const noexcept
+        {
+            label old(comm_);
+            if (communicator >= 0) comm_ = communicator;
+            return old;
+        }
+
         //- Distributed roots (parallel run)
         bool distributed() const noexcept
         {
             return distributed_;
         }
 
-        //- Set distributed roots on/off (mutable)
+        //- Set distributed roots on/off [mutable]
         //  \return old value
-        bool distributed(bool on) const noexcept;
+        bool distributed(bool on) const noexcept
+        {
+            bool old(distributed_);
+            distributed_ = on;
+            return old;
+        }
+
+        //- The list of IO ranks (global ranks)
+        //  Primarily for additional bookkeeping in non-parallel
+        const labelList& ioRanks() const noexcept { return ioRanks_; }
+
+        //- Return info proxy,
+        //- used to print information to a stream
+        InfoProxy<fileOperation> info() const noexcept { return *this; }
+
+
+    // Member Functions
+
+        //- True if the fileOperation can be considered valid.
+        //- At the moment, primarily used to detect the dummy fileOperation.
+        virtual bool good() const { return true; }
+
+        //- Transfer ownership of communicator to this fileOperation.
+        //- Use with caution
+        virtual void storeComm() const = 0;
 
 
         // OSSpecific equivalents
@@ -379,6 +641,23 @@ public:
                 const bool emptyOnly = false
             ) const = 0;
 
+            //- Read dir/file (recursively if necessary) on master of the
+            //- communicator, send and write contents to all 'writeOnProc'
+            //- processors with local file name
+            //  \param comm the communicator for broadcasting
+            //  \param writeOnProc write on the processor
+            //  \param src the source file/directory
+            //  \param dst the target file/directory.
+            //      If empty, treat as being identical to the src.
+            virtual bool broadcastCopy
+            (
+                const label comm,
+                const bool writeOnProc,
+                const fileName& src,
+                const fileName& dst
+                // always recreates links
+            ) const;
+
 
         // (reg)IOobject functionality
 
@@ -433,7 +712,7 @@ public:
                 regIOobject&,
                 const fileName&,
                 const word& typeName,
-                const bool valid = true
+                const bool readOnProc = true
             ) const = 0;
 
             //- Top-level read
@@ -447,14 +726,14 @@ public:
 
             //- Writes a regIOobject (so header, contents and divider).
             //  Returns success state. Default action is to write to
-            //  the objectPath using writeData. If !valid the
+            //  the objectPath using writeData. If !writeOnProc the
             //  file does not need to be written (this is used e.g. to
             //  suppress empty local lagrangian data)
             virtual bool writeObject
             (
                 const regIOobject& io,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const;
 
 
@@ -477,7 +756,7 @@ public:
             (
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const = 0;
 
             //- Generate an OSstream that writes a file
@@ -486,7 +765,7 @@ public:
                 IOstreamOption::atomicType atomic,
                 const fileName& pathname,
                 IOstreamOption streamOpt = IOstreamOption(),
-                const bool valid = true
+                const bool writeOnProc = true
             ) const = 0;
 
 
@@ -527,26 +806,37 @@ public:
 
         // Other
 
-            //- Actual name of processors dir (for use in mode PROCOBJECT,
-            //  PROCINSTANCE)
+            //- Actual name of processors dir
+            //- (for use in mode PROCOBJECT, PROCINSTANCE)
             virtual word processorsDir(const IOobject& io) const
             {
                 return processorsBaseDir;
             }
 
-            //- Actual name of processors dir (for use in mode PROCOBJECT,
-            //  PROCINSTANCE)
+            //- Actual name of processors dir
+            //- (for use in mode PROCOBJECT, PROCINSTANCE)
             virtual word processorsDir(const fileName&) const
             {
                 return processorsBaseDir;
             }
 
-            //- Set number of processor directories/results. Only used in
-            //  decomposePar
-            virtual void setNProcs(const label nProcs);
+            //- Overall number of processors,
+            //- from UPstream::nProcs() or detected from directories/results.
+            label nProcs() const noexcept { return nProcs_; }
 
-            //- Get number of processor directories/results. Used for e.g.
-            //  reconstructPar, argList checking
+            //- Set number of processor directories/results.
+            //  Used to cache format of e.g. processorsDDD.
+            //  Returns old number of processors.
+            //  Only used in decomposePar
+            label nProcs(const label numProcs) noexcept
+            {
+                label old(nProcs_);
+                nProcs_ = numProcs;
+                return old;
+            }
+
+            //- Get number of processor directories/results.
+            //  Used for e.g. reconstructPar, argList checking
             virtual label nProcs
             (
                 const fileName& dir,
@@ -574,11 +864,14 @@ public:
             //- Forcibly wait until all output done. Flush any cached data
             virtual void flush() const;
 
+            //- Forcibly parallel sync
+            virtual void sync();
+
             //- Generate path (like io.path) from root+casename with any
             //  'processorXXX' replaced by procDir (usually 'processsors')
             fileName processorsCasePath
             (
-                const IOobject&,
+                const IOobject& io,
                 const word& procDir
             ) const;
 
@@ -586,7 +879,7 @@ public:
             //  'processorXXX' replaced by procDir (usually 'processsors')
             fileName processorsPath
             (
-                const IOobject&,
+                const IOobject& io,
                 const word& instance,
                 const word& procDir
             ) const;
@@ -613,6 +906,27 @@ public:
 
             //- Detect processor number from '/aa/bb/processorDDD/cc'
             static label detectProcessorPath(const fileName& objPath);
+
+
+    // Rank selection/sub-selection
+
+        //- Get (contiguous) range/bounds of ranks addressed
+        //- within the given main io-ranks.
+        static labelRange subRanks(const labelUList& mainIOranks);
+
+        //- Get list of global IO master ranks based on the hostname.
+        //- It is assumed that each host range is contiguous.
+        static labelList getGlobalHostIORanks();
+
+        //- Get list of global IO ranks from FOAM_IORANKS env variable.
+        //- If set, these correspond to the IO master ranks.
+        static labelList getGlobalIORanks();
+
+
+    // Housekeeping
+
+        //- Same as nProcs
+        label setNProcs(label numProcs) { return nProcs(numProcs); }
 };
 
 
@@ -636,23 +950,23 @@ inline Ostream& operator<<(Ostream& os, const fileOperation::pathType b)
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-// Note: defined in fileOperation.C
+//- Return the current file handler
+//- (will create default file handler if necessary).
+//- Forwards to fileOperation::handler()
+inline const fileOperation& fileHandler()
+{
+    return fileOperation::fileHandler();
+}
 
-//- Return the current file handler.
-//- Will create the default file handler if necessary.
-const fileOperation& fileHandler();
+//- Delete current file handler - forwards to fileOperation::handler()
+//  Should have [[nodiscard]], but gcc ignores void casting.
+inline refPtr<fileOperation> fileHandler(std::nullptr_t)
+{
+    return fileOperation::fileHandler(nullptr);
+}
 
-//- Delete current file handler.
-//  \returns the old handler
-autoPtr<fileOperation> fileHandler(std::nullptr_t);
-
-//- Replace the current file handler.
-//  The following are considered no-ops:
-//  - an empty/invalid newHandler does \b not delete,
-//    use fileHandler(std::nullptr_t) - ie, a literal \c nullptr for that
-//  - if new handler and current handler are identical (same pointer).
-//  .
-//  \returns the old handler (on change), nullptr otherwise
+//- Replace the current file handler - forwards to fileOperation::handler().
+//  \note legacy behaviour, so returns autoPtr instead of refPtr!
 autoPtr<fileOperation> fileHandler(autoPtr<fileOperation>&& newHandler);
 
 

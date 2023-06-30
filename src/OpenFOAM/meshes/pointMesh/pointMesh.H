@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2011-2013 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -112,7 +112,7 @@ public:
         }
 
         //- Return reference to boundary mesh
-        const pointBoundaryMesh& boundary() const
+        const pointBoundaryMesh& boundary() const noexcept
         {
             return boundary_;
         }
@@ -136,7 +136,16 @@ public:
         }
 
 
-    // Mesh motion
+    // Volume Mesh
+
+        //- Return boundary mesh for underlying volume mesh
+        const polyBoundaryMesh& boundaryMesh() const
+        {
+            return GeoMesh<polyMesh>::mesh_.boundaryMesh();
+        }
+
+
+    // Mesh Motion
 
         //- Move points
         bool movePoints();

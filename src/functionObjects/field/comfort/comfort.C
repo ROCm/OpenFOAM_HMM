@@ -6,7 +6,7 @@
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
     Copyright (C) 2019 OpenFOAM Foundation
-    Copyright (C) 2021 OpenCFD Ltd.
+    Copyright (C) 2021-2023 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,11 @@ namespace functionObjects
     addToRunTimeSelectionTable(functionObject, comfort, dictionary);
 }
 }
+
+
+// Temperature bounds based on EN ISO 7730 (10 - 40 degC)
+static const Foam::scalarMinMax Tbounds(283.15, 313.15);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -93,7 +98,7 @@ Foam::dimensionedScalar Foam::functionObjects::comfort::Trad() const
     }
 
     // Bounds based on EN ISO 7730
-    if ((Trad.value() < 283.15) || (Trad.value() > 313.15))
+    if (!Tbounds.contains(Trad.value()))
     {
         WarningInFunction
             << "The calculated mean wall radiation temperature is out of the\n"
@@ -177,9 +182,6 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::comfort::Tcloth
 
     Tcl.storePrevIter();
 
-    // Same temperatures as for the radiation
-    const dimensionedScalar Tmin(dimTemperature, 283.15);
-    const dimensionedScalar Tmax(dimTemperature, 313.15);
 
     // Iterative solving of equation (2)
     do
@@ -208,7 +210,7 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::comfort::Tcloth
 
         // Make sure that Tcl is in some physical limit (same range as we used
         // for the radiative estimation - based on ISO EN 7730:2005)
-        Tcl.clip(Tmin, Tmax);
+        Tcl.clamp_range(Tbounds);
 
     } while (!converged(Tcl) && i++ < maxClothIter_);
 
@@ -422,7 +424,7 @@ bool Foam::functionObjects::comfort::execute()
 
     // Limit the velocity field to the values given in EN ISO 7733
     volScalarField Umag(mag(lookupObject<volVectorField>("U")));
-    Umag.clip(Umin, Umax);
+    Umag.clamp_range(Umin, Umax);
 
     // Calculate the turbulent intensity if turbulent kinetic energy field k
     // exists

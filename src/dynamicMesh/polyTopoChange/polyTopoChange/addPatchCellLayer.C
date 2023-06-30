@@ -452,31 +452,6 @@ Foam::label Foam::addPatchCellLayer::addSideFace
 }
 
 
-Foam::label Foam::addPatchCellLayer::findProcPatch
-(
-    const polyMesh& mesh,
-    const label nbrProcID
-)
-{
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    forAll(mesh.globalData().processorPatches(), i)
-    {
-        label patchi = mesh.globalData().processorPatches()[i];
-
-        if
-        (
-            refCast<const processorPolyPatch>(patches[patchi]).neighbProcNo()
-         == nbrProcID
-        )
-        {
-            return patchi;
-        }
-    }
-    return -1;
-}
-
-
 void Foam::addPatchCellLayer::setFaceProps
 (
     const polyMesh& mesh,
@@ -1959,7 +1934,7 @@ void Foam::addPatchCellLayer::setRefinement
                     forAll(f, fp)
                     {
                         const auto fnd = minPointValue.find(f[fp]);
-                        if (fnd.found())
+                        if (fnd.good())
                         {
                             baseF.setSize(f.size(), labelMax);
                             if (baseF[fp] == labelMax)

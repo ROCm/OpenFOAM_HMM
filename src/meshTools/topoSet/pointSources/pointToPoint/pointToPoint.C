@@ -77,7 +77,7 @@ Foam::pointToPoint::pointToPoint
     if (!dict.readIfPresent("sets", names_))
     {
         names_.resize(1);
-        dict.readEntry("set", names_.first());
+        dict.readEntry("set", names_.front());
     }
 }
 
@@ -105,7 +105,7 @@ void Foam::pointToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Adding all elements of pointSet "
+            Info<< "    Adding all elements of point sets: "
                 << flatOutput(names_) << nl;
         }
 
@@ -120,7 +120,7 @@ void Foam::pointToPoint::applyToSet
     {
         if (verbose_)
         {
-            Info<< "    Removing all elements of pointSet "
+            Info<< "    Removing all elements of point sets: "
                 << flatOutput(names_) << nl;
         }
 

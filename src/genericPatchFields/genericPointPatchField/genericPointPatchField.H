@@ -36,8 +36,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef genericPointPatchField_H
-#define genericPointPatchField_H
+#ifndef Foam_genericPointPatchField_H
+#define Foam_genericPointPatchField_H
 
 #include "calculatedPointPatchField.H"
 #include "genericPatchFieldBase.H"
@@ -84,7 +84,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given patchField<Type> onto a new patch
+        //- Construct by mapping given patch field onto a new patch
         genericPointPatchField
         (
             const genericPointPatchField<Type>&,

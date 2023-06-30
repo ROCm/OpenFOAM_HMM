@@ -26,10 +26,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "scalarRange.H"
-#include "string.H"
 #include "Switch.H"
 #include "MinMax.H"
 #include "error.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

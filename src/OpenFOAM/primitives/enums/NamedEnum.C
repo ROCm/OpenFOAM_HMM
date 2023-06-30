@@ -97,7 +97,7 @@ Foam::List<int> Foam::NamedEnum<EnumType, nEnum>::values() const
         {
             auto iter = lookup_.cfind(names[enumi]);
 
-            if (iter.found())
+            if (iter.good())
             {
                 lst[count++] = iter.val();
             }
@@ -135,7 +135,7 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::lookup
     const word enumName(dict.lookup(key));
     auto iter = lookup_.cfind(enumName);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalIOErrorInFunction(dict)
             << enumName << " is not in enumeration: "
@@ -170,7 +170,7 @@ EnumType Foam::NamedEnum<EnumType, nEnum>::read(Istream& is) const
     const word enumName(is);
     auto iter = lookup_.cfind(enumName);
 
-    if (!iter.found())
+    if (!iter.good())
     {
         FatalIOErrorInFunction(is)
             << enumName << " is not in enumeration: "

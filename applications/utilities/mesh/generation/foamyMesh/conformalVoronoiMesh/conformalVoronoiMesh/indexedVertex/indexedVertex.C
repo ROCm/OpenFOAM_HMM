@@ -156,10 +156,10 @@ template<class Gt, class Vb>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const InfoProxy<CGAL::indexedVertex<Gt, Vb>>& p
+    const InfoProxy<CGAL::indexedVertex<Gt, Vb>>& iproxy
 )
 {
-    const CGAL::indexedVertex<Gt, Vb>& iv = p.t_;
+    const auto& iv = *iproxy;
 
     const Foam::point pt
     (

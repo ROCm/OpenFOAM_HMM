@@ -50,9 +50,8 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    #include "setRootCase.H"
-    #include "createTime.H"
-
+    argList::noCheckProcessorDirectories();
+    argList args(argc, argv);
 
     // Test PstreamBuffers
     // ~~~~~~~~~~~~~~~~~~~
@@ -83,13 +82,13 @@ int main(int argc, char *argv[])
         if (Pstream::master())
         {
             // Collect my own data
-            allData.append(data);
+            allData.push_back(data);
 
             for (const int proci : Pstream::subProcs())
             {
                 Perr << "master receiving from " << proci << endl;
                 UIPstream fromProc(proci, pBufs);
-                allData.append(vector(fromProc));
+                allData.push_back(vector(fromProc));
             }
         }
 
@@ -102,7 +101,7 @@ int main(int argc, char *argv[])
             {
                 Perr << "master sending to " << proci << endl;
                 UOPstream toProc(proci, pBufs);
-                toSlave << allData;
+                toProc << allData;
             }
         }
 
@@ -125,13 +124,27 @@ int main(int argc, char *argv[])
     scalar data1 = 1.0;
     label request1 = -1;
     {
-        Foam::reduce(data1, sumOp<scalar>(), UPstream::msgType(), request1);
+        Foam::reduce
+        (
+            data1,
+            sumOp<scalar>(),
+            UPstream::msgType(),
+            UPstream::worldComm,
+            request1
+        );
     }
 
     scalar data2 = 0.1;
-    label request2 = -1;
+    UPstream::Request request2;
     {
-        Foam::reduce(data2, sumOp<scalar>(), UPstream::msgType(), request2);
+        Foam::reduce
+        (
+            data2,
+            sumOp<scalar>(),
+            UPstream::msgType(),
+            UPstream::worldComm,
+            request2
+        );
     }
 
 
@@ -168,23 +181,23 @@ int main(int argc, char *argv[])
 
     if (request1 != -1)
     {
-        Pout<< "Waiting for non-blocking reduce with request " << request1
-            << endl;
-        Pstream::waitRequest(request1);
+        Pout<< "Waiting for non-blocking reduce with request "
+            << request1 << endl;
+        UPstream::waitRequest(request1);
     }
     Info<< "Reduced data1:" << data1 << endl;
 
-    if (request2 != -1)
+    if (request2.good())
     {
-        Pout<< "Waiting for non-blocking reduce with request " << request1
-            << endl;
-        Pstream::waitRequest(request2);
+        Pout<< "Waiting for non-blocking reduce with request "
+            << Foam::name(request2.pointer()) << endl;
+        UPstream::waitRequest(request2);
     }
     Info<< "Reduced data2:" << data2 << endl;
 
 
-    // Clear any outstanding requests
-    Pstream::resetRequests(0);
+    // Clear all outstanding requests
+    UPstream::resetRequests(0);
 
     Info<< "End\n" << endl;
 

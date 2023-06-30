@@ -31,8 +31,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellListFwd_H
-#define cellListFwd_H
+#ifndef Foam_cellListFwd_H
+#define Foam_cellListFwd_H
 
 #include "List.H"
 #include "SubList.H"
@@ -41,12 +41,13 @@ Description
 
 namespace Foam
 {
+    // Forward Declaration
     class cell;
 
-    typedef UList<cell> cellUList;
-    typedef List<cell> cellList;
-    typedef SubList<cell> cellSubList;
-    typedef List<cellList> cellListList;
+    typedef List<cell> cellList;            //!< List of cell
+    typedef SubList<cell> cellSubList;      //!< SubList of cell
+    typedef UList<cell> cellUList;          //!< UList of cell
+    typedef List<cellList> cellListList;    //!< List of cellList
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

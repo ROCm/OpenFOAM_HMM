@@ -91,13 +91,13 @@ Foam::PatchCollisionDensity<CloudType>::PatchCollisionDensity
     (
         this->owner().mesh().boundary(),
         volScalarField::Internal::null(),
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     ),
     collisionDensity0_
     (
         this->owner().mesh().boundary(),
         volScalarField::Internal::null(),
-        calculatedFvPatchField<scalar>::typeName
+        fvPatchFieldBase::calculatedType()
     ),
     time0_(this->owner().mesh().time().value())
 {

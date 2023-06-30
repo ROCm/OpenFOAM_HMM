@@ -655,7 +655,7 @@ void Foam::meshRefinement::markFacesOnProblemCells
         // Get number of anchor points (pointLevel <= cellLevel)
 
         label nBoundaryAnchors = 0;
-        label nNonAnchorBoundary = 0;
+        // label nNonAnchorBoundary = 0;
         label nonBoundaryAnchor = -1;
 
         for (const label pointi : cPoints)
@@ -673,10 +673,10 @@ void Foam::meshRefinement::markFacesOnProblemCells
                     nonBoundaryAnchor = pointi;
                 }
             }
-            else if (isBoundaryPoint[pointi])
-            {
-                nNonAnchorBoundary++;
-            }
+            // else if (isBoundaryPoint[pointi])
+            // {
+            //     ++nNonAnchorBoundary;
+            // }
         }
 
         if (nBoundaryAnchors == 8)
@@ -684,15 +684,15 @@ void Foam::meshRefinement::markFacesOnProblemCells
             const cell& cFaces = mesh_.cells()[celli];
 
             // Count boundary faces.
-            label nBfaces = 0;
-
-            forAll(cFaces, cFacei)
-            {
-                if (isBoundaryFace[cFaces[cFacei]])
-                {
-                    nBfaces++;
-                }
-            }
+            // label nBfaces = 0;
+            //
+            // forAll(cFaces, cFacei)
+            // {
+            //     if (isBoundaryFace[cFaces[cFacei]])
+            //     {
+            //         ++nBfaces;
+            //     }
+            // }
 
             // If nBfaces > 1 make all non-boundary non-baffle faces baffles.
             // We assume that this situation is where there is a single

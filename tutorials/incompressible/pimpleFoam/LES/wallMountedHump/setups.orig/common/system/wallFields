@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2212                                 |
+|  \\    /   O peration     | Version:  v2306                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -12,6 +12,7 @@ wallShearStress
     libs            (fieldFunctionObjects);
 
     enabled         true;
+    writeFields     yes;
     writeControl    writeTime;
 
     patches         ( bottomWall );
@@ -23,9 +24,8 @@ yPlus
     libs            (fieldFunctionObjects);
 
     enabled         true;
+    writeFields     yes;
     writeControl    writeTime;
-
-    patches         ( bottomWall );
 }
 
 

@@ -65,7 +65,7 @@ void Foam::patchCorrectedInterpolation::interpolateType
             wordList
             (
                 pointUncorrectedDisplacement.boundaryField().size(),
-                zeroGradientPointPatchField<Type>::typeName
+                pointPatchFieldBase::zeroGradientType()
             )
         );
 
@@ -107,7 +107,7 @@ void Foam::patchCorrectedInterpolation::interpolateDataFromPatchGroups
         ),
         data.mesh(),
         dimensionedScalar(dimless, Zero),
-        zeroGradientPointPatchField<scalar>::typeName
+        pointPatchFieldBase::zeroGradientType()
     );
     data = dimensioned<Type>(data.dimensions(), Zero);
 
@@ -124,7 +124,7 @@ void Foam::patchCorrectedInterpolation::interpolateDataFromPatchGroups
             ),
             data.mesh(),
             dimensionedScalar(data.dimensions(), Zero),
-            zeroGradientPointPatchField<scalar>::typeName
+            pointPatchFieldBase::zeroGradientType()
         );
         GeometricField<Type, pointPatchField, pointMesh> patchData(data);
 

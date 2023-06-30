@@ -583,11 +583,9 @@ public:
 
     // Info
 
-        //- Return info proxy for printing token information to a stream
-        InfoProxy<token> info() const
-        {
-            return *this;
-        }
+        //- Return info proxy,
+        //- for printing token information to a stream
+        InfoProxy<token> info() const noexcept { return *this; }
 
 
     // Member Operators
@@ -658,7 +656,7 @@ public:
         friend Ostream& operator<<(Ostream& os, const punctuationToken& pt);
         friend ostream& operator<<(ostream& os, const punctuationToken& pt);
 
-        friend ostream& operator<<(ostream& os, const InfoProxy<token>& ct);
+        friend ostream& operator<<(ostream& os, const InfoProxy<token>& ip);
 
 
     // Housekeeping

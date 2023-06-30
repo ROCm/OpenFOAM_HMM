@@ -509,7 +509,7 @@ void Foam::ccm::writer::writeCells
             mesh_,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
@@ -667,7 +667,7 @@ void Foam::ccm::writer::writeInterfaces
             mesh_,
             IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE,
-            false
+            IOobject::NO_REGISTER
         )
     );
 
