@@ -40,11 +40,12 @@ License
 #include <roctracer/roctx.h>
 #endif
 
-
+#if 0 
 #include "umpire/Allocator.hpp"
 #include "umpire/ResourceManager.hpp"
 #include "umpire/strategy/AlignedAllocator.hpp"
 #include "umpire/strategy/DynamicPoolList.hpp"
+#endif
 
 //LG using OpenMP offloading and HMM
 //#include <omp.h>
