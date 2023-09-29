@@ -33,6 +33,9 @@ License
   #endif 
 #endif
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
 
 #include "PstreamReduceOps.H"
 #include "FieldReuseFunctions.H"
@@ -56,20 +59,42 @@ void component
 )
 {
     typedef typename Field<Type>::cmptType cmptType;
+
+    #ifdef USE_ROCTX
+    roctxRangePushA("component:TFOR_ALL_F_OP_F_FUNC_S");
+    #endif
+
+    /*
     TFOR_ALL_F_OP_F_FUNC_S
     (
         cmptType, res, =, Type, f, .component, const direction, d
     )
+    */
+
+    TPARALLELFOR_ALL_F_OP_F_FUNC_S
+    (
+        cmptType, res, =, Type, f, .component, const direction, d
+    )
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
-
+//LG1 AMD
 template<class Type>
 void T(Field<Type>& res, const UList<Type>& f)
 {
+
+    /*
     TFOR_ALL_F_OP_F_FUNC(Type, res, =, Type, f, T)
+    */
+    TPARALLELFOR_ALL_F_OP_F_FUNC(Type, res, =, Type, f, T)
+
 }
 
-
+//LG1 AMD
 template<class Type, direction r>
 void pow
 (
@@ -78,11 +103,28 @@ void pow
 )
 {
     typedef typename powProduct<Type, r>::type powProductType;
-    TFOR_ALL_F_OP_FUNC_F_S
-    (
-        powProductType, res, =, pow, Type, vf, powProductType,
-        pTraits<powProductType>::zero
-    )
+
+    if constexpr ( std::is_same<Type,double>() ) {
+      TPARALLELFOR_ALL_F_OP_FUNC_F_S
+      (
+          powProductType, res, =, pow, double, vf, powProductType,
+          pTraits<powProductType>::zero
+      )
+    }
+    else if constexpr ( std::is_same<Type,float>() ) {
+      TPARALLELFOR_ALL_F_OP_FUNC_F_S
+      (
+          powProductType, res, =, pow, float, vf, powProductType,
+          pTraits<powProductType>::zero
+      )
+    }
+    else {
+      TFOR_ALL_F_OP_FUNC_F_S
+      (
+          powProductType, res, =, pow, Type, vf, powProductType,
+          pTraits<powProductType>::zero
+      )
+    }
 }
 
 template<class Type, direction r>
@@ -117,7 +159,7 @@ pow
     return tres;
 }
 
-
+//LG1 AMD
 template<class Type>
 void sqr
 (
@@ -161,7 +203,7 @@ sqr(const tmp<Field<Type>>& tf)
     return tres;
 }
 
-
+//LG1 AMD
 template<class Type>
 void magSqr
 (
@@ -253,7 +295,15 @@ template<class Type>
 void cmptMax(Field<typename Field<Type>::cmptType>& res, const UList<Type>& f)
 {
     typedef typename Field<Type>::cmptType cmptType;
+    #ifdef USE_ROCTX
+    roctxRangePushA("cmptMax:TFOR_ALL_F_OP_FUNC_F");
+    #endif
+
     TFOR_ALL_F_OP_FUNC_F(cmptType, res, =, cmptMax, Type, f)
+
+    #ifdef USE_ROCTX        
+    roctxRangePop();
+    #endif
 }
 
 template<class Type>
@@ -280,7 +330,17 @@ template<class Type>
 void cmptMin(Field<typename Field<Type>::cmptType>& res, const UList<Type>& f)
 {
     typedef typename Field<Type>::cmptType cmptType;
+    typedef typename Field<Type>::cmptType cmptType;
+
+    #ifdef USE_ROCTX
+    roctxRangePushA("cmptMin:TFOR_ALL_F_OP_FUNC_F");
+    #endif
+
     TFOR_ALL_F_OP_FUNC_F(cmptType, res, =, cmptMin, Type, f)
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 template<class Type>
@@ -780,8 +840,10 @@ void OpFunc                                                                    \
     const UList<Type2>& f2                                                     \
 )                                                                              \
 {                                                                              \
+    roctxRangePushA("TFOR_ALL_F_OP_F_OP_F");                                   \
     typedef typename product<Type1, Type2>::type productType;                  \
-    TFOR_ALL_F_OP_F_OP_F(productType, res, =, Type1, f1, Op, Type2, f2)        \
+       TPARALLELFOR_ALL_F_OP_F_OP_F(productType, res, =, Type1, f1, Op, Type2, f2) \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
 template<class Type1, class Type2>                                             \
@@ -837,8 +899,10 @@ void OpFunc                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Type, Form>::type productType;                    \
+    roctxRangePushA("TFOR_ALL_F_OP_F_OP_S");                                   \
     TFOR_ALL_F_OP_F_OP_S                                                       \
         (productType, res, =,Type, f1, Op, Form, static_cast<const Form&>(vs)) \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
 template<class Type, class Form, class Cmpt, direction nCmpt>                  \
@@ -874,9 +938,11 @@ void OpFunc                                                                    \
     const UList<Type>& f1                                                      \
 )                                                                              \
 {                                                                              \
+    roctxRangePushA("TFOR_ALL_F_OP_S_OP_F");                                   \
     typedef typename product<Form, Type>::type productType;                    \
     TFOR_ALL_F_OP_S_OP_F                                                       \
         (productType, res, =,Form,static_cast<const Form&>(vs), Op, Type, f1)  \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type>                  \

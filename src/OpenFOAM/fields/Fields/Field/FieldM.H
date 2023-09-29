@@ -37,6 +37,9 @@ Description
   #endif 
 #endif
 
+#ifndef TARGET_CUT_OFF
+#define TARGET_CUT_OFF 10000
+#endif
 
 #ifndef FieldM_H
 #define FieldM_H
@@ -95,11 +98,7 @@ void checkFields
 
 #else
 
-//LG1 AMD
 template<class Type1, class Type2>
-#ifdef USE_HIP
-__host__ __device__ 
-#endif
 void checkFields
 (
     const UList<Type1>&,
@@ -134,10 +133,10 @@ void checkFields
     List_ACCESS(typeF1, f1, f1P);                                              \
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
                                                                                \
-    label f1_sz = (f1).size();                                                 \
+    label loop_len = (f1).size();                                                 \
     /* Loop: f1 OP FUNC(f2) */                                                 \
-    /* _Pragma("omp target teams distribute parallel for if(target:f1_sz > 0)")  */ \
-    for (label i = 0; i < f1_sz; ++i)                                          \
+    /* _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  */ \
+    for (label i = 0; i < loop_len; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP FUNC(f2P[i]);                                              \
     }
@@ -177,6 +176,25 @@ void checkFields
     }
 
 
+#define TPARALLELFOR_ALL_F_OP_F_FUNC(typeF1, f1, OP, typeF2, f2, FUNC)                 \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, "f1 " #OP " f2" #FUNC);                                \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    label loop_len = (f1).size();                                              \
+    /* Loop: f1 OP f2.FUNC() */                                                \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000) ")  \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        (f1P[i]) OP (f2P[i]).FUNC();                                           \
+    }
+
+
+
+
 // Member function : this field f1 OP FUNC(f2, f3)
 
 #define TFOR_ALL_F_OP_FUNC_F_F(typeF1, f1, OP, FUNC, typeF2, f2, typeF3, f3)   \
@@ -194,6 +212,27 @@ void checkFields
     {                                                                          \
         (f1P[i]) OP FUNC((f2P[i]), (f3P[i]));                                  \
     }
+
+
+#define TPARALLELFOR_ALL_F_OP_FUNC_F_F(typeF1, f1, OP, FUNC, typeF2, f2, typeF3, f3)   \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, f3, "f1 " #OP " " #FUNC "(f2, f3)");                   \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    List_CONST_ACCESS(typeF3, f3, f3P);                                        \
+    label loop_len = (f1).size();                                              \
+                                                                               \
+    /* Loop: f1 OP FUNC(f2, f3) */                                             \
+    /* List_FOR_ALL(f1, i) */                                                  \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        (f1P[i]) OP FUNC((f2P[i]), (f3P[i]));                                  \
+    }
+
 
 
 // Member function : s OP FUNC(f1, f2)
@@ -227,6 +266,23 @@ void checkFields
                                                                                \
     /* Loop: f1 OP FUNC(f2, s) */                                              \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
+        (f1P[i]) OP FUNC((f2P[i]), (s));                                       \
+    }
+
+
+#define TPARALLELFOR_ALL_F_OP_FUNC_F_S(typeF1, f1, OP, FUNC, typeF2, f2, typeS, s)     \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, "f1 " #OP " " #FUNC "(f2, s)");                        \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    label loop_len = (f1).size();                                               \
+    /* Loop: f1 OP FUNC(f2, s) */                                              \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") \
+    for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP FUNC((f2P[i]), (s));                                       \
     }
@@ -295,6 +351,27 @@ void checkFields
     }
 
 
+
+#define TPARALLELFOR_ALL_F_OP_FUNC_S_F(typeF1, f1, OP, FUNC, typeS, s, typeF2, f2)     \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, "f1 " #OP " " #FUNC "(s, f2)");                        \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    label loop_len = (f1).size();                                               \
+                                                                               \
+    /* Loop: f1 OP1 f2 OP2 f3 */                                               \
+    /* List_FOR_ALL(f1, i)   */                                                \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        (f1P[i]) OP FUNC((s), (f2P[i]));                                       \
+    }
+
+
+
 // Member function : this f1 OP FUNC(s1, s2)
 
 #define TFOR_ALL_F_OP_FUNC_S_S(typeF1, f1, OP, FUNC, typeS1, s1, typeS2, s2)   \
@@ -327,6 +404,26 @@ void checkFields
     }
 
 
+
+#define TPARALLELFOR_ALL_F_OP_F_FUNC_S(typeF1, f1, OP, typeF2, f2, FUNC, typeS, s)     \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, "f1 " #OP " f2 " #FUNC "(s)");                         \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    label loop_len = (f1).size();                                               \
+    /* Loop: f1 OP f2 FUNC(s) */                                               \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        (f1P[i]) OP (f2P[i]) FUNC((s));                                        \
+    }
+
+
+
+
 // Member operator : this field f1 OP1 f2 OP2 f3
 
 #define TFOR_ALL_F_OP_F_OP_F(typeF1, f1, OP1, typeF2, f2, OP2, typeF3, f3)     \
@@ -341,12 +438,32 @@ void checkFields
     label f1_sz = (f1).size();                                                 \
                                                                                \
     /* Loop: f1 OP1 f2 OP2 f3 */                                               \
-    /* _Pragma("omp target teams distribute parallel for if(target:f1_sz > 0)") */ \
-    /* _Pragma("omp parallel for if(f1_sz > 1)") */                            \
     for (label i = 0; i < f1_sz; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP1 (f2P[i]) OP2 (f3P[i]);                                    \
     }
+
+
+#define TPARALLELFOR_ALL_F_OP_F_OP_F(typeF1, f1, OP1, typeF2, f2, OP2, typeF3, f3)     \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, f3, "f1 " #OP1 " f2 " #OP2 " f3");                     \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    List_CONST_ACCESS(typeF3, f3, f3P);                                        \
+    label loop_len = (f1).size();                                              \
+                                                                               \
+    /* Loop: f1 OP1 f2 OP2 f3 */                                               \
+     _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        (f1P[i]) OP1 (f2P[i]) OP2 (f3P[i]);                                    \
+    }
+
+
+
 
 
 // Member operator : this field f1 OP1 www OP2 f2
@@ -367,6 +484,27 @@ void checkFields
     }
 
 
+
+#define TPARALLELFOR_ALL_F_OP_S_OP_F(typeF1, f1, OP1, typeS, s, OP2, typeF2, f2)       \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, "f1 " #OP1 " s " #OP2 " f2");                          \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    label loop_len = (f1).size();                                              \
+                                                                               \
+    /* Loop: f1 OP1 s OP2 f2 */                                                \
+    /* List_FOR_ALL(f1, i)   */                                                \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        (f1P[i]) OP1 (s) OP2 (f2P[i]);                                         \
+    }
+
+
+
 // Member operator : this field f1 OP1 f2 OP2 s
 
 #define TFOR_ALL_F_OP_F_OP_S(typeF1, f1, OP1, typeF2, f2, OP2, typeS, s)       \
@@ -383,6 +521,26 @@ void checkFields
     {                                                                          \
         (f1P[i]) OP1 (f2P[i]) OP2 (s);                                         \
     }
+
+
+#define TPARALLELFOR_ALL_F_OP_F_OP_S(typeF1, f1, OP1, typeF2, f2, OP2, typeS, s)       \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, "f1 " #OP1 " f2 " #OP2 " s");                          \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+    label loop_len = (f1).size();                                              \
+                                                                               \
+    /* Loop f1 OP1 s OP2 f2 */                                                 \
+    /*List_FOR_ALL(f1, i) */                                                   \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+    for (label i = 0; i < loop_len; ++i)                                       \
+    {                                                                          \
+        (f1P[i]) OP1 (f2P[i]) OP2 (s);                                         \
+    }
+
 
 
 // Member operator : this field f1 OP f2
@@ -451,7 +609,7 @@ void checkFields
     label loop_len = (f).size();                                                  \
                                                                                \
     /* Loop: s OP f */                                                         \
-    /* _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") */ \
+    /* _Pragma("omp target teams distribute parallel for if(target:loop_len > 2000)") */ \
     for (label i = 0; i < loop_len; ++i)                                          \
     {                                                                          \
         (s) OP (fP[i]);                                                        \

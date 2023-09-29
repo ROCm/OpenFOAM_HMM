@@ -32,6 +32,10 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("continuityErrs");
+    #endif
+
     volScalarField contErr(fvc::div(phi));
 
     scalar sumLocalContErr = runTime.deltaTValue()*
@@ -40,6 +44,10 @@ Description
     scalar globalContErr = runTime.deltaTValue()*
         contErr.weightedAverage(mesh.V()).value();
     cumulativeContErr += globalContErr;
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     Info<< "time step continuity errors : sum local = " << sumLocalContErr
         << ", global = " << globalContErr

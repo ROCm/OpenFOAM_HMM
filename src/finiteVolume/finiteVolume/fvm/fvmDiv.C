@@ -30,6 +30,10 @@ License
 #include "fvMatrix.H"
 #include "convectionScheme.H"
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -68,8 +72,17 @@ div
     const word& name
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvm:div1");
+    #endif
+
     tmp<fvMatrix<Type>> Div(fvm::div(tflux(), vf, name));
     tflux.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Div;
 }
 
@@ -93,8 +106,17 @@ div
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvm:div3");
+    #endif
+
     tmp<fvMatrix<Type>> Div(fvm::div(tflux(), vf));
     tflux.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Div;
 }
 

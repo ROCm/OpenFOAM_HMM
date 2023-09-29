@@ -25,6 +25,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class GeoField>
@@ -35,7 +37,7 @@ Foam::tmp<GeoField> Foam::uniformInterpolate
     const scalarField& weights
 )
 {
-    const GeoField& field0 = *(*fields.begin());
+   const GeoField& field0 = *(*fields.begin());
 
     // Interpolate
     auto tfld = tmp<GeoField>::New
@@ -51,6 +53,7 @@ Foam::tmp<GeoField> Foam::uniformInterpolate
         weights[0]*(*fields[indices[0]])
     );
     auto& fld = tfld();
+
 
     for (label i = 1; i < indices.size(); ++i)
     {

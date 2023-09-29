@@ -32,7 +32,7 @@ License
 #include "convectionScheme.H"
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,10 +73,19 @@ div
 )
 {
     #ifdef USE_ROCTX
-    roctxRangePush("fvc::div_B");
+    roctxRangePush("fvc::div_B1");
     #endif
 
     tmp<GeometricField<Type, fvPatchField, volMesh>> Div(fvc::div(tssf()));
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_B2_clear");
+    #endif
+
     tssf.clear();
 
     #ifdef USE_ROCTX
@@ -172,9 +181,20 @@ div
     #ifdef USE_ROCTX
     roctxRangePush("fvc::div_G");
     #endif
+ 
     typedef typename innerProduct<vector, Type>::type DivType;
     tmp<GeometricField<DivType, fvPatchField, volMesh>> Div(fvc::div(tvvf()));
+ 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::div_G.clear");
+    #endif
+
     tvvf.clear();
+
     #ifdef USE_ROCTX
     roctxRangePop();
     #endif

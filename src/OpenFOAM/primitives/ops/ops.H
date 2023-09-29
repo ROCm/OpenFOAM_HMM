@@ -61,31 +61,6 @@ namespace Foam
 //     Eg, plusEqOp for (x += y)
 //LG1 AMD
 
-#ifdef USE_HIP
-
-#define EqOp(opName, op)                                                       \
-                                                                               \
-    template<class T1, class T2>                                               \
-    struct opName##Op2                                                         \
-    {                                                                          \
-	__host__  __device__                                                   \
-        void operator()(T1& x, const T2& y) const                              \
-        {                                                                      \
-            op;                                                                \
-        }                                                                      \
-    };                                                                         \
-                                                                               \
-    template<class T>                                                          \
-    struct opName##Op                                                          \
-    {                                                                          \
-        void operator()(T& x, const T& y) const                                \
-        {                                                                      \
-            op;                                                                \
-        }                                                                      \
-    };
-
-#else
-
 
 #define EqOp(opName, op)                                                       \
                                                                                \
@@ -106,7 +81,6 @@ namespace Foam
             op;                                                                \
         }                                                                      \
     };
-#endif
 
 EqOp(eq, x = y)
 EqOp(plusEq, x += y)

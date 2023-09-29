@@ -1,6 +1,18 @@
     // Momentum predictor
 
+    #ifdef USE_ROCTX
+    roctxRangePush("UEqn");
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("UEqn-MRF.correctBoundaryVelocity");
+    #endif
+
     MRF.correctBoundaryVelocity(U);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     tmp<fvVectorMatrix> tUEqn
     (
@@ -10,11 +22,29 @@
      ==
         fvOptions(U)
     );
+
     fvVectorMatrix& UEqn = tUEqn.ref();
+
+    #ifdef USE_ROCTX
+    roctxRangePush("UEqn-UEqn.relax");
+    #endif
 
     UEqn.relax();
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("UEqn-fvOptions.constrain");
+    #endif
+
     fvOptions.constrain(UEqn);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 
     if (simple.momentumPredictor())
     {
@@ -22,3 +52,7 @@
 
         fvOptions.correct(U);
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif

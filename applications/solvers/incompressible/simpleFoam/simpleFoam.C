@@ -69,6 +69,11 @@ Description
 #include "simpleControl.H"
 #include "fvOptions.H"
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -104,8 +109,25 @@ int main(int argc, char *argv[])
             #include "pEqn.H"
         }
 
+	#ifdef USE_ROCTX
+        roctxRangePush("call.laminarTransport.correct");
+        #endif
+
         laminarTransport.correct();
+
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
+        #ifdef USE_ROCTX
+        roctxRangePush("call.turbulence.correct");
+        #endif
+
         turbulence->correct();
+
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
 
         runTime.write();
 

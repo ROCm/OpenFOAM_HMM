@@ -28,6 +28,11 @@ License
 #include "scalarMatrices.H"
 #include "SVD.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::LUDecompose
@@ -48,6 +53,10 @@ void Foam::LUDecompose
     label& sign
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePushA("Foam::LUDecompose_1");
+    #endif
+
     label m = matrix.m();
     scalar vv[m];
     sign = 1;
@@ -144,11 +153,19 @@ void Foam::LUDecompose
             }
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
 void Foam::LUDecompose(scalarSymmetricSquareMatrix& matrix)
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePushA("Foam::LUDecompose_2"); 
+    #endif
+
     // Store result in upper triangular part of matrix
     label size = matrix.m();
 
@@ -194,6 +211,10 @@ void Foam::LUDecompose(scalarSymmetricSquareMatrix& matrix)
 
         matrix(j, j) = sqrt(d);
     }
+    
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -207,6 +228,11 @@ void Foam::multiply
     const scalarRectangularMatrix& C
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePushA("Foam::multiply_1");
+    #endif
+
     if (A.n() != B.m())
     {
         FatalErrorInFunction
@@ -240,6 +266,11 @@ void Foam::multiply
             }
         }
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 
@@ -251,6 +282,10 @@ void Foam::multiply
     const scalarRectangularMatrix& C
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePushA("Foam::multiply_2");
+    #endif
+
     if (A.n() != B.size())
     {
         FatalErrorInFunction
@@ -279,6 +314,9 @@ void Foam::multiply
             }
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -290,6 +328,11 @@ void Foam::multiply
     const scalarSquareMatrix& C
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePushA("Foam::multiply_3");
+    #endif
+
     if (A.m() != B.size())
     {
         FatalErrorInFunction
@@ -320,6 +363,9 @@ void Foam::multiply
             }
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

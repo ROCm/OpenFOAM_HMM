@@ -27,6 +27,20 @@ License
 
 #include "diagonalPreconditioner.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+#ifdef USE_OMP
+#include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+#endif
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -54,16 +68,24 @@ Foam::diagonalPreconditioner::diagonalPreconditioner
     lduMatrix::preconditioner(sol),
     rD(sol.matrix().diag().size())
 {
+    #ifdef USE_ROCTX
+    roctxRangePushA("diagonalPreconditioner::diagonalPreconditioner");
+    #endif
+
     solveScalar* __restrict__ rDPtr = rD.begin();
     const scalar* __restrict__ DPtr = solver_.matrix().diag().begin();
 
     const label nCells = rD.size();
 
     // Generate reciprocal diagonal
+    #pragma omp target teams distribute parallel for if(target:nCells>20000)
     for (label cell=0; cell<nCells; cell++)
     {
         rDPtr[cell] = 1.0/DPtr[cell];
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -76,16 +98,25 @@ void Foam::diagonalPreconditioner::precondition
     const direction
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePushA("diagonalPreconditioner::precondition");
+    #endif
+
     solveScalar* __restrict__ wAPtr = wA.begin();
     const solveScalar* __restrict__ rAPtr = rA.begin();
     const solveScalar* __restrict__ rDPtr = rD.begin();
 
     const label nCells = wA.size();
 
+    #pragma omp target teams distribute parallel for if(target:nCells>20000)
     for (label cell=0; cell<nCells; cell++)
     {
         wAPtr[cell] = rDPtr[cell]*rAPtr[cell];
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

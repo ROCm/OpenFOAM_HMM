@@ -5,7 +5,7 @@ LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
 
 LINKEXE     = $(CC) $(c++FLAGS) \
     -fuse-ld=ld  -Xlinker --add-needed \
-    $(FOAM_EXTRA_LDFLAGS) ${ROCM4FOAM}/lib/libroctx64.so   
+    $(FOAM_EXTRA_LDFLAGS) ${ROCM4FOAM}/lib/libroctx64.so   -L/opt/umpire-6.0.0/lib -lumpire -lumpire -L/opt/rocm/lib -lamdhip64 
 
 
 

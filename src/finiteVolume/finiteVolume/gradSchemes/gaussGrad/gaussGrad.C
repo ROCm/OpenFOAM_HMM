@@ -32,7 +32,7 @@ License
 #include "macros.H"
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
 
 #ifdef USE_OMP

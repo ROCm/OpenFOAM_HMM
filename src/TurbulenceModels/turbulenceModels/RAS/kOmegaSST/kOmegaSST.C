@@ -27,6 +27,10 @@ License
 
 #include "kOmegaSST.H"
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -39,14 +43,24 @@ namespace RASModels
 template<class BasicTurbulenceModel>
 void kOmegaSST<BasicTurbulenceModel>::correctNut(const volScalarField& S2)
 {
+    
+    #ifdef USE_ROCTX
+    roctxRangePush("kOmegaSST_A");
+    #endif
+
     // Correct the turbulence viscosity
     kOmegaSSTBase<eddyViscosity<RASModel<BasicTurbulenceModel>>>::correctNut
     (
         S2
     );
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     // Correct the turbulence thermal diffusivity
     BasicTurbulenceModel::correctNut();
+
 }
 
 

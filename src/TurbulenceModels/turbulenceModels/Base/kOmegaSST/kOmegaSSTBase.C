@@ -31,6 +31,10 @@ License
 #include "bound.H"
 #include "wallDist.H"
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -64,7 +68,7 @@ tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F1
         scalar(10)
     );
 
-    return tanh(pow4(arg1));
+    return tanh(pow4(arg1)); //related to src/OpenFOAM/fields/Fields/Field/FieldFunctionsM.H ?
 }
 
 
@@ -118,6 +122,8 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correctNut
     const volScalarField& S2
 )
 {
+    printf("I AM IN kOmegaSSTBase<BasicEddyViscosityModel>::correctNut\n");
+
     // Correct the turbulence viscosity
     this->nut_ = a1_*k_/max(a1_*omega_, b1_*F23()*sqrt(S2));
     this->nut_.correctBoundaryConditions();
@@ -488,6 +494,11 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
         return;
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePush("kOmegaSSTBase_BEVM_::correct");
+    #endif
+
+
     // Local references
     const alphaField& alpha = this->alpha_;
     const rhoField& rho = this->rho_;
@@ -496,12 +507,25 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
     volScalarField& nut = this->nut_;
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
+    #ifdef USE_ROCTX
+    roctxRangePush("BEVM_::correct_A");
+    #endif
+
     BasicEddyViscosityModel::correct();
 
     volScalarField::Internal divU(fvc::div(fvc::absolute(this->phi(), U)));
 
     tmp<volTensorField> tgradU = fvc::grad(U);
     volScalarField S2(2*magSqr(symm(tgradU())));
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("BEVM_::correct_B");
+    #endif
+
     volScalarField::Internal GbyNu0
     (
         this->type() + ":GbyNu",
@@ -517,14 +541,47 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
         (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_
     );
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("BEVM_::correct_F1");
+    #endif
+
     volScalarField F1(this->F1(CDkOmega));
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("BEVM_::correct_F23");
+    #endif
+
     volScalarField F23(this->F23());
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     {
+        #ifdef USE_ROCTX
+        roctxRangePush("BEVM_::correct_D");
+        #endif
+
         volScalarField::Internal gamma(this->gamma(F1));
         volScalarField::Internal beta(this->beta(F1));
 
         GbyNu0 = GbyNu(GbyNu0, F23(), S2());
+
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
+	#ifdef USE_ROCTX
+        roctxRangePush("BEVM_::correct_E");
+        #endif
 
         // Turbulent frequency equation
         tmp<fvScalarMatrix> omegaEqn
@@ -546,6 +603,14 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
           + omegaSource()
           + fvOptions(alpha, rho, omega_)
         );
+    
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
+	#ifdef USE_ROCTX
+        roctxRangePush("BEVM_::correct_F");
+        #endif
 
         omegaEqn.ref().relax();
         fvOptions.constrain(omegaEqn.ref());
@@ -553,6 +618,11 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
         solve(omegaEqn);
         fvOptions.correct(omega_);
         bound(omega_, this->omegaMin_);
+
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
     }
 
     // Turbulent kinetic energy equation
@@ -579,6 +649,11 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
     bound(k_, this->kMin_);
 
     correctNut(S2);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 

@@ -28,9 +28,12 @@ License
 #include "fvcSurfaceIntegrate.H"
 #include "fvMesh.H"
 #include "extrapolatedCalculatedFvPatchFields.H"
+#include "AtomicAccumulator.H"
+
+
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,10 +66,17 @@ void surfaceIntegrate
 
     const Field<Type>& issf = ssf;
 
+    #if 0
     forAll(owner, facei)
+    #else
+    const label loop_len = owner.size();
+    #pragma omp target teams distribute parallel for if(target:loop_len>20000)
+    for (label facei = 0; facei < loop_len; ++facei)
+    #endif
     {
-        ivf[owner[facei]] += issf[facei];
-        ivf[neighbour[facei]] -= issf[facei];
+            
+        atomicAccumulator(ivf[owner[facei]]) += issf[facei];
+        atomicAccumulator(ivf[neighbour[facei]]) -= issf[facei];
     }
 
     forAll(mesh.boundary(), patchi)
@@ -75,10 +85,15 @@ void surfaceIntegrate
             mesh.boundary()[patchi].faceCells();
 
         const fvsPatchField<Type>& pssf = ssf.boundaryField()[patchi];
-
+        #if 0
         forAll(mesh.boundary()[patchi], facei)
+        #else
+        const label loop_len = mesh.boundary()[patchi].size();
+        #pragma omp target teams distribute parallel for if(target:loop_len>20000)
+        for (label facei = 0; facei < loop_len; ++facei)
+        #endif
         {
-            ivf[pFaceCells[facei]] += pssf[facei];
+            atomicAccumulator(ivf[pFaceCells[facei]]) += pssf[facei];
         }
     }
 
@@ -184,10 +199,16 @@ surfaceSum
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
 
+    #if 0
     forAll(owner, facei)
+    #else
+    const label loop_len = owner.size();
+    #pragma omp target teams distribute parallel for if(target:loop_len>20000)
+    for (label facei = 0; facei < loop_len; ++facei)
+    #endif
     {
-        vf[owner[facei]] += ssf[facei];
-        vf[neighbour[facei]] += ssf[facei];
+        atomicAccumulator(vf[owner[facei]]) += ssf[facei];
+        atomicAccumulator(vf[neighbour[facei]]) += ssf[facei];
     }
 
     forAll(mesh.boundary(), patchi)
@@ -197,9 +218,15 @@ surfaceSum
 
         const fvsPatchField<Type>& pssf = ssf.boundaryField()[patchi];
 
+        #if 0
         forAll(mesh.boundary()[patchi], facei)
-        {
-            vf[pFaceCells[facei]] += pssf[facei];
+        #else
+        const label loop_len = mesh.boundary()[patchi].size();
+        #pragma omp target teams distribute parallel for if(target:loop_len>20000)
+	for (label facei = 0; facei < loop_len; ++facei)
+        #endif
+        {   
+            atomicAccumulator(vf[pFaceCells[facei]]) += pssf[facei];
         }
     }
 

@@ -28,6 +28,11 @@ License
 #include "scalarMatrices.H"
 #include "ListOps.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -242,6 +247,10 @@ void Foam::multiply
     const Matrix<Form, Type>& B
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePushA("Foam::multiply");
+    #endif
+
     if (A.n() != B.m())
     {
         FatalErrorInFunction
@@ -262,6 +271,9 @@ void Foam::multiply
             }
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

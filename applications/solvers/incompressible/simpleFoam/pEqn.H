@@ -15,10 +15,27 @@
         HbyA -= (rAU - rAtU())*fvc::grad(p);
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePush("tUEqn.clear");
+    #endif
+
     tUEqn.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("call2_constrainPressure");
+    #endif
 
     // Update the pressure BCs to ensure flux consistency
     constrainPressure(p, U, phiHbyA, rAtU(), MRF);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 
     // Non-orthogonal pressure corrector loop
     while (simple.correctNonOrthogonal())
@@ -40,11 +57,28 @@
 
     #include "continuityErrs.H"
 
+    #ifdef USE_ROCTX
+    roctxRangePush("p.relax");
+    #endif
+
     // Explicitly relax pressure for momentum corrector
     p.relax();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("Momentum_corrector");
+    #endif
 
     // Momentum corrector
     U = HbyA - rAtU()*fvc::grad(p);
     U.correctBoundaryConditions();
     fvOptions.correct(U);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }

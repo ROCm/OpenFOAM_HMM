@@ -1,17 +1,23 @@
-module load openmpi/4.0.3-ucx1.13.0-rocm5.4.0
 
 
 export HSA_XNACK=1
-export OMP_NUM_THREADS=4
+export OMP_NUM_THREADS=1
 export OMPX_DISABLE_USM_MAPS=1
 export GPU_MAX_HW_QUEUES=4
-
+#export HSA_FORCE_STORESC1=0 
 
 #export ROCM4FOAM=${HOME}/OPENMP_COMPILER_UVM/rocm-5.5.0
-export ROCM4FOAM=${HOME}/OPENMP_COMPILER_UVM/rocm-afar-001-afar
+#export ROCM4FOAM=/opt/rocm-5.7.0-1207
+export ROCM4FOAM=/opt/rocm-5.7.0-1330
+#export ROCM4FOAM=/home/rlieberm/rocm-5.7.0-12374
 #export MPI4FOAM=${THERA_OMPI_DIR}
 
-export MPI4FOAM=/home/lgrinber/OPENMP_COMPILER_UVM/openmpi-5.0.0rc2
+#sh5/MI300A
+export MPI4FOAM=/opt/ompi
+
+#sh5/MI300A
+#export MPI4FOAM=${HOME}/openmpi-5.0.0rc12
+
 export OMPI_CXX=clang++
 export OMPI_CC=clang
 

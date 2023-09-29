@@ -97,10 +97,19 @@ void Func                                                                      \
     const UList<Type2>& f2                                                     \
 )                                                                              \
 {                                                                              \
-    TFOR_ALL_F_OP_FUNC_F_F                                                     \
-    (                                                                          \
-        ReturnType, res, =, ::Foam::Func, Type1, f1, Type2, f2                 \
-    )                                                                          \
+    roctxRangePush("Func:TFOR_ALL_F_OP_FUNC_F_F");                             \
+    if constexpr ( std::is_same<Type1,scalar>() && std::is_same<Type2,scalar>() ) { \
+       TPARALLELFOR_ALL_F_OP_FUNC_F_F                                          \
+       (                                                                       \
+       ReturnType, res, =, ::Foam::Func, Type1, f1, Type2, f2                  \
+       )                                                                       \
+    } else {                                                                   \
+      TFOR_ALL_F_OP_FUNC_F_F                                                   \
+      (                                                                        \
+          ReturnType, res, =, ::Foam::Func, Type1, f1, Type2, f2               \
+      )                                                                        \
+    }                                                                          \
+    roctxRangePop();	                                                       \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -168,10 +177,19 @@ void Func                                                                      \
     const UList<Type2>& f2                                                     \
 )                                                                              \
 {                                                                              \
-    TFOR_ALL_F_OP_FUNC_S_F                                                     \
-    (                                                                          \
+    roctxRangePush("Func:TFOR_ALL_F_OP_FUNC_S_F");                             \
+    if constexpr ( std::is_same<Type1,scalar>() && std::is_same<Type2,scalar>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_S_F                                           \
+      (                                                                        \
         ReturnType, res, =, ::Foam::Func, Type1, s1, Type2, f2                 \
-    )                                                                          \
+      )                                                                        \
+    } else {               	                                               \
+      TFOR_ALL_F_OP_FUNC_S_F                                                   \
+      (                                                                        \
+        ReturnType, res, =, ::Foam::Func, Type1, s1, Type2, f2                 \
+      )                                                                        \
+    }                                                                          \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -210,10 +228,19 @@ void Func                                                                      \
     const Type2& s2                                                            \
 )                                                                              \
 {                                                                              \
-    TFOR_ALL_F_OP_FUNC_F_S                                                     \
-    (                                                                          \
+    roctxRangePush("Func:TFOR_ALL_F_OP_FUNC_F_S");                             \
+    if constexpr ( std::is_same<Type1,scalar>() && std::is_same<Type2,scalar>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_S                                           \
+      (                                                                        \
         ReturnType, res, =, ::Foam::Func, Type1, f1, Type2, s2                 \
-    )                                                                          \
+      )                                                                        \
+    } else {                                                     	       \
+      TFOR_ALL_F_OP_FUNC_F_S                                                   \
+      (                                                                        \
+        ReturnType, res, =, ::Foam::Func, Type1, f1, Type2, s2                 \
+      )                                                                        \
+    }	                                                                       \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -259,7 +286,13 @@ void OpFunc                                                                    \
     const UList<Type2>& f2                                                     \
 )                                                                              \
 {                                                                              \
-    TFOR_ALL_F_OP_F_OP_F(ReturnType, res, =, Type1, f1, Op, Type2, f2)         \
+    roctxRangePush("OpFunc:TFOR_ALL_F_OP_F_OP_F");                             \
+    if constexpr ( std::is_same<Type1,scalar>() && std::is_same<Type2,scalar>() ) { \
+      TPARALLELFOR_ALL_F_OP_F_OP_F(ReturnType, res, =, Type1, f1, Op, Type2, f2)      \
+    } else {                                                                   \
+      TFOR_ALL_F_OP_F_OP_F(ReturnType, res, =, Type1, f1, Op, Type2, f2)       \
+    }	                                                                       \
+    roctxRangePop();                           				       \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -327,7 +360,13 @@ void OpFunc                                                                    \
     const UList<Type2>& f2                                                     \
 )                                                                              \
 {                                                                              \
-    TFOR_ALL_F_OP_S_OP_F(ReturnType, res, =, Type1, s1, Op, Type2, f2)         \
+    roctxRangePush("OpFunc:TFOR_ALL_F_OP_S_OP_F");                             \
+    if constexpr ( std::is_same<Type1,scalar>() && std::is_same<Type2,scalar>() ) { \
+      TPARALLELFOR_ALL_F_OP_S_OP_F(ReturnType, res, =, Type1, s1, Op, Type2, f2) \
+    } else {						                       \
+      TFOR_ALL_F_OP_S_OP_F(ReturnType, res, =, Type1, s1, Op, Type2, f2)       \
+    }                                                                          \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -366,7 +405,13 @@ void OpFunc                                                                    \
     const Type2& s2                                                            \
 )                                                                              \
 {                                                                              \
-    TFOR_ALL_F_OP_F_OP_S(ReturnType, res, =, Type1, f1, Op, Type2, s2)         \
+    roctxRangePush("OpFunc:TFOR_ALL_F_OP_F_OP_S");                             \
+    if constexpr ( std::is_same<Type1,scalar>() && std::is_same<Type2,scalar>() ) { \
+      TPARALLELFOR_ALL_F_OP_F_OP_S(ReturnType, res, =, Type1, f1, Op, Type2, s2)    \
+    } else {                                                                   \
+      TFOR_ALL_F_OP_F_OP_S(ReturnType, res, =, Type1, f1, Op, Type2, s2)       \
+    }                                                                          \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \

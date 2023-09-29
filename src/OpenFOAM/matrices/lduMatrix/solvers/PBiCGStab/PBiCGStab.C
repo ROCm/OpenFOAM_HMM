@@ -29,6 +29,20 @@ License
 #include "PBiCGStab.H"
 #include "PrecisionAdaptor.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+#ifdef USE_OMP
+#include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+#endif
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -76,6 +90,11 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
     const direction cmpt
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePushA("PBiCGStab::scalarSolve");
+    #endif
+
     // --- Setup class containing solver performance data
     solverPerformance solverPerf
     (
@@ -173,6 +192,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
             // --- Update pA
             if (solverPerf.nIterations() == 0)
             {
+                #pragma omp target teams distribute parallel for if(target:nCells>20000)    
                 for (label cell=0; cell<nCells; cell++)
                 {
                     pAPtr[cell] = rAPtr[cell];
@@ -187,7 +207,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
                 }
 
                 const solveScalar beta = (rA0rA/rA0rAold)*(alpha/omega);
-
+                #pragma omp target teams distribute parallel for if(target:nCells>20000)
                 for (label cell=0; cell<nCells; cell++)
                 {
                     pAPtr[cell] =
@@ -207,6 +227,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
             alpha = rA0rA/rA0AyA;
 
             // --- Calculate sA
+	    #pragma omp target teams distribute parallel for if(target:nCells>20000)
             for (label cell=0; cell<nCells; cell++)
             {
                 sAPtr[cell] = rAPtr[cell] - alpha*AyAPtr[cell];
@@ -222,12 +243,17 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
              && solverPerf.checkConvergence(tolerance_, relTol_, log_)
             )
             {
+		#pragma omp target teams distribute parallel for if(target:nCells>20000)    
                 for (label cell=0; cell<nCells; cell++)
                 {
                     psiPtr[cell] += alpha*yAPtr[cell];
                 }
 
                 solverPerf.nIterations()++;
+   
+                #ifdef USE_ROCTX
+                roctxRangePop();
+                #endif
 
                 return solverPerf;
             }
@@ -245,6 +271,7 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
             omega = gSumProd(tA, sA, matrix().mesh().comm())/tAtA;
 
             // --- Update solution and residual
+	    #pragma omp target teams distribute parallel for if(target:nCells>20000)
             for (label cell=0; cell<nCells; cell++)
             {
                 psiPtr[cell] += alpha*yAPtr[cell] + omega*zAPtr[cell];
@@ -270,6 +297,10 @@ Foam::solverPerformance Foam::PBiCGStab::scalarSolve
         fieldName_,
         false
     );
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return solverPerf;
 }

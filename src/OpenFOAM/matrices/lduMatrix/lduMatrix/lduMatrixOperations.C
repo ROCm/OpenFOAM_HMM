@@ -37,13 +37,17 @@ Description
   #endif 
 #endif
 
+#ifndef TARGET_CUT_OFF
+#define TARGET_CUT_OFF 10000
+#endif
+
 #include "lduMatrix.H"
 
 #include "AtomicAccumulator.H"
 #include "macros.H"
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,7 +66,7 @@ void Foam::lduMatrix::sumDiag()
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
-    #pragma omp target teams distribute parallel for if (target:l.size() > 1)
+    #pragma omp target teams distribute parallel for if (target:l.size() > 10000)
     for (label face=0; face<l.size(); face++)
     {
         atomicAccumulator(Diag[l[face]]) += Lower[face];
@@ -87,7 +91,7 @@ void Foam::lduMatrix::negSumDiag()
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
-    #pragma omp target teams distribute parallel for if (target:l.size() > 1000)
+    #pragma omp target teams distribute parallel for if (target:l.size() > 10000)
     for (label face=0; face<l.size(); face++)
     {
         atomicAccumulator(Diag[l[face]]) -= Lower[face];
@@ -114,7 +118,7 @@ void Foam::lduMatrix::sumMagOffDiag
     const labelUList& l = lduAddr().lowerAddr();
     const labelUList& u = lduAddr().upperAddr();
 
-    #pragma omp target teams distribute parallel for if (target:l.size() > 1000)
+    #pragma omp target teams distribute parallel for if (target:l.size() > 10000)
     for (label face = 0; face < l.size(); face++)
     {
         atomicAccumulator(sumOff[u[face]]) += mag(Lower[face]);
@@ -341,6 +345,12 @@ void Foam::lduMatrix::operator-=(const lduMatrix& A)
 
 void Foam::lduMatrix::operator*=(const scalarField& sf)
 {
+
+    
+    #ifdef USE_ROCTX
+    roctxRangePush("lduMatrix::operator-mul-sField");
+    #endif
+
     if (diagPtr_)
     {
         *diagPtr_ *= sf;
@@ -356,21 +366,32 @@ void Foam::lduMatrix::operator*=(const scalarField& sf)
         const labelUList& l = lduAddr().lowerAddr();
         const labelUList& u = lduAddr().upperAddr();
 
-        for (label face=0; face<upper.size(); face++)
+        label loop_len = upper.size(); 
+        #pragma omp target teams distribute parallel for if(target:loop_len>TARGET_CUT_OFF)
+        for (label face=0; face<loop_len; face++)
         {
             upper[face] *= sf[l[face]];
         }
-
-        for (label face=0; face<lower.size(); face++)
+        loop_len = lower.size();
+	#pragma omp target teams distribute parallel for if(target:loop_len>TARGET_CUT_OFF)
+        for (label face=0; face<loop_len; face++)
         {
             lower[face] *= sf[u[face]];
         }
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
 void Foam::lduMatrix::operator*=(scalar s)
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("lduMatrix::operator-mul-scalar");
+    #endif
+
     if (diagPtr_)
     {
         *diagPtr_ *= s;
@@ -385,6 +406,9 @@ void Foam::lduMatrix::operator*=(scalar s)
     {
         *lowerPtr_ *= s;
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

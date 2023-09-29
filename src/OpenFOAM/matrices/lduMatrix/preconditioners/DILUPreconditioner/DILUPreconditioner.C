@@ -29,6 +29,23 @@ License
 #include "DILUPreconditioner.H"
 #include <algorithm>
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+#ifdef USE_OMP
+#include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+#endif
+
+#ifndef TARGET_CUT_OFF
+#define TARGET_CUT_OFF 10000
+#endif
+
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -99,7 +116,11 @@ void Foam::DILUPreconditioner::precondition
     const direction
 ) const
 {
-    solveScalar* __restrict__ wAPtr = wA.begin();
+    #ifdef USE_ROCTX
+    roctxRangePushA("DILUPreconditioner::precondition");
+    #endif
+    
+	solveScalar* __restrict__ wAPtr = wA.begin();
     const solveScalar* __restrict__ rAPtr = rA.begin();
     const solveScalar* __restrict__ rDPtr = rD_.begin();
 
@@ -119,11 +140,13 @@ void Foam::DILUPreconditioner::precondition
     const label nFaces = solver_.matrix().upper().size();
     const label nFacesM1 = nFaces - 1;
 
+    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)
     for (label cell=0; cell<nCells; cell++)
     {
         wAPtr[cell] = rDPtr[cell]*rAPtr[cell];
     }
 
+    //LG1 wAPtr is on LHS and RHS ? are indices different ? can parallelize ? 
     for (label face=0; face<nFaces; face++)
     {
         const label sface = losortPtr[face];
@@ -136,6 +159,9 @@ void Foam::DILUPreconditioner::precondition
         wAPtr[lPtr[face]] -=
             rDPtr[lPtr[face]]*upperPtr[face]*wAPtr[uPtr[face]];
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -146,6 +172,10 @@ void Foam::DILUPreconditioner::preconditionT
     const direction
 ) const
 {
+    #ifdef USE_ROCTX
+    roctxRangePushA("DILUPreconditioner::preconditionT");
+    #endif
+
     solveScalar* __restrict__ wTPtr = wT.begin();
     const solveScalar* __restrict__ rTPtr = rT.begin();
     const solveScalar* __restrict__ rDPtr = rD_.begin();
@@ -166,11 +196,13 @@ void Foam::DILUPreconditioner::preconditionT
     const label nFaces = solver_.matrix().upper().size();
     const label nFacesM1 = nFaces - 1;
 
+    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)
     for (label cell=0; cell<nCells; cell++)
     {
         wTPtr[cell] = rDPtr[cell]*rTPtr[cell];
     }
 
+    //LG1 wTPtr is on LHS and RHS ? are indices different ? can parallelize ?
     for (label face=0; face<nFaces; face++)
     {
         wTPtr[uPtr[face]] -=
@@ -184,6 +216,9 @@ void Foam::DILUPreconditioner::preconditionT
         wTPtr[lPtr[sface]] -=
             rDPtr[lPtr[sface]]*lowerPtr[sface]*wTPtr[uPtr[sface]];
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

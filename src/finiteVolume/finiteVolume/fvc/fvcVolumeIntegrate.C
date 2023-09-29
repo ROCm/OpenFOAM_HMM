@@ -30,7 +30,7 @@ License
 #include "Field.H"
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

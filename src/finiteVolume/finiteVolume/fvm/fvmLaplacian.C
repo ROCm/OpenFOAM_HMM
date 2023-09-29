@@ -30,6 +30,10 @@ License
 #include "fvMatrix.H"
 #include "laplacianScheme.H"
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -262,8 +266,18 @@ laplacian
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvm:laplacian1");
+    #endif
+
     tmp<fvMatrix<Type>> Laplacian(fvm::laplacian(tgamma(), vf));
     tgamma.clear();
+   
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return Laplacian;
 }
 
@@ -296,8 +310,17 @@ laplacian
     const word& name
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fvm:laplacian3");
+    #endif
+
     tmp<fvMatrix<Type>> tLaplacian = fvm::laplacian(tgamma(), vf, name);
     tgamma.clear();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tLaplacian;
 }
 
@@ -327,8 +350,18 @@ laplacian
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvm:laplacian4");
+    #endif
+
     tmp<fvMatrix<Type>> tfvm(fvm::laplacian(tGamma(), vf));
     tGamma.clear();
+    
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tfvm;
 }
 

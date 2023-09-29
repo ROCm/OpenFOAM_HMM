@@ -26,6 +26,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
@@ -176,50 +180,91 @@ inline void Foam::SubField<Type>::operator=
     const VectorSpace<Form, Type, Ncmpts>& rhs
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("SubField:copy");
+    #endif
+
     forAll(rhs, i)
     {
         this->operator[](i) = rhs[i];
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
 template<class Type>
 inline void Foam::SubField<Type>::operator+=(const Type& val)
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("SubField:plus_eq");
+    #endif
+
     for (Type& lhs : *this)
     {
         lhs += val;
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
 template<class Type>
 inline void Foam::SubField<Type>::operator-=(const Type& val)
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("SubField:minus_eq");
+    #endif
+
     for (Type& lhs : *this)
     {
         lhs -= val;
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
 template<class Type>
 inline void Foam::SubField<Type>::operator*=(const scalar& s)
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("SubField:mul_eq");
+    #endif
+
     for (Type& lhs : *this)
     {
         lhs *= s;
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
 template<class Type>
 inline void Foam::SubField<Type>::operator/=(const scalar& s)
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("SubField:div_eq");
+    #endif
+
     for (Type& lhs : *this)
     {
         lhs /= s;
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif    
 }
 
 

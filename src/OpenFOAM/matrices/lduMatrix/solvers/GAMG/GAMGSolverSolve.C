@@ -36,8 +36,11 @@ License
   #endif
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
+
+
+#define USM_GAMGS_1 
 
 
 #ifdef USE_HIP 
@@ -582,22 +585,12 @@ void Foam::GAMGSolver::Vcycle
         #endif
     }
 
-    #ifdef USE_HIP   //LG2  PROBLEM HERE
-
-       solveScalar* __restrict__ psiPtr = psi.begin();
-       const solveScalar* __restrict__ finestCorrectionPtr = finestCorrection.begin();
-
-        hipLaunchKernelGGL(HIP_KERNEL_NAME(GAMGSolver_Vcycle_kernel_A),(psi.size() + 255)/256, 256, 0,0,
-                           psiPtr, finestCorrectionPtr, (label) psi.size() );
-        hipDeviceSynchronize();
-    #else
-      #pragma omp target teams distribute parallel for if(target:psi.size()>100)
+      #pragma omp target teams distribute parallel for if(target:psi.size()>10000)
       for (label i = 0; i < psi.size(); ++i)
       //forAll(psi, i)
       {
         psi[i] += finestCorrection[i];
       }
-    #endif
 
 
     #ifdef USE_ROCTX

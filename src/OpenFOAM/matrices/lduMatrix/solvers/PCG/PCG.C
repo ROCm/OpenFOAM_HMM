@@ -32,7 +32,7 @@ License
 
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
 
 //LG using OpenMP offloading and HMM
@@ -45,40 +45,8 @@ License
 #define OMP_UNIFIED_MEMORY_REQUIRED
 #endif
 
-#ifdef USE_HIP 
-#include <hip/hip_runtime.h>
-__global__
-static void  PCG_kernel_A(Foam::solveScalar* __restrict__ pAPtr,  Foam::solveScalar* __restrict__ wAPtr, 
-                          Foam::label N){
-    Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
-    Foam::label i_shift = blockDim.x*gridDim.x;
-    for (Foam::label i = i_start; i < N; i+=i_shift)
-        pAPtr[i] = wAPtr[i];
-}
 
-__global__
-static void  PCG_kernel_B(Foam::solveScalar* __restrict__ pAPtr,  Foam::solveScalar* __restrict__ wAPtr, 
-                          Foam::solveScalar beta,  Foam::label N){
-    Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
-    Foam::label i_shift = blockDim.x*gridDim.x;
-    for (Foam::label i = i_start; i < N; i+=i_shift)
-        pAPtr[i] = wAPtr[i] + beta*pAPtr[i];
-}
-
-__global__
-static void  PCG_kernel_C(Foam::solveScalar* __restrict__ psiPtr,  Foam::solveScalar* __restrict__ pAPtr,
-                          Foam::solveScalar* __restrict__ rAPtr,   Foam::solveScalar* __restrict__ wAPtr, 
-                          Foam::solveScalar alpha, Foam::label N){
-    Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
-    Foam::label i_shift = blockDim.x*gridDim.x;
-    for (Foam::label i = i_start; i < N; i+=i_shift){
-        psiPtr[i] += alpha*pAPtr[i];
-        rAPtr[i] -= alpha*wAPtr[i];
-    }
-}
-
-#endif
-
+#define USM_PCG 
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -250,7 +218,7 @@ Foam::solverPerformance Foam::PCG::scalarSolve
 
             if (solverPerf.nIterations() == 0)
             {
-                  #pragma omp target teams distribute parallel for if(target:nCells>2000) //LG1 AMD
+                  #pragma omp target teams distribute parallel for if(target:nCells>20000) //LG1 AMD
                   for (label cell=0; cell<nCells; cell++)
                   {
                       pAPtr[cell] = wAPtr[cell];
@@ -259,7 +227,7 @@ Foam::solverPerformance Foam::PCG::scalarSolve
             else
             {
                   solveScalar beta = wArA/wArAold;
-                  #pragma omp target teams distribute parallel for  if(target:nCells>2000) //LG1 AMD
+                  #pragma omp target teams distribute parallel for  if(target:nCells>20000) //LG1 AMD
                   for (label cell=0; cell<nCells; cell++)
                   {
                       pAPtr[cell] = wAPtr[cell] + beta*pAPtr[cell];
@@ -303,7 +271,7 @@ Foam::solverPerformance Foam::PCG::scalarSolve
             roctxRangePush("PCG::update psi aA");
             #endif
 
-            #pragma omp target teams distribute parallel for  if(target:nCells>2000) //LG1 AMD
+            #pragma omp target teams distribute parallel for  if(target:nCells>20000) //LG1 AMD
             for (label cell=0; cell<nCells; cell++)
             {
                 psiPtr[cell] += alpha*pAPtr[cell];

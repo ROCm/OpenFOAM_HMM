@@ -61,10 +61,6 @@ Description
   #endif
 #endif
 
-#ifndef TARGET_CUT_OFF
-#define TARGET_CUT_OFF 10000
-#endif
-
 #define USM_LDU_MAT
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -78,10 +74,6 @@ void Foam::lduMatrix::Amul
     const direction cmpt
 ) const
 {
-    #ifdef USE_ROCTX
-    roctxRangePush("lduMatrix::Amul");
-    #endif
-
     solveScalar* __restrict__ ApsiPtr = Apsi.begin();
 
     const solveScalarField& psi = tpsi();
@@ -112,26 +104,7 @@ void Foam::lduMatrix::Amul
     //printf("LG:  in Amul  file = %s line = %d, ApsiPtr = %p\n",__FILE__,__LINE__, ApsiPtr );
     
     const label nCells = diag().size();
-#if 1 //mi300A
-
-    const label nFaces = upper().size();  
-
-
-    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)
-    for (label cell=0; cell<nCells; cell++)
-    {
-          ApsiPtr[cell] = diagPtr[cell]*psiPtr[cell];
-    }
-
-    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)  
-    for (label face=0; face<nFaces; face++)
-    {
-          #pragma omp atomic 
-          ApsiPtr[uPtr[face]] += lowerPtr[face]*psiPtr[lPtr[face]];
-          #pragma omp atomic 
-          ApsiPtr[lPtr[face]] += upperPtr[face]*psiPtr[uPtr[face]];
-    }
-#else
+   
 
       #ifdef USE_OMP
       label target_offload_limit = 20000;
@@ -195,7 +168,6 @@ void Foam::lduMatrix::Amul
 
     #endif
     
-#endif
 
 
     //printf("LG:  in Amul  file = %s line = %d\n",__FILE__,__LINE__ );
@@ -219,10 +191,6 @@ void Foam::lduMatrix::Amul
     #endif
 
     tpsi.clear();
-
-    #ifdef USE_ROCTX
-    roctxRangePop();
-    #endif
 }
 
 
@@ -235,9 +203,6 @@ void Foam::lduMatrix::Tmul
     const direction cmpt
 ) const
 {
-    #ifdef USE_ROCTX
-    roctxRangePush("lduMatrix::Tmul");
-    #endif
     solveScalar* __restrict__ TpsiPtr = Tpsi.begin();
 
     const solveScalarField& psi = tpsi();
@@ -265,19 +230,15 @@ void Foam::lduMatrix::Tmul
     );
 
     const label nCells = diag().size();
-    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)
     for (label cell=0; cell<nCells; cell++)
     {
         TpsiPtr[cell] = diagPtr[cell]*psiPtr[cell];
     }
 
     const label nFaces = upper().size();
-    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF) 
     for (label face=0; face<nFaces; face++)
     {
-        #pragma omp atomic   
         TpsiPtr[uPtr[face]] += upperPtr[face]*psiPtr[lPtr[face]];
-	#pragma omp atomic
         TpsiPtr[lPtr[face]] += lowerPtr[face]*psiPtr[uPtr[face]];
     }
 
@@ -294,10 +255,6 @@ void Foam::lduMatrix::Tmul
     );
 
     tpsi.clear();
-
-    #ifdef USE_ROCTX
-    roctxRangePop();
-    #endif
 }
 
 
@@ -308,10 +265,6 @@ void Foam::lduMatrix::sumA
     const lduInterfaceFieldPtrsList& interfaces
 ) const
 {
-    #ifdef USE_ROCTX
-    roctxRangePush("lduMatrix::sumA");
-    #endif
-
     solveScalar* __restrict__ sumAPtr = sumA.begin();
 
     const scalar* __restrict__ diagPtr = diag().begin();
@@ -325,18 +278,14 @@ void Foam::lduMatrix::sumA
     const label nCells = diag().size();
     const label nFaces = upper().size();
 
-    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)
     for (label cell=0; cell<nCells; cell++)
     {
         sumAPtr[cell] = diagPtr[cell];
     }
 
-    #pragma omp target teams distribute parallel for if(target:nFaces>TARGET_CUT_OFF)
     for (label face=0; face<nFaces; face++)
     {
-        #pragma omp atomic    
         sumAPtr[uPtr[face]] += lowerPtr[face];
-	#pragma omp atomic
         sumAPtr[lPtr[face]] += upperPtr[face];
     }
 
@@ -349,20 +298,12 @@ void Foam::lduMatrix::sumA
             const labelUList& pa = lduAddr().patchAddr(patchi);
             const scalarField& pCoeffs = interfaceBouCoeffs[patchi];
 
-
-            //forAll(pa, face)
-	    label loop_len = pa.size();
-	    #pragma omp target teams distribute parallel for if(target:loop_len>TARGET_CUT_OFF)
-	    for (label face=0; face<loop_len; face++)
+            forAll(pa, face)
             {
-		#pragma omp atomic    
                 sumAPtr[pa[face]] -= pCoeffs[face];
             }
         }
     }
-    #ifdef USE_ROCTX
-    roctxRangePop();
-    #endif
 }
 
 
@@ -376,9 +317,6 @@ void Foam::lduMatrix::residual
     const direction cmpt
 ) const
 {
-    #ifdef USE_ROCTX
-    roctxRangePush("lduMatrix::residual");
-    #endif
     solveScalar* __restrict__ rAPtr = rA.begin();
 
     const solveScalar* const __restrict__ psiPtr = psi.begin();
@@ -416,7 +354,6 @@ void Foam::lduMatrix::residual
     );
 
     const label nCells = diag().size();
-    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)
     for (label cell=0; cell<nCells; cell++)
     {
         rAPtr[cell] = sourcePtr[cell] - diagPtr[cell]*psiPtr[cell];
@@ -424,12 +361,10 @@ void Foam::lduMatrix::residual
 
 
     const label nFaces = upper().size();
-    #pragma omp target teams distribute parallel for if(target:nFaces>TARGET_CUT_OFF)
+
     for (label face=0; face<nFaces; face++)
     {
-        #pragma omp atomic    
         rAPtr[uPtr[face]] -= lowerPtr[face]*psiPtr[lPtr[face]];
-	 #pragma omp atomic
         rAPtr[lPtr[face]] -= upperPtr[face]*psiPtr[uPtr[face]];
     }
 
@@ -444,9 +379,6 @@ void Foam::lduMatrix::residual
         cmpt,
         startRequest
     );
-    #ifdef USE_ROCTX
-    roctxRangePop();
-    #endif
 }
 
 
@@ -467,9 +399,6 @@ Foam::tmp<Foam::Field<Foam::solveScalar>> Foam::lduMatrix::residual
 
 Foam::tmp<Foam::scalarField> Foam::lduMatrix::H1() const
 {
-    #ifdef USE_ROCTX
-    roctxRangePush("lduMatrix::H1");
-    #endif
     auto tH1 = tmp<scalarField>::New(lduAddr().size(), Zero);
 
     if (lowerPtr_ || upperPtr_)
@@ -490,9 +419,7 @@ Foam::tmp<Foam::scalarField> Foam::lduMatrix::H1() const
             H1Ptr[lPtr[face]] -= upperPtr[face];
         }
     }
-    #ifdef USE_ROCTX
-    roctxRangePop();
-    #endif
+
     return tH1;
 }
 

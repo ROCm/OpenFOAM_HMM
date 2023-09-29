@@ -34,6 +34,20 @@ License
 #include "volFields.H"
 #include "fixedValueFvPatchFields.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makeFvGradScheme(faceLimitedGrad)
@@ -48,6 +62,11 @@ Foam::fv::faceLimitedGrad<Foam::scalar>::calcGrad
     const word& name
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::faceLimitedGrad:calcGrad_1");
+    #endif
+
     const fvMesh& mesh = vsf.mesh();
 
     tmp<volVectorField> tGrad = basicGradScheme_().calcGrad(vsf, name);
@@ -172,6 +191,10 @@ Foam::fv::faceLimitedGrad<Foam::scalar>::calcGrad
     g.correctBoundaryConditions();
     gaussGrad<scalar>::correctBoundaryConditions(vsf, g);
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     return tGrad;
 }
 
@@ -184,6 +207,10 @@ Foam::fv::faceLimitedGrad<Foam::vector>::calcGrad
     const word& name
 ) const
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("fv::faceLimitedGrad:calcGrad_2");
+    #endif
+
     const fvMesh& mesh = vvf.mesh();
 
     tmp<volTensorField> tGrad = basicGradScheme_().calcGrad(vvf, name);
@@ -332,6 +359,11 @@ Foam::fv::faceLimitedGrad<Foam::vector>::calcGrad
     g.primitiveFieldRef() *= limiter;
     g.correctBoundaryConditions();
     gaussGrad<vector>::correctBoundaryConditions(vvf, g);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 
     return tGrad;
 }

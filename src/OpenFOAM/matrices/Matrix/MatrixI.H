@@ -27,6 +27,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MatrixBlock.H"
+#include <new>
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -38,7 +43,20 @@ inline void Foam::Matrix<Form, Type>::doAlloc()
     if (len > 0)
     {
         // With sign-check to avoid spurious -Walloc-size-larger-than
-        v_ = new Type[len];
+
+	#if __cplusplus >= 201703L
+
+       	  size_t alignement = 16;
+          size_t bytes_needed = sizeof(Type)*len;
+          if (bytes_needed > 2*100){ //LG1 AMD
+             alignement = 256;       //LG1 AMD        
+          }
+
+          v_ = new (std::align_val_t( alignement)) Type[len]; //LG1 AMD
+							    //
+        #else
+          v_ = new Type[len];
+        #endif
     }
 }
 

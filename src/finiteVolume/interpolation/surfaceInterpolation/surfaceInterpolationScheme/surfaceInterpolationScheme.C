@@ -33,7 +33,7 @@ License
 #include "coupledFvPatchField.H"
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
@@ -177,6 +177,7 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
 
     Field<Type>& sfi = sf.primitiveFieldRef();
 
+    #pragma omp target teams distribute parallel for if(target:P.size()>20000)
     for (label fi=0; fi<P.size(); fi++)
     {
         sfi[fi] = lambda[fi]*vfi[P[fi]] + y[fi]*vfi[N[fi]];
@@ -187,7 +188,13 @@ Foam::surfaceInterpolationScheme<Type>::interpolate
     typename GeometricField<Type, fvsPatchField, surfaceMesh>::
         Boundary& sfbf = sf.boundaryFieldRef();
 
+#if 0
     forAll(lambdas.boundaryField(), pi)
+#else
+    label loop_len = lambdas.boundaryField().size();	    
+    //#pragma omp target teams distribute parallel for if(target:loop_len>20000)
+    for (label pi=0; pi<loop_len; pi++)	    
+#endif
     {
         const fvsPatchScalarField& pLambda = lambdas.boundaryField()[pi];
         const fvsPatchScalarField& pY = ys.boundaryField()[pi];
@@ -279,8 +286,9 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     Field<RetType>& sfi = sf.primitiveFieldRef();
 
     const typename SFType::Internal& Sfi = Sf();
-
-    for (label fi=0; fi<P.size(); fi++)
+    label loop_len = P.size();
+    #pragma omp target teams distribute parallel for if(target:loop_len > 20000)
+    for (label fi=0; fi<loop_len; fi++)
     {
         sfi[fi] = Sfi[fi] & (lambda[fi]*(vfi[P[fi]] - vfi[N[fi]]) + vfi[N[fi]]);
     }
@@ -290,6 +298,40 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     typename GeometricField<RetType, fvsPatchField, surfaceMesh>::
         Boundary& sfbf = sf.boundaryFieldRef();
 
+#if 1
+
+    //typename SFType::Patch& pSf;
+    //fvsPatchField<RetType>& psf;
+    #if 0 
+    forAll(lambdas.boundaryField(), pi)
+    #else
+    loop_len = lambdas.boundaryField().size();
+    //LG2 need to wrap  a definition   of [lambdas.boundaryField()[pi]*vf.boundaryField()[pi].patchInternalField() ] in declare target
+    //#pragma omp target teams distribute parallel for if(target:loop_len > 20000)
+    for (label pi=0; pi<loop_len; pi++)
+    #endif
+    {
+        //fvsPatchScalarField& pLambda = lambdas.boundaryField()[pi];
+        //const typename SFType::Patch& pSf = Sf.boundaryField()[pi];
+        //fvsPatchField<RetType>& psf = sfbf[pi];
+
+        if (vf.boundaryField()[pi].coupled())
+        {
+            /*psf*/ sfbf[pi]  =
+                /*pSf*/ Sf.boundaryField()[pi]
+              & (
+                    lambdas.boundaryField()[pi]*vf.boundaryField()[pi].patchInternalField()
+                  + (1.0 - lambdas.boundaryField()[pi])*vf.boundaryField()[pi].patchNeighbourField()
+                );
+        }
+        else
+        {
+            /*psf*/ sfbf[pi] = /*pSf*/ Sf.boundaryField()[pi] & vf.boundaryField()[pi];
+        }
+    }
+
+
+#else
     forAll(lambdas.boundaryField(), pi)
     {
         const fvsPatchScalarField& pLambda = lambdas.boundaryField()[pi];
@@ -310,6 +352,7 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
             psf = pSf & vf.boundaryField()[pi];
         }
     }
+#endif
 
     tlambdas.clear();
 

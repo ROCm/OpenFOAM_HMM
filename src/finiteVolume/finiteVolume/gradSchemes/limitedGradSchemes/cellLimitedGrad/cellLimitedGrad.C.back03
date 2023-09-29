@@ -164,44 +164,47 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     roctxRangePush("fv::cellLimitedGrad_min_max");
     #endif
 
-    if constexpr ( std::is_same_v<Type,Foam::Vector<double>> ) {   
+    scalar * maxVsfPtr_work_array = NULL, * minVsfPtr_work_array = NULL;
+    if constexpr ( std::is_same_v<Type,double> || std::is_same_v<Type,float> ) {
+        maxVsfPtr_work_array = (scalar*) omp_target_alloc(sizeof(scalar)*maxVsf.size(),omp_get_default_device());
+        minVsfPtr_work_array = (scalar*) omp_target_alloc(sizeof(scalar)*maxVsf.size(),omp_get_default_device());    
+    }
+    if constexpr ( std::is_same<Type,double>() ) printf("Type == double\n");
+    if constexpr ( std::is_same<Type,float>() ) printf("Type == float\n");
+    else if constexpr (std::is_same_v<Type,int> ) printf("Type == int\n");
+    else printf("Type is not float no double no int\n"); 
+ 
+    if constexpr ( std::is_same_v<Type,double> || std::is_same_v<Type,float>  ) {   
+
+
+      printf("owner.size()  = %d\n",(int) owner.size());
+
+      #pragma omp target teams distributed parallel for if(target:maxVsf.size()> 10000)
+      for (label i = 0; i < maxVsf.size(); ++i){
+         maxVsfPtr_work_array[i] = maxVsf[i];
+         minVsfPtr_work_array[i] = minVsf[i];  
+      }
 
       #pragma omp target teams distribute parallel for if(target:owner.size() > 10000) //LG4 testing , possibly OK
       for (label facei = 0; facei < owner.size(); ++facei){
         const label own = owner[facei];
         const label nei = neighbour[facei];
-        const Foam::Vector<double>& vsfOwn = vsf[own];
-        const Foam::Vector<double>& vsfNei = vsf[nei];
-      
-	//maxVsf[own] = Foam::max(maxVsf[own], vsfNei);
-        for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
- 	  double& var = setComponent(maxVsf[own],cmpt);	
-          #pragma omp atomic compare            
-          if (var < (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);	
-	}
+        const auto vsfOwn = (scalar) vsf[own];
+        const auto vsfNei = (scalar) vsf[nei];
 
-	//minVsf[own] = Foam::min(minVsf[own], vsfNei);
-	for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-          double& var = setComponent(minVsf[own],cmpt);
-          #pragma omp atomic compare
-          if (var > (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-        }
-        
-	//maxVsf[nei] = Foam::max(maxVsf[nei], vsfOwn);
-        for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-          double& var = setComponent(maxVsf[nei],cmpt);
-          #pragma omp atomic compare
-          if (var < (double) component(vsfOwn,cmpt)) var = (double) component(vsfOwn,cmpt);
-        }
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (maxVsfPtr_work_array[own] < vsfNei) {maxVsfPtr_work_array[own] = vsfNei;}
 
-	//minVsf[nei] = Foam::min(minVsf[nei], vsfOwn);
-        for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-          double& var = setComponent(minVsf[nei],cmpt);
-          #pragma omp atomic compare
-          if (var > (double) component(vsfOwn,cmpt)) var = (double) component(vsfOwn,cmpt);
-        }
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (minVsfPtr_work_array[own] > vsfNei) minVsfPtr_work_array[own] = vsfNei;
 
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (maxVsfPtr_work_array[nei] < vsfOwn) maxVsfPtr_work_array[nei] = vsfOwn;
+
+        #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+        if (minVsfPtr_work_array[nei] > vsfOwn) minVsfPtr_work_array[nei] = vsfOwn;        
       }
+
     }
     else{
       	    
@@ -210,11 +213,42 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         const label nei = neighbour[facei];
         const Type& vsfOwn = vsf[own];
         const Type& vsfNei = vsf[nei];
-        
-	maxVsf[own] = Foam::max(maxVsf[own], vsfNei);
+
+#if 0
+
+        #pragma unroll 	
+	for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt){
+	  scalar a = 1.1;	
+          #pragma omp atomic compare 		
+	  if ( setComponent(vsf[nei],cmpt) > setComponent(maxVsf[own],cmpt) ) setComponent(maxVsf[own],cmpt) = setComponent(vsf[nei],cmpt);
+          //setComponent(maxVsf[own],cmpt) = setComponent(maxVsf[own],cmpt) > setComponent(vsf[nei],cmpt) ? setComponent(maxVsf[own],cmpt) : setComponent(vsf[nei],cmpt);///MAX  
+	}
+	/*
+	#pragma unroll
+        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt){
+          #pragma omp atomic compare
+            setComponent(minVsf[own],cmpt) = component(minVsf[own],cmpt) < component(vsf[nei],cmpt) ? component(minVsf[own],cmpt) : component(vsf[nei],cmpt);///MIN
+	}
+	#pragma unroll  
+        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt){
+          #pragma omp atomic compare            
+            setComponent(maxVsf[nei],cmpt) = component(maxVsf[nei],cmpt) > component(vsf[own],cmpt) ? component(maxVsf[nei],cmpt) : component(vsf[own],cmpt);///MAX  
+        }																  
+        #pragma unroll
+        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt){
+          #pragma omp atomic compare
+            setComponent(minVsf[nei],cmpt) = component(minVsf[nei],cmpt) < component(vsf[own],cmpt) ? component(minVsf[nei],cmpt) : component(vsf[own],cmpt);///MIN
+        }
+       */
+#else
+
+        maxVsf[own] = Foam::max(maxVsf[own], vsfNei);
         minVsf[own] = Foam::min(minVsf[own], vsfNei);
         maxVsf[nei] = Foam::max(maxVsf[nei], vsfOwn);
         minVsf[nei] = Foam::min(minVsf[nei], vsfOwn);
+#endif
+
+
       }
     }
     #ifdef USE_ROCTX
@@ -227,6 +261,62 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
 
     const auto& bsf = vsf.boundaryField();
 
+   if constexpr ( std::is_same_v<Type,double>  || std::is_same_v<Type,float> ) { 
+
+     // USM_Cell_Limit_Grad #pragma omp parallel for schedule (dynamic,1)
+     for (label patchi=0; patchi < bsf.size(); ++patchi)
+     {
+        const fvPatchField<Type>& psf = bsf[patchi];
+        const labelUList& pOwner = mesh.boundary()[patchi].faceCells();
+
+        if (psf.coupled())
+        {
+            const Field<Type> psfNei(psf.patchNeighbourField()); //LG3  copy constructor ?  can be part of target region on GPU ?
+
+            #if 0
+            forAll(pOwner, pFacei)
+            #else
+            #pragma omp target teams distribute parallel for if(target:pOwner.size() > 10000) //LG4  testing, probably OK
+            for (label pFacei=0; pFacei < pOwner.size(); ++pFacei)            
+            #endif 
+            {
+                const label own = pOwner[pFacei];
+                const scalar vsfNei = (scalar) psfNei[pFacei];
+
+                //atomic MAXA/MIN should solve the race condition issue 
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (maxVsfPtr_work_array[own] < vsfNei) {maxVsfPtr_work_array[own] = vsfNei;}
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (minVsfPtr_work_array[own] > vsfNei) {minVsfPtr_work_array[own] = vsfNei;}
+            }
+        }
+        else
+        {
+            #if 0
+            forAll(pOwner, pFacei)
+            #else
+            #pragma omp target teams distribute parallel for if(target:pOwner.size() > 10000) //LG4 testing
+            for (label pFacei=0; pFacei < pOwner.size(); ++pFacei)            
+            #endif             
+            {
+                const label own = pOwner[pFacei];
+                const scalar vsfNei = (scalar) psf[pFacei];
+
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (maxVsfPtr_work_array[own] < vsfNei) {maxVsfPtr_work_array[own] = vsfNei;}
+                #pragma omp atomic compare hint(ompx_fast_fp_atomics)
+                if (minVsfPtr_work_array[own] > vsfNei) {minVsfPtr_work_array[own] = vsfNei;}
+            }
+        }
+     }
+      #pragma omp target teams distribute parallel for if(maxVsf.size()> 20000) // LG4 testing
+      for (label i = 0; i < maxVsf.size(); ++i){
+         maxVsf[i] = maxVsfPtr_work_array[i];
+         minVsf[i] = minVsfPtr_work_array[i] ;  
+      }
+
+   }
+   else{
 
     for (label patchi=0; patchi < bsf.size(); ++patchi)
     {
@@ -239,75 +329,29 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         {
             const Field<Type> psfNei(psf.patchNeighbourField());
 
-            if constexpr ( std::is_same_v<Type,Foam::Vector<double>> ) {
-              #pragma omp target teams distribute parallel for if(target:owner.size() > 10000) //LG4 testing , possibly OK
-               for (label pFacei = 0; pFacei < pOwner.size(); ++pFacei){
-		 const label own = pOwner[pFacei];
-                 const Type& vsfNei = psfNei[pFacei];
-
-                 //maxVsf[own] = max(maxVsf[own], vsfNei);
-		 for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(maxVsf[own],cmpt);
-                    #pragma omp atomic compare
-                    if (var < (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-                 //minVsf[own] = min(minVsf[own], vsfNei);
-		 for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(minVsf[own],cmpt);
-                    #pragma omp atomic compare
-                    if (var > (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-	       }
-	    }
-	    else {
-
-              forAll(pOwner, pFacei)
-              {
+            
+            forAll(pOwner, pFacei)
+            {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psfNei[pFacei];
 
                 //atomic MAX/MIN should solve the race condition issue 
                 maxVsf[own] = max(maxVsf[own], vsfNei);
                 minVsf[own] = min(minVsf[own], vsfNei);
-              }
-	    }
+            }
         }
         else
         {
-            if constexpr ( std::is_same_v<Type,Foam::Vector<double>> ) {
-              #pragma omp target teams distribute parallel for if(target:owner.size() > 10000) //LG4 testing , possibly OK
-              for (label pFacei = 0; pFacei < pOwner.size(); ++pFacei){
-                const label own = pOwner[pFacei];
-                const Type& vsfNei = psf[pFacei];
-                
-		//maxVsf[own] = max(maxVsf[own], vsfNei);
-                for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(maxVsf[own],cmpt);
-                    #pragma omp atomic compare
-                     if (var < (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-		 
-                //minVsf[own] = min(minVsf[own], vsfNei);
-                for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(minVsf[own],cmpt);
-                    #pragma omp atomic compare
-                     if (var > (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-	      }
-	    }
-	    else
-	    {
-
-              forAll(pOwner, pFacei)             
-              {
+            forAll(pOwner, pFacei)             
+            {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psf[pFacei];
                 maxVsf[own] = max(maxVsf[own], vsfNei);
                 minVsf[own] = min(minVsf[own], vsfNei);
-              }
-	    }
+            }
         }
      }
+   }
 
     #ifdef USE_ROCTX
     roctxRangePop();
@@ -423,6 +467,10 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     roctxRangePop();
     #endif
 
+    if constexpr ( std::is_same<Type,double>()  || std::is_same<Type,float>() ) {
+      omp_target_free(maxVsfPtr_work_array,omp_get_default_device());
+      omp_target_free(minVsfPtr_work_array,omp_get_default_device());
+    }
 
     #ifdef USE_ROCTX
     roctxRangePop();

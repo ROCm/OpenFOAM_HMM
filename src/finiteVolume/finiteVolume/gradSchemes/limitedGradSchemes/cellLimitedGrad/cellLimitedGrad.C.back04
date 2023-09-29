@@ -239,73 +239,26 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
         {
             const Field<Type> psfNei(psf.patchNeighbourField());
 
-            if constexpr ( std::is_same_v<Type,Foam::Vector<double>> ) {
-              #pragma omp target teams distribute parallel for if(target:owner.size() > 10000) //LG4 testing , possibly OK
-               for (label pFacei = 0; pFacei < pOwner.size(); ++pFacei){
-		 const label own = pOwner[pFacei];
-                 const Type& vsfNei = psfNei[pFacei];
-
-                 //maxVsf[own] = max(maxVsf[own], vsfNei);
-		 for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(maxVsf[own],cmpt);
-                    #pragma omp atomic compare
-                    if (var < (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-                 //minVsf[own] = min(minVsf[own], vsfNei);
-		 for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(minVsf[own],cmpt);
-                    #pragma omp atomic compare
-                    if (var > (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-	       }
-	    }
-	    else {
-
-              forAll(pOwner, pFacei)
-              {
+            
+            forAll(pOwner, pFacei)
+            {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psfNei[pFacei];
 
                 //atomic MAX/MIN should solve the race condition issue 
                 maxVsf[own] = max(maxVsf[own], vsfNei);
                 minVsf[own] = min(minVsf[own], vsfNei);
-              }
-	    }
+            }
         }
         else
         {
-            if constexpr ( std::is_same_v<Type,Foam::Vector<double>> ) {
-              #pragma omp target teams distribute parallel for if(target:owner.size() > 10000) //LG4 testing , possibly OK
-              for (label pFacei = 0; pFacei < pOwner.size(); ++pFacei){
-                const label own = pOwner[pFacei];
-                const Type& vsfNei = psf[pFacei];
-                
-		//maxVsf[own] = max(maxVsf[own], vsfNei);
-                for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(maxVsf[own],cmpt);
-                    #pragma omp atomic compare
-                     if (var < (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-		 
-                //minVsf[own] = min(minVsf[own], vsfNei);
-                for (direction cmpt=0; cmpt<pTraits<Foam::Vector<double>>::nComponents; ++cmpt){
-                    double& var = setComponent(minVsf[own],cmpt);
-                    #pragma omp atomic compare
-                     if (var > (double) component(vsfNei,cmpt)) var = (double) component(vsfNei,cmpt);
-                 }
-	      }
-	    }
-	    else
-	    {
-
-              forAll(pOwner, pFacei)             
-              {
+            forAll(pOwner, pFacei)             
+            {
                 const label own = pOwner[pFacei];
                 const Type& vsfNei = psf[pFacei];
                 maxVsf[own] = max(maxVsf[own], vsfNei);
                 minVsf[own] = min(minVsf[own], vsfNei);
-              }
-	    }
+            }
         }
      }
 

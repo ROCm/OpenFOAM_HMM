@@ -46,82 +46,9 @@ Description
 #endif
 
 
-#ifdef USE_HIP
-#include <hip/hip_runtime.h>
-
-__global__ 
-static void scalarField_kernel_A_float( const float * __restrict__ f1,  const float * __restrict__ f2, Foam::label N, float *result){
-
-  Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
-  Foam::label i_shift = blockDim.x*gridDim.x;
-  __shared__  float s_sum[16];//1024/WARP_SIZE
-
-  float sum = 0.0;
-
-    for (Foam::label i=i_start; i<N; i+=i_shift){
-        sum += f1[i]*f2[i];
-    }
-
-    //reduce within a warp; assume warp size id 64
-    for (int i = 32; i > 0 ; i = i/2){
-      sum += __shfl_down(sum,i);
-    }
-    //reduce across warps of the same threadblock
-    if (threadIdx.x%64 == 0) 
-      s_sum[threadIdx.x/64] = sum;
-
-    __syncthreads();
-    if (threadIdx.x==0){
-      for (int i = 1; i < blockDim.x/64; ++i)
-        sum += s_sum[i];
-       atomicAdd(&result[0],sum);
-    }
-    /*
-    //reduce across all warps 
-    if (threadIdx.x%64 == 0){
-        atomicAdd(&result[0],sum);
-    }
-    */
-
-}
-
-__global__ 
-static void scalarField_kernel_A_double( const double * __restrict__ f1,  const double * __restrict__ f2, Foam::label N, double *result){
-
-  Foam::label i_start = threadIdx.x+blockIdx.x*blockDim.x;
-  Foam::label i_shift = blockDim.x*gridDim.x;
-
-  double sum = 0.0;
-  __shared__  double s_sum[16];//1024/WARP_SIZE
-
-    for (Foam::label i=i_start; i<N; i+=i_shift){
-        sum += f1[i]*f2[i];
-    }
-
-    //reduce within a warp; assume warp size id 64
-    for (int i = 32; i > 0 ; i = i/2){
-      sum += __shfl_down(sum,i);
-    }
-
-    //reduce across warps of the same threadblock
-    if (threadIdx.x%64 == 0) 
-      s_sum[threadIdx.x/64] = sum;
-
-    __syncthreads();
-    if (threadIdx.x==0){
-      for (int i = 1; i < blockDim.x/64; ++i)
-        sum += s_sum[i];
-       atomicAdd(&result[0],sum);
-    }
-    /*
-    //reduce across all warps 
-    if (threadIdx.x%64 == 0){
-        atomicAdd(&result[0],sum);
-    }
-    */
-}
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
 #endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -156,10 +83,19 @@ void scalarField::replace(const direction, const scalar& s)
 
 void stabilise(scalarField& res, const UList<scalar>& sf, const scalar s)
 {
+    #ifdef USE_ROCTX
+    roctxRangePushA("stabilise");
+    #endif
+
     TFOR_ALL_F_OP_FUNC_S_F
     (
         scalar, res, =, ::Foam::stabilise, scalar, s, scalar, sf
     )
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 tmp<scalarField> stabilise(const UList<scalar>& sf, const scalar s)
@@ -189,22 +125,11 @@ float sumProd(const UList<float>& f1, const UList<float>& f2)
         #if 0 //LG1
         TFOR_ALL_S_OP_F_OP_F(float, result, +=, float, f1, *, float, f2)
         #else
-        label f1_sz = f1.size();
+          label loop_len = f1.size();
 
-        #ifdef USE_HIP
-          const float *f1ptr = &f1[0];
-          const float *f2ptr = &f2[0];
-          float *result_ptr = new float[1];
-          result_ptr[0] = 0.0;
-          hipLaunchKernelGGL(HIP_KERNEL_NAME(scalarField_kernel_A_float), (f1_sz + 1023)/1024, 1024, 0,0, f1ptr,  f2ptr, f1_sz, result_ptr);
-          hipDeviceSynchronize();
-          result = result_ptr[0];
-          delete[] result_ptr;
-        #else 
-          #pragma omp target teams distribute parallel for reduction(+:result) map(tofrom:result)  //if(target:f1_sz>200)
-          for (label i = 0; i < f1_sz; ++i)
+          #pragma omp target teams distribute parallel for reduction(+:result) map(tofrom:result) if(target:loop_len>10000)
+          for (label i = 0; i < loop_len; ++i)
               result += f1[i]*f2[i];
-          #endif  
         #endif  
     }
     return result;
@@ -221,22 +146,10 @@ double sumProd(const UList<double>& f1, const UList<double>& f2)
         TFOR_ALL_S_OP_F_OP_F(double, result, +=, double, f1, *, double, f2)
         
         #else
-        label f1_sz = f1.size();
-
-        #ifdef USE_HIP
-          const double *f1ptr = &f1[0];
-          const double *f2ptr = &f2[0];
-          double *result_ptr = new double[1];
-          result_ptr[0] = 0.0;
-          hipLaunchKernelGGL(HIP_KERNEL_NAME(scalarField_kernel_A_double), (f1_sz + 1023)/1024, 1024, 0,0, f1ptr,  f2ptr, f1_sz, result_ptr);
-          hipDeviceSynchronize();
-          result = result_ptr[0];
-          delete[] result_ptr;
-        #else 
-          #pragma omp target  teams distribute parallel for reduction(+:result) map(tofrom:result) //if(target:f1_sz>200)
-          for (label i = 0; i < f1_sz; ++i)
+          label loop_len = f1.size();
+          #pragma omp target  teams distribute parallel for reduction(+:result) map(tofrom:result) if(target:loop_len>10000)
+          for (label i = 0; i < loop_len; ++i)
               result += f1[i]*f2[i];
-          #endif
         #endif
 
     }

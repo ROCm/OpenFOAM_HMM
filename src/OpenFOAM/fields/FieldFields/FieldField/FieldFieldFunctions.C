@@ -133,7 +133,6 @@ void sqr
 {
     //forAll(f, i)
     label f_sz = f.size();
-    //LG3 #pragma omp parallel for if (f_sz > 4)
     for (label i=0; i < f_sz; ++i)
     {
         sqr(f[i], vf[i]);

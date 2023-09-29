@@ -37,8 +37,14 @@ License
 #include <stdlib.h>  //LG1 AMD
 
 #ifdef USE_ROCTX
-#include <roctx.h>
+#include <roctracer/roctx.h>
 #endif
+
+
+#include "umpire/Allocator.hpp"
+#include "umpire/ResourceManager.hpp"
+#include "umpire/strategy/AlignedAllocator.hpp"
+#include "umpire/strategy/DynamicPoolList.hpp"
 
 //LG using OpenMP offloading and HMM
 //#include <omp.h>
@@ -46,6 +52,16 @@ License
 //#pragma omp requires unified_shared_memory
 //#define OMP_UNIFIED_MEMORY_REQUIRED
 //#endif
+
+#if 0
+#ifndef UMPIRE_VARS__
+int UMPIRE_INIT=0;
+umpire::ResourceManager& rm = umpire::ResourceManager::getInstance();
+umpire::Allocator umpire_aligned_alloc;
+umpire::Allocator umpire_pooled_allocator;
+#define UMPIRE_VARS__
+#endif
+#endif
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -66,21 +82,34 @@ void Foam::List<T>::doResize(const label len)
         if (bytes_needed > 2*100){ //LG1 AMD
            alignement = 256;       //LG1 AMD        
         }
+	/*
         #ifdef USE_ROCTX
-	//char roctx_name[128];
-	//sprintf(roctx_name,"allocating_%zu",sizeof(T)*len);
-        //roctxRangePush(roctx_name);
+	if (len  > 10000){
+	  char roctx_name[128];
+	  sprintf(roctx_name,"allocating_%zu",sizeof(T)*len);
+          roctxRangePush(roctx_name);
+	}
         #endif
+        */
+        T *nv;
+#if 0	
+	if (UMPIRE_INIT==0){
+          umpire_aligned_alloc = rm.makeAllocator<umpire::strategy::AlignedAllocator>("aligned_allocator", rm.getAllocator("HOST"), 256);
+          umpire_pooled_allocator = rm.makeAllocator<umpire::strategy::DynamicPoolList>("DEVICE_pool", umpire_aligned_alloc);
+	  UMPIRE_INIT=1;
+	}
+        if (len > 10000) nv = (T*) umpire_pooled_allocator.allocate(len*sizeof(T));
+        else
+#endif	
+    	   nv = new (std::align_val_t( alignement)) T[len]; //LG1 AMD
 
-        T* nv = new (std::align_val_t( alignement)) T[len]; //LG1 AMD
+/*
         #ifdef USE_ROCTX
-        //roctxRangePop();
+	if (len  > 10000){
+           roctxRangePop();
+        }
         #endif
-
-        //if (bytes_needed > 2*128){   //LG1 AMD
-        //   #pragma omp target enter data map(to:nv[0:len]) //LG1 AMD
-       // } //LG1 AMD
-
+*/
 
         const label overlap = Foam::min(this->size_, len);
 
@@ -454,7 +483,28 @@ Foam::List<T>::~List()
 {
     if (this->v_)
     {
-        delete[] this->v_;
+/*
+        #ifdef USE_ROCTX
+        if (this->size_  > 10000){
+          char roctx_name[128];
+          sprintf(roctx_name,"deleting_%zu",sizeof(T)*this->size_);
+          roctxRangePush(roctx_name);
+	}
+        #endif
+*/
+#if 0
+	if (this->size_  > 10000) umpire_pooled_allocator.deallocate( this->v_);
+        else 
+#endif
+	delete[] this->v_;
+
+/*
+	#ifdef USE_ROCTX
+	if (this->size_  > 10000){
+           roctxRangePop();
+	}
+        #endif
+*/
     }
 }
 

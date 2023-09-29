@@ -10,51 +10,13 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      controlDict;
+    object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-libs            (OpenFOAM fieldFunctionObjects);
+numberOfSubdomains  36;
 
-application     simpleFoam;
-
-startFrom       startTime;
-
-startTime       0;
-
-stopAt          endTime;
-
-endTime         500;
-
-deltaT          1;
-
-writeControl    timeStep;
-
-writeInterval   5;
-
-purgeWrite      0;
-
-writeFormat     ascii;
-
-writePrecision  6;
-
-writeCompression on;
-
-timeFormat      general;
-
-timePrecision   6;
-
-runTimeModifiable true;
-
-functions
-{
-    // Demonstrate runTimePostProcessing
-    #include "visualization"
-
-    // Do some other functionObjects
-    #include "forceCoeffs"
-    #include "stabilizationSchemes"
-}
+method              scotch;
 
 
 // ************************************************************************* //

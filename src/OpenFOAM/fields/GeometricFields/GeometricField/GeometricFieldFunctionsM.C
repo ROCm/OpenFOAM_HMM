@@ -26,6 +26,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 #include "GeometricFieldReuseFunctions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -505,11 +509,13 @@ void OpFunc                                                                    \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2                      \
 )                                                                              \
 {                                                                              \
+    roctxRangePush("opFunc_A");                                                \
     Foam::OpFunc                                                               \
     (res.primitiveFieldRef(), gf1.primitiveField(), gf2.primitiveField());     \
     Foam::OpFunc                                                               \
     (res.boundaryFieldRef(), gf1.boundaryField(), gf2.boundaryField());        \
     res.oriented() = gf1.oriented() Op gf2.oriented();                         \
+    roctxRangePop();                                                           \
 }                                                                              \
                                                                                \
                                                                                \
@@ -634,7 +640,9 @@ void OpFunc                                                                    \
 {                                                                              \
     Foam::OpFunc(res.primitiveFieldRef(), dt1.value(), gf2.primitiveField());  \
     Foam::OpFunc(res.boundaryFieldRef(), dt1.value(), gf2.boundaryField());    \
+    roctxRangePush("opFunc_C");                                                \
     res.oriented() = gf2.oriented();                                           \
+    roctxRangePop();                                                           \
                                                                                \
 }                                                                              \
                                                                                \

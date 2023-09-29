@@ -29,6 +29,14 @@ License
 #include "mapDistribute.H"
 #include "globalIndex.H"
 
+
+#ifndef OMP_UNIFIED_MEMORY_REQUIRED
+#pragma omp requires unified_shared_memory
+#define OMP_UNIFIED_MEMORY_REQUIRED
+#endif
+
+#define USM_GAMGA_1  
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -40,8 +48,12 @@ void Foam::GAMGAgglomeration::restrictField
 ) const
 {
     cf = Zero;
-    forAll(ff, i) // macro: for (label i = 0; i < ff.size(); ++i) 
+    label loop_len = ff.size();
+    //forAll(ff, i) // macro: for (label i = 0; i < ff.size(); ++i)
+    #pragma omp target teams distribute parallel for if(target:loop_len>10000)
+    for (label i = 0; i < loop_len; ++i)
     {
+       #pragma omp atomic    
         cf[fineToCoarse[i]] += ff[i];
     }
 }
@@ -113,12 +125,17 @@ void Foam::GAMGAgglomeration::restrictFaceField
 
     cf = Zero;
 
-    forAll(fineToCoarse, ffacei)
+    label loop_len = fineToCoarse.size();
+
+    //forAll(fineToCoarse, ffacei)
+    #pragma omp target teams distribute parallel for if(target:loop_len > 10000)
+    for (label ffacei=0; ffacei < loop_len; ++ffacei)
     {
         label cFace = fineToCoarse[ffacei];
 
         if (cFace >= 0)
         {
+	    #pragma omp atomic	
             cf[cFace] += ff[ffacei];
         }
     }
@@ -162,7 +179,7 @@ void Foam::GAMGAgglomeration::prolongField
 
         
 
-        #pragma omp target teams distribute parallel for if(target:fineToCoarse.size() > 2000)
+        #pragma omp target teams distribute parallel for if(target:fineToCoarse.size() > 10000)
         for (label i = 0; i < fineToCoarse.size(); ++i)
         //forAll(fineToCoarse, i)
         {
@@ -171,7 +188,7 @@ void Foam::GAMGAgglomeration::prolongField
     }
     else
     {
-	#pragma omp target teams distribute parallel for if(target:fineToCoarse.size() > 2000)
+	#pragma omp target teams distribute parallel for if(target:fineToCoarse.size() > 10000)
         for (label i = 0; i < fineToCoarse.size(); ++i)
         //forAll(fineToCoarse, i)
         {

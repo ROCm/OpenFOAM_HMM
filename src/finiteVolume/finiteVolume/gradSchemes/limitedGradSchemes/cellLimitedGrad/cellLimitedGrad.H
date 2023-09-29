@@ -48,6 +48,15 @@ SourceFiles
 #include "gradScheme.H"
 #include "Field.H"
 
+
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -179,9 +188,14 @@ inline void cellLimitedGrad<Type, Limiter>::limitFaceCmpt
         return;
     }
 
+#if 1
+    scalar lmtr_r = Limiter::limiter(r);
+    #pragma omp atomic compare 
+    if (limiter > lmtr_r) limiter = lmtr_r;
+#else
     limiter = min(limiter, Limiter::limiter(r));
+#endif
 }
-
 
 template<class Type, class Limiter>
 inline void cellLimitedGrad<Type, Limiter>::limitFace
