@@ -338,11 +338,11 @@ runParallel()
         if [ "$logMode" = append ]
         then
         (
-            $mpirun -n $nProcs /home/lgrinber/helper_gomp.sh $appRun $appArgs "$@" </dev/null >> $logFile 2>&1
+            $mpirun -n $nProcs $appRun $appArgs "$@" </dev/null >> $logFile 2>&1
         )
         else
         (
-            $mpirun -n $nProcs /home/lgrinber/helper_gomp.sh $appRun $appArgs "$@" </dev/null > $logFile 2>&1
+            $mpirun -n $nProcs $appRun $appArgs "$@" </dev/null > $logFile 2>&1
         )
         fi
     fi
