@@ -30,6 +30,11 @@ License
 #include "volFields.H"
 //#include "cylicFvPatchField.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -276,6 +281,12 @@ void Foam::cyclicAMIFvPatchField<Type>::manipulateMatrix
 )
 {
 
+    #ifdef USE_ROCTX
+    roctxRangePush("cyclicAMIFvPatchField::manipulateMatrix");
+    #endif
+
+
+
     if (this->cyclicAMIPatch().owner())
     {
         label index = this->patch().index();
@@ -355,6 +366,10 @@ void Foam::cyclicAMIFvPatchField<Type>::manipulateMatrix
             );
         }
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

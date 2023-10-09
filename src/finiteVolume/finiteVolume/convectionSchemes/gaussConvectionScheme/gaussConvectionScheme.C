@@ -29,6 +29,11 @@ License
 #include "fvcSurfaceIntegrate.H"
 #include "fvMatrices.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -81,8 +86,14 @@ gaussConvectionScheme<Type>::fvmDiv
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("gaussConvectionScheme::fvmDiv");
+    #endif
+
     tmp<surfaceScalarField> tweights = tinterpScheme_().weights(vf);
     const surfaceScalarField& weights = tweights();
+
 
     tmp<fvMatrix<Type>> tfvm
     (
@@ -92,11 +103,43 @@ gaussConvectionScheme<Type>::fvmDiv
             faceFlux.dimensions()*vf.dimensions()
         )
     );
+
+
     fvMatrix<Type>& fvm = tfvm.ref();
 
+    #ifdef USE_ROCTX
+    roctxRangePush("fvmDiv_low");
+    #endif
+
     fvm.lower() = -weights.primitiveField()*faceFlux.primitiveField();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvmDiv_up");
+    #endif
+
     fvm.upper() = fvm.lower() + faceFlux.primitiveField();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvmDiv_negSum");
+    #endif
+
     fvm.negSumDiag();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("forAll_boundaryF");
+    #endif
 
     forAll(vf.boundaryField(), patchi)
     {
@@ -108,10 +151,19 @@ gaussConvectionScheme<Type>::fvmDiv
         fvm.boundaryCoeffs()[patchi] = -patchFlux*psf.valueBoundaryCoeffs(pw);
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+
     if (tinterpScheme_().corrected())
     {
         fvm += fvc::surfaceIntegrate(faceFlux*tinterpScheme_().correction(vf));
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tfvm;
 }

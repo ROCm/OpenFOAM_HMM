@@ -166,7 +166,7 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
 
     if constexpr ( std::is_same_v<Type,Foam::Vector<double>> ) {   
 
-      #pragma omp target teams distribute parallel for if(target:owner.size() > 10000) //LG4 testing , possibly OK
+      #pragma omp target teams distribute parallel for if(target:owner.size() > 10000) 
       for (label facei = 0; facei < owner.size(); ++facei){
         const label own = owner[facei];
         const label nei = neighbour[facei];

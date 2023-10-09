@@ -30,6 +30,20 @@ License
 #include <functional>
 #include <algorithm>
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+#ifndef USE_MEM_POOL
+void * provide_umpire_pool(size_t N);
+void free_umpire_pool( void * data);
+bool is_umpire_pool_ptr(void *ptr);
+
+//#define USE_MEM_POOL
+#endif
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Form, class Type>
@@ -245,7 +259,26 @@ Foam::Matrix<Form, Type>::~Matrix()
 {
     if (v_)
     {
+
+        #ifdef USE_ROCTX
+        roctxRangePush("matrix_delete");
+        #endif
+
+        #ifdef USE_MEM_POOL
+        bool umpr_ptr =  is_umpire_pool_ptr( reinterpret_cast<void*>( v_ ) );
+        if (umpr_ptr == true  )
+           free_umpire_pool( reinterpret_cast<void*>( v_) ); //AMD
+        else
+          delete[] v_;
+        #else
         delete[] v_;
+        #endif
+
+        #ifdef USE_ROCTX
+           roctxRangePop();
+        #endif
+
+
     }
 }
 
@@ -257,8 +290,26 @@ void Foam::Matrix<Form, Type>::clear()
 {
     if (v_)
     {
+	#ifdef USE_ROCTX
+        roctxRangePush("matrix_clear");
+        #endif
+
+	#ifdef USE_MEM_POOL
+        bool umpr_ptr =  is_umpire_pool_ptr( reinterpret_cast<void*>( v_ ) );
+        if (umpr_ptr == true  )
+           free_umpire_pool( reinterpret_cast<void*>( v_) ); //AMD
+        else                                                      
+          delete[] v_;
+        #else    
         delete[] v_;
+        #endif
+
         v_ = nullptr;
+
+        #ifdef USE_ROCTX
+           roctxRangePop();
+        #endif
+
     }
 
     mRows_ = 0;

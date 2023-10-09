@@ -155,11 +155,29 @@ surfaceIntegrate
     const tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>& tssf
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::surfaceIntegrate_call");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> tvf
     (
         fvc::surfaceIntegrate(tssf())
     );
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvc::surfaceIntegrate_clear");
+    #endif
+
     tssf.clear();
+    
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+    
     return tvf;
 }
 

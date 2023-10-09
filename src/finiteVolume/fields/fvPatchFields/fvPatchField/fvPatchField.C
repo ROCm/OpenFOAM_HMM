@@ -32,6 +32,11 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volMesh.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>

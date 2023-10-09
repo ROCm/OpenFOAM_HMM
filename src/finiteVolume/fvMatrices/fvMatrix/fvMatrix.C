@@ -41,6 +41,12 @@ License
 
 #include "processorLduInterfaceField.H"
 
+
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Type>
@@ -789,6 +795,11 @@ void Foam::fvMatrix<Type>::setBounAndInterCoeffs()
 template<class Type>
 void Foam::fvMatrix<Type>::manipulateMatrix(direction cmp)
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvMatrix::manipulateMatrix");
+    #endif
+	
     for (label i=0; i < nMatrices(); ++i)
     {
         forAll(psi(i).boundaryField(), patchI)
@@ -806,6 +817,9 @@ void Foam::fvMatrix<Type>::manipulateMatrix(direction cmp)
             }
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -1096,6 +1110,11 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
         return;
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePush("fvMatrix::relax");
+    #endif
+
+
     DebugInFunction
         << "Relaxing " << psi_.name() << " by " << alpha << endl;
 
@@ -1109,6 +1128,9 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
     scalarField sumOff(D.size(), Zero);
     sumMagOffDiag(sumOff);
 
+    #ifdef USE_ROCTX
+    roctxRangePush("fvMatrix::relax_1");
+    #endif
     // Handle the boundary contributions to the diagonal
     forAll(psi_.boundaryField(), patchi)
     {
@@ -1125,9 +1147,14 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
 
                 // For coupled boundaries add the diagonal and
                 // off-diagonal contributions
-                forAll(pa, face)
+                //forAll(pa, face)
+                label loop_len = pa.size();
+                #pragma omp target teams distribute parallel for if(target:loop_len>10000)
+		for (label face=0; face < loop_len; ++face)
                 {
+		    #pragma omp atomic	
                     D[pa[face]] += component(iCoeffs[face], 0);
+                    #pragma omp atomic
                     sumOff[pa[face]] += mag(component(pCoeffs[face], 0));
                 }
             }
@@ -1135,14 +1162,20 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
             {
                 // For non-coupled boundaries add the maximum magnitude diagonal
                 // contribution to ensure stability
-                forAll(pa, face)
+                //forAll(pa, face)
+	        label loop_len = pa.size();
+		#pragma omp target teams distribute parallel for if(target:loop_len>10000)
+		for (label face=0; face < loop_len; ++face)
                 {
+		    #pragma omp atomic
                     D[pa[face]] += cmptMax(cmptMag(iCoeffs[face]));
                 }
             }
         }
     }
-
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     if (debug)
     {
@@ -1196,13 +1229,20 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
 
     // Ensure the matrix is diagonally dominant...
     // Assumes that the central coefficient is positive and ensures it is
-    forAll(D, celli)
+    //forAll(D, celli)
+    label loop_len = D.size();
+    #pragma omp target teams distribute parallel for if(target:loop_len > 10000) 
+    for (label celli = 0; celli < loop_len; ++celli)
     {
         D[celli] = max(mag(D[celli]), sumOff[celli]);
     }
 
     // ... then relax
     D /= alpha;
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvMatrix::relax_2");
+    #endif
 
     // Now remove the diagonal contribution from coupled boundaries
     forAll(psi_.boundaryField(), patchi)
@@ -1216,23 +1256,38 @@ void Foam::fvMatrix<Type>::relax(const scalar alpha)
 
             if (ptf.coupled())
             {
-                forAll(pa, face)
+                //forAll(pa, face)
+	        label loop_len = pa.size();
+                #pragma omp target teams distribute parallel for if(target:loop_len>10000)
+                for (label face=0; face < loop_len; ++face)
                 {
+		    #pragma omp atomic	
                     D[pa[face]] -= component(iCoeffs[face], 0);
                 }
             }
             else
             {
-                forAll(pa, face)
+                //forAll(pa, face)
+                label loop_len = pa.size();
+                #pragma omp target teams distribute parallel for if(target:loop_len>10000)
+                for (label face=0; face < loop_len; ++face)
                 {
+		    #pragma omp atomic
                     D[pa[face]] -= cmptMin(iCoeffs[face]);
                 }
             }
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     // Finally add the relaxation contribution to the source.
     S += (D - D0)*psi_.primitiveField();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -1259,10 +1314,19 @@ void Foam::fvMatrix<Type>::boundaryManipulate
         Boundary& bFields
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("fvMatrix::boundaryManipulate");
+    #endif
+
     forAll(bFields, patchi)
     {
         bFields[patchi].manipulateMatrix(*this);
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

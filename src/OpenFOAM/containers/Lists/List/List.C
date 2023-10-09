@@ -36,33 +36,36 @@ License
 
 #include <stdlib.h>  //LG1 AMD
 
+#include <type_traits>
+
+
+
 #ifdef USE_ROCTX
 #include <roctracer/roctx.h>
 #endif
 
-#if 0 
-#include "umpire/Allocator.hpp"
-#include "umpire/ResourceManager.hpp"
-#include "umpire/strategy/AlignedAllocator.hpp"
-#include "umpire/strategy/DynamicPoolList.hpp"
+#ifdef USE_MEM_POOL
+void * provide_umpire_pool(size_t N);
+void free_umpire_pool( void * data);
+bool is_umpire_pool_ptr(void *ptr);
+
+//#define USE_MEM_POOL
 #endif
 
-//LG using OpenMP offloading and HMM
-//#include <omp.h>
-//#ifndef OMP_UNIFIED_MEMORY_REQUIRED
-//#pragma omp requires unified_shared_memory
-//#define OMP_UNIFIED_MEMORY_REQUIRED
-//#endif
 
-#if 0
-#ifndef UMPIRE_VARS__
-int UMPIRE_INIT=0;
-umpire::ResourceManager& rm = umpire::ResourceManager::getInstance();
-umpire::Allocator umpire_aligned_alloc;
-umpire::Allocator umpire_pooled_allocator;
-#define UMPIRE_VARS__
+#ifndef OMP_UNIFIED_MEMORY_REQUIRED
+#pragma omp requires unified_shared_memory
+#define OMP_UNIFIED_MEMORY_REQUIRED
 #endif
-#endif
+
+
+//forward declaration of Foam::Vector<>
+
+namespace Foam 
+{
+template<typename T> class Vector;
+template<typename T> class Tensor;
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -78,44 +81,57 @@ void Foam::List<T>::doResize(const label len)
     {
         // With sign-check to avoid spurious -Walloc-size-larger-than
         
-        size_t alignement = 16;
-        size_t bytes_needed = sizeof(T)*len;
-        if (bytes_needed > 2*100){ //LG1 AMD
-           alignement = 256;       //LG1 AMD        
-        }
-	/*
+	
         #ifdef USE_ROCTX
 	if (len  > 10000){
 	  char roctx_name[128];
-	  sprintf(roctx_name,"allocating_%zu",sizeof(T)*len);
+	  sprintf(roctx_name,"resizing_%zu",sizeof(T)*len);
           roctxRangePush(roctx_name);
 	}
         #endif
-        */
+        
         T *nv;
-#if 0	
-	if (UMPIRE_INIT==0){
-          umpire_aligned_alloc = rm.makeAllocator<umpire::strategy::AlignedAllocator>("aligned_allocator", rm.getAllocator("HOST"), 256);
-          umpire_pooled_allocator = rm.makeAllocator<umpire::strategy::DynamicPoolList>("DEVICE_pool", umpire_aligned_alloc);
-	  UMPIRE_INIT=1;
-	}
-        if (len > 10000) nv = (T*) umpire_pooled_allocator.allocate(len*sizeof(T));
-        else
-#endif	
-    	   nv = new (std::align_val_t( alignement)) T[len]; //LG1 AMD
 
-/*
+	   //fprintf(stderr,"doResize: calling mem allocator len = %d\n",len);
+
+	   #ifdef USE_MEM_POOL
+
+	   if (len > 10000 && is_contiguous<T>::value ){
+	       void * tmp_ptr = provide_umpire_pool(sizeof(T)*len);
+               nv = new (tmp_ptr) T[len]; //use placement new	    
+	   }
+	   else {
+		size_t alignement = 16;
+                size_t bytes_needed = sizeof(T)*len;
+                if (bytes_needed > 2*100){ //LG1 AMD
+                   alignement = 256;       //LG1 AMD
+                }
+                nv = new (std::align_val_t( alignement)) T[len];
+	   }
+           #else
+                size_t alignement = 16;
+                size_t bytes_needed = sizeof(T)*len;
+                if (bytes_needed > 2*100){ //LG1 AMD
+                   alignement = 256;       //LG1 AMD
+                }
+                nv = new (std::align_val_t( alignement)) T[len];
+
+           #endif
+	   //if (nv == NULL) fprintf(stderr,"nv is NULL\n");
+
+
         #ifdef USE_ROCTX
 	if (len  > 10000){
            roctxRangePop();
         }
         #endif
-*/
+
 
         const label overlap = Foam::min(this->size_, len);
 
         if (overlap)
         {
+
             #ifdef USEMEMCPY
             if (is_contiguous<T>::value)
             {
@@ -187,13 +203,71 @@ Foam::List<T>::List(const label len, const T& val)
 
     if (len)
     {
-        doAlloc();
 
-        List_ACCESS(T, (*this), vp);
-        for (label i=0; i < len; ++i)
-        {
-            vp[i] = val;
+	#ifdef USE_ROCTX
+        roctxRangePush("List::List_ref");
+        #endif
+
+    	doAlloc();
+
+        //PRINTS
+          // if  ( !(std::is_same<T,scalar>() || std::is_same<T,int>() || std::is_same<T,unsigned int>() || std::is_same_v<T,Foam::Vector<scalar>> || std::is_same_v<T,Foam::Tensor<scalar>> ) && len>10000 ) fprintf(stderr,"List:not scalar/vector/tensor line=%d\n",__LINE__);
+
+
+	if constexpr ( std::is_same<T,scalar>() ) {
+           scalar * __restrict__ vp_ptr = (*this).begin();
+           #pragma omp target teams distribute parallel for if(target:len>20000)
+           for (label i=0; i < len; ++i)
+           {
+              vp_ptr[i] = val;
+           }
+	}
+	else if constexpr ( std::is_same<T,int>() ) {
+           int * __restrict__ vp_ptr = (*this).begin();
+           #pragma omp target teams distribute parallel for if(target:len>20000)
+           for (label i=0; i < len; ++i)
+           {
+              vp_ptr[i] = val;
+           }
         }
+        else if constexpr ( std::is_same<T,unsigned int>() ) {
+           unsigned int * __restrict__ vp_ptr = (*this).begin();
+           #pragma omp target teams distribute parallel for if(target:len>20000)
+           for (label i=0; i < len; ++i)
+           {
+              vp_ptr[i] = val;
+           }
+        }
+	else if (std::is_same_v<T,Foam::Vector<scalar>> || std::is_same_v<T,Foam::Tensor<scalar>> ) {
+           T * __restrict__ vp_ptr = (*this).begin();
+           #pragma omp target teams distribute parallel for if(target:len>20000)
+           for (label i=0; i < len; ++i)
+           {
+              vp_ptr[i] = val;
+           }
+         }
+	else{
+//	test_type<T>;
+
+          List_ACCESS(T, (*this), vp);
+
+/*
+lnInclude/List.C:254:26: error: cannot pass non-trivial object of type 'Foam::SphericalTensor<double>' to variadic function; expected type from format string was 'unsigned int' [-Wnon-pod-varargs]
+lnInclude/List.C:254:26: error: cannot pass non-trivial object of type 'Foam::Vector<double>' to variadic function; expected type from format string was 'unsigned int' [-Wnon-pod-varargs]
+lnInclude/List.C:254:26: error: cannot pass non-trivial object of type 'Foam::Vector<double>' to variadic function; expected type from format string was 'unsigned int' [-Wnon-pod-varargs]
+lnInclude/List.C:254:26: error: cannot pass non-trivial object of type 'Foam::Tensor<double>' to variadic function; expected type from format string was 'unsigned int' [-Wnon-pod-varargs]
+lnInclude/List.C:254:26: error: cannot pass non-trivial object of type 'Foam::Tensor<double>' to variadic function; expected type from format string was 'unsigned int' [-Wnon-pod-varargs]
+*/
+
+          for (label i=0; i < len; ++i)
+          {
+            vp[i] = val;
+          }
+	}
+
+	#ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
     }
 }
 
@@ -214,7 +288,9 @@ Foam::List<T>::List(const label len, const Foam::zero)
     {
         doAlloc();
 
+
         List_ACCESS(T, (*this), vp);
+        #pragma omp target teams distribute parallel for if(target:len>20000)
         for (label i=0; i < len; ++i)
         {
             vp[i] = Zero;
@@ -292,6 +368,10 @@ Foam::List<T>::List(const List<T>& a)
 
     if (len)
     {
+        #ifdef USE_ROCTX
+        roctxRangePush("List::List");
+        #endif
+
         doAlloc();
 
         #ifdef USEMEMCPY
@@ -305,13 +385,59 @@ Foam::List<T>::List(const List<T>& a)
         else
         #endif
         {
-            List_ACCESS(T, (*this), vp);
-            List_CONST_ACCESS(T, a, ap);
-            for (label i = 0; i < len; ++i)
-            {
-                vp[i] = ap[i];
+            //PRINTS
+           //if  ( !(std::is_same<T,scalar>() || std::is_same<T,int>() || std::is_same<T,unsigned int>() || std::is_same<T,Foam::Vector<scalar>>() ) && len>10000 ) fprintf(stderr,"List:not scalar/Vector line=%d\n",__LINE__);
+
+            if constexpr ( std::is_same<T,scalar>() ) {
+              scalar * __restrict__ vp_ptr = (*this).begin();
+              const scalar * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000) 
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
+	    }
+            else if constexpr ( std::is_same<T,int>() ) {
+              int * __restrict__ vp_ptr = (*this).begin();
+              const int * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000) 
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
             }
+            else if constexpr ( std::is_same<T,unsigned int>() ) {
+              unsigned int * __restrict__ vp_ptr = (*this).begin();
+              const unsigned int * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000) 
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
+            }
+	    else if constexpr ( std::is_same<T,Foam::Vector<scalar>>() ) {
+              T * __restrict__ vp_ptr = (*this).begin();
+              const T * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000)
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
+            }
+
+
+	    else{
+              List_ACCESS(T, (*this), vp);
+              List_CONST_ACCESS(T, a, ap);
+              for (label i = 0; i < len; ++i)
+              {
+                vp[i] = ap[i];
+              }
+	    }
         }
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
     }
 }
 
@@ -347,12 +473,23 @@ Foam::List<T>::List(List<T>& a, bool reuse)
         else
         #endif
         {
-            List_ACCESS(T, (*this), vp);
-            List_CONST_ACCESS(T, a, ap);
-            for (label i = 0; i < len; ++i)
-            {
-                vp[i] = ap[i];
+	    if constexpr ( std::is_same<T,scalar>() || std::is_same<T,int>() || std::is_same<T,unsigned int>() || std::is_same<T,Foam::Vector<scalar>>() ) {
+              T * __restrict__ vp_ptr = (*this).begin();
+              const T * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000)
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
             }
+	    else{
+              List_ACCESS(T, (*this), vp);
+              List_CONST_ACCESS(T, a, ap);
+              for (label i = 0; i < len; ++i)
+              {
+                  vp[i] = ap[i];
+              }
+	    }
         }
     }
 }
@@ -368,6 +505,7 @@ Foam::List<T>::List(const UList<T>& list, const labelUList& indices)
     if (len)
     {
         doAlloc();
+        //AMD LG used in snappy Mesh a lot
 
         List_ACCESS(T, (*this), vp);
 
@@ -392,6 +530,9 @@ Foam::List<T>::List
     const label len = label(N);
 
     doAlloc();
+
+    fprintf(stderr,"line=%d copy\n",__LINE__);
+
 
     List_ACCESS(T, (*this), vp);
 
@@ -484,7 +625,7 @@ Foam::List<T>::~List()
 {
     if (this->v_)
     {
-/*
+
         #ifdef USE_ROCTX
         if (this->size_  > 10000){
           char roctx_name[128];
@@ -492,20 +633,23 @@ Foam::List<T>::~List()
           roctxRangePush(roctx_name);
 	}
         #endif
-*/
-#if 0
-	if (this->size_  > 10000) umpire_pooled_allocator.deallocate( this->v_);
-        else 
-#endif
-	delete[] this->v_;
 
-/*
+	#ifdef USE_MEM_POOL
+        bool umpr_ptr =  is_umpire_pool_ptr( reinterpret_cast<void*>(this->v_) );
+        if (umpr_ptr == true  ){
+           free_umpire_pool( reinterpret_cast<void*>(this->v_) ); //AMD
+        }
+        else    
+        #endif
+           delete[] this->v_;
+
+
 	#ifdef USE_ROCTX
 	if (this->size_  > 10000){
            roctxRangePop();
 	}
         #endif
-*/
+
     }
 }
 
@@ -536,7 +680,10 @@ void Foam::List<T>::transfer(List<T>& list)
     }
 
     // Clear and swap - could also check for self assignment
+    //fprintf(stderr,"calling clear()\n");
     clear();
+    //fprintf(stderr,"after clear()\n");
+
     this->size_ = list.size_;
     this->v_ = list.v_;
 
@@ -574,6 +721,11 @@ void Foam::List<T>::operator=(const UList<T>& a)
 
     if (len)
     {
+        //fprintf(stderr,"line=%d copy\n",__LINE__);
+        #ifdef USE_ROCTX
+        roctxRangePush("List_equal_A");
+        #endif
+
         #ifdef USEMEMCPY
         if (is_contiguous<T>::value)
         {
@@ -585,13 +737,59 @@ void Foam::List<T>::operator=(const UList<T>& a)
         else
         #endif
         {
-            List_ACCESS(T, (*this), vp);
-            List_CONST_ACCESS(T, a, ap);
-            for (label i = 0; i < len; ++i)
-            {
+           //PRINTS
+//           if  ( !(std::is_same<T,scalar>() || std::is_same<T,int>() || std::is_same<T,unsigned int>() || std::is_same<T,Foam::Vector<scalar>>() || std::is_same<T,Foam::Tensor<scalar>>() ) && len>10000 ) 
+//		   fprintf(stderr,"List:not scalar or vector<scalar>, its %s  line=%d\n", typeid(T).name(),  __LINE__);
+
+
+           if constexpr ( std::is_same<T,scalar>() ) {
+              scalar * __restrict__ vp_ptr = (*this).begin();
+              const scalar * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000) 
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
+	   } 
+	   else if constexpr ( std::is_same<T,int>() ) {
+              int * __restrict__ vp_ptr = (*this).begin();
+              const int * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000)
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
+           }
+	   else if constexpr ( std::is_same<T,unsigned int>() ) {
+              unsigned int * __restrict__ vp_ptr = (*this).begin();
+              const unsigned int * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000)
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
+           }
+	   else if constexpr ( std::is_same<T,Foam::Vector<scalar>>() || std::is_same<T,Foam::Tensor<scalar>>() ) {
+              T * __restrict__ vp_ptr = (*this).begin();
+              const T * __restrict__ ap_ptr = a.begin();
+              #pragma omp target teams distribute parallel for if(target:len > 10000)
+              for (label i = 0; i < len; ++i)
+              {
+                vp_ptr[i] = ap_ptr[i];
+              }
+           }
+	   else{
+              List_ACCESS(T, (*this), vp);
+              List_CONST_ACCESS(T, a, ap);
+              for (label i = 0; i < len; ++i)
+              {
                 vp[i] = ap[i];
-            }
+              }
+	   }
         }
+	#ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
     }
 }
 

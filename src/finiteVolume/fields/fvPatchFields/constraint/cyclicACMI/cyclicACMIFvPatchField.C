@@ -30,6 +30,10 @@ License
 #include "cyclicACMIFvPatchField.H"
 #include "transformField.H"
 
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -295,6 +299,11 @@ void Foam::cyclicACMIFvPatchField<Type>::manipulateMatrix
     fvMatrix<Type>& matrix
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("cyclicACMIFvPatchField::manipulateMatrixA");
+    #endif
+
     const scalarField& mask = cyclicACMIPatch_.cyclicACMIPatch().mask();
 
     // Nothing to be done by the AMI, but re-direct to non-overlap patch
@@ -302,6 +311,10 @@ void Foam::cyclicACMIFvPatchField<Type>::manipulateMatrix
     const fvPatchField<Type>& npf = nonOverlapPatchField();
 
     const_cast<fvPatchField<Type>&>(npf).manipulateMatrix(matrix, 1.0 - mask);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 
@@ -313,6 +326,10 @@ void Foam::cyclicACMIFvPatchField<Type>::manipulateMatrix
     const direction cmpt
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("cyclicACMIFvPatchField::manipulateMatrix");
+    #endif
+
     if (this->cyclicACMIPatch().owner())
     {
         label index = this->patch().index();
@@ -392,6 +409,9 @@ void Foam::cyclicACMIFvPatchField<Type>::manipulateMatrix
             );
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

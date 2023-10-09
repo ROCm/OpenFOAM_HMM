@@ -26,6 +26,19 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+#ifdef USE_MEM_POOL
+void * provide_umpire_pool(size_t N);
+void free_umpire_pool( void * data);
+bool is_umpire_pool_ptr(void *ptr);
+
+//#define USE_MEM_POOL
+#endif
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class T>
@@ -40,11 +53,25 @@ inline void Foam::List<T>::doAlloc()
           if (bytes_needed > 2*100){ //LG1 AMD
            alignement = 256;       //LG1 AMD        
           }
-          this->v_ = new (std::align_val_t( alignement)) T[this->size_];
+	 
+//	   fprintf(stderr,"doAlloc: calling mem allocator size_ = %d\n",this->size_);
+
+           #ifdef USE_MEM_POOL
+           if (this->size_ > 20000 && is_contiguous<T>::value){
+	       void * tmp_ptr = provide_umpire_pool(sizeof(T)*this->size_);
+               this->v_ = new (tmp_ptr) T[this->size_]; //use placement new 
+	   }
+           else
+               this->v_ = new (std::align_val_t( alignement)) T[this->size_];
+           #else
+               this->v_ = new (std::align_val_t( alignement)) T[this->size_];
+           #endif
+
 
         #else
           this->v_ = new T[this->size_];
         #endif
+
     }
 }
 
@@ -66,6 +93,7 @@ template<class List2>
 inline void Foam::List<T>::copyList(const List2& list)
 {
     const label len = this->size_;
+
 
     for (label i=0; i<len; ++i)
     {
@@ -89,12 +117,28 @@ inline Foam::List<T>::List
     {
         doAlloc();
 
+        #ifdef USE_ROCTX
+        if (len  > 10000){
+         char roctx_name[128];
+         sprintf(roctx_name,"copy_iterator_%zu",sizeof(T)*len);
+         roctxRangePush(roctx_name);
+        }
+        #endif
+
         InputIterator iter = begIter;
         for (label i = 0; i < len; ++i)
         {
             this->operator[](i) = *iter;
             ++iter;
         }
+
+        #ifdef USE_ROCTX
+        if (len  > 10000){
+           roctxRangePop();
+        }
+        #endif
+
+
     }
 }
 
@@ -127,10 +171,39 @@ inline void Foam::List<T>::clear()
 {
     if (this->v_)
     {
-        delete[] this->v_;
+        #ifdef USE_ROCTX
+        if (this->size_  > 10000){
+          char roctx_name[128];
+          sprintf(roctx_name,"deleting_%zu",sizeof(T)*this->size_);
+          roctxRangePush(roctx_name);
+        }
+        #endif
+
+        #ifdef USE_MEM_POOL
+        bool umpr_ptr =  is_umpire_pool_ptr( reinterpret_cast<void*>(this->v_) );
+
+
+        if (umpr_ptr == true) //AMD
+           free_umpire_pool( reinterpret_cast<void*> (this->v_) );
+        else    
+           delete[] this->v_;
+
+        #else
+	    delete[] this->v_;
+        #endif
+
+
         this->v_ = nullptr;
+
+        #ifdef USE_ROCTX
+        if (this->size_  > 10000){
+           roctxRangePop(); 
+	}
+        #endif
+
     }
     this->size_ = 0;
+
 }
 
 
@@ -215,10 +288,25 @@ inline void Foam::List<T>::append(const UList<T>& list)
 
     resize(idx + n);
 
+    #ifdef USE_ROCTX
+    if (n  > 10000){
+         char roctx_name[128];
+         sprintf(roctx_name,"append1_%zu",sizeof(T)*n);
+         roctxRangePush(roctx_name);
+    }
+    #endif
+
     for (label i=0; i<n; ++i)
     {
         this->operator[](idx++) = list[i];  // copy element
     }
+
+    #ifdef USE_ROCTX
+    if (n  > 10000){
+           roctxRangePop();
+    }
+    #endif
+
 }
 
 
@@ -231,10 +319,25 @@ inline void Foam::List<T>::append(const IndirectListBase<T, Addr>& list)
 
     resize(idx + n);
 
+    #ifdef USE_ROCTX
+    if (n  > 10000){
+         char roctx_name[128];
+         sprintf(roctx_name,"append2_%zu",sizeof(T)*n);
+         roctxRangePush(roctx_name);
+    }
+    #endif
+
     for (label i=0; i<n; ++i)
     {
         this->operator[](idx++) = list[i];  // copy element
     }
+
+    #ifdef USE_ROCTX
+    if (n  > 10000){
+           roctxRangePop();
+    }
+    #endif
+
 }
 
 

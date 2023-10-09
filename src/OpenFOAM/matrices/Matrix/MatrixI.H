@@ -33,6 +33,15 @@ License
 #include <roctracer/roctx.h>
 #endif
 
+#ifdef USE_MEM_POOL
+void * provide_umpire_pool(size_t N);
+void free_umpire_pool( void * data);
+bool is_umpire_pool_ptr(void *ptr);
+
+//#define USE_MEM_POOL
+#endif
+
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class Form, class Type>
@@ -51,9 +60,15 @@ inline void Foam::Matrix<Form, Type>::doAlloc()
           if (bytes_needed > 2*100){ //LG1 AMD
              alignement = 256;       //LG1 AMD        
           }
-
+          #ifdef USE_MEM_POOL 
+	  if (len >10000 && is_contiguous<Type>::value )
+	     v_ = new ( provide_umpire_pool(sizeof(Type)*len) ) Type[len];
+          else
+	     v_ = new (std::align_val_t( alignement)) Type[len];
+          #else
           v_ = new (std::align_val_t( alignement)) Type[len]; //LG1 AMD
-							    //
+	  #endif
+	  //
         #else
           v_ = new Type[len];
         #endif

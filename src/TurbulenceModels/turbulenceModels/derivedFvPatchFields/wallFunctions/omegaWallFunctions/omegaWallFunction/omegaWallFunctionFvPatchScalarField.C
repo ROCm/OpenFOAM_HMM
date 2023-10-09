@@ -32,6 +32,11 @@ License
 #include "fvMatrix.H"
 #include "addToRunTimeSelectionTable.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 Foam::scalar Foam::omegaWallFunctionFvPatchScalarField::tolerance_ = 1e-5;
@@ -567,6 +572,10 @@ void Foam::omegaWallFunctionFvPatchScalarField::manipulateMatrix
         return;
     }
 
+    #ifdef USE_ROCTX
+    roctxRangePush("omegaWallFunctionFvPatchScalarField::manipulateMatrix");
+    #endif
+
     DynamicList<label> constraintCells(weights.size());
     DynamicList<scalar> constraintValues(weights.size());
     const labelUList& faceCells = patch().faceCells();
@@ -596,6 +605,10 @@ void Foam::omegaWallFunctionFvPatchScalarField::manipulateMatrix
     matrix.setValues(constraintCells, constraintValues);
 
     fvPatchField<scalar>::manipulateMatrix(matrix);
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 

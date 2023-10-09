@@ -104,6 +104,10 @@ void pow
 {
     typedef typename powProduct<Type, r>::type powProductType;
 
+    #ifdef USE_ROCTX
+    roctxRangePushA("pow:TFOR_ALL_F_OP_FUNC_F_S");
+    #endif
+
     if constexpr ( std::is_same<Type,double>() ) {
       TPARALLELFOR_ALL_F_OP_FUNC_F_S
       (
@@ -125,6 +129,9 @@ void pow
           pTraits<powProductType>::zero
       )
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 template<class Type, direction r>
@@ -167,6 +174,9 @@ void sqr
     const UList<Type>& vf
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePushA("scr:TFOR_ALL_F_OP_FUNC_F");
+    #endif
     typedef typename outerProduct<Type, Type>::type outerProductType;
     if constexpr ( std::is_same<Type,double>() ) {
        TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(outerProductType, res, =, sqr, double, vf) 
@@ -177,6 +187,9 @@ void sqr
     else{ 
       TFOR_ALL_F_OP_FUNC_F(outerProductType, res, =, sqr, Type, vf) 
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 template<class Type>
@@ -210,7 +223,7 @@ void magSqr
     Field<typename typeOfMag<Type>::type>& res,
     const UList<Type>& f
 )
-{
+{	
     typedef typename typeOfMag<Type>::type magType;
     if constexpr ( std::is_same<Type,double>() ) {
        TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(magType, res, =, magSqr, double, f)
@@ -451,8 +464,13 @@ ReturnType Func(const tmp<Field<Type>>& tf1)                                   \
 template<class Type>
 Type max(const UList<Type>& f)
 {
+	
     if (f.size())
     {
+        #ifdef USE_ROCTX
+        roctxRangePushA("max:TFOR_ALL_S_OP_FUNC_F_S");
+        #endif
+
         Type Max(f[0]);
         if constexpr ( std::is_same<Type,double>() ) {
             //compute: (s) = (f[i]) > (s) ?  (f[i]) : (s)   
@@ -465,6 +483,9 @@ Type max(const UList<Type>& f)
         else {
             TFOR_ALL_S_OP_FUNC_F_S(Type, Max, =, max, Type, f, Type, Max)
         }
+	#ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
         return Max;
     }
 
@@ -478,6 +499,9 @@ Type min(const UList<Type>& f)
 {
     if (f.size())
     {
+        #ifdef USE_ROCTX
+        roctxRangePushA("min:TFOR_ALL_S_OP_FUNC_F_S");
+        #endif	    
         Type Min(f[0]);
         if constexpr ( std::is_same<Type,double>() ) {
             //compute: (s) = (f[i]) < (s) ?  (f[i]) : (s)   
@@ -490,6 +514,9 @@ Type min(const UList<Type>& f)
         else {
           TFOR_ALL_S_OP_FUNC_F_S(Type, Min, =, min, Type, f, Type, Min)
         }
+	#ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
         return Min;
     }
 
@@ -506,6 +533,10 @@ Type sum(const UList<Type>& f)
     solveType Sum = Zero;
     if (f.size())
     {
+	#ifdef USE_ROCTX
+        roctxRangePushA("min:TFOR_ALL_S_OP_FUNC_F_S");
+        #endif
+
         if constexpr ( std::is_same<Type,double>() ) {
            TPARALLELFOR_ALL_S_OP_FUNC_REDUCTION_F_ARITHMETIC(solveType, Sum, +=, solveType, double, f)
         }
@@ -515,8 +546,11 @@ Type sum(const UList<Type>& f)
         else {
            TFOR_ALL_S_OP_FUNC_F(solveType, Sum, +=, solveType, Type, f)
         }
-    }
 
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+    }
     return Type(Sum);
 }
 
@@ -593,7 +627,7 @@ sumProd(const UList<Type>& f1, const UList<Type>& f2)
     {
         if constexpr ( std::is_same<Type,double>() || std::is_same<Type,float>() ) {
 
-          printf("executing sumProd as a loop f1.size = %d\n", (int) f1.size() );
+          printf("executing sumProd as a loop f1.size = %d\n", reinterpret_cast<int> (f1.size()) );
 
           for (label i = 0; i < f1.size(); ++i)
              result += f1[i]*f2[i];
@@ -840,10 +874,10 @@ void OpFunc                                                                    \
     const UList<Type2>& f2                                                     \
 )                                                                              \
 {                                                                              \
-    roctxRangePushA("TFOR_ALL_F_OP_F_OP_F");                                   \
+    /* roctxRangePushA("TFOR_ALL_F_OP_F_OP_F");*/                              \
     typedef typename product<Type1, Type2>::type productType;                  \
        TPARALLELFOR_ALL_F_OP_F_OP_F(productType, res, =, Type1, f1, Op, Type2, f2) \
-    roctxRangePop();                                                           \
+    /* roctxRangePop(); */                                                     \
 }                                                                              \
                                                                                \
 template<class Type1, class Type2>                                             \
@@ -899,10 +933,10 @@ void OpFunc                                                                    \
 )                                                                              \
 {                                                                              \
     typedef typename product<Type, Form>::type productType;                    \
-    roctxRangePushA("TFOR_ALL_F_OP_F_OP_S");                                   \
+    /* roctxRangePushA("TFOR_ALL_F_OP_F_OP_S");  */                                 \
     TFOR_ALL_F_OP_F_OP_S                                                       \
         (productType, res, =,Type, f1, Op, Form, static_cast<const Form&>(vs)) \
-    roctxRangePop();                                                           \
+    /* roctxRangePop();  */                                                     \
 }                                                                              \
                                                                                \
 template<class Type, class Form, class Cmpt, direction nCmpt>                  \

@@ -31,6 +31,11 @@ License
 #include "transformField.H"
 #include "volFields.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -254,6 +259,10 @@ void Foam::cyclicFvPatchField<Type>::manipulateMatrix
     const direction cmpt
 )
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("cyclicFvPatchField::manipulateMatrix");
+    #endif
+
     if (this->cyclicPatch().owner())
     {
         label index = this->patch().index();
@@ -321,6 +330,9 @@ void Foam::cyclicFvPatchField<Type>::manipulateMatrix
             );
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 }
 
 // ************************************************************************* //

@@ -382,17 +382,11 @@ public:
     // Member Operators
 
         //- Return element of UList
-        #ifdef USE_HIP
-        __host__ __device__
-        #endif
         inline T& operator[](const label i);
 
         //- Return element of constant UList
         //  \note bool specialization adds lazy evaluation so reading an
         //       out-of-range element returns false without ill-effects
-        #ifdef USE_HIP
-	    __host__ __device__ 
-	    #endif
         inline const T& operator[](const label i) const;
 
         //- Allow cast to a const List<T>&
@@ -407,11 +401,7 @@ public:
 
     // Random access iterator (non-const)
 
-//LG1 AMD
         //- Return an iterator to begin traversing the UList
-        #ifdef USE_HIP
-	    __host__ __device__ 
-	    #endif 
         inline iterator begin() noexcept;
 
         //- Return an iterator to end traversing the UList
@@ -426,11 +416,7 @@ public:
         //- Return const_iterator to end traversing the constant UList
         inline const_iterator cend() const noexcept;
 
-//LG1 AMD
         //- Return const_iterator to begin traversing the constant UList
-        #ifdef USE_HIP
-	    __host__ __device__ 
-	    #endif
         inline const_iterator begin() const noexcept;
 
         //- Return const_iterator to end traversing the constant UList
@@ -463,11 +449,7 @@ public:
 
     // STL member functions
 
-//LG1 AMD
         //- The number of elements in the UList
-        #ifdef USE_HIP
-        __host__ __device__
-        #endif
         inline label size() const noexcept;
 
         //- True if the UList is empty (ie, size() is zero)

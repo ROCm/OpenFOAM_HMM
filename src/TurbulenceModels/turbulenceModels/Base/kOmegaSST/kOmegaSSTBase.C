@@ -75,6 +75,9 @@ tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F1
 template<class BasicEddyViscosityModel>
 tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F2() const
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("F2_before_tanh");
+    #endif	
     tmp<volScalarField> arg2 = min
     (
         max
@@ -84,6 +87,9 @@ tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F2() const
         ),
         scalar(100)
     );
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tanh(sqr(arg2));
 }
@@ -105,12 +111,19 @@ tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F3() const
 template<class BasicEddyViscosityModel>
 tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F23() const
 {
+    #ifdef USE_ROCTX
+    roctxRangePush("F23");
+    #endif	
     tmp<volScalarField> f23(F2());
 
     if (F3_)
     {
         f23.ref() *= F3();
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return f23;
 }
@@ -124,9 +137,26 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correctNut
 {
     printf("I AM IN kOmegaSSTBase<BasicEddyViscosityModel>::correctNut\n");
 
+    #ifdef USE_ROCTX
+    roctxRangePush("kOmegaSSTBase_correct_turb_visc");
+    #endif
+
     // Correct the turbulence viscosity
     this->nut_ = a1_*k_/max(a1_*omega_, b1_*F23()*sqrt(S2));
+    
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("kOmegaSSTBase_call_correctBC");
+    #endif
     this->nut_.correctBoundaryConditions();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
     fv::options::New(this->mesh_).correct(this->nut_);
 }
 
@@ -555,33 +585,27 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
     roctxRangePop();
     #endif
 
-    #ifdef USE_ROCTX
-    roctxRangePush("BEVM_::correct_F23");
-    #endif
-
     volScalarField F23(this->F23());
 
-    #ifdef USE_ROCTX
-    roctxRangePop();
-    #endif
 
     {
-        #ifdef USE_ROCTX
-        roctxRangePush("BEVM_::correct_D");
-        #endif
+
+    //    #ifdef USE_ROCTX
+    //    roctxRangePush("BEVM_::correct_D");
+    //    #endif
 
         volScalarField::Internal gamma(this->gamma(F1));
         volScalarField::Internal beta(this->beta(F1));
 
         GbyNu0 = GbyNu(GbyNu0, F23(), S2());
 
-        #ifdef USE_ROCTX
-        roctxRangePop();
-        #endif
+    //    #ifdef USE_ROCTX
+    //    roctxRangePop();
+    //    #endif
 
-	#ifdef USE_ROCTX
-        roctxRangePush("BEVM_::correct_E");
-        #endif
+//	#ifdef USE_ROCTX
+ //       roctxRangePush("BEVM_::correct_E");
+  //      #endif
 
         // Turbulent frequency equation
         tmp<fvScalarMatrix> omegaEqn
@@ -604,24 +628,69 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
           + fvOptions(alpha, rho, omega_)
         );
     
-        #ifdef USE_ROCTX
-        roctxRangePop();
-        #endif
+    //    #ifdef USE_ROCTX
+    //    roctxRangePop();
+    //    #endif
 
-	#ifdef USE_ROCTX
-        roctxRangePush("BEVM_::correct_F");
-        #endif
+//	#ifdef USE_ROCTX
+  //      roctxRangePush("BEVM_::correct_F_a");
+    //    #endif
 
         omegaEqn.ref().relax();
-        fvOptions.constrain(omegaEqn.ref());
-        omegaEqn.ref().boundaryManipulate(omega_.boundaryFieldRef());
-        solve(omegaEqn);
-        fvOptions.correct(omega_);
-        bound(omega_, this->omegaMin_);
+        
+      //  #ifdef USE_ROCTX
+      //  roctxRangePop();
+      //  #endif
 
-        #ifdef USE_ROCTX
-        roctxRangePop();
-        #endif
+      //  #ifdef USE_ROCTX
+      //  roctxRangePush("BEVM_::correct_F_b");
+      //  #endif
+
+        fvOptions.constrain(omegaEqn.ref());
+
+//	#ifdef USE_ROCTX
+  //      roctxRangePop();
+    //    #endif
+
+//	#ifdef USE_ROCTX
+//        roctxRangePush("BEVM_::correct_F_c");
+//        #endif
+
+        omegaEqn.ref().boundaryManipulate(omega_.boundaryFieldRef());
+        
+//        #ifdef USE_ROCTX
+//        roctxRangePop();
+//        #endif
+
+//        #ifdef USE_ROCTX
+//        roctxRangePush("BEVM_::correct_F_d");
+//        #endif
+
+	solve(omegaEqn);
+
+  //      #ifdef USE_ROCTX
+  //      roctxRangePop();
+  //      #endif
+
+//	#ifdef USE_ROCTX
+//        roctxRangePush("BEVM_::correct_F_e");
+//        #endif
+
+	fvOptions.correct(omega_);
+
+  //      #ifdef USE_ROCTX
+  //      roctxRangePop();
+  //      #endif
+
+//	#ifdef USE_ROCTX
+  //      roctxRangePush("BEVM_::correct_F_f");
+    //    #endif
+
+	bound(omega_, this->omegaMin_);
+
+      //  #ifdef USE_ROCTX
+      //  roctxRangePop();
+      //  #endif
 
     }
 

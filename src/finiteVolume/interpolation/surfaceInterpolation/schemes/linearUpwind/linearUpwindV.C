@@ -30,6 +30,17 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+
+#ifndef OMP_UNIFIED_MEMORY_REQUIRED
+#pragma omp requires unified_shared_memory
+#define OMP_UNIFIED_MEMORY_REQUIRED
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -39,6 +50,11 @@ Foam::linearUpwindV<Type>::correction
     const GeometricField<Type, fvPatchField, volMesh>& vf
 ) const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("GeometricField:correction");
+    #endif
+
     const fvMesh& mesh = this->mesh();
 
     tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> tsfCorr
@@ -87,7 +103,15 @@ Foam::linearUpwindV<Type>::correction
         volMesh
     >& gradVf = tgradVf();
 
-    forAll(faceFlux, facei)
+    #ifdef USE_ROCTX
+    roctxRangePush("GeometricField:correction_loop1");
+    #endif
+
+    label loop_len = faceFlux.size();
+
+    //forAll(faceFlux, facei)
+    #pragma omp target teams distribute parallel for if(target:loop_len > 10000)
+    for (label facei = 0; facei < loop_len; ++facei) 
     {
         vector maxCorr;
 
@@ -123,10 +147,16 @@ Foam::linearUpwindV<Type>::correction
             }
         }
     }
-
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     typename GeometricField<Type, fvsPatchField, surfaceMesh>::
         Boundary& bSfCorr = sfCorr.boundaryFieldRef();
+
+    #ifdef USE_ROCTX
+    roctxRangePush("GeometricField:correction_loop2");
+    #endif
 
     forAll(bSfCorr, patchi)
     {
@@ -192,6 +222,14 @@ Foam::linearUpwindV<Type>::correction
             }
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tsfCorr;
 }
