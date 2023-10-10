@@ -32,6 +32,16 @@ License
 #include "surfaceFields.H"
 #include "HashTable.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
+#ifndef OMP_UNIFIED_MEMORY_REQUIRED
+#pragma omp requires unified_shared_memory
+#define OMP_UNIFIED_MEMORY_REQUIRED
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -96,6 +106,12 @@ snGradScheme<Type>::snGrad
     const word& snGradName
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("snGradScheme::snGrad");
+    #endif
+
+
     const fvMesh& mesh = vf.mesh();
 
     // construct GeometricField<Type, fvsPatchField, surfaceMesh>
@@ -125,7 +141,10 @@ snGradScheme<Type>::snGrad
     const labelUList& owner = mesh.owner();
     const labelUList& neighbour = mesh.neighbour();
 
-    forAll(owner, facei)
+    const label loop_len = owner.size();
+    //forAll(owner, facei)
+    #pragma omp target teams distribute parallel for if(target:loop_len>10000)
+    for (label facei = 0; facei < loop_len; ++facei)
     {
         ssf[facei] =
             deltaCoeffs[facei]*(vf[neighbour[facei]] - vf[owner[facei]]);
@@ -147,6 +166,10 @@ snGradScheme<Type>::snGrad
             ssfbf[patchi] = pvf.snGrad();
         }
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tsf;
 }

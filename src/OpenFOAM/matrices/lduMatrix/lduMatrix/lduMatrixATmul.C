@@ -123,7 +123,7 @@ void Foam::lduMatrix::Amul
           ApsiPtr[cell] = diagPtr[cell]*psiPtr[cell];
     }
 
-    #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF)  
+    #pragma omp target teams distribute parallel for thread_limit(64)  if(target:nCells>TARGET_CUT_OFF)  
     for (label face=0; face<nFaces; face++)
     {
           #pragma omp atomic 
@@ -484,9 +484,12 @@ Foam::tmp<Foam::scalarField> Foam::lduMatrix::H1() const
 
         const label nFaces = upper().size();
 
+        #pragma omp target teams distribute parallel for if(target:nFaces>10000)
         for (label face=0; face<nFaces; face++)
         {
+            #pragma omp atomic		
             H1Ptr[uPtr[face]] -= lowerPtr[face];
+            #pragma omp atomic
             H1Ptr[lPtr[face]] -= upperPtr[face];
         }
     }

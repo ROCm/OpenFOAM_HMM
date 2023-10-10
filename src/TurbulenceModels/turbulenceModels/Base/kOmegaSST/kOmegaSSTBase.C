@@ -98,11 +98,20 @@ tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F2() const
 template<class BasicEddyViscosityModel>
 tmp<volScalarField> kOmegaSSTBase<BasicEddyViscosityModel>::F3() const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("F3_febore_tanh");
+    #endif
+
     tmp<volScalarField> arg3 = min
     (
         150*(this->mu()/this->rho_)/(omega_*sqr(y_)),
         scalar(10)
     );
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return 1 - tanh(pow4(arg3));
 }

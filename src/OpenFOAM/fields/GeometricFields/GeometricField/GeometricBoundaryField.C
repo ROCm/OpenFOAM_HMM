@@ -31,6 +31,11 @@ License
 #include "cyclicPolyPatch.H"
 #include "emptyPolyPatch.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -437,6 +442,11 @@ void Foam::GeometricBoundaryField<Type, PatchField, GeoMesh>::evaluate()
     ///    InfoInFunction << nl;
     ///}
 
+
+    #ifdef USE_ROCTX
+    roctxRangePush("Foam::GeometricBoundaryField:evaluate");
+    #endif
+
     const UPstream::commsTypes commsType(UPstream::defaultCommsType);
 
     if
@@ -494,6 +504,11 @@ void Foam::GeometricBoundaryField<Type, PatchField, GeoMesh>::evaluate()
             << UPstream::commsTypeNames[commsType]
             << exit(FatalError);
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 

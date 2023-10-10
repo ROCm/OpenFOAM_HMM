@@ -41,6 +41,8 @@ License
 
 #include "processorLduInterfaceField.H"
 
+#include "AtomicAccumulator.H"
+#include "macros.H"
 
 
 #ifdef USE_ROCTX
@@ -66,9 +68,12 @@ void Foam::fvMatrix<Type>::addToInternalField
             << abort(FatalError);
     }
 
-    forAll(addr, facei)
+    //forAll(addr, facei)
+    label loop_len = addr.size();
+    #pragma omp target teams distribute parallel for if(target:loop_len > 10000)
+    for (label facei=0; facei < loop_len; ++facei)
     {
-        intf[addr[facei]] += pf[facei];
+        atomicAccumulator(intf[addr[facei]]) += pf[facei];
     }
 }
 
@@ -1395,6 +1400,11 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::fvPatchField, Foam::volMesh>>
 Foam::fvMatrix<Type>::H() const
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("Foam::fvMatrix::H");
+    #endif
+
     tmp<GeometricField<Type, fvPatchField, volMesh>> tHphi
     (
         new GeometricField<Type, fvPatchField, volMesh>
@@ -1414,6 +1424,12 @@ Foam::fvMatrix<Type>::H() const
     );
     GeometricField<Type, fvPatchField, volMesh>& Hphi = tHphi.ref();
 
+
+    #ifdef USE_ROCTX
+    roctxRangePush("Foam::fvMatrix:loop_cmpt_1");
+    #endif
+
+
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
@@ -1426,17 +1442,51 @@ Foam::fvMatrix<Type>::H() const
 
         Hphi.primitiveFieldRef().replace(cmpt, boundaryDiagCmpt*psiCmpt);
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     Hphi.primitiveFieldRef() += lduMatrix::H(psi_.primitiveField()) + source_;
+
+    #ifdef USE_ROCTX
+    roctxRangePush("call_addBoundarySource");
+    #endif
+
     addBoundarySource(Hphi.primitiveFieldRef());
 
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("primitiveFieldRef_divide");
+    #endif
+
     Hphi.primitiveFieldRef() /= psi_.mesh().V();
+
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePush("correctBoundaryConditions");
+    #endif
+
     Hphi.correctBoundaryConditions();
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     typename Type::labelType validComponents
     (
         psi_.mesh().template validComponents<Type>()
     );
+
+    #ifdef USE_ROCTX
+    roctxRangePush("Foam::fvMatrix:loop_cmpt_2");
+    #endif
 
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
@@ -1449,6 +1499,14 @@ Foam::fvMatrix<Type>::H() const
             );
         }
     }
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tHphi;
 }

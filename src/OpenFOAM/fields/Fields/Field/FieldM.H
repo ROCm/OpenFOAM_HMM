@@ -575,11 +575,30 @@ void checkFields
                                                                                \
     label f1_sz = (f1).size();                                                 \
     /* Loop: f1 OP1 OP2 f2 */                                                  \
-    /* _Pragma("omp target teams distribute parallel for if(target:f1_sz > 0)") */  \
     for (label i = 0; i < f1_sz; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP1 OP2 (f2P[i]);                                             \
     }
+
+
+
+#define TPARALLELFOR_ALL_F_OP_OP_F(typeF1, f1, OP1, OP2, typeF2, f2)                   \
+                                                                               \
+    /* Check fields have same size */                                          \
+    checkFields(f1, f2, #OP1 " " #OP2 " f2");                                  \
+                                                                               \
+    /* Field access */                                                         \
+    List_ACCESS(typeF1, f1, f1P);                                              \
+    List_CONST_ACCESS(typeF2, f2, f2P);                                        \
+                                                                               \
+    label f1_sz = (f1).size();                                                 \
+    /* Loop: f1 OP1 OP2 f2 */                                                  \
+    _Pragma("omp target teams distribute parallel for if(target:f1_sz > 20000)")   \
+    for (label i = 0; i < f1_sz; ++i)                                          \
+    {                                                                          \
+        (f1P[i]) OP1 OP2 (f2P[i]);                                             \
+    }
+
 
 
 // Member operator : this field f OP s

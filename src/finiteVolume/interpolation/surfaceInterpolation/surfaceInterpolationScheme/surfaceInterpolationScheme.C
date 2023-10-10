@@ -298,7 +298,7 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
     typename GeometricField<RetType, fvsPatchField, surfaceMesh>::
         Boundary& sfbf = sf.boundaryFieldRef();
 
-#if 1
+#if 0
 
     //typename SFType::Patch& pSf;
     //fvsPatchField<RetType>& psf;

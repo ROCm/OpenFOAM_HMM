@@ -27,8 +27,18 @@ Description
     lduMatrix member H operations.
 
 \*---------------------------------------------------------------------------*/
+#ifdef USE_OMP
+  #include <omp.h>
+  #ifndef OMP_UNIFIED_MEMORY_REQUIRED
+  #pragma omp requires unified_shared_memory
+  #define OMP_UNIFIED_MEMORY_REQUIRED
+  #endif
+#endif
 
 #include "lduMatrix.H"
+
+#include "AtomicAccumulator.H"
+#include "macros.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,11 +65,13 @@ Foam::tmp<Foam::Field<Type>> Foam::lduMatrix::H(const Field<Type>& psi) const
         const scalar* __restrict__ upperPtr = upper().begin();
 
         const label nFaces = upper().size();
-
+   
+        #pragma omp target teams distribute parallel for thread_limit(64)  if(target:nFaces>10000) 
         for (label face=0; face<nFaces; face++)
         {
-            HpsiPtr[uPtr[face]] -= lowerPtr[face]*psiPtr[lPtr[face]];
-            HpsiPtr[lPtr[face]] -= upperPtr[face]*psiPtr[uPtr[face]];
+            
+            atomicAccumulator(HpsiPtr[uPtr[face]]) -= (lowerPtr[face]*psiPtr[lPtr[face]]);
+            atomicAccumulator(HpsiPtr[lPtr[face]]) -= (upperPtr[face]*psiPtr[uPtr[face]]);
         }
     }
 
@@ -91,7 +103,9 @@ Foam::lduMatrix::faceH(const Field<Type>& psi) const
         tmp<Field<Type>> tfaceHpsi(new Field<Type> (Lower.size()));
         Field<Type> & faceHpsi = tfaceHpsi.ref();
 
-        for (label face=0; face<l.size(); face++)
+	label loop_len = l.size();
+        #pragma omp target teams distribute parallel for if(target:loop_len>10000)
+        for (label face=0; face<loop_len; face++)
         {
             faceHpsi[face] =
                 Upper[face]*psi[u[face]]

@@ -230,11 +230,7 @@ inline void Foam::UPtrList<T>::checkNonNull() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-//LG1 AMD
 template<class T>
-#ifdef USE_HIP
-__host__ __device__ __attribute__((always_inline)) 
-#endif	
 inline const T& Foam::UPtrList<T>::operator[](const label i) const
 {
     const T* ptr = ptrs_[i];
@@ -253,11 +249,7 @@ inline const T& Foam::UPtrList<T>::operator[](const label i) const
 }
 
 
-//LG1 AMD
 template<class T>
-#ifdef USE_HIP
-__host__  __device__ __attribute__((always_inline)) 
-#endif
 inline T& Foam::UPtrList<T>::operator[](const label i)
 {
     T* ptr = ptrs_[i];

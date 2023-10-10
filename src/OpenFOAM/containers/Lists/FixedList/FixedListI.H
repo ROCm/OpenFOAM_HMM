@@ -58,6 +58,7 @@ inline Foam::FixedList<T, N>::FixedList(const Foam::zero)
 template<class T, unsigned N>
 inline Foam::FixedList<T, N>::FixedList(const T list[N])
 {
+
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = list[i];
@@ -78,6 +79,7 @@ inline Foam::FixedList<T, N>::FixedList(const FixedList<T, N>& list)
 template<class T, unsigned N>
 inline Foam::FixedList<T, N>::FixedList(FixedList<T, N>&& list)
 {
+	
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = std::move(list.v_[i]);
@@ -103,7 +105,6 @@ template<class T, unsigned N>
 inline Foam::FixedList<T, N>::FixedList(const UList<T>& list)
 {
     checkSize(list.size());
-
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = list[i];
@@ -383,7 +384,6 @@ inline void Foam::FixedList<T, N>::swap(FixedList<T, N>& other)
     {
         return;  // Self-swap is a no-op
     }
-
     for (unsigned i=0; i<N; ++i)
     {
         Foam::Swap(v_[i], other.v_[i]);
@@ -495,7 +495,6 @@ inline void Foam::FixedList<T, N>::operator=(const FixedList<T, N>& list)
     {
         return;  // Self-assignment is a no-op
     }
-
     for (unsigned i=0; i<N; ++i)
     {
         v_[i] = list.v_[i];

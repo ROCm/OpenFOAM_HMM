@@ -29,6 +29,11 @@ License
 #include "volFields.H"
 #include "fixedFluxExtrapolatedPressureFvPatchScalarField.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volVectorField> Foam::constrainHbyA
@@ -38,6 +43,11 @@ Foam::tmp<Foam::volVectorField> Foam::constrainHbyA
     const volScalarField& p
 )
 {
+
+    #ifdef USE_ROCTX
+    roctxRangePush("Foam::constrainHbyA");
+    #endif
+
     tmp<volVectorField> tHbyANew;
 
     if (tHbyA.isTmp())
@@ -53,6 +63,11 @@ Foam::tmp<Foam::volVectorField> Foam::constrainHbyA
     volVectorField& HbyA = tHbyANew.ref();
     volVectorField::Boundary& HbyAbf = HbyA.boundaryFieldRef();
 
+
+    #ifdef USE_ROCTX
+    roctxRangePush("Foam::constrainHbyA_loop");
+    #endif
+
     forAll(U.boundaryField(), patchi)
     {
         if
@@ -67,6 +82,14 @@ Foam::tmp<Foam::volVectorField> Foam::constrainHbyA
             HbyAbf[patchi] = U.boundaryField()[patchi];
         }
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
 
     return tHbyANew;
 }
