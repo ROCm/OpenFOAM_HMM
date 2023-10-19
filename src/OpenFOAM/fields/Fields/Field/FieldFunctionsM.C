@@ -36,7 +36,32 @@ License
 TEMPLATE                                                                       \
 void Func(Field<ReturnType>& res, const UList<Type>& f)                        \
 {                                                                              \
-    TFOR_ALL_F_OP_FUNC_F(ReturnType, res, =, ::Foam::Func, Type, f)            \
+    roctxRangePush("Func:TFOR_ALL_F_OP_FUNC_F");                               \
+    if constexpr ( std::is_same<ReturnType,scalar>() && std::is_same<Type,scalar>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(ReturnType, res, =, ::Foam::Func, Type, f)          \
+    }                                                                          \
+    else if constexpr ( std::is_same<ReturnType,Foam::SymmTensor<scalar>>() && std::is_same<Type,Foam::Vector<scalar>>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(ReturnType, res, =, ::Foam::Func, Type, f)          \
+    }                                                                          \
+    else if constexpr ( std::is_same<ReturnType,Foam::SymmTensor<int>>() && std::is_same<Type,Foam::Tensor<int>>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(ReturnType, res, =, ::Foam::Func, Type, f)          \
+    }                                                                          \
+    else if constexpr ( std::is_same<ReturnType,Foam::SymmTensor<scalar>>() && std::is_same<Type,Foam::Tensor<scalar>>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(ReturnType, res, =, ::Foam::Func, Type, f)          \
+    }                                                                          \
+    else if constexpr ( std::is_same<ReturnType,Foam::SymmTensor<scalar>>() && std::is_same<Type,Foam::SymmTensor<scalar>>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(ReturnType, res, =, ::Foam::Func, Type, f)          \
+    }                                                                           \
+    else if constexpr ( std::is_same<ReturnType,Foam::Tensor<int>>() && std::is_same<Type,Foam::Tensor<int>>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(ReturnType, res, =, ::Foam::Func, Type, f)          \
+    }                                                                           \
+    else if constexpr ( std::is_same<ReturnType,Foam::Tensor<scalar>>() && std::is_same<Type,Foam::Tensor<scalar>>() ) { \
+      TPARALLELFOR_ALL_F_OP_FUNC_F_ARITHMETIC(ReturnType, res, =, ::Foam::Func, Type, f)          \
+    }                                                                           \
+    else{                                                                       \
+      TFOR_ALL_F_OP_FUNC_F(ReturnType, res, =, ::Foam::Func, Type, f)          	\
+    }                                                                          	\
+    roctxRangePop();       							\
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -194,7 +219,7 @@ void Func                                                                      \
         ReturnType, res, =, ::Foam::Func, Type1, s1, Type2, f2                 \
       )                                                                        \
     }                                                                          \
-    roctxRangePop();                                                           \
+    roctxRangePop();                                                        \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \
@@ -301,7 +326,7 @@ void OpFunc                                                                    \
     } else {                                                                   \
       TFOR_ALL_F_OP_F_OP_F(ReturnType, res, =, Type1, f1, Op, Type2, f2)       \
     }	                                                                       \
-    roctxRangePop();                           				                   \
+    roctxRangePop();                           				       \
 }                                                                              \
                                                                                \
 TEMPLATE                                                                       \

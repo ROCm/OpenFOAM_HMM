@@ -114,6 +114,8 @@ void Foam::lduCalculatedProcessorField<Type>::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
+
+
     // Bypass patchInternalField since uses fvPatch addressing
     const labelList& fc = lduAddr.patchAddr(patchId);
 
@@ -175,16 +177,30 @@ void Foam::lduCalculatedProcessorField<Type>::addToInternalField
 {
     const labelUList& faceCells = this->procInterface_.faceCells();
 
+
     if (add)
     {
-        forAll(faceCells, elemI)
+        //forAll(faceCells, elemI)
+        label loop_len = faceCells.size();
+	
+	fprintf(stderr,"addToInternalField: loop_len = %d \n",(int) loop_len);
+
+        #pragma omp target teams distribute parallel for if(target:loop_len > 10000)
+	for (label elemI = 0; elemI < loop_len; ++elemI)
         {
             result[faceCells[elemI]] += coeffs[elemI]*vals[elemI];
         }
     }
     else
     {
-        forAll(faceCells, elemI)
+        //forAll(faceCells, elemI)
+        label loop_len = faceCells.size();
+	
+	fprintf(stderr,"addToInternalField: loop_len = %d \n",(int) loop_len);
+
+
+        #pragma omp target teams distribute parallel for if(target:loop_len > 10000)
+        for (label elemI = 0; elemI < loop_len; ++elemI)
         {
             result[faceCells[elemI]] -= coeffs[elemI]*vals[elemI];
         }
@@ -205,6 +221,10 @@ void Foam::lduCalculatedProcessorField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
+
+    fprintf(stderr,"updateInterfaceMatrix : file=%s, line=%d \n",__FILE__,__LINE__);
+
+
     if (this->updatedMatrix())
     {
         return;

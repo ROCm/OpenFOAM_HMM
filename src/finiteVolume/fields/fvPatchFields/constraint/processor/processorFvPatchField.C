@@ -31,6 +31,11 @@ License
 #include "demandDrivenData.H"
 #include "transformField.H"
 
+
+#ifdef USE_ROCTX
+#include <roctracer/roctx.h>
+#endif
+
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -399,10 +404,17 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
     const Pstream::commsTypes commsType
 ) const
 {
+
+
+
     if (this->updatedMatrix())
     {
         return;
     }
+
+    #ifdef USE_ROCTX
+    roctxRangePush("processorFvPatchField:updateInterfaceMatrix");
+    #endif
 
     const labelUList& faceCells = lduAddr.patchAddr(patchId);
 
@@ -431,6 +443,10 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
             // Transform non-scalar data according to the transformation tensor
             transformCoupleField(scalarReceiveBuf_, cmpt);
         }
+    
+        #ifdef USE_ROCTX
+        roctxRangePush("addToInternalField");
+        #endif
 
         // Multiply the field by coefficients and add into the result
         this->addToInternalField
@@ -441,6 +457,11 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
             coeffs,
             scalarReceiveBuf_
         );
+
+	#ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
     }
     else
     {
@@ -459,11 +480,27 @@ void Foam::processorFvPatchField<Type>::updateInterfaceMatrix
             transformCoupleField(pnf, cmpt);
         }
 
+	#ifdef USE_ROCTX
+        roctxRangePush("addToInternalField");
+        #endif
+
         // Multiply the field by coefficients and add into the result
         this->addToInternalField(result, !add, faceCells, coeffs, pnf);
+
+	#ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
     }
 
     const_cast<processorFvPatchField<Type>&>(*this).updatedMatrix() = true;
+
+
+
+    #ifdef USE_ROCTX
+    roctxRangePop();
+    #endif
+
 }
 
 

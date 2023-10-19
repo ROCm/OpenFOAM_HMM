@@ -25,6 +25,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+
+
+#ifndef OMP_UNIFIED_MEMORY_REQUIRED
+#pragma omp requires unified_shared_memory
+#define OMP_UNIFIED_MEMORY_REQUIRED
+#endif
+
+#include "AtomicAccumulator.H"
+#include "macros.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
@@ -37,18 +47,26 @@ void Foam::lduInterfaceField::addToInternalField
     const Field<Type>& vals
 ) const
 {
+    
+
     if (add)
     {
-        forAll(faceCells, elemi)
+        //forAll(faceCells, elemi)
+	const label loop_len = faceCells.size();
+        #pragma omp target teams distribute parallel for if(loop_len>5000)
+        for (label elemi = 0; elemi < loop_len; ++elemi)
         {
-            result[faceCells[elemi]] += coeffs[elemi]*vals[elemi];
+            atomicAccumulator(result[faceCells[elemi]]) += (coeffs[elemi]*vals[elemi]);
         }
     }
     else
     {
-        forAll(faceCells, elemi)
+        //forAll(faceCells, elemi)
+        const label loop_len = faceCells.size();
+        #pragma omp target teams distribute parallel for if(loop_len>5000)
+        for (label elemi = 0; elemi < loop_len; ++elemi)
         {
-            result[faceCells[elemi]] -= coeffs[elemi]*vals[elemi];
+            atomicAccumulator(result[faceCells[elemi]]) -= (coeffs[elemi]*vals[elemi]);
         }
     }
 }

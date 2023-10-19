@@ -61,7 +61,7 @@ inline void Foam::Matrix<Form, Type>::doAlloc()
              alignement = 256;       //LG1 AMD        
           }
           #ifdef USE_MEM_POOL 
-	  if (len >10000 && is_contiguous<Type>::value )
+	  if (len >= 5000 && is_contiguous<Type>::value )
 	     v_ = new ( provide_umpire_pool(sizeof(Type)*len) ) Type[len];
           else
 	     v_ = new (std::align_val_t( alignement)) Type[len];

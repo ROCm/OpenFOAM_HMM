@@ -275,10 +275,12 @@ void Foam::lduMatrix::Tmul
     #pragma omp target teams distribute parallel for if(target:nCells>TARGET_CUT_OFF) 
     for (label face=0; face<nFaces; face++)
     {
+	const label l_val = lPtr[face];
+        const label u_val = uPtr[face];	
         #pragma omp atomic   
-        TpsiPtr[uPtr[face]] += upperPtr[face]*psiPtr[lPtr[face]];
+        TpsiPtr[u_val] += upperPtr[face]*psiPtr[l_val];
 	#pragma omp atomic
-        TpsiPtr[lPtr[face]] += lowerPtr[face]*psiPtr[uPtr[face]];
+        TpsiPtr[l_val] += lowerPtr[face]*psiPtr[u_val];
     }
 
     // Update interface interfaces
@@ -427,10 +429,20 @@ void Foam::lduMatrix::residual
     #pragma omp target teams distribute parallel for if(target:nFaces>TARGET_CUT_OFF)
     for (label face=0; face<nFaces; face++)
     {
+        const label l_val = lPtr[face];
+        const label u_val = uPtr[face];
+
+        #pragma omp atomic    
+        rAPtr[u_val] -= lowerPtr[face]*psiPtr[l_val];
+         #pragma omp atomic
+        rAPtr[l_val] -= upperPtr[face]*psiPtr[u_val];
+
+	/*
         #pragma omp atomic    
         rAPtr[uPtr[face]] -= lowerPtr[face]*psiPtr[lPtr[face]];
 	 #pragma omp atomic
         rAPtr[lPtr[face]] -= upperPtr[face]*psiPtr[uPtr[face]];
+	*/
     }
 
     // Update interface interfaces

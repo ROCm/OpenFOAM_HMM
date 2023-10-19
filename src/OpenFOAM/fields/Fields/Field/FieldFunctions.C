@@ -533,7 +533,7 @@ Type sum(const UList<Type>& f)
     solveType Sum = Zero;
     if (f.size())
     {
-	    #ifdef USE_ROCTX
+	#ifdef USE_ROCTX
         roctxRangePushA("min:TFOR_ALL_S_OP_FUNC_F_S");
         #endif
 

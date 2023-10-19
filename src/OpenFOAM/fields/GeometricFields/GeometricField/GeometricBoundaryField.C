@@ -462,6 +462,9 @@ void Foam::GeometricBoundaryField<Type, PatchField, GeoMesh>::evaluate()
             pfld.initEvaluate(commsType);
         }
 
+	#ifdef USE_ROCTX
+        roctxRangePush("Foam::GeometricBoundaryField:waitRequests");
+        #endif
         // Wait for outstanding requests
         if
         (
@@ -471,6 +474,10 @@ void Foam::GeometricBoundaryField<Type, PatchField, GeoMesh>::evaluate()
         {
             UPstream::waitRequests(startOfRequests);
         }
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
 
         for (auto& pfld : *this)
         {

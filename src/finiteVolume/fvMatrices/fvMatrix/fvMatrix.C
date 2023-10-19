@@ -70,7 +70,8 @@ void Foam::fvMatrix<Type>::addToInternalField
 
     //forAll(addr, facei)
     label loop_len = addr.size();
-    #pragma omp target teams distribute parallel for if(target:loop_len > 10000)
+
+    #pragma omp target teams distribute parallel for if(target:loop_len > 5000)
     for (label facei=0; facei < loop_len; ++facei)
     {
         atomicAccumulator(intf[addr[facei]]) += pf[facei];

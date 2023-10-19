@@ -135,7 +135,7 @@ void checkFields
                                                                                \
     label loop_len = (f1).size();                                                 \
     /* Loop: f1 OP FUNC(f2) */                                                 \
-    /* _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  */ \
+    /* _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)")  */ \
     for (label i = 0; i < loop_len; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP FUNC(f2P[i]);                                              \
@@ -153,7 +153,7 @@ void checkFields
                                                                                \
     label loop_len = (f1).size();                                                 \
     /* Loop: f1 OP FUNC(f2) */                                                 \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000) ")  \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000) ")  \
     for (label i = 0; i < loop_len; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP FUNC(f2P[i]);                                              \
@@ -186,7 +186,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
     label loop_len = (f1).size();                                              \
     /* Loop: f1 OP f2.FUNC() */                                                \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000) ")  \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000) ")  \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP (f2P[i]).FUNC();                                           \
@@ -227,7 +227,7 @@ void checkFields
                                                                                \
     /* Loop: f1 OP FUNC(f2, f3) */                                             \
     /* List_FOR_ALL(f1, i) */                                                  \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)") \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP FUNC((f2P[i]), (f3P[i]));                                  \
@@ -281,7 +281,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
     label loop_len = (f1).size();                                               \
     /* Loop: f1 OP FUNC(f2, s) */                                              \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)") \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP FUNC((f2P[i]), (s));                                       \
@@ -309,7 +309,7 @@ void checkFields
     label loop_len = (f).size();                                               \
     typeS1 min_val = (s);                                                      \
     /* Loop: s OP FUNC(f, s) */                                                \
-    _Pragma("omp target teams distribute parallel for reduction(min:min_val) map(tofrom:min_val) if(target:loop_len > 20000)") \
+    _Pragma("omp target teams distribute parallel for reduction(min:min_val) map(tofrom:min_val) if(target:loop_len > 10000)") \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         /*(s1) OP FUNC((fP[i]), (s2));     */                                  \
@@ -325,7 +325,7 @@ void checkFields
     label loop_len = (f).size();                                               \
     typeS1 max_val = (s);                                                      \
     /* Loop: s OP FUNC(f, s) */                                                \
-    _Pragma("omp target teams distribute parallel for reduction(max:max_val) map(tofrom:max_val) if(target:loop_len > 20000)") \
+    _Pragma("omp target teams distribute parallel for reduction(max:max_val) map(tofrom:max_val) if(target:loop_len > 10000)") \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         /*(s1) OP FUNC((fP[i]), (s2));     */                                  \
@@ -364,7 +364,7 @@ void checkFields
                                                                                \
     /* Loop: f1 OP1 f2 OP2 f3 */                                               \
     /* List_FOR_ALL(f1, i)   */                                                \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)") \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)") \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP FUNC((s), (f2P[i]));                                       \
@@ -415,7 +415,7 @@ void checkFields
     List_CONST_ACCESS(typeF2, f2, f2P);                                        \
     label loop_len = (f1).size();                                               \
     /* Loop: f1 OP f2 FUNC(s) */                                               \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)")  \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP (f2P[i]) FUNC((s));                                        \
@@ -456,7 +456,7 @@ void checkFields
     label loop_len = (f1).size();                                              \
                                                                                \
     /* Loop: f1 OP1 f2 OP2 f3 */                                               \
-     _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+     _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)")  \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP1 (f2P[i]) OP2 (f3P[i]);                                    \
@@ -497,7 +497,7 @@ void checkFields
                                                                                \
     /* Loop: f1 OP1 s OP2 f2 */                                                \
     /* List_FOR_ALL(f1, i)   */                                                \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)")  \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP1 (s) OP2 (f2P[i]);                                         \
@@ -535,7 +535,7 @@ void checkFields
                                                                                \
     /* Loop f1 OP1 s OP2 f2 */                                                 \
     /*List_FOR_ALL(f1, i) */                                                   \
-    _Pragma("omp target teams distribute parallel for if(target:loop_len > 20000)")  \
+    _Pragma("omp target teams distribute parallel for if(target:loop_len > 10000)")  \
     for (label i = 0; i < loop_len; ++i)                                       \
     {                                                                          \
         (f1P[i]) OP1 (f2P[i]) OP2 (s);                                         \
@@ -556,7 +556,7 @@ void checkFields
                                                                                \
     label f1_sz = (f1).size();                                                 \
     /* Loop: f1 OP f2 */                                                       \
-    _Pragma("omp target teams distribute parallel for if(target:f1_sz > 20000)") \
+    _Pragma("omp target teams distribute parallel for if(target:f1_sz > 10000)") \
     for (label i = 0; i < f1_sz; ++i)                                          \
     {                                                                          \
         (f1P[i]) OP (f2P[i]);                                                  \

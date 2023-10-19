@@ -114,6 +114,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
     const label startRequest
 ) const
 {
+
     if (Pstream::defaultCommsType == Pstream::commsTypes::blocking)
     {
         forAll(interfaces, interfacei)
@@ -136,6 +137,10 @@ void Foam::lduMatrix::updateMatrixInterfaces
     }
     else if (Pstream::defaultCommsType == Pstream::commsTypes::nonBlocking)
     {
+	#ifdef USE_ROCTX
+        roctxRangePush("lduMatrix::updateMatrixInterfaces-A");
+        #endif
+
         // Try and consume interfaces as they become available
         bool allUpdated = false;
 
@@ -151,6 +156,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
                     {
                         if (interfaces[interfacei].ready())
                         {
+
                             interfaces[interfacei].updateInterfaceMatrix
                             (
                                 result,
@@ -177,6 +183,10 @@ void Foam::lduMatrix::updateMatrixInterfaces
             }
         }
 
+	#ifdef USE_ROCTX
+        roctxRangePush("lduMatrix::updateMatrixInterfaces-A-parRun");
+        #endif
+
         // Block for everything
         if (Pstream::parRun())
         {
@@ -192,6 +202,10 @@ void Foam::lduMatrix::updateMatrixInterfaces
             }
         }
 
+	#ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
+
         // Consume
         forAll(interfaces, interfacei)
         {
@@ -201,6 +215,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
             && !interfaces[interfacei].updatedMatrix()
             )
             {
+
                 interfaces[interfacei].updateInterfaceMatrix
                 (
                     result,
@@ -214,6 +229,9 @@ void Foam::lduMatrix::updateMatrixInterfaces
                 );
             }
         }
+        #ifdef USE_ROCTX
+        roctxRangePop();
+        #endif
     }
     else if (Pstream::defaultCommsType == Pstream::commsTypes::scheduled)
     {
@@ -268,6 +286,7 @@ void Foam::lduMatrix::updateMatrixInterfaces
         {
             if (interfaces.set(interfacei))
             {
+
                 interfaces[interfacei].updateInterfaceMatrix
                 (
                     result,

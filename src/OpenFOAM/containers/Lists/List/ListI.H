@@ -57,7 +57,7 @@ inline void Foam::List<T>::doAlloc()
 //	   fprintf(stderr,"doAlloc: calling mem allocator size_ = %d\n",this->size_);
 
            #ifdef USE_MEM_POOL
-           if (this->size_ > 20000 && is_contiguous<T>::value){
+           if (this->size_ >= 5000 && is_contiguous<T>::value){
 	       void * tmp_ptr = provide_umpire_pool(sizeof(T)*this->size_);
                this->v_ = new (tmp_ptr) T[this->size_]; //use placement new 
 	   }
