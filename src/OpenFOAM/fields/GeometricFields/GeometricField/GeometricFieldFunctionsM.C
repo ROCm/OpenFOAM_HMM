@@ -509,13 +509,17 @@ void OpFunc                                                                    \
     const GeometricField<Type2, PatchField, GeoMesh>& gf2                      \
 )                                                                              \
 {                                                                              \
+#ifdef USE_ROCTX     
     roctxRangePush("opFunc_A");                                                \
+#endif
     Foam::OpFunc                                                               \
     (res.primitiveFieldRef(), gf1.primitiveField(), gf2.primitiveField());     \
     Foam::OpFunc                                                               \
     (res.boundaryFieldRef(), gf1.boundaryField(), gf2.boundaryField());        \
     res.oriented() = gf1.oriented() Op gf2.oriented();                         \
+#ifdef USE_ROCTX     
     roctxRangePop();                                                           \
+#endif
 }                                                                              \
                                                                                \
                                                                                \
@@ -640,9 +644,13 @@ void OpFunc                                                                    \
 {                                                                              \
     Foam::OpFunc(res.primitiveFieldRef(), dt1.value(), gf2.primitiveField());  \
     Foam::OpFunc(res.boundaryFieldRef(), dt1.value(), gf2.boundaryField());    \
+#ifdef USE_ROCTX     
     roctxRangePush("opFunc_C");                                                \
+#endif
     res.oriented() = gf2.oriented();                                           \
+#ifdef USE_ROCTX 
     roctxRangePop();                                                           \
+#endif 
                                                                                \
 }                                                                              \
                                                                                \

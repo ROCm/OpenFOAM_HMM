@@ -8,6 +8,7 @@ export GPU_MAX_HW_QUEUES=4
 #set ROCm and MPI paths
 export ROCM4FOAM=${ROCM_PATH:-/opt/rocm}
 export MPI4FOAM=${MPI_PATH:-/opt/ompi}
+export UMPIRE4FOAM=${UMPIRE_PATH:-/opt/umpire-6.0.0}
 
 #set OMPI compilers
 export OMPI_CXX=clang++

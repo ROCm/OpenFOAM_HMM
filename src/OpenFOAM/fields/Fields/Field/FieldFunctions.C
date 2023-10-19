@@ -972,11 +972,15 @@ void OpFunc                                                                    \
     const UList<Type>& f1                                                      \
 )                                                                              \
 {                                                                              \
+#ifdef USE_ROCTX
     roctxRangePushA("TFOR_ALL_F_OP_S_OP_F");                                   \
+#endif
     typedef typename product<Form, Type>::type productType;                    \
     TFOR_ALL_F_OP_S_OP_F                                                       \
         (productType, res, =,Form,static_cast<const Form&>(vs), Op, Type, f1)  \
+#ifdef USE_ROCTX
     roctxRangePop();                                                           \
+#endif
 }                                                                              \
                                                                                \
 template<class Form, class Cmpt, direction nCmpt, class Type>                  \
