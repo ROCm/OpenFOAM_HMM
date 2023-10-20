@@ -6,7 +6,7 @@ LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
 LINKEXE     = $(CC) $(c++FLAGS) \
     -fuse-ld=ld  -Xlinker --add-needed \
     $(FOAM_EXTRA_LDFLAGS) ${ROCM4FOAM}/lib/libroctx64.so -L${ROCM4FOAM}/lib -lamdhip64 \
-    ${WM_PROJECT_DIR}/../ADD_UMPIRE/provide_umpire_pool.o -L{UMPIRE4FOAM}/lib -lumpire
+    ${WM_PROJECT_DIR}/../ADD_UMPIRE/provide_umpire_pool.o -L${UMPIRE4FOAM}/lib -lumpire
 # umpire related flags, copy from below and add to LINKEXE
 # $WM_PROJECT_DIR/../ADD_UMPIRE/provide_umpire_pool.o -L/opt/umpire-6.0.0/lib -lumpire
 
