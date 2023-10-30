@@ -1,5 +1,5 @@
 cDBUG       =
 
-cOPT        = -O3 -DUSE_OMP -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -fopenmp-target-fast -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx940,gfx942 -fopenmp-version=51  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__ 
+cOPT        = -O3 -DUSE_OMP -target x86_64-pc-linux-gnu -fopenmp --offload-arch=gfx90a,gfx940,gfx942 -fopenmp-target-fast -fopenmp-version=51 -Wno-conditional-type-mismatch
 
 

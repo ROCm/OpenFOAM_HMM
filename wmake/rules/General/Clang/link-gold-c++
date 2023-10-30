@@ -5,8 +5,8 @@ LINKLIBSO   = $(CC) $(c++FLAGS) -shared \
     $(FOAM_EXTRA_LDFLAGS)  ${ROCM4FOAM}/lib/libroctx64.so 
 
 LINKEXE     = $(CC) $(c++FLAGS) \
-    -fuse-ld=gold \
+    -fuse-ld=lld \
     -L$(FOAM_LIBBIN)/dummy -lPstream \
-    $(FOAM_EXTRA_LDFLAGS) ${ROCM4FOAM}/lib/libroctx64.so 
+    $(FOAM_EXTRA_LDFLAGS) 
 
 

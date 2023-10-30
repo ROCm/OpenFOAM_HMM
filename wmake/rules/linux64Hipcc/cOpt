@@ -1,2 +1,0 @@
-cDBUG       =
-cOPT        = -O3 -DUSE_OMP #-target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx90a  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__ -v

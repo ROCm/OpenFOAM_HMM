@@ -1,6 +1,6 @@
 c++DBUG     =
 
-c++OPT      = -g -fPIC -O3 -fno-fast-math -std=c++17 -I ${ROCM4FOAM}/roctracer/include/ -DUSE_ROCTX -DUSE_OMP -target x86_64-pc-linux-gnu -fopenmp -fopenmp-targets=amdgcn-amd-amdhsa -Xopenmp-target=amdgcn-amd-amdhsa -march=gfx940,gfx942 -fopenmp-target-fast -fopenmp-version=51  -Wno-conditional-type-mismatch  -D__HIP_PLATFORM_AMD__  -DUSE_MEM_POOL -I${UMPIRE4FOAM}/include
+c++OPT      = -g -fPIC -O3 -fno-fast-math -std=c++17 -I ${ROCM4FOAM}/roctracer/include/ -DUSE_ROCTX -DUSE_OMP -target x86_64-pc-linux-gnu -fopenmp --offload-arch=gfx90a,gfx940,gfx942 -fopenmp-target-fast -fopenmp-version=51 -Wno-conditional-type-mismatch -DUSE_MEM_POOL -I${UMPIRE4FOAM}/include
 
 # umipre flags - copy from below and add to c++OPT
 # -DUSE_MEM_POOL -I/opt/umpire-6.0.0/include
