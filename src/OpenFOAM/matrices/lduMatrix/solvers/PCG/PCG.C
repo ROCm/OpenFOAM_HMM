@@ -93,8 +93,6 @@ Foam::solverPerformance Foam::PCG::scalarSolve
     const direction cmpt
 ) const
 {
-    printf("in PCG\n");
-
     #ifdef USE_ROCTX
     roctxRangePush("PCG::scalarSolve");
     #endif

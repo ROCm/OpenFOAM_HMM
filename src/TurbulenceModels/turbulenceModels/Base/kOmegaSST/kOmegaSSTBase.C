@@ -144,8 +144,6 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correctNut
     const volScalarField& S2
 )
 {
-    printf("I AM IN kOmegaSSTBase<BasicEddyViscosityModel>::correctNut\n");
-
     #ifdef USE_ROCTX
     roctxRangePush("kOmegaSSTBase_correct_turb_visc");
     #endif

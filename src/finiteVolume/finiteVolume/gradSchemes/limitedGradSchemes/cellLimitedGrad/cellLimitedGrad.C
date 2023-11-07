@@ -95,7 +95,7 @@ void Foam::fv::cellLimitedGrad<Type, Limiter>::limitGradient
     roctxRangePop();
     #endif
 }
-
+/*
 template< class T >
 void test_type(){
    if (std::is_same_v<T, double>) printf("test_type: T==double\n");
@@ -103,8 +103,7 @@ void test_type(){
    if (std::is_same_v<T,Foam::Vector<double>>) printf("test_type: T==Foam::Vector<double>\n");
    if (std::is_same_v<T,Foam::Vector<float>>) printf("test_type: T==Foam::Vector<float>\n");
 }
-
-
+*/
 template<class Type, class Limiter>
 Foam::tmp
 <
@@ -121,9 +120,6 @@ Foam::fv::cellLimitedGrad<Type, Limiter>::calcGrad
     const word& name
 ) const
 {
-
-    test_type<Type>();
-
     #ifdef USE_ROCTX
     roctxRangePush("fv::cellLimitedGrad_C");
     #endif
