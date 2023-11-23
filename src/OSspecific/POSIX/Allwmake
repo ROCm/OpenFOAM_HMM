@@ -1,6 +1,6 @@
 #!/bin/sh
 cd "${0%/*}" || exit                                # Run from this directory
-targetType=libo                                     # Preferred library type
+targetType=libso                                    # Preferred library type
 . ${WM_PROJECT_DIR:?}/wmake/scripts/AllwmakeParseArguments $*
 
 #------------------------------------------------------------------------------

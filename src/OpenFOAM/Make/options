@@ -2,7 +2,7 @@ EXE_INC = \
     -I$(OBJECTS_DIR)
 
 LIB_LIBS = \
-    $(FOAM_LIBBIN)/libOSspecific.o
+    -L$(FOAM_LIBBIN) -lOSspecific
 
 /* libz: (not disabled) */
 ifeq (,$(findstring ~libz,$(WM_COMPILE_CONTROL)))
