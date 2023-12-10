@@ -180,8 +180,8 @@ int main(int argc, char *argv[])
 
         scalar o2 = (1.0/equiv)*stoicO2;
         scalar n2 = (0.79/0.21)*o2;
-        scalar fres = max(1.0 - 1.0/equiv, 0.0);
-        scalar ores = max(1.0/equiv - 1.0, 0.0);
+        scalar fres = Foam::max(1.0 - 1.0/equiv, 0.0);
+        scalar ores = Foam::max(1.0/equiv - 1.0, 0.0);
         scalar fburnt = 1.0 - fres;
 
         thermo reactants

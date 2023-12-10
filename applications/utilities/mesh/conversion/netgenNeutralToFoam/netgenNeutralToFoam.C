@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
         }
 
 
-        maxPatch = max(maxPatch, patchi);
+        maxPatch = Foam::max(maxPatch, patchi);
 
         triFace tri(readLabel(str)-1, readLabel(str)-1, readLabel(str)-1);
 
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
     );
 
     // Set the precision of the points data to 10
-    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
+    IOstream::defaultPrecision(Foam::max(10u, IOstream::defaultPrecision()));
 
     Info<< "Writing mesh ..." << endl;
     mesh.removeFiles();

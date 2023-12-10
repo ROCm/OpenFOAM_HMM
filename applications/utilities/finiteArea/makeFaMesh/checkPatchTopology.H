@@ -113,13 +113,13 @@ Input
             if (numNbrs == 1)
             {
                 //if (pointSetPtr) pointSetPtr->insert(mesh.edges()[meshEdgei]);
-                labelTyp = max(labelTyp, TopoType::OPEN);
+                labelTyp = Foam::max(labelTyp, TopoType::OPEN);
             }
             else if (numNbrs == 0 || numNbrs > 2)
             {
                 if (pointSetPtr) pointSetPtr->insert(mesh.edges()[meshEdgei]);
                 if (badEdgesPtr) badEdgesPtr->insert(edgei);
-                labelTyp = max(labelTyp, TopoType::ILLEGAL);
+                labelTyp = Foam::max(labelTyp, TopoType::ILLEGAL);
             }
         }
         reduce(labelTyp, maxOp<label>());

@@ -333,11 +333,11 @@ void printMeshData(const polyMesh& mesh)
                 << nBndFaces-nProcFaces << endl;
         }
 
-        maxProcCells = max(maxProcCells, nLocalCells);
+        maxProcCells = Foam::max(maxProcCells, nLocalCells);
         totProcFaces += nProcFaces;
         totProcPatches += nei.size();
-        maxProcFaces = max(maxProcFaces, nProcFaces);
-        maxProcPatches = max(maxProcPatches, nei.size());
+        maxProcFaces = Foam::max(maxProcFaces, nProcFaces);
+        maxProcPatches = Foam::max(maxProcPatches, nei.size());
     }
 
     // Summary stats
@@ -784,7 +784,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
 
     // Set the minimum write precision
-    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
+    IOstream::defaultPrecision(Foam::max(10u, IOstream::defaultPrecision()));
 
 
     if (!overwrite)

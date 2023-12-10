@@ -22,7 +22,7 @@ forAll(solidRegions, i)
     tmp<volScalarField> trho = thermo.rho();
     const volScalarField& rho = trho();
 
-    DiNum = max
+    DiNum = Foam::max
     (
         solidRegionDiffNo
         (

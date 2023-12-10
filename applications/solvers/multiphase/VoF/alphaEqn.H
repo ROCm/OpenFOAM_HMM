@@ -123,8 +123,8 @@
 
         Info<< "Phase-1 volume fraction = "
             << alpha1.weightedAverage(mesh.Vsc()).value()
-            << "  Min(" << alpha1.name() << ") = " << min(alpha1).value()
-            << "  Max(" << alpha1.name() << ") = " << max(alpha1).value()
+            << "  Min(" << alpha1.name() << ") = " << Foam::min(alpha1).value()
+            << "  Max(" << alpha1.name() << ") = " << Foam::max(alpha1).value()
             << endl;
 
         tmp<surfaceScalarField> talphaPhi1UD(alpha1Eqn.flux());
@@ -214,7 +214,7 @@
                 phiCN,
                 alphaPhi10,
                 Sp,
-                (Su + divU*min(alpha1(), scalar(1)))(),
+                (Su + divU*Foam::min(alpha1(), scalar(1)))(),
                 oneField(),
                 zeroField()
             );
@@ -262,7 +262,7 @@
 
     Info<< "Phase-1 volume fraction = "
         << alpha1.weightedAverage(mesh.Vsc()).value()
-        << "  Min(" << alpha1.name() << ") = " << min(alpha1).value()
-        << "  Max(" << alpha1.name() << ") = " << max(alpha1).value()
+        << "  Min(" << alpha1.name() << ") = " << Foam::min(alpha1).value()
+        << "  Max(" << alpha1.name() << ") = " << Foam::max(alpha1).value()
         << endl;
 }

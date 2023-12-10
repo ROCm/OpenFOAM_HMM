@@ -8,5 +8,5 @@
 
     Info<< "Max Ur Courant Number = " << UrCoNum << endl;
 
-    CoNum = max(CoNum, UrCoNum);
+    CoNum = Foam::max(CoNum, UrCoNum);
 }

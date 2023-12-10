@@ -886,7 +886,7 @@ int main(int argc, char *argv[])
             writeParts
             (
                 surf,
-                min(outputThreshold, numZones),
+                Foam::min(outputThreshold, numZones),
                 faceZone,
                 surfFilePath,
                 surfFileStem
@@ -952,7 +952,7 @@ int main(int argc, char *argv[])
             writeParts
             (
                 surf,
-                min(outputThreshold, numNormalZones),
+                Foam::min(outputThreshold, numNormalZones),
                 normalZone,
                 surfFilePath,
                 surfFileStem + "_normal"

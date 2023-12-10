@@ -8,10 +8,10 @@
         {
             if (kivaVersion == kiva3v)
             {
-                regionIndex = max
+                regionIndex = Foam::max
                 (
-                    max(idface[quadFace[0]], idface[quadFace[1]]),
-                    max(idface[quadFace[2]], idface[quadFace[3]])
+                    Foam::max(idface[quadFace[0]], idface[quadFace[1]]),
+                    Foam::max(idface[quadFace[2]], idface[quadFace[3]])
                 );
 
                 if (regionIndex > 0)

@@ -350,7 +350,7 @@ mtype                 {space}"MTYPE:"{space}
         // Find out how many labels are expected. If less or equal to
         // seven, read them all and finish with it. If there is more,
         // set read of the next line
-        label labelsToRead = min(8, nVertices);
+        label labelsToRead = Foam::min(8, nVertices);
         label labelI = 0;
         for (; labelI < labelsToRead; labelI++)
         {
@@ -387,7 +387,7 @@ mtype                 {space}"MTYPE:"{space}
 
         labelList& curLabels = cellLabels[curNumberOfCells];
 
-        label labelsToRead = min
+        label labelsToRead = Foam::min
         (
             (nCellContinuationLines + 1)*7,
             curLabels.size()
@@ -869,7 +869,7 @@ int main(int argc, char *argv[])
     );
 
     // Set the precision of the points data to 10
-    IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
+    IOstream::defaultPrecision(Foam::max(10u, IOstream::defaultPrecision()));
 
     Info<< "Writing polyMesh" << endl;
     pShapeMesh.removeFiles();

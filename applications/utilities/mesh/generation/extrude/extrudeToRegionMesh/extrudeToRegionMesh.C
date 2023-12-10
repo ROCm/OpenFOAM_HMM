@@ -556,8 +556,8 @@ void calcEdgeMinMaxZone
             forAll(eFaces, i)
             {
                 label zoneI = mappedZoneID[eFaces[i]];
-                minZoneID[edgeI] = min(minZoneID[edgeI], zoneI);
-                maxZoneID[edgeI] = max(maxZoneID[edgeI], zoneI);
+                minZoneID[edgeI] = Foam::min(minZoneID[edgeI], zoneI);
+                maxZoneID[edgeI] = Foam::max(maxZoneID[edgeI], zoneI);
             }
         }
     }
@@ -813,8 +813,8 @@ void addCoupledPatches
             forAll(eFaces, i)
             {
                 label proci = procID[eFaces[i]];
-                minProcID[edgeI] = min(minProcID[edgeI], proci);
-                maxProcID[edgeI] = max(maxProcID[edgeI], proci);
+                minProcID[edgeI] = Foam::min(minProcID[edgeI], proci);
+                maxProcID[edgeI] = Foam::max(maxProcID[edgeI], proci);
             }
         }
     }
@@ -1291,7 +1291,7 @@ void extrudeGeometricProperties
             label celli = regionMesh.faceOwner()[facei];
             if (regionMesh.isInternalFace(facei))
             {
-                celli = max(celli, regionMesh.faceNeighbour()[facei]);
+                celli = Foam::max(celli, regionMesh.faceNeighbour()[facei]);
             }
 
             // Calculate layer from cell numbering (see createShellMesh)
@@ -2192,8 +2192,8 @@ int main(int argc, char *argv[])
 
             if (zone0 != zone1) // || (cos(angle) > blabla))
             {
-                label minZone = min(zone0,zone1);
-                label maxZone = max(zone0,zone1);
+                label minZone = Foam::min(zone0,zone1);
+                label maxZone = Foam::max(zone0,zone1);
                 label index = minZone*zoneNames.size()+maxZone;
 
                 ePatches.setSize(eFaces.size());

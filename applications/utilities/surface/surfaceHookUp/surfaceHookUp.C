@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
     const IOdictionary dict(dictIO);
 
     const scalar dist(args.get<scalar>(1));
-    const scalar matchTolerance(max(1e-6*dist, SMALL));
+    const scalar matchTolerance(Foam::max(1e-6*dist, SMALL));
     const label maxIters = 100;
 
     Info<< "Hooking distance = " << dist << endl;

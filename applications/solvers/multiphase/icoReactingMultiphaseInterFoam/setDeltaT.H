@@ -36,13 +36,13 @@ Description
 if (adjustTimeStep)
 {
     scalar maxDeltaTFact =
-        min
+        Foam::min
         (
             maxCo/(CoNum + SMALL),
-            min
+            Foam::min
             (
                 maxAlphaCo/(alphaCoNum + SMALL),
-                min
+                Foam::min
                 (
                     maxAlphaDdt/(ddtAlphaNum + SMALL),
                     maxDi/(DiNum + SMALL)
@@ -50,11 +50,11 @@ if (adjustTimeStep)
             )
         );
 
-    scalar deltaTFact = min(min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
+    scalar deltaTFact = Foam::min(Foam::min(maxDeltaTFact, 1.0 + 0.1*maxDeltaTFact), 1.2);
 
     runTime.setDeltaT
     (
-        min
+        Foam::min
         (
             deltaTFact*runTime.deltaTValue(),
             maxDeltaT

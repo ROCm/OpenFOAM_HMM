@@ -100,26 +100,26 @@ void printEdgeStats(const polyMesh& mesh)
 
             if (mag(eVec & x) > 1-edgeTol)
             {
-                minX = min(minX, eMag);
-                maxX = max(maxX, eMag);
+                minX = Foam::min(minX, eMag);
+                maxX = Foam::max(maxX, eMag);
                 nX++;
             }
             else if (mag(eVec & y) > 1-edgeTol)
             {
-                minY = min(minY, eMag);
-                maxY = max(maxY, eMag);
+                minY = Foam::min(minY, eMag);
+                maxY = Foam::max(maxY, eMag);
                 nY++;
             }
             else if (mag(eVec & z) > 1-edgeTol)
             {
-                minZ = min(minZ, eMag);
-                maxZ = max(maxZ, eMag);
+                minZ = Foam::min(minZ, eMag);
+                maxZ = Foam::max(maxZ, eMag);
                 nZ++;
             }
             else
             {
-                minOther = min(minOther, eMag);
-                maxOther = max(maxOther, eMag);
+                minOther = Foam::min(minOther, eMag);
+                maxOther = Foam::max(maxOther, eMag);
             }
         }
     }

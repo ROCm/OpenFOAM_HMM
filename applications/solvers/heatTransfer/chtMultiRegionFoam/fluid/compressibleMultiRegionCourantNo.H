@@ -2,7 +2,7 @@
 
     forAll(fluidRegions, regioni)
     {
-        CoNum = max
+        CoNum = Foam::max
         (
             compressibleCourantNo
             (

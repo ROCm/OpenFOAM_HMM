@@ -345,7 +345,7 @@ void subsetTopoSets
 
         Info<< "Subsetting " << set.type() << " " << set.name() << endl;
 
-        labelHashSet subset(2*min(set.size(), map.size()));
+        labelHashSet subset(2*Foam::min(set.size(), map.size()));
 
         forAll(map, i)
         {

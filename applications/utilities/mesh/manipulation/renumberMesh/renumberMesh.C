@@ -134,10 +134,10 @@ void getBand
 
         // Note: mag not necessary for correct (upper-triangular) ordering.
         label diff = nei-own;
-        cellBandwidth[nei] = max(cellBandwidth[nei], diff);
+        cellBandwidth[nei] = Foam::max(cellBandwidth[nei], diff);
     }
 
-    bandwidth = max(cellBandwidth);
+    bandwidth = Foam::max(cellBandwidth);
 
     // Do not use field algebra because of conversion label to scalar
     profile = 0.0;
@@ -329,7 +329,7 @@ labelList getRegionFaceOrder
     }
 
     // Do region interfaces
-    label nRegions = max(cellToRegion)+1;
+    label nRegions = Foam::max(cellToRegion)+1;
     {
         // Sort in increasing region
         SortableList<label> sortKey(mesh.nFaces(), labelMax);
@@ -342,8 +342,8 @@ labelList getRegionFaceOrder
             if (ownRegion != neiRegion)
             {
                 sortKey[facei] =
-                    min(ownRegion, neiRegion)*nRegions
-                   +max(ownRegion, neiRegion);
+                    Foam::min(ownRegion, neiRegion)*nRegions
+                   +Foam::max(ownRegion, neiRegion);
             }
         }
         sortKey.sort();
@@ -555,7 +555,7 @@ labelList regionRenumber
 
     labelList cellOrder(cellToRegion.size());
 
-    label nRegions = max(cellToRegion)+1;
+    label nRegions = Foam::max(cellToRegion)+1;
 
     labelListList regionToCells(invertOneToMany(nRegions, cellToRegion));
 

@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     args.readIfPresent("format", setFormat);
 
     args.readIfPresent("stride", sampleFrequency);
-    sampleFrequency = max(1, sampleFrequency);  // sanity
+    sampleFrequency = Foam::max(1, sampleFrequency);  // sanity
 
     // Setup the writer
     auto writerPtr =
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
                     maxIds.resize(origProc+1, -1);
                 }
 
-                maxIds[origProc] = max(maxIds[origProc], origId);
+                maxIds[origProc] = Foam::max(maxIds[origProc], origId);
             }
         }
 

@@ -71,9 +71,9 @@ int main(int argc, char *argv[])
         {
             scalar b = j1(swirlProfile*r/cylinderRadius).value();
             scalar vEff = omega*b;
-            r = max(r, SMALL);
+            r = Foam::max(r, SMALL);
             U[celli] = ((vEff/r)*(c & yT))*xT + (-(vEff/r)*(c & xT))*yT;
-            Umax = max(Umax, mag(U[celli]));
+            Umax = Foam::max(Umax, mag(U[celli]));
         }
     }
 

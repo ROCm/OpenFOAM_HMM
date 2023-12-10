@@ -320,10 +320,10 @@ bool doCommand
     const globalMeshData& parData = mesh.globalData();
 
     label typSize =
-        max
+        Foam::max
         (
             parData.nTotalCells(),
-            max
+            Foam::max
             (
                 parData.nTotalFaces(),
                 parData.nTotalPoints()
@@ -375,7 +375,7 @@ bool doCommand
 
                 topoSet& currentSet = currentSetPtr();
                 // Presize it according to current mesh data.
-                currentSet.resize(max(currentSet.size(), typSize));
+                currentSet.resize(Foam::max(currentSet.size(), typSize));
             }
         }
 

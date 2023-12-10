@@ -47,10 +47,10 @@ if (adjustTimeStep)
 
         runTime.setDeltaT
         (
-            min
+            Foam::min
             (
-                min(maxCo/CoNum, maxDi/DiNum)*runTime.deltaT().value(),
-                min(runTime.deltaTValue(), maxDeltaT)
+                Foam::min(maxCo/CoNum, maxDi/DiNum)*runTime.deltaT().value(),
+                Foam::min(runTime.deltaTValue(), maxDeltaT)
             )
         );
         Info<< "deltaT = " <<  runTime.deltaT().value() << endl;
