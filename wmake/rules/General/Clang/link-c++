@@ -5,6 +5,7 @@ LINK_LIBS   = $(c++DBUG)
 LINKLIBSO   = $(CC) $(c++FLAGS) -shared
 
 LINKEXE     = $(CC) $(c++FLAGS) \
-    -Xlinker --add-needed
+    -Xlinker --add-needed \
+    -fuse-ld=ld
 
 #------------------------------------------------------------------------------
