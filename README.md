@@ -1,3 +1,15 @@
+## notes on installation
+Given that some roctx profiling calls are in openfoam macros it is necessary to
+add the relevant compiler flags to succesfully compile the code, this is done
+via FOAM_EXTRA environment variables
+
+    export ROCM4FOAM="path to your rocm installation"
+    export FOAM_EXTRA_CFLAGS="-DUSE_ROCTX -I${ROCM4FOAM}/roctracer/include/"
+    export FOAM_EXTRA_CXXFLAGS="-DUSE_ROCTX -I${ROCM4FOAM}/roctracer/include/"
+    export FOAM_EXTRA_LDFLAGS="${ROCM4FOAM}/lib/libroctx64.so -L${ROCM4FOAM}/lib 
+
+these must be set before compiling openfoam.
+
 ## About OpenFOAM
 OpenFOAM is a free, open source CFD software [released and developed by OpenCFD Ltd since 2004](http://www.openfoam.com/history/).
 It has a large user base across most areas of engineering and science, from both commercial and academic organisations.

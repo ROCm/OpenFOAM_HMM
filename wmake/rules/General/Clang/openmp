@@ -1,1 +1,18 @@
-openmp-gomp
+# Flags for compiling/linking openmp
+# -
+
+COMP_OPENMP = -fopenmp -fopenmp-version=51
+
+LINK_OPENMP =
+
+WM_OMP_OFFLOAD_ARCH=$(patsubst +openmp:%,%,$(filter +openmp:%,$(WM_COMPILE_CONTROL)))
+
+ifneq ($(WM_OMP_OFFLOAD_ARCH),)
+
+        COMP_OPENMP += -fno-fast-math --offload-arch=${WM_OMP_OFFLOAD_ARCH}
+
+endif
+
+#specific to openfoam_hmm
+COMP_OPENMP += -DUSE_OMP
+# ----------------------------------------------------------------------------

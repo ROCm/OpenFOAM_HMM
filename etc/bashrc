@@ -90,6 +90,7 @@ export WM_COMPILE_OPTION=Opt
 #   ~libz   : without libz compression
 #   ~rpath  : without rpath handling [MacOS]
 #   +openmp : with openmp
+#             for clang optional add offload arch, i.e for amd MI300A +openmp:gfx942
 #   ~openmp : without openmp
 #   +ccache : use ccache
 #   +xcrun  : use xcrun and native compilers [MacOS]
@@ -97,6 +98,7 @@ export WM_COMPILE_OPTION=Opt
 #   ccache=... : ccache command (unquoted, single/double or <> quoted)
 #   version=... : compiler suffix (eg, version=11 -> gcc-11)
 #export WM_COMPILE_CONTROL="+strict"
+#export WM_COMPILE_CONTROL="+openmp:gfx942 +link-ld"
 
 # [WM_MPLIB] - MPI implementation:
 # = SYSTEMOPENMPI | OPENMPI | SYSTEMMPI | MPI | MPICH | MPICH-GM |
